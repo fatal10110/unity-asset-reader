@@ -949,6 +949,18 @@
               "height": 5,
               "imageSize": 160,
               "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6",
+              "assetStudioCrossCheck": {
+                "width": 8,
+                "height": 5,
+                "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6",
+                "rgbaSha256": "b1ff3d0114261e6e84c775fe611bbea4db0021dce2244bfaa91698eefadea904",
+                "firstPixel": [48, 122, 0, 255],
+                "format": 72,
+                "method": "DecodeRG32",
+                "verdict": "AssetStudio",
+                "reference": "assetstudio-fixture-cross-checks.json"
+              },
+              "oracleNote": "UnityPy's export is not the acceptance oracle for this format. Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. Full RGBA bytes and pinned execution provenance: assetstudio-fixture-cross-checks.json.",
               "oracleError": "KeyError: 'raw'"
             },
             "-359215574879732508": {
@@ -976,6 +988,18 @@
               "height": 5,
               "imageSize": 80,
               "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779",
+              "assetStudioCrossCheck": {
+                "width": 8,
+                "height": 5,
+                "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779",
+                "rgbaSha256": "30901be9e4dfb503f9c69c10a9846f3205f7132c13c10f3bc24a89f44a131400",
+                "firstPixel": [11, 48, 0, 255],
+                "format": 62,
+                "method": "DecodeRG16",
+                "verdict": "AssetStudio",
+                "reference": "assetstudio-fixture-cross-checks.json"
+              },
+              "oracleNote": "UnityPy's export is not the acceptance oracle for this format. Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. Full RGBA bytes and pinned execution provenance: assetstudio-fixture-cross-checks.json.",
               "oracleError": "KeyError: 'raw'"
             },
             "-677264149156131896": {
@@ -1053,6 +1077,18 @@
               "height": 5,
               "imageSize": 320,
               "imageSha256": "6ba51bc5959d3c7ceda23edb9125400efffb37fa91637166e1bc56ba4c9083cd",
+              "assetStudioCrossCheck": {
+                "width": 8,
+                "height": 5,
+                "imageSha256": "6ba51bc5959d3c7ceda23edb9125400efffb37fa91637166e1bc56ba4c9083cd",
+                "rgbaSha256": "fb23e5ac0c83d5d2d2d25c678191a47358d524696ae7e6bbfdce1391e5e4cd56",
+                "firstPixel": [48, 122, 196, 15],
+                "format": 74,
+                "method": "DecodeRGBA64",
+                "verdict": "AssetStudio",
+                "reference": "assetstudio-fixture-cross-checks.json"
+              },
+              "oracleNote": "UnityPy's export is not the acceptance oracle for this format. Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. Full RGBA bytes and pinned execution provenance: assetstudio-fixture-cross-checks.json.",
               "oracleError": "ValueError: unknown raw mode for given image mode"
             },
             "668033029112530731": {
