@@ -1221,3 +1221,139 @@ the packer puts and flips each sprite depends on the editor (2019.4 packs into
 check the test that the fixtures still cover FlipHorizontal, FlipVertical and
 Rotate180, and regenerate the AssetStudio sprite cross-check hashes with the
 goldens.
+
+## 13. Unity 6000.6.4f1 candidate fixtures (#108, #153, #155, #160)
+
+Scope: Unity 2019 and newer. Unity 5.x layouts are outside this fixture task.
+The existing 2019.4, 2020.3 and 6000.3 bundles are preserved.
+
+These Windows64 builds write **SerializedFile format 23**, even for plain
+textures. Our reader currently supports formats 2-22 and refuses 23.
+UnityPy **1.25.4** reads these files; 1.25.3 fails in the type-tree metadata.
+They are therefore candidate fixtures, with independent goldens in
+`modern-goldens.json`, separate from the supported-fixture `goldens.json`.
+`scripts/make-goldens.py` excludes the sidecar's candidate keys; it continues
+using UnityPy 1.25.3 for the existing fixtures. Do not add the candidates to the
+supported set until format 23 and the new Sprite/SpriteAtlas layouts are ported.
+
+| Folder / bundle | Content | Evidence / remaining work |
+|---|---|---|
+| `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 and eight signed variants; #108 conversion still required |
+| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; bicubic cross-check and decoder still required |
+| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
+| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4 |
+
+The 6000.6 atlas holds the imported sprites' names, rects, pivots, border,
+vertex data and indices inside `*spriteInstanceData`; individual packed Sprite
+objects are no longer necessary in the bundle. The sheet and unpacked tight
+sprite are still individual Sprite objects. Inspect the oracle type-tree dumps,
+not only the old `sprites` image map, when implementing #155 and #160.
+
+### Prepare and build
+
+Create an empty project outside the repository (R2) with the installed editor,
+then run:
+
+```text
+python scripts/prepare-modern-fixtures.py <project>
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildMorePlain.Build -logFile <project>/plain.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildSprites.Build -logFile <project>/sprite.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildVariantSprites.Build -logFile <project>/variant.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildV2Sprites.Build -logFile <project>/v2.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildV2Rects.Build -logFile <project>/v2-rect.log
+```
+
+Run sequentially; the methods select their packer mode. The plain build must
+log 13 `FIXTURE-TEX` lines and `FIXTURE-OK more-plain`. Each sprite builder
+must log `FIXTURE-OK sprite`, followed by its `Build/<folder>` output path.
+Copy only the five bundle files listed above from `Build/<folder>` to
+`fixtures/bundles/editor/6000.6.4f1/<folder>`. The binary `.resS` data is embedded
+in each bundle; do not copy text manifests or any C# into the repository.
+
+The preparer takes the section 12 `BuildSprites` source, writes it into the
+local project, and derives the variant and V2 builders from it. It uses native
+packing throughout and never forces `settingsRaw`.
+
+The plain builder writes `(k * 37 + 11) & 255` into every byte. This exercises
+both signs of the signed channels and distinct high/low bytes of 16-bit
+channels. `R16_Alt` has no editor enum; it is an AssetStudio-only alias and has
+no separate Unity fixture.
+
+`Assets/Editor/BuildMorePlain.cs`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+public static class BuildMorePlain
+{
+    public static void Build()
+    {
+        Directory.CreateDirectory("Assets/Fixtures/more-plain");
+        AssetDatabase.Refresh();
+        var paths = new List<string>();
+        var formats = new[] { TextureFormat.R8, TextureFormat.RG16, TextureFormat.RG32,
+            TextureFormat.RGB48, TextureFormat.RGBA64, TextureFormat.R8_SIGNED,
+            TextureFormat.RG16_SIGNED, TextureFormat.RGB24_SIGNED, TextureFormat.RGBA32_SIGNED,
+            TextureFormat.R16_SIGNED, TextureFormat.RG32_SIGNED, TextureFormat.RGB48_SIGNED,
+            TextureFormat.RGBA64_SIGNED };
+        foreach (var format in formats)
+        {
+            var tex = new Texture2D(8, 5, format, false) { name = format.ToString() };
+            var raw = new byte[tex.GetRawTextureData().Length];
+            for (int k = 0; k < raw.Length; k++) raw[k] = (byte)((k * 37 + 11) & 255);
+            tex.LoadRawTextureData(raw);
+            tex.Apply(false, false);
+            var path = "Assets/Fixtures/more-plain/" + format + ".asset";
+            AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(tex, path);
+            paths.Add(path);
+            Debug.Log("FIXTURE-TEX " + format + " " + raw.Length);
+        }
+        AssetDatabase.SaveAssets();
+        Directory.CreateDirectory("Build/more-plain");
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "textures", assetNames = paths.ToArray() } };
+        if (BuildPipeline.BuildAssetBundles("Build/more-plain", builds,
+            BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows64) == null)
+            throw new Exception("more-plain build failed");
+        Debug.Log("FIXTURE-OK more-plain");
+    }
+}
+
+```
+
+### Independent goldens and validation
+
+Use a separate virtual environment:
+
+```text
+python3 -m venv <modern-oracle>
+<modern-oracle>/bin/pip install UnityPy==1.25.4
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+npm ci
+npm run verify
+```
+
+The sidecar includes raw node hashes, object tables, type trees and texture
+RGBA hashes wherever UnityPy supports the format. Oracle limitations remain
+explicit `oracleError`/`oracleNote` fields. The core's candidate tests compare
+all unpacked nodes with the oracle and assert that SerializedFile parsing
+refuses format 23. This proves container integrity, not pixel decoder support.
+
+### Remaining blockers
+
+- #152 ETC1 split alpha: this installation has Windows and WebGL modules,
+  but no Android module. Add Android Build Support, SDK/NDK and OpenJDK before
+  building this fixture. No Android fixture was generated.
+- #160: none of the three native packer configurations above produced
+  rotation value 4. The probe bundles are reproducible evidence, not acceptance
+  of Rotate90. Its UV0-derived direction and source-image comparison remain open.
+- #153: the variant's type-tree bytes are validated; UnityPy ignores its
+  downscale field for sprite export. A separate AssetStudio bicubic cross-check
+  is still needed before choosing a resampler or claiming decoded pixels agree.
+- Format 23 must be ported before any of these new files can be consumed by
+  the current reader. Merely installing Android support does not resolve this.

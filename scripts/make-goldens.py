@@ -884,9 +884,13 @@ def main() -> None:
         "fixtures": {},
     }
     paths = [p for p in FIXTURES.rglob("*") if p.is_file()]
+    # Format 23 is candidate data, with its own UnityPy 1.25.4 environment and
+    # sidecar goldens. Do not add it to the supported format-21/22 harness yet.
+    modern = ROOT / "fixtures" / "modern-goldens.json"
+    candidates = set(json.loads(modern.read_text())["fixtures"]) if modern.exists() else set()
     for path in sorted(paths, key=lambda p: p.relative_to(FIXTURES).as_posix()):
         key = path.relative_to(FIXTURES).as_posix()
-        if any(part.startswith(".") for part in key.split("/")):
+        if key in candidates or any(part.startswith(".") for part in key.split("/")):
             continue
         goldens["fixtures"][key] = read_with_fallback(path)
         print(f"  {key:<48} {len(goldens['fixtures'][key]['files'])} files")
