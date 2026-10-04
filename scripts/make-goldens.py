@@ -518,6 +518,17 @@ def texture_golden(obj) -> dict:
         out["oracleError"] = f"{type(error).__name__}: {error}"
         return out
     out["rgbaSha256"] = sha256(image.convert("RGBA").tobytes())
+    if out["format"] == 73:
+        cross_check = json.loads((ROOT / "fixtures/assetstudio-rgb48.json").read_text())
+        if cross_check["inputSha256"] == out["imageSha256"]:
+            assert cross_check["verdict"] == "AssetStudio"
+            assert cross_check["rgbaSha256"] != out["rgbaSha256"]
+            out["assetStudioCrossCheck"] = cross_check
+        out["oracleNote"] = (
+            "RGB48: UnityPy's RGB;16 export disagrees with AssetStudio. "
+            "The retained UnityPy rgbaSha256 is unsuitable for decoder acceptance. "
+            "Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256 when available."
+        )
     if out["format"] in ORACLE_DISAGREES:
         out["oracleNote"] = ORACLE_DISAGREES[out["format"]]
     return out
@@ -590,6 +601,16 @@ def sprite_golden(obj) -> dict:
         "height": height,
         "rgbaSha256": sha256(data),
     }
+    if sprite.m_SpriteAtlas:
+        atlas = sprite.m_SpriteAtlas.deref_parse_as_object()
+        atlas_data = next(value for key, value in atlas.m_RenderDataMap
+                          if key == sprite.m_RenderDataKey)
+        if atlas_data.downscaleMultiplier != 1:
+            out["oracleNote"] = (
+                "UnityPy crops the variant atlas but ignores downscaleMultiplier. "
+                "Its retained pixel hashes are unsuitable for variant-resize acceptance; "
+                "AssetStudio bicubic output must be cross-checked for #153."
+            )
     if (raw >> 1) & 1 == SpritePackingMode.kSPMTight:
         try:
             tight, width, height, _ = sprite_image(sprite)

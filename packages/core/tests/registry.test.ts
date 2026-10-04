@@ -224,7 +224,7 @@ for (const name of RESS_FIXTURES) {
     const cab = files.find((f) => f !== ress)!;
     // The SerializedFile alone, as a loose input: nothing else is loaded.
     const obj = load([{ name: cab.path, data: cab.data }]).objects.find(
-      (o) => o.type === ClassID.Texture2D,
+      (o) => o.type === ClassID.Texture2D && (readTexture2D(o).m_StreamData?.size ?? 0) > 0,
     )!;
     const { path } = readTexture2D(obj).m_StreamData!;
     assert.throws(

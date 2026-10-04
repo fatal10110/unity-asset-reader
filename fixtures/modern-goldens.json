@@ -1013,7 +1013,6 @@
               "imageSize": 240,
               "imageSha256": "b5146679edab862505197078c78fd7aefad702cb82a5841bbcc48a9b4f11425e",
               "rgbaSha256": "fd817234260f3ee0ecb98fb3a62a963943b7bbc8cd5f525de91db3581a8a9cbd",
-              "oracleNote": "RGB48: UnityPy 1.25.4's RGB;16 export disagrees with AssetStudio's little-endian unsigned channels, scaled as (component * 255 + 32895) >> 16. The retained UnityPy rgbaSha256 is unsuitable for decoder acceptance. Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. Unmodified pinned converter methods were executed in an external .NET 8 harness; see fixtures/BUILDING.md section 13 and #108.",
               "assetStudioCrossCheck": {
                 "verdict": "AssetStudio",
                 "source": "https://github.com/Razviar/assetstudio/blob/c37af7dfcdafee93e33b5da9f0285c97998d6ae3/AssetStudio.Utility/Texture2DConverter.cs",
@@ -1026,7 +1025,8 @@
                 "height": 5,
                 "firstPixel": [48, 122, 196, 255],
                 "rgbaSha256": "03d886e69c09698f9a1f94e48f2365c8470cbb730686af697ada98730e31db9d"
-              }
+              },
+              "oracleNote": "RGB48: UnityPy 1.25.4's RGB;16 export disagrees with AssetStudio's little-endian unsigned channels, scaled as (component * 255 + 32895) >> 16. The retained UnityPy rgbaSha256 is unsuitable for decoder acceptance. Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. Unmodified pinned converter methods were executed in an external .NET 8 harness; see fixtures/BUILDING.md section 13 and #108."
             },
             "1937484101367226322": {
               "name": "RGBA32_SIGNED",

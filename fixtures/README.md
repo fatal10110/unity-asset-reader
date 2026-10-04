@@ -390,3 +390,11 @@ Adding an M1 fixture: add an entry to `FIXTURES` in `make-fixtures.py`, then
 rerun both scripts. Adding an editor fixture: follow [`BUILDING.md`](BUILDING.md),
 then rerun `make-goldens.py`. Goldens are committed; never hand-edit `goldens.json`, and never
 regenerate it from this library's own output (R12).
+
+The additional Unity 2019.4.41f2 bundles in BUILDING section 14 are included in
+canonical `goldens.json`: five unsigned plain formats, a half-scale variant,
+Android ETC1 split alpha, and two native rotation probes. Both probes lack
+Rotate90, which remains a coverage gap. RGB48 records AssetStudio's executed
+verdict; variant pixel hashes are retained with a warning that UnityPy ignores
+the downscale multiplier. Only 2019 and later are in this fixture addition's
+support scope.

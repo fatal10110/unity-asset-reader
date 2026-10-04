@@ -1402,3 +1402,58 @@ The harness checks the source blob before extracting the methods. The golden
 generator verifies the cross-check's source blob, verdict and input hash
 against the fixture. It never replaces the original UnityPy image hash.
 C# is generated only in the external harness project, preserving R2.
+
+## 14. Unity 2019.4.41f2 acceptance fixtures and rotation probes
+
+These bundles complement section 13's Unity 6000.6 candidates. They contain
+SerializedFile format 21, so the current reader can load and compare their
+class fields. Install the Windows standalone and Android build modules.
+Create a separate local Unity project outside this repository, then run:
+
+```text
+python scripts/prepare-2019-fixtures.py <external-2019-project>
+```
+
+The script derives five builders from sections 12 and 13. It excludes the
+signed formats and SpriteAtlas V2 APIs unavailable in 2019. Run Unity in
+batch mode with the external project and each of these execute methods:
+
+| Execute method | Output under the project | Committed bundle |
+| --- | --- | --- |
+| `BuildMorePlain.Build` | `Build/more-plain/textures` | `editor/2019.4.41f2/more-plain/textures` |
+| `BuildVariantSprites.Build` | `Build/variant/sprites` | `editor/2019.4.41f2/variant/sprites` |
+| `BuildSplitAlpha.Build` | `Build/split-alpha/sprites` | `editor/2019.4.41f2/split-alpha/sprites` |
+| `BuildRotationProbe.Build` | `Build/rotation-probe/sprites` | `editor/2019.4.41f2/rotation-probe/sprites` |
+| `BuildLegacyProbe.Build` | `Build/legacy-probe/sprites` | `editor/2019.4.41f2/legacy-probe/sprites` |
+
+For example, on Windows (substitute the external project and log paths):
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\2019.4.41f2\Editor\Unity.exe' -batchmode -nographics -quit -projectPath <external-2019-project> -executeMethod BuildSplitAlpha.Build -logFile <external-log>
+```
+
+Copy only the five named bundles into `fixtures/bundles/`, then regenerate
+canonical goldens using UnityPy 1.25.3 and run `npm run verify`.
+
+The plain fixture contains R8, RG16, RG32, RGB48 and RGBA64, each 8 by 5 with
+one mip and the section 13 byte ramp. Its RGB48 input hash matches the executed
+AssetStudio converter cross-check exactly. The golden retains UnityPy's
+conflicting image hash with an explicit AssetStudio verdict.
+
+The variant has two native render-data entries with `downscaleMultiplier = 0.5`.
+UnityPy ignores this multiplier when exporting sprites. Its hashes are labeled
+unsuitable for #153 resize acceptance; an AssetStudio bicubic pixel cross-check
+is still required before implementing that behavior.
+
+The Android atlases use ETC_RGB4 with `allowsAlphaSplitting = true`. All 17
+atlas sprite entries resolve to distinct, non-null ETC1 color and alpha textures.
+The fixture supplies native inputs for #152; it does not implement alpha merging.
+
+The rotation probe uses rectangular packing with rotation enabled and a
+64-pixel atlas maximum. The legacy probe uses
+`TightRotateEnabledSpritePackerPolicy` and a shared packing tag. Read back
+through UnityPy, the rectangle probe has rotation 0, and the legacy probe has
+0, 1 and 2. Neither contains native Rotate90 (4). These are negative probes,
+not #160 acceptance evidence. Do not force a settings flag to claim native
+coverage. A future successful probe must supply UV0/position direction evidence
+and an AssetStudio pixel result as required by #160.
