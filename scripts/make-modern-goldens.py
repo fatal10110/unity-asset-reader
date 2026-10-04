@@ -6,6 +6,7 @@ are independently readable but not yet supported by our SerializedFile reader.
 No decoded output from the library under test is used here.
 """
 import importlib.util
+import json
 import pathlib
 import sys
 
@@ -73,6 +74,25 @@ def main():
         path = oracle.FIXTURES / name
         result["fixtures"][name] = oracle.read_fixture(path)
         result["fixtures"][name]["evidence"] = evidence(name, path)
+        if "/more-plain/" in name:
+            cross_check = json.loads((ROOT / "fixtures/assetstudio-rgb48.json").read_text())
+            for serialized in result["fixtures"][name]["serialized"].values():
+                for texture in serialized["textures"].values():
+                    if texture["format"] != 73:
+                        continue
+                    assert cross_check["inputSha256"] == texture["imageSha256"]
+                    assert cross_check["verdict"] == "AssetStudio"
+                    assert cross_check["sourceBlob"] == "91c659434c07d92ea1d6fbc634d222fc37222b4f"
+                    assert cross_check["rgbaSha256"] != texture["rgbaSha256"]
+                    texture["oracleNote"] = (
+                        "RGB48: UnityPy 1.25.4's RGB;16 export disagrees with AssetStudio's "
+                        "little-endian unsigned channels, scaled as (component * 255 + 32895) >> 16. "
+                        "The retained UnityPy rgbaSha256 is unsuitable for decoder acceptance. "
+                        "Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. "
+                        "Unmodified pinned converter methods were executed in an external .NET 8 "
+                        "harness; see fixtures/BUILDING.md section 13 and #108."
+                    )
+                    texture["assetStudioCrossCheck"] = cross_check
         print(name)
     (ROOT / "fixtures/modern-goldens.json").write_text(oracle.to_json(result) + "\n")
 
