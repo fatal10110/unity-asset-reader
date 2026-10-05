@@ -1,0 +1,3337 @@
+{
+  "oracle": "UnityPy 1.25.4",
+  "status": "negative-experiment",
+  "scope": "24 bounded probe cases, 288 genuinely packed entries; no overridden flags. V1/V2 request different atlas maxima, but V2 output exceeds the 64/128 requests. Legacy keeps its built-in size/padding policy and repeats some mesh/order settings.",
+  "sourceDimensions": [
+    [
+      13,
+      47
+    ],
+    [
+      47,
+      13
+    ],
+    [
+      19,
+      37
+    ],
+    [
+      37,
+      19
+    ],
+    [
+      23,
+      41
+    ],
+    [
+      41,
+      23
+    ],
+    [
+      33,
+      49
+    ],
+    [
+      49,
+      33
+    ],
+    [
+      35,
+      43
+    ],
+    [
+      43,
+      35
+    ],
+    [
+      7,
+      53
+    ],
+    [
+      53,
+      7
+    ]
+  ],
+  "sourceRecipe": "BUILDING section 12 Pixels: R=(x*5+3)&255, G=(y*5+5)&255, B=((id+1)*16+7)&255; opaque or asymmetric triangle/Ell alpha. Tight cases use Full for id%3=0, Triangle for 1, Ell for 2. Rect cases use Full. Names encode case and id. Import max 1024, point-filtered RGBA32, no mipmaps. V1/V2 request atlas maxima and padding 2 with rotation enabled; legacy uses TightRotateEnabledSpritePackerPolicy without overriding its size or padding.",
+  "probes": [
+    {
+      "editorVersion": "2019.4.41f2",
+      "packer": "legacy",
+      "legacyPolicy": "TightRotateEnabledSpritePackerPolicy",
+      "requestedPadding": null,
+      "legacyTightMeaning": "imported sprite mesh mode; policy is unchanged",
+      "bundle": "Build/rotate-matrix-legacy/sprites",
+      "bundleSha256": "0eaba294fc8a292a11eb9506d937744a0ea7b6dc054d06914630c000d5d10629",
+      "builderSha256": "a9d0200a3add5669477c05b73fbd1a2ed83a813ebc6c1ac6d33cd2b585c64bce",
+      "serializedFormat": [
+        21
+      ],
+      "nativePackedEntries": 72,
+      "rotations": {
+        "0": 69,
+        "1": 1,
+        "2": 2
+      },
+      "rotate90Candidates": [],
+      "cases": [
+        {
+          "name": "c0-64-rect-forward",
+          "tight": false,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c0-64-rect-forward-s00",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s01",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s02",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s03",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s04",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s05",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s06",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s07",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s08",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s09",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s10",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s11",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 64,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c1-64-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c1-64-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s07",
+              "settingsRaw": 73,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 64,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 11,
+            "2": 1
+          }
+        },
+        {
+          "name": "c2-128-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c2-128-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s07",
+              "settingsRaw": 73,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s08",
+              "settingsRaw": 69,
+              "packed": true,
+              "rotation": 1,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 128,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 10,
+            "1": 1,
+            "2": 1
+          }
+        },
+        {
+          "name": "c3-128-tight-reverse",
+          "tight": true,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c3-128-tight-reverse-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s07",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 128,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c4-256-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c4-256-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s07",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 256,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c5-256-rect-reverse",
+          "tight": false,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c5-256-rect-reverse-s00",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s01",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s02",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s03",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s04",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s05",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s06",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s07",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s08",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s09",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s10",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s11",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": null,
+          "caseLabelSize": 256,
+          "sizeControl": "built-in policy unchanged; case-name size is only a label",
+          "observedDimensionsExceedRequested": null,
+          "rotations": {
+            "0": 12
+          }
+        }
+      ]
+    },
+    {
+      "editorVersion": "2019.4.41f2",
+      "packer": "v1",
+      "legacyPolicy": null,
+      "requestedPadding": 2,
+      "legacyTightMeaning": null,
+      "bundle": "Build/rotate-matrix-v1/sprites",
+      "bundleSha256": "6efc931d6a072b8ded686607f2076898a331140c7732ba95ded9914d9b5cc551",
+      "builderSha256": "a9d0200a3add5669477c05b73fbd1a2ed83a813ebc6c1ac6d33cd2b585c64bce",
+      "serializedFormat": [
+        21
+      ],
+      "nativePackedEntries": 72,
+      "rotations": {
+        "0": 71,
+        "2": 1
+      },
+      "rotate90Candidates": [],
+      "cases": [
+        {
+          "name": "c0-64-rect-forward",
+          "tight": false,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c0-64-rect-forward-s00",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s01",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s02",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s03",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s04",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s05",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s06",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s07",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s08",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s09",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s10",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s11",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c1-64-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c1-64-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s07",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                32,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c2-128-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c2-128-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s07",
+              "settingsRaw": 73,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 11,
+            "2": 1
+          }
+        },
+        {
+          "name": "c3-128-tight-reverse",
+          "tight": true,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c3-128-tight-reverse-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s07",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c4-256-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c4-256-tight-forward-s00",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s01",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s02",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s03",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s04",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s05",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s06",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s07",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s08",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s09",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s10",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s11",
+              "settingsRaw": 65,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c5-256-rect-reverse",
+          "tight": false,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c5-256-rect-reverse-s00",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s01",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s02",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s03",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s04",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s05",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s06",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s07",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s08",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s09",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s10",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s11",
+              "settingsRaw": 3,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        }
+      ]
+    },
+    {
+      "editorVersion": "6000.6.4f1",
+      "packer": "v1",
+      "legacyPolicy": null,
+      "requestedPadding": 2,
+      "legacyTightMeaning": null,
+      "bundle": "Build/rotate-matrix-v1/sprites",
+      "bundleSha256": "cb3b78f38668d9dcfd048d2568e5052193f3d43df522bcda15200aea29d91ddf",
+      "builderSha256": "a9d0200a3add5669477c05b73fbd1a2ed83a813ebc6c1ac6d33cd2b585c64bce",
+      "serializedFormat": [
+        23
+      ],
+      "nativePackedEntries": 72,
+      "rotations": {
+        "0": 70,
+        "2": 2
+      },
+      "rotate90Candidates": [],
+      "cases": [
+        {
+          "name": "c0-64-rect-forward",
+          "tight": false,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c0-64-rect-forward-s00",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s01",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s02",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s03",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s04",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s05",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s06",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s07",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s08",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s09",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s10",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s11",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c1-64-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c1-64-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s07",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s08",
+              "settingsRaw": 3145,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                64
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 11,
+            "2": 1
+          }
+        },
+        {
+          "name": "c2-128-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c2-128-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s07",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s08",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                128
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                64,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c3-128-tight-reverse",
+          "tight": true,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c3-128-tight-reverse-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s07",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s08",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c4-256-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c4-256-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s07",
+              "settingsRaw": 3145,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s08",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 11,
+            "2": 1
+          }
+        },
+        {
+          "name": "c5-256-rect-reverse",
+          "tight": false,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c5-256-rect-reverse-s00",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s01",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s02",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s03",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s04",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s05",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s06",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s07",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s08",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s09",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s10",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s11",
+              "settingsRaw": 3075,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        }
+      ]
+    },
+    {
+      "editorVersion": "6000.6.4f1",
+      "packer": "v2",
+      "legacyPolicy": null,
+      "requestedPadding": 2,
+      "legacyTightMeaning": null,
+      "bundle": "Build/rotate-matrix-v2/sprites",
+      "bundleSha256": "0e305926fe8bab995ababeed5da5840cb5675ce488a447ec970acc0497303d59",
+      "builderSha256": "a9d0200a3add5669477c05b73fbd1a2ed83a813ebc6c1ac6d33cd2b585c64bce",
+      "serializedFormat": [
+        23
+      ],
+      "nativePackedEntries": 72,
+      "rotations": {
+        "0": 66,
+        "1": 1,
+        "2": 2,
+        "3": 3
+      },
+      "rotate90Candidates": [],
+      "cases": [
+        {
+          "name": "c0-64-rect-forward",
+          "tight": false,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c0-64-rect-forward-s00",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s01",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s02",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s03",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s04",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s05",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s06",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s07",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s08",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s09",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s10",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c0-64-rect-forward-s11",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": true,
+          "rotations": {
+            "0": 12
+          }
+        },
+        {
+          "name": "c1-64-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c1-64-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s07",
+              "settingsRaw": 3145,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s08",
+              "settingsRaw": 3149,
+              "packed": true,
+              "rotation": 3,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c1-64-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 64,
+          "observedDimensionsExceedRequested": true,
+          "rotations": {
+            "0": 10,
+            "2": 1,
+            "3": 1
+          }
+        },
+        {
+          "name": "c2-128-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c2-128-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s07",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s08",
+              "settingsRaw": 3149,
+              "packed": true,
+              "rotation": 3,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c2-128-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": true,
+          "rotations": {
+            "0": 11,
+            "3": 1
+          }
+        },
+        {
+          "name": "c3-128-tight-reverse",
+          "tight": true,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c3-128-tight-reverse-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s07",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s08",
+              "settingsRaw": 3149,
+              "packed": true,
+              "rotation": 3,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            },
+            {
+              "sprite": "c3-128-tight-reverse-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                256,
+                128
+              ]
+            }
+          ],
+          "requestedAtlasSize": 128,
+          "observedDimensionsExceedRequested": true,
+          "rotations": {
+            "0": 11,
+            "3": 1
+          }
+        },
+        {
+          "name": "c4-256-tight-forward",
+          "tight": true,
+          "reverse": false,
+          "entries": [
+            {
+              "sprite": "c4-256-tight-forward-s00",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s01",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s02",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s03",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s04",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s05",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s06",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s07",
+              "settingsRaw": 3145,
+              "packed": true,
+              "rotation": 2,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s08",
+              "settingsRaw": 3141,
+              "packed": true,
+              "rotation": 1,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s09",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s10",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c4-256-tight-forward-s11",
+              "settingsRaw": 3137,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 10,
+            "1": 1,
+            "2": 1
+          }
+        },
+        {
+          "name": "c5-256-rect-reverse",
+          "tight": false,
+          "reverse": true,
+          "entries": [
+            {
+              "sprite": "c5-256-rect-reverse-s00",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s01",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s02",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s03",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s04",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s05",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s06",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s07",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s08",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s09",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s10",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            },
+            {
+              "sprite": "c5-256-rect-reverse-s11",
+              "settingsRaw": 3073,
+              "packed": true,
+              "rotation": 0,
+              "atlasDimensions": [
+                128,
+                256
+              ]
+            }
+          ],
+          "requestedAtlasSize": 256,
+          "observedDimensionsExceedRequested": false,
+          "rotations": {
+            "0": 12
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1529,3 +1529,84 @@ No new native probe was built during this oracle run. Keep #160 open until an
 owned Unity build actually contains flag 4 and includes UV0/position direction
 evidence and an independent AssetStudio pixel cross-check. Never force a flag
 or relabel the existing synthetic rotation tests as native coverage.
+
+## 16. Bounded native Rotate90 experiment (#160)
+
+The [PR #221 instruction](https://github.com/fatal10110/unity-asset-reader/pull/221#issuecomment-5983270269)
+requires native flag 4 before any direction verdict. On 2026-10-05 the installed
+2019.4.41f2 legacy/V1 and 6000.6.4f1 V1/V2 packers were each run through these
+six probe cases (24 total; some legacy settings repeat):
+
+| Case | Requested atlas maximum (V1/V2) | Packing / imported mesh | Order |
+| --- | --- | --- | --- |
+| c0 | 64 | rectangle / FullRect | forward |
+| c1 | 64 | tight / Tight | forward |
+| c2 | 128 | tight / Tight | forward |
+| c3 | 128 | tight / Tight | reverse |
+| c4 | 256 | tight / Tight | forward |
+| c5 | 256 | rectangle / FullRect | reverse |
+
+For legacy packing, all cases use `TightRotateEnabledSpritePackerPolicy` and
+separate case-specific packing tags. The rectangle/tight column describes the
+imported mesh setting there; it does not select a different legacy policy.
+V1/V2 request the listed atlas maxima and tight-packing settings, with rotation
+enabled and padding 2. Legacy uses the built-in policy without overriding its
+atlas maximum or padding: the size in its case name is only a label. Its c1, c2
+and c4 repeat the same Tight/forward settings with separately imported images.
+All image imports use Windows RGBA32, point filtering and no mipmaps.
+V1 produced pages within the requested limits. V2 produced 128x256 or 256x128
+pages even for the 64/128 requests; those calls did not establish effective
+V2 size limits in this experiment. The report records this limitation explicitly
+without assuming its cause.
+
+Each case imports twelve asymmetric non-square images with dimensions
+13x47, 47x13, 19x37, 37x19, 23x41, 41x23, 33x49, 49x33, 35x43, 43x35,
+7x53 and 53x7. Pixels use section 12's coordinate-color recipe: R identifies
+x, G identifies y, B identifies the image, and all corners have distinct R/G.
+Rectangular cases are opaque; tight cases alternate opaque, Triangle and Ell
+alpha shapes by image ID. Reverse cases reverse the import/add order. Image
+imports allow 1024 pixels so the atlas experiment does not shrink inputs first.
+
+Reproduce outside the repository (R2/R11), using the matching installed editor:
+
+```text
+python scripts/prepare-rotate90-experiment.py <external-unity-project>
+Unity.exe -batchmode -nographics -quit -projectPath <external-unity-project> -executeMethod BuildRotationMatrix.Build -probeMode <legacy-or-v1-or-v2> -logFile <external-log>
+```
+
+Run legacy and V1 in 2019; V1 and V2 in 6000.6. The preparer guards the legacy
+API removed in Unity 6 and does not change any serialized rotation flag.
+It creates `Build/rotate-matrix-<mode>/sprites` and procedural source PNGs in
+each external project. This is an experiment, **not a verified Rotate90 recipe**.
+
+Read all four outputs through the independent oracle:
+
+```text
+<UnityPy-1.25.4-python> scripts/inspect-rotate90-experiment.py <external-2019-project> <external-6000-project>
+```
+
+`fixtures/rotate90-experiment.json` records every case and native entry's
+`settingsRaw`, packed bit and rotation, plus editor versions, source dimensions,
+builder hashes, bundle hashes and serialized formats. All four editor builds
+completed successfully. The report also records each native atlas texture's actual dimensions. All
+288 inspected entries were genuinely packed:
+
+| Editor / packer | Rotation counts |
+| --- | --- |
+| 2019 legacy | 0:69, 1:1, 2:2 |
+| 2019 V1 | 0:71, 2:1 |
+| 6000.6 V1 | 0:70, 2:2 |
+| 6000.6 V2 | 0:66, 1:1, 2:2, 3:3 |
+
+No native flag 4 was found. The unsuccessful bundles remain external experiment
+outputs, rather than being added as Rotate90 acceptance fixtures. No UV turn
+verdict, AssetStudio Rotate90 pixel cross-check, or decoder direction change is
+justified by these results. #160 stays open with its native-fixture requirement
+unchanged. Existing forced-flag tests remain synthetic coverage. The public
+rotation enum's lack of a named Rotate90 does not establish that native flag 4
+is impossible; this result applies only to the bounded configurations above.
+
+The separate [`codex/fixture-oracle-references` branch at `be60685`](https://github.com/fatal10110/unity-asset-reader/tree/be60685)
+contains the prepared plain and half-scale variant pixel references. Those
+references do not settle Rotate90. Its rectangle-only variant harness must not
+be used as a tight-mask oracle.
