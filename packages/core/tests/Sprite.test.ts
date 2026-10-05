@@ -73,8 +73,8 @@ function normalize(node: Node, value: unknown): unknown {
 
 // --- every Sprite and SpriteAtlas of the fixtures -------------------------------------
 
-for (const name of FIXTURES) {
-  for (const { classId, read } of READERS) {
+for (const { classId, read } of READERS) {
+  for (const name of fixturesWith(classId)) {
     test(`${name}: class ${classId} equals the golden dump and readTypeTree()`, () => {
       const sf = Object.values(golden(name).serialized!)[0]!;
       const objects = objectsOf(name, classId);

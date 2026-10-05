@@ -1,0 +1,21 @@
+{
+  "verdict": "AssetStudio",
+  "source": "https://github.com/Razviar/assetstudio/blob/c37af7dfcdafee93e33b5da9f0285c97998d6ae3/AssetStudio.Utility/Texture2DConverter.cs",
+  "sourceBlob": "91c659434c07d92ea1d6fbc634d222fc37222b4f",
+  "methods": [
+    "DecodeRGB48",
+    "DownScaleFrom16BitTo8Bit"
+  ],
+  "execution": "Unmodified converter methods executed in an external .NET 8 harness; BGRA swapped to RGBA once; bottom row first. Full AssetStudio application was not run.",
+  "generator": "scripts/cross-check-rgb48.py",
+  "inputSha256": "b5146679edab862505197078c78fd7aefad702cb82a5841bbcc48a9b4f11425e",
+  "width": 8,
+  "height": 5,
+  "firstPixel": [
+    48,
+    122,
+    196,
+    255
+  ],
+  "rgbaSha256": "03d886e69c09698f9a1f94e48f2365c8470cbb730686af697ada98730e31db9d"
+}

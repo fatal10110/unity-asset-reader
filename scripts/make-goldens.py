@@ -68,6 +68,7 @@ from UnityPy.streams import EndianBinaryReader
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures" / "bundles"
 GOLDENS = ROOT / "fixtures" / "goldens.json"
+CROSS_CHECKS = json.loads((ROOT / "fixtures/assetstudio-fixture-cross-checks.json").read_text())
 
 INT64_TYPES = {"SInt64", "UInt64", "long long", "unsigned long long", "FileSize"}
 BYTE_TYPES = {"UInt8", "SInt8", "char"}
@@ -512,15 +513,44 @@ def texture_golden(obj) -> dict:
         "imageSize": len(data),
         "imageSha256": sha256(data),
     }
+    reference = CROSS_CHECKS["plain"].get(tex.m_Name)
+    if reference and all(reference[key] == out[key] for key in ["format", "width", "height", "imageSha256"]):
+        out["assetStudioCrossCheck"] = cross_check_summary(reference)
+        out["oracleNote"] = (
+            "UnityPy's export is not the acceptance oracle for this format. "
+            "Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256. "
+            "Full RGBA bytes and pinned execution provenance: assetstudio-fixture-cross-checks.json."
+        )
     try:
         image = get_image_from_texture2d(tex, flip=False)
     except Exception as error:  # noqa: BLE001 - any failure is recorded, never guessed around
         out["oracleError"] = f"{type(error).__name__}: {error}"
         return out
     out["rgbaSha256"] = sha256(image.convert("RGBA").tobytes())
+    if out["format"] == 73:
+        cross_check = json.loads((ROOT / "fixtures/assetstudio-rgb48.json").read_text())
+        if cross_check["inputSha256"] == out["imageSha256"]:
+            assert cross_check["verdict"] == "AssetStudio"
+            assert cross_check["rgbaSha256"] != out["rgbaSha256"]
+            out["assetStudioCrossCheck"] = cross_check
+        out["oracleNote"] = (
+            "RGB48: UnityPy's RGB;16 export disagrees with AssetStudio. "
+            "The retained UnityPy rgbaSha256 is unsuitable for decoder acceptance. "
+            "Verdict: AssetStudio; use assetStudioCrossCheck.rgbaSha256 when available."
+        )
     if out["format"] in ORACLE_DISAGREES:
         out["oracleNote"] = ORACLE_DISAGREES[out["format"]]
     return out
+
+
+def cross_check_summary(reference):
+    """Attach only a content-bound summary; complete pixels live in the report."""
+    rgba = bytes.fromhex(reference["rgbaHex"])
+    assert len(rgba) == reference["width"] * reference["height"] * 4
+    assert sha256(rgba) == reference["rgbaSha256"]
+    assert CROSS_CHECKS["verdict"] == "AssetStudio"
+    return {**{key: value for key, value in reference.items() if key != "rgbaHex"},
+            "verdict": CROSS_CHECKS["verdict"], "reference": "assetstudio-fixture-cross-checks.json"}
 
 
 class ForcedSpriteSettings(SpriteHelper.SpriteSettings):
@@ -590,6 +620,36 @@ def sprite_golden(obj) -> dict:
         "height": height,
         "rgbaSha256": sha256(data),
     }
+    if sprite.m_SpriteAtlas:
+        atlas = sprite.m_SpriteAtlas.deref_parse_as_object()
+        atlas_data = next(value for key, value in atlas.m_RenderDataMap
+                          if key == sprite.m_RenderDataKey)
+        if atlas_data.downscaleMultiplier != 1:
+            out["oracleNote"] = (
+                "UnityPy crops the variant atlas but ignores downscaleMultiplier. "
+                "Its retained pixel hashes are unsuitable for variant-resize acceptance; "
+                "AssetStudio bicubic output must be cross-checked for #153."
+            )
+            texture = atlas_data.texture.deref_parse_as_object()
+            metadata = {
+                "textureWidth": texture.m_Width, "textureHeight": texture.m_Height,
+                "imageSha256": sha256(bytes(texture.get_image_data())),
+                "textureRect": {key: getattr(atlas_data.textureRect, key) for key in ["x", "y", "width", "height"]},
+                "textureRectOffset": {key: getattr(atlas_data.textureRectOffset, key) for key in ["x", "y"]},
+                "settingsRaw": raw, "downscaleMultiplier": atlas_data.downscaleMultiplier,
+            }
+            for references in CROSS_CHECKS["variants"].values():
+                reference = references.get(sprite.m_Name)
+                if reference and all(reference[key] == value for key, value in metadata.items()):
+                    out["assetStudioCrossCheck"] = cross_check_summary(reference)
+                    out["oracleNote"] = (
+                        "UnityPy crops the variant atlas but ignores downscaleMultiplier. "
+                        "Its retained pixel hashes are unsuitable for variant-resize acceptance. "
+                        "Verdict: AssetStudio; use assetStudioCrossCheck dimensions and rgbaSha256. "
+                        "Full bicubic reference pixels: assetstudio-fixture-cross-checks.json; "
+                        "rectangle path only, no tight-mask claim (#153)."
+                    )
+                    break
     if (raw >> 1) & 1 == SpritePackingMode.kSPMTight:
         try:
             tight, width, height, _ = sprite_image(sprite)
@@ -884,9 +944,13 @@ def main() -> None:
         "fixtures": {},
     }
     paths = [p for p in FIXTURES.rglob("*") if p.is_file()]
+    # Format 23 is candidate data, with its own UnityPy 1.25.4 environment and
+    # sidecar goldens. Do not add it to the supported format-21/22 harness yet.
+    modern = ROOT / "fixtures" / "modern-goldens.json"
+    candidates = set(json.loads(modern.read_text())["fixtures"]) if modern.exists() else set()
     for path in sorted(paths, key=lambda p: p.relative_to(FIXTURES).as_posix()):
         key = path.relative_to(FIXTURES).as_posix()
-        if any(part.startswith(".") for part in key.split("/")):
+        if key in candidates or any(part.startswith(".") for part in key.split("/")):
             continue
         goldens["fixtures"][key] = read_with_fallback(path)
         print(f"  {key:<48} {len(goldens['fixtures'][key]['files'])} files")

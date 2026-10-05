@@ -127,13 +127,21 @@ test("image bytes, inline or sliced from .resS, match the golden", () => {
 });
 
 test("RGBA sha256 = UnityPy golden where the oracle and AssetStudio agree", () => {
-  const agreed = TEXTURES.filter((t) => t.golden.rgbaSha256 && !t.golden.oracleNote);
-  // RGBA32 x 9 editor-built `texture` bundles and 4 in each of the 2 `sprite`
-  // bundles (#34), plus ARGB4444, RGB24, RGBA32, ARGB32, RGBA4444 and BGRA32
-  // from the plain fixture.
-  assert.equal(agreed.length, 23);
+  // Block formats and the pending #108 formats need their own decoders.
+  const agreed = TEXTURES.filter((t) => t.format <= 22 && t.golden.rgbaSha256 && !t.golden.oracleNote);
+  // Preserve coverage of all six agreed plain formats as fixtures are added.
+  assert.deepEqual([...new Set(agreed.map((t) => t.format))].sort((a, b) => a - b),
+    [2, 3, 4, 5, 13, 14]);
   for (const t of agreed) {
     assert.equal(sha256(decode(t)), t.golden.rgbaSha256, `${t.fixture} ${t.golden.name}`);
+  }
+});
+
+test("2019 more-plain formats remain explicit #108 conversion refusals", () => {
+  const pending = TEXTURES.filter((t) => t.fixture === "editor/2019.4.41f2/more-plain/textures");
+  assert.equal(pending.length, 5);
+  for (const texture of pending) {
+    assert.throws(() => decode(texture), UnsupportedError);
   }
 });
 
@@ -174,7 +182,7 @@ test("RGB565: channel bits = UnityPy golden; widened by bit repetition as in Ass
 });
 
 test("formats UnityPy cannot decode or decodes differently = AssetStudio cross-check", () => {
-  const checked = TEXTURES.filter((t) => t.golden.oracleError || t.golden.oracleNote);
+  const checked = TEXTURES.filter((t) => t.fixture === PLAIN && (t.golden.oracleError || t.golden.oracleNote));
   assert.deepEqual(checked.map((t) => t.golden.name).sort(), Object.keys(ASSETSTUDIO_RGBA).sort());
   for (const t of checked) {
     assert.equal(t.fixture, PLAIN);

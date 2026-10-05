@@ -1221,3 +1221,392 @@ the packer puts and flips each sprite depends on the editor (2019.4 packs into
 check the test that the fixtures still cover FlipHorizontal, FlipVertical and
 Rotate180, and regenerate the AssetStudio sprite cross-check hashes with the
 goldens.
+
+## 13. Unity 6000.6.4f1 candidate fixtures (#108, #153, #155, #160)
+
+Scope: Unity 2019 and newer. Unity 5.x layouts are outside this fixture task.
+The existing 2019.4, 2020.3 and 6000.3 bundles are preserved.
+
+These Windows64 builds write **SerializedFile format 23**, even for plain
+textures. Our reader currently supports formats 2-22 and refuses 23.
+UnityPy **1.25.4** reads these files; 1.25.3 fails in the type-tree metadata.
+They are therefore candidate fixtures, with independent goldens in
+`modern-goldens.json`, separate from the supported-fixture `goldens.json`.
+`scripts/make-goldens.py` excludes the sidecar's candidate keys; it continues
+using UnityPy 1.25.3 for the existing fixtures. Do not add the candidates to the
+supported set until format 23 and the new Sprite/SpriteAtlas layouts are ported.
+
+| Folder / bundle | Content | Evidence / remaining work |
+|---|---|---|
+| `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 and eight signed variants; #108 conversion still required |
+| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; bicubic cross-check and decoder still required |
+| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
+| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4 |
+
+The 6000.6 atlas holds the imported sprites' names, rects, pivots, border,
+vertex data and indices inside `*spriteInstanceData`; individual packed Sprite
+objects are no longer necessary in the bundle. The sheet and unpacked tight
+sprite are still individual Sprite objects. Inspect the oracle type-tree dumps,
+not only the old `sprites` image map, when implementing #155 and #160.
+
+### Prepare and build
+
+Create an empty project outside the repository (R2) with the installed editor,
+then run:
+
+```text
+python scripts/prepare-modern-fixtures.py <project>
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildMorePlain.Build -logFile <project>/plain.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildSprites.Build -logFile <project>/sprite.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildVariantSprites.Build -logFile <project>/variant.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildV2Sprites.Build -logFile <project>/v2.log
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod BuildV2Rects.Build -logFile <project>/v2-rect.log
+```
+
+Run sequentially; the methods select their packer mode. The plain build must
+log 13 `FIXTURE-TEX` lines and `FIXTURE-OK more-plain`. Each sprite builder
+must log `FIXTURE-OK sprite`, followed by its `Build/<folder>` output path.
+Copy only the five bundle files listed above from `Build/<folder>` to
+`fixtures/bundles/editor/6000.6.4f1/<folder>`. The binary `.resS` data is embedded
+in each bundle; do not copy text manifests or any C# into the repository.
+
+The preparer takes the section 12 `BuildSprites` source, writes it into the
+local project, and derives the variant and V2 builders from it. It uses native
+packing throughout and never forces `settingsRaw`.
+
+The plain builder writes `(k * 37 + 11) & 255` into every byte. This exercises
+both signs of the signed channels and distinct high/low bytes of 16-bit
+channels. `R16_Alt` has no editor enum; it is an AssetStudio-only alias and has
+no separate Unity fixture.
+
+`Assets/Editor/BuildMorePlain.cs`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+public static class BuildMorePlain
+{
+    public static void Build()
+    {
+        Directory.CreateDirectory("Assets/Fixtures/more-plain");
+        AssetDatabase.Refresh();
+        var paths = new List<string>();
+        var formats = new[] { TextureFormat.R8, TextureFormat.RG16, TextureFormat.RG32,
+            TextureFormat.RGB48, TextureFormat.RGBA64, TextureFormat.R8_SIGNED,
+            TextureFormat.RG16_SIGNED, TextureFormat.RGB24_SIGNED, TextureFormat.RGBA32_SIGNED,
+            TextureFormat.R16_SIGNED, TextureFormat.RG32_SIGNED, TextureFormat.RGB48_SIGNED,
+            TextureFormat.RGBA64_SIGNED };
+        foreach (var format in formats)
+        {
+            var tex = new Texture2D(8, 5, format, false) { name = format.ToString() };
+            var raw = new byte[tex.GetRawTextureData().Length];
+            for (int k = 0; k < raw.Length; k++) raw[k] = (byte)((k * 37 + 11) & 255);
+            tex.LoadRawTextureData(raw);
+            tex.Apply(false, false);
+            var path = "Assets/Fixtures/more-plain/" + format + ".asset";
+            AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(tex, path);
+            paths.Add(path);
+            Debug.Log("FIXTURE-TEX " + format + " " + raw.Length);
+        }
+        AssetDatabase.SaveAssets();
+        Directory.CreateDirectory("Build/more-plain");
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "textures", assetNames = paths.ToArray() } };
+        if (BuildPipeline.BuildAssetBundles("Build/more-plain", builds,
+            BuildAssetBundleOptions.UncompressedAssetBundle, BuildTarget.StandaloneWindows64) == null)
+            throw new Exception("more-plain build failed");
+        Debug.Log("FIXTURE-OK more-plain");
+    }
+}
+
+```
+
+### Independent goldens and validation
+
+Use a separate virtual environment:
+
+```text
+python3 -m venv <modern-oracle>
+<modern-oracle>/bin/pip install UnityPy==1.25.4
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+npm ci
+npm run verify
+```
+
+The sidecar includes raw node hashes, object tables, type trees and texture
+RGBA hashes wherever UnityPy supports the format. Oracle limitations remain
+explicit `oracleError`/`oracleNote` fields. The core's candidate tests compare
+all unpacked nodes with the oracle and assert that SerializedFile parsing
+refuses format 23. This proves container integrity, not pixel decoder support.
+
+### Remaining blockers
+
+- #152 ETC1 split alpha: this installation has Windows and WebGL modules,
+  but no Android module. Add Android Build Support, SDK/NDK and OpenJDK before
+  building this fixture. No Android fixture was generated.
+- #160: none of the three native packer configurations above produced
+  rotation value 4. The probe bundles are reproducible evidence, not acceptance
+  of Rotate90. Its UV0-derived direction and source-image comparison remain open.
+- #153: the variant's type-tree bytes are validated; UnityPy ignores its
+  downscale field for sprite export. A separate AssetStudio bicubic cross-check
+  is still needed before choosing a resampler or claiming decoded pixels agree.
+- Format 23 must be ported before any of these new files can be consumed by
+  the current reader. Merely installing Android support does not resolve this.
+
+### RGB48 AssetStudio verdict (PR #221 review)
+
+RGB48's UnityPy 1.25.4 export is incorrect for AssetStudio's required
+conversion. Keep its original `rgbaSha256` for oracle provenance, but do not
+use that hash as decoder acceptance. Its generated `oracleNote` records
+**Verdict: AssetStudio**, and `assetStudioCrossCheck.rgbaSha256` is the expected
+RGB48 result. R8's unsigned UnityPy image hash is unqualified. RG16, RG32 and
+RGBA64 now use the executed references in section 15.
+
+`fixtures/assetstudio-rgb48.json` was generated by executing the unmodified
+`DecodeRGB48` and `DownScaleFrom16BitTo8Bit` methods from
+`AssetStudio.Utility/Texture2DConverter.cs` at revision
+`c37af7dfcdafee93e33b5da9f0285c97998d6ae3` (Git blob
+`91c659434c07d92ea1d6fbc634d222fc37222b4f`) in a .NET 8 console harness
+outside the repository. It runs the actual methods, rather than a Python/TS
+translation. The full AssetStudio application was not executed. Its BGRA
+output is swapped to RGBA once and hashed bottom row first. The first pixel
+is `[48, 122, 196, 255]`, and the RGBA SHA-256 is
+`03d886e69c09698f9a1f94e48f2365c8470cbb730686af697ada98730e31db9d`.
+
+To reproduce, retrieve that exact source outside the repository and use
+UnityPy 1.25.4 to extract the fixture's RGB48 bytes into `<raw-input>`:
+
+```python
+import pathlib, UnityPy
+bundle = "fixtures/bundles/editor/6000.6.4f1/more-plain/textures"
+for obj in UnityPy.load(bundle).objects:
+    if obj.type.name == "Texture2D":
+        texture = obj.read()
+        if texture.m_Name == "RGB48":
+            pathlib.Path("<raw-input>").write_bytes(bytes(texture.get_image_data()))
+```
+
+Then, using Python with access to the installed .NET 8 SDK:
+
+```text
+python scripts/cross-check-rgb48.py --source <external-Texture2DConverter.cs> --input <raw-input> --project <external-harness> --output fixtures/assetstudio-rgb48.json --dotnet <dotnet-executable>
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+```
+
+The harness checks the source blob before extracting the methods. The golden
+generator verifies the cross-check's source blob, verdict and input hash
+against the fixture. It never replaces the original UnityPy image hash.
+C# is generated only in the external harness project, preserving R2.
+
+## 14. Unity 2019.4.41f2 acceptance fixtures and rotation probes
+
+These bundles complement section 13's Unity 6000.6 candidates. They contain
+SerializedFile format 21, so the current reader can load and compare their
+class fields. Install the Windows standalone and Android build modules.
+Create a separate local Unity project outside this repository, then run:
+
+```text
+python scripts/prepare-2019-fixtures.py <external-2019-project>
+```
+
+The script derives five builders from sections 12 and 13. It excludes the
+signed formats and SpriteAtlas V2 APIs unavailable in 2019. Run Unity in
+batch mode with the external project and each of these execute methods:
+
+| Execute method | Output under the project | Committed bundle |
+| --- | --- | --- |
+| `BuildMorePlain.Build` | `Build/more-plain/textures` | `editor/2019.4.41f2/more-plain/textures` |
+| `BuildVariantSprites.Build` | `Build/variant/sprites` | `editor/2019.4.41f2/variant/sprites` |
+| `BuildSplitAlpha.Build` | `Build/split-alpha/sprites` | `editor/2019.4.41f2/split-alpha/sprites` |
+| `BuildRotationProbe.Build` | `Build/rotation-probe/sprites` | `editor/2019.4.41f2/rotation-probe/sprites` |
+| `BuildLegacyProbe.Build` | `Build/legacy-probe/sprites` | `editor/2019.4.41f2/legacy-probe/sprites` |
+
+For example, on Windows (substitute the external project and log paths):
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\2019.4.41f2\Editor\Unity.exe' -batchmode -nographics -quit -projectPath <external-2019-project> -executeMethod BuildSplitAlpha.Build -logFile <external-log>
+```
+
+Copy only the five named bundles into `fixtures/bundles/`, then regenerate
+canonical goldens using UnityPy 1.25.3 and run `npm run verify`.
+
+The plain fixture contains R8, RG16, RG32, RGB48 and RGBA64, each 8 by 5 with
+one mip and the section 13 byte ramp. Its RGB48 input hash matches the executed
+AssetStudio converter cross-check exactly. The golden retains UnityPy's
+conflicting image hash with an explicit AssetStudio verdict.
+
+The variant has two native render-data entries with `downscaleMultiplier = 0.5`.
+UnityPy ignores this multiplier when exporting sprites. Its hashes are labeled
+unsuitable for #153 resize acceptance. The executed AssetStudio bicubic reference
+pixels are available through section 15; the resize implementation remains #153.
+
+The Android atlases use ETC_RGB4 with `allowsAlphaSplitting = true`. All 17
+atlas sprite entries resolve to distinct, non-null ETC1 color and alpha textures.
+The fixture supplies native inputs for #152; it does not implement alpha merging.
+
+The rotation probe uses rectangular packing with rotation enabled and a
+64-pixel atlas maximum. The legacy probe uses
+`TightRotateEnabledSpritePackerPolicy` and a shared packing tag. Read back
+through UnityPy, the rectangle probe has rotation 0, and the legacy probe has
+0, 1 and 2. Neither contains native Rotate90 (4). These are negative probes,
+not #160 acceptance evidence. Do not force a settings flag to claim native
+coverage. A future successful probe must supply UV0/position direction evidence
+and an AssetStudio pixel result as required by #160.
+
+## 15. Complete plain-format and variant pixel references (no Unity rebuild)
+
+PR #221's existing 2019 bundles contain all inputs needed for RG16, RG32,
+RGBA64 and the half-scale variant's rectangle output. No Unity installation,
+license activation or new editor build is needed to generate these references.
+Use UnityPy 1.25.3 to extract input bytes and native atlas metadata, then execute
+pinned AssetStudio methods with an installed .NET 8 SDK.
+
+Clone the MIT reference outside this repository and check out revision
+`c37af7dfcdafee93e33b5da9f0285c97998d6ae3`. From this repository's root:
+
+```text
+git clone https://github.com/Razviar/assetstudio.git <external-source>
+git -C <external-source> checkout --detach c37af7dfcdafee93e33b5da9f0285c97998d6ae3
+.venv-oracle/bin/python scripts/cross-check-fixture-oracles.py --source <external-source> --project <external-harness> --output fixtures/assetstudio-fixture-cross-checks.json --dotnet <dotnet-executable>
+.venv-oracle/bin/python scripts/make-goldens.py
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+npm run verify
+```
+
+Use the separate UnityPy 1.25.4 environment from section 13 for modern goldens.
+The generator rejects source/harness paths inside this checkout, validates the
+source Git blobs before extracting methods, and places C#, project files,
+NuGet packages, the lock file and raw temporary output only in the external harness directory.
+Network access is needed for its first NuGet restore. Output JSON is the only
+new committed pixel artifact; the fixture bundle bytes are unchanged.
+
+| Pinned source file | Git blob SHA-1 |
+| --- | --- |
+| `Texture2DConverter.cs` | `91c659434c07d92ea1d6fbc634d222fc37222b4f` |
+| `SpriteHelper.cs` | `2110b7100491417e337ed06aa155ab9bc3696edb` |
+| `AssetStudio.Utility.csproj` | `328274d0428a262c9d6e351fc3d734a9d7f5fad4` |
+
+The source project pins ImageSharp.Drawing **1.0.0-beta15**. Its NuGet
+dependencies are explicitly pinned in the harness: ImageSharp **2.1.3**, Fonts
+**1.0.0-beta18**. Transitive packages are pinned to exact versions too; the only
+restore source is nuget.org, and every downloaded archive is checked against
+the SHA-512 recorded in the script/report before compilation. Subsequent runs
+use locked restore. All three SixLabors package manifests declare Apache-2.0. They are
+external oracle tooling, not package/runtime dependencies or fixture content.
+NuGet reports known vulnerabilities in this old ImageSharp release: run this
+isolated oracle only on our known fixture bytes, not arbitrary third-party
+images. Do not upgrade the resampler silently and rebaseline its pixels.
+
+The unmodified `DecodeRG16`, `DecodeRG32`, `DecodeRGBA64`, `DecodeRGBA32`,
+`DownScaleFrom16BitTo8Bit` and `CutImage` methods are executed. Minimal metadata
+and texture-loading shims replace the application readers. Tight packing is
+rejected before `CutImage`, so no tight-mask or full-app equivalence is claimed.
+`CutImage` calls ImageSharp's default [bicubic resize without companding](https://github.com/SixLabors/ImageSharp/blob/v2.1.3/src/ImageSharp/Processing/Extensions/Transforms/ResizeExtensions.cs),
+resizing the entire atlas before cropping/undoing native packing. Its top-down
+result is flipped back to stored rows; BGRA becomes RGBA exactly once.
+
+The report stores complete RGBA bytes, not just hashes, for future per-channel
+tolerance tests. Golden generators attach summaries only when the input hash,
+dimensions and relevant native metadata match. Original UnityPy pixel hashes
+and export errors are preserved with an explicit AssetStudio verdict. This
+prepares #108/#153 acceptance inputs; it does not implement either behavior.
+
+### Native Rotate90 remains unavailable
+
+A fresh UnityPy scan of these ten additional bundles (including atlas entries
+and legacy Sprite render data) found no native rotation value 4. The probes are
+negative evidence, not #160 acceptance fixtures. [Unity's public 2019 enum](https://github.com/Unity-Technologies/UnityCsReference/blob/2019.4/Runtime/2D/Common/ScriptBindings/Sprites.bindings.cs)
+contains 0, 1, 2, 3 and Any=15; the [Unity 6 API](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/SpritePackingRotation.html)
+also has no named Rotate90. This does not prove serialized flag 4 is impossible,
+but provides no verified editor recipe for generating it.
+
+No new native probe was built during this oracle run. Keep #160 open until an
+owned Unity build actually contains flag 4 and includes UV0/position direction
+evidence and an independent AssetStudio pixel cross-check. Never force a flag
+or relabel the existing synthetic rotation tests as native coverage.
+
+## 16. Bounded native Rotate90 experiment (#160)
+
+The [PR #221 instruction](https://github.com/fatal10110/unity-asset-reader/pull/221#issuecomment-5983270269)
+requires native flag 4 before any direction verdict. On 2026-10-05 the installed
+2019.4.41f2 legacy/V1 and 6000.6.4f1 V1/V2 packers were each run through these
+six probe cases (24 total; some legacy settings repeat):
+
+| Case | Requested atlas maximum (V1/V2) | Packing / imported mesh | Order |
+| --- | --- | --- | --- |
+| c0 | 64 | rectangle / FullRect | forward |
+| c1 | 64 | tight / Tight | forward |
+| c2 | 128 | tight / Tight | forward |
+| c3 | 128 | tight / Tight | reverse |
+| c4 | 256 | tight / Tight | forward |
+| c5 | 256 | rectangle / FullRect | reverse |
+
+For legacy packing, all cases use `TightRotateEnabledSpritePackerPolicy` and
+separate case-specific packing tags. The rectangle/tight column describes the
+imported mesh setting there; it does not select a different legacy policy.
+V1/V2 request the listed atlas maxima and tight-packing settings, with rotation
+enabled and padding 2. Legacy uses the built-in policy without overriding its
+atlas maximum or padding: the size in its case name is only a label. Its c1, c2
+and c4 repeat the same Tight/forward settings with separately imported images.
+All image imports use Windows RGBA32, point filtering and no mipmaps.
+V1 produced pages within the requested limits. V2 produced 128x256 or 256x128
+pages even for the 64/128 requests; those calls did not establish effective
+V2 size limits in this experiment. The report records this limitation explicitly
+without assuming its cause.
+
+Each case imports twelve asymmetric non-square images with dimensions
+13x47, 47x13, 19x37, 37x19, 23x41, 41x23, 33x49, 49x33, 35x43, 43x35,
+7x53 and 53x7. Pixels use section 12's coordinate-color recipe: R identifies
+x, G identifies y, B identifies the image, and all corners have distinct R/G.
+Rectangular cases are opaque; tight cases alternate opaque, Triangle and Ell
+alpha shapes by image ID. Reverse cases reverse the import/add order. Image
+imports allow 1024 pixels so the atlas experiment does not shrink inputs first.
+
+Reproduce outside the repository (R2/R11), using the matching installed editor:
+
+```text
+python scripts/prepare-rotate90-experiment.py <external-unity-project>
+Unity.exe -batchmode -nographics -quit -projectPath <external-unity-project> -executeMethod BuildRotationMatrix.Build -probeMode <legacy-or-v1-or-v2> -logFile <external-log>
+```
+
+Run legacy and V1 in 2019; V1 and V2 in 6000.6. The preparer guards the legacy
+API removed in Unity 6 and does not change any serialized rotation flag.
+It creates `Build/rotate-matrix-<mode>/sprites` and procedural source PNGs in
+each external project. This is an experiment, **not a verified Rotate90 recipe**.
+
+Read all four outputs through the independent oracle:
+
+```text
+<UnityPy-1.25.4-python> scripts/inspect-rotate90-experiment.py <external-2019-project> <external-6000-project>
+```
+
+`fixtures/rotate90-experiment.json` records every case and native entry's
+`settingsRaw`, packed bit and rotation, plus editor versions, source dimensions,
+builder hashes, bundle hashes and serialized formats. All four editor builds
+completed successfully. The report also records each native atlas texture's actual dimensions. All
+288 inspected entries were genuinely packed:
+
+| Editor / packer | Rotation counts |
+| --- | --- |
+| 2019 legacy | 0:69, 1:1, 2:2 |
+| 2019 V1 | 0:71, 2:1 |
+| 6000.6 V1 | 0:70, 2:2 |
+| 6000.6 V2 | 0:66, 1:1, 2:2, 3:3 |
+
+No native flag 4 was found. The unsuccessful bundles remain external experiment
+outputs, rather than being added as Rotate90 acceptance fixtures. No UV turn
+verdict, AssetStudio Rotate90 pixel cross-check, or decoder direction change is
+justified by these results. #160 stays open with its native-fixture requirement
+unchanged. Existing forced-flag tests remain synthetic coverage. The public
+rotation enum's lack of a named Rotate90 does not establish that native flag 4
+is impossible; this result applies only to the bounded configurations above.
+
+The separate [`codex/fixture-oracle-references` branch at `be60685`](https://github.com/fatal10110/unity-asset-reader/tree/be60685)
+contains the prepared plain and half-scale variant pixel references. Those
+references do not settle Rotate90. Its rectangle-only variant harness must not
+be used as a tight-mask oracle.
