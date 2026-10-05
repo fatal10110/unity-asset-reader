@@ -406,3 +406,25 @@ are not applied limits, and some legacy mesh/order settings repeat.
 `rotate90-experiment.json` is an independent negative experiment report, not a
 pixel golden or native Rotate90 acceptance fixture. None of these probes wrote
 rotation value 4; #160 remains open with the same acceptance requirement.
+
+
+### Plain-format and half-scale variant AssetStudio references
+
+`assetstudio-fixture-cross-checks.json` contains complete bottom-row-first
+RGBA8 bytes (`rgbaHex`), dimensions, input hashes, output hashes and execution
+provenance for RG16, RG32, RGBA64 and the 2019 variant's `r_a` and `r_b`.
+`goldens.json` attaches content-bound summaries under `assetStudioCrossCheck`.
+The same unsigned plain inputs in `modern-goldens.json` receive these references;
+format-23 reader support is still unimplemented.
+
+The external .NET harness executes unmodified methods from the same pinned
+AssetStudio revision as RGB48, including `SpriteHelper.CutImage`. Its pinned
+ImageSharp 2.1.3 `Resize(width, height)` uses bicubic sampling without companding.
+The variant atlas is resized from 32x32 to 64x64 before cropping: `r_a` is 10x8,
+`r_b` is 34x33. This is the rectangle path only: metadata/loading shims replace
+the full application's readers, and tight packing is rejected. The original
+UnityPy hashes and errors remain, but are not variant-resize acceptance values.
+
+See BUILDING section 15 for source/package pins, isolated reproduction, license
+and dependency-security notes. These references support future #108/#153 tests;
+they do not implement decoders or close those issues.
