@@ -87,9 +87,16 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ### 1.0.2 - Unreleased
 
-- A sprite packed into a Unity 6000.6 `SpriteAtlas` is refused with `UnsupportedError` (kind
-  `"Unity version"`) by `decodeSprite`, `imageInfo`, `decodeImage` and `images`, now that the
-  core reads that atlas; cutting it out by the atlas' own mesh is not implemented yet (#155).
+- Unity 6000.6 bundles hold packed sprites only inside their `SpriteAtlas`
+  (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects, so
+  `images` and `decodeSprite` do not list or decode them yet; that is planned under #155. A
+  `Sprite` object that still points at a 6000.6 atlas is refused with `UnsupportedError` (kind
+  `"Unity version"`) by `decodeSprite`, `imageInfo`, `decodeImage` and `images` (#155).
+- `decodeSprite`, `decodeImage` and `images` decode a sprite with an alpha texture (Android ETC1
+  split alpha), with the alpha texture's red channel as its alpha, as UnityPy does; such sprites
+  were refused. An alpha texture of another size than its texture is refused with
+  `UnsupportedError` (kind `"sprite alpha texture size"`). Tested on a 2019.4.41f2 Android
+  fixture (#152).
 - Decode `R8`, `RG16`, `RG32`, `RGB48` and `RGBA64` to RGBA with AssetStudio's rounded
   16-bit channel conversion, tested on the existing 2019.4 and 6000.6 fixtures (#108).
 - Add a caller-owned `decodedTextures` map to `decodeSprite`, `decodeImage` and `images`,

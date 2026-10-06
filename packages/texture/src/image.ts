@@ -205,10 +205,11 @@ export function isImage(asset: Asset): asset is ImageAsset {
  * @throws {UnsupportedError} / {CorruptError} what the readers throw: an
  *   editor file or unknown Unity version, a layout that does not hold
  *   together; for a Sprite also what `decodeSprite`'s lookup throws (a
- *   pointer that is null or dangles, a texture of the wrong class, a sprite
- *   its atlas has no entry for, a `textureRect` outside its texture)
- * @throws {ResourceNotFoundError} for a Sprite whose texture or atlas is in a
- *   SerializedFile that is not loaded
+ *   pointer that is null or dangles, a texture or alpha texture of the wrong
+ *   class, a sprite its atlas has no entry for, a `textureRect` outside its
+ *   texture)
+ * @throws {ResourceNotFoundError} for a Sprite whose texture, alpha texture
+ *   or atlas is in a SerializedFile that is not loaded
  */
 export function imageInfo(asset: Asset<"Texture2D">): TextureImageInfo;
 export function imageInfo(asset: Asset<"Sprite">): SpriteImageInfo;

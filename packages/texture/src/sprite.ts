@@ -1,5 +1,6 @@
 // Ported from AssetStudio.Utility/SpriteHelper.cs (MIT, © Perfare / RazTools / Razviar)
 // Ported from AssetStudio/Classes/Mesh.cs (MIT, © Perfare / RazTools / Razviar)
+// Ported from UnityPy/export/SpriteHelper.py (MIT, © K0lb3): the alpha texture merge, see mergeAlpha
 // Derived from SixLabors/ImageSharp.Drawing src/ImageSharp.Drawing/Shapes/Rasterization/*.cs @ v1.0.0-beta15 (Apache-2.0, © Six Labors): the triangle fill at the end of this file, see there
 
 import {
@@ -32,6 +33,9 @@ export interface DecodeSpriteOptions {
    * Missing textures are decoded and added only on success. This map belongs
    * to the caller: clear or delete entries to free pixels or after editing
    * the input. No textures are retained by the package without this option.
+   * A sprite's alpha texture (ETC1 split alpha) is kept under its own key
+   * like any texture; the image merged from the two is made anew by each call
+   * and never stored, so every entry stays its Texture2D's own image.
    */
   decodedTextures?: Map<ObjectReader, RgbaImage>;
   /**
@@ -60,6 +64,8 @@ export interface SpriteSource {
   sprite: Sprite;
   rect: SpriteRect;
   texture: Texture2DData;
+  /** The texture holding its alpha (ETC1 split alpha), when `rect` names one. */
+  alphaTexture: Texture2DData | undefined;
 }
 
 /**
@@ -83,14 +89,21 @@ export interface SpriteSource {
  * ImageSharp.Drawing's code and is under the Apache License 2.0 (this
  * package's `NOTICE` and `LICENSE-APACHE`).
  *
+ * A sprite whose render data names an alpha texture (`alphaTexture`, the
+ * Android "split alpha" of a format without alpha, such as ETC1) gets that
+ * texture's red channel as its alpha, as UnityPy's `get_image` does: both
+ * textures are decoded and merged whole, before the cut. AssetStudio ignores
+ * the alpha texture and returns such a sprite opaque.
+ *
  * `Rotate90` is turned back the way upstream turns it (ImageSharp
  * `Rotate(270)`). That direction is not verified against Unity's packer: no
  * fixture editor's packer writes `Rotate90`, and UnityPy, which turns the
  * other way, mistranslates the same upstream call rather than checking it
  * independently (#34; verification tracked in #160).
  *
- * With `options.decodedTextures`, sequential calls reuse their shared atlas.
- * The caller owns the map and decides how long to retain its decoded pixels.
+ * With `options.decodedTextures`, sequential calls reuse their shared atlas
+ * (and its alpha texture). The caller owns the map and decides how long to
+ * retain its decoded pixels.
  * Without it, every call decodes the texture again.
  *
  * Unlike upstream, which hands back no image or an unmasked one, this throws
@@ -105,12 +118,12 @@ export interface SpriteSource {
  * @throws {TypeError} when `sprite` is not a Sprite
  * @throws {Error} before `initTexture` has finished, or when `sprite` is not
  *   one of `env.objects`
- * @throws {ResourceNotFoundError} when the texture, or the atlas it is in, is
- *   in a SerializedFile that is not loaded (its `fileName`), or the texture's
- *   data is in a `.resS` that is not
+ * @throws {ResourceNotFoundError} when the texture, its alpha texture, or the
+ *   atlas it is in, is in a SerializedFile that is not loaded (its
+ *   `fileName`), or a texture's data is in a `.resS` that is not
  * @throws {UnsupportedError} what `obj.read()` and `decodeTexture2D` throw,
- *   and: an alpha texture (`alphaTexture`, ETC1 split alpha; kind
- *   `"sprite alpha texture"`), a `downscaleMultiplier` other than 1 (a variant
+ *   and: an alpha texture of another size than the texture (kind
+ *   `"sprite alpha texture size"`), a `downscaleMultiplier` other than 1 (a variant
  *   atlas; kind `"sprite downscale"`), a packing rotation Unity does not define
  *   (kind `"sprite packing rotation"`) and, with `tightMesh`, a mesh whose
  *   positions are not 32-bit floats (kind `"sprite vertex format"`)
@@ -132,8 +145,12 @@ export async function decodeSprite(
   options: DecodeSpriteOptions = {},
 ): Promise<RgbaImage> {
   const source = locateSprite(sprite, env);
-  refuseAlphaTexture(source.alphaTexture, `sprite "${source.sprite.m_Name}" (path id ${sprite.pathId})`);
-  const image = await decodeTextureObject(source.texture, options.decodedTextures);
+  let image = await decodeTextureObject(source.texture, options.decodedTextures);
+  if (source.alphaTexture) {
+    const alpha = await decodeTextureObject(source.alphaTexture, options.decodedTextures);
+    const what = `sprite "${source.sprite.m_Name}" (path id ${sprite.pathId})`;
+    image = mergeAlpha(image, alpha, what);
+  }
   return cutSprite(image, source.sprite, source.rect, sprite.version, options.tightMesh === true);
 }
 
@@ -145,8 +162,12 @@ export async function decodeSprite(
  */
 export function findSpriteSource(obj: ObjectReader, env: Env): SpriteSource {
   const { sprite, rect, texture, alphaTexture } = locateSprite(obj, env);
-  refuseAlphaTexture(alphaTexture, `sprite "${sprite.m_Name}" (path id ${obj.pathId})`);
-  return { sprite, rect, texture: texture.read<Texture2DData>() };
+  return {
+    sprite,
+    rect,
+    texture: texture.read<Texture2DData>(),
+    alphaTexture: alphaTexture?.read<Texture2DData>(),
+  };
 }
 
 /** A sprite, where its pixels are, and the objects holding them. */
@@ -155,22 +176,20 @@ export interface SpriteLocation {
   rect: SpriteRect;
   /** The Texture2D its pixels are in, not read. */
   texture: ObjectReader;
-  /** The texture holding its alpha (ETC1 split alpha), when `rect` names one. */
-  alphaTexture: PPtr | undefined;
+  /** The Texture2D holding its alpha (ETC1 split alpha), when `rect` names one; not read. */
+  alphaTexture: ObjectReader | undefined;
   /** The atlas it was found through; `undefined` when `rect` is its own `m_RD`. */
   atlas: SpriteAtlas | undefined;
 }
 
 /**
  * Upstream `GetImage`'s lookup: the sprite's atlas entry when its atlas is
- * loaded, its own `m_RD` otherwise; then the texture either names, found but
- * not read, so its image data (maybe in a `.resS`) is not needed. An alpha
- * texture is not refused here but by {@link findSpriteSource}: describing
- * such a sprite is fine, decoding it is not. Internal: exported for
- * `imageInfo`, not from the package.
+ * loaded, its own `m_RD` otherwise; then the texture and alpha texture it
+ * names, found but not read, so their image data (maybe in a `.resS`) is not
+ * needed. Internal: exported for `imageInfo`, not from the package.
  *
- * @throws what {@link decodeSprite} throws, but for decoding, for reading the
- *   texture and for an alpha texture
+ * @throws what {@link decodeSprite} throws, but for decoding and for reading
+ *   the textures
  */
 export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
   if (obj?.type !== ClassID.Sprite) {
@@ -204,7 +223,13 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
       );
     }
     const texture = findTexture(env, entry.texture, atlasObj, `${what}'s atlas texture`);
-    return { sprite, rect: entry, texture, alphaTexture: entry.alphaTexture, atlas: data };
+    const alphaTexture = findAlphaTexture(
+      env,
+      entry.alphaTexture,
+      atlasObj,
+      `${what}'s atlas alpha texture`,
+    );
+    return { sprite, rect: entry, texture, alphaTexture, atlas: data };
   }
 
   // Upstream falls back to m_RD for any atlas it cannot get. When that has
@@ -215,13 +240,27 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
     found(atlas, atlasPointer, `${what}'s atlas, which holds its texture,`);
   }
   const texture = findTexture(env, rd.texture, obj, `${what}'s texture`);
-  return { sprite, rect: rd, texture, alphaTexture: rd.alphaTexture, atlas: undefined };
+  const alphaTexture = findAlphaTexture(env, rd.alphaTexture, obj, `${what}'s alpha texture`);
+  return { sprite, rect: rd, texture, alphaTexture, atlas: undefined };
 }
 
 /** The Texture2D a pointer names. */
 function findTexture(env: Env, pointer: PPtr, from: ObjectReader, what: string): ObjectReader {
   const texture = found(env.resolve(pointer, from), pointer, what);
   return checkClass(texture, ClassID.Texture2D, what);
+}
+
+/**
+ * The alpha texture a pointer names; `undefined` for a null pointer, which is
+ * no alpha texture, as UnityPy takes it, and before 5.2, which has no pointer.
+ */
+function findAlphaTexture(
+  env: Env,
+  pointer: PPtr | undefined,
+  from: ObjectReader,
+  what: string,
+): ObjectReader | undefined {
+  return pointer && pointer.m_PathID !== 0n ? findTexture(env, pointer, from, what) : undefined;
 }
 
 /**
@@ -263,17 +302,32 @@ function checkClass(obj: ObjectReader, classId: number, what: string): ObjectRea
 }
 
 /**
- * Upstream ignores a sprite's alpha texture and returns its colour texture
- * as if opaque; that is a sprite without its alpha, so it is refused (R9).
+ * UnityPy's `get_image` for a sprite with an alpha texture: the texture's red,
+ * green and blue with the alpha texture's red as alpha, pixel for pixel
+ * (`Image.merge`), into a new image, so that neither decoded texture (maybe
+ * the caller's `decodedTextures` entry) changes. Both are top row first.
+ *
+ * ponytail: each call copies the whole texture, once per sprite; caching the
+ * merged image per (texture, alpha texture) pair, as UnityPy does, would make
+ * it once per atlas, if a caller needs that.
+ *
+ * @throws {UnsupportedError} when the two are not the same size: Unity samples
+ *   them with the same UVs, so it could be drawn, but merging it would need a
+ *   resampling that neither upstream does (UnityPy's merge fails on it)
  */
-function refuseAlphaTexture(alpha: PPtr | undefined, what: string): void {
-  if (alpha && alpha.m_PathID !== 0n) {
+function mergeAlpha(image: RgbaImage, alpha: RgbaImage, what: string): RgbaImage {
+  const { width, height } = image;
+  if (alpha.width !== width || alpha.height !== height) {
     throw new UnsupportedError(
-      "sprite alpha texture",
-      `path id ${alpha.m_PathID}`,
-      `${what} keeps its alpha in a texture of its own (ETC1 split alpha)`,
+      "sprite alpha texture size",
+      `${alpha.width} x ${alpha.height}`,
+      `${what}'s texture is ${width} x ${height}; its alpha texture is merged pixel for ` +
+        "pixel, and resampling it is not implemented",
     );
   }
+  const data = new Uint8Array(image.data);
+  for (let i = 3; i < data.length; i += 4) data[i] = alpha.data[i - 3]!;
+  return { data, width, height };
 }
 
 /** Whether two `m_RenderDataKey`s (a GUID and a 64-bit id) are the same. */

@@ -130,9 +130,10 @@ The short answer. The full tables, with what each claim is tested on, are in the
   tree reads work on every one of them, whatever the Unity version. The class readers know the
   layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6, `SpriteAtlas` from 2017.1) up
   to 6000.6, and read a newer version with the newest layout they know. `SpriteAtlas`'s 6000.6
-  layout is tested on Unity 6000.6.4f1 bundles; cutting a sprite out of such an atlas is not
-  implemented yet ([#155](https://github.com/fatal10110/unity-asset-reader/issues/155)). A
-  class reader refuses a version older than its first layout;
+  layout is tested on Unity 6000.6.4f1 bundles; the texture package does not list or decode
+  its packed sprites yet (planned,
+  [#155](https://github.com/fatal10110/unity-asset-reader/issues/155)). A class reader refuses
+  a version older than its first layout;
   `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,
   with gates at 2.6 and 3.0 that no test covers, and reads any older version with its oldest
   layout.
@@ -150,12 +151,16 @@ Each of these throws `UnsupportedError`, naming what it found:
 - Containers: `UnityArchive`, zip archives, encrypted bundles (UnityCN and other game-specific
   encryption).
 - Texture formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, `R8`, `RG16`, `RG32`, `RGB48`,
-  `RGBA64`. Textures built for PS4 or PS5. Sprites with an alpha texture (ETC1 split alpha) or
-  from a variant atlas. Sprites packed into a Unity 6000.6 `SpriteAtlas`.
+  `RGBA64`. Textures built for PS4 or PS5. Sprites whose alpha texture (ETC1 split
+  alpha) is not the size of their texture, or from a variant atlas. A `Sprite` object that
+  points at a Unity 6000.6 `SpriteAtlas`.
 
 Not provided at all: decoding audio, video or meshes; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or
-repacking bundles.
+repacking bundles. Sprites packed into a Unity 6000.6 `SpriteAtlas`, which such bundles hold only
+inside the atlas, not as `Sprite` objects: the core reads them (`spriteInstanceData`), the texture
+package does not list or decode them yet (planned,
+[#155](https://github.com/fatal10110/unity-asset-reader/issues/155)).
 
 ## Development
 

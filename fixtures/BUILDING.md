@@ -1348,20 +1348,20 @@ refuses format 23. This proves container integrity, not pixel decoder support.
 
 ### Remaining blockers
 
-- #152 ETC1 split alpha: this installation has Windows and WebGL modules,
-  but no Android module. Add Android Build Support, SDK/NDK and OpenJDK before
-  building this fixture. No Android fixture was generated.
+- #152 ETC1 split alpha: this 6000.6 installation has Windows and WebGL
+  modules, but no Android module, so no 6000.6 Android fixture was generated.
+  The Android fixture is the 2019.4.41f2 `split-alpha/sprites` of section 14.
 - #160: none of the three native packer configurations above produced
   rotation value 4. The probe bundles are reproducible evidence, not acceptance
   of Rotate90. Its UV0-derived direction and source-image comparison remain open.
 - #153: the variant's type-tree bytes are validated; UnityPy ignores its
   downscale field for sprite export. A separate AssetStudio bicubic cross-check
   is still needed before choosing a resampler or claiming decoded pixels agree.
-- #155: the core reads the 6000.6 SpriteAtlas layout, but the texture package
-  does not cut sprites out of it yet (by `*spriteInstanceData`) and refuses a
-  sprite packed into one with `UnsupportedError`.
-- Format 23 is read since #223; merely installing Android support does not
-  resolve the ETC1 blocker above.
+- #155: the core reads the 6000.6 SpriteAtlas layout. Its packed sprites exist
+  only inside the atlas (`*spriteInstanceData`), not as Sprite objects, and the
+  texture package does not list or decode them yet; a Sprite object that points
+  at a 6000.6 atlas is refused with `UnsupportedError`.
+- Format 23 is read since #223.
 
 ### RGB48 AssetStudio verdict (PR #221 review)
 
@@ -1452,7 +1452,8 @@ pixels are available through section 15; the resize implementation remains #153.
 
 The Android atlases use ETC_RGB4 with `allowsAlphaSplitting = true`. All 17
 atlas sprite entries resolve to distinct, non-null ETC1 color and alpha textures.
-The fixture supplies native inputs for #152; it does not implement alpha merging.
+It is #152's fixture: its sprite goldens are UnityPy's `get_image`, which takes
+the alpha texture's red channel as alpha.
 
 The rotation probe uses rectangular packing with rotation enabled and a
 64-pixel atlas maximum. The legacy probe uses

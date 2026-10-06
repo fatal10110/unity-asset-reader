@@ -183,11 +183,12 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 60
 |---|---|
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
-| Packed into a Unity 6000.6 `SpriteAtlas`, which holds its sprites' meshes itself | Refused ([#155](https://github.com/fatal10110/unity-asset-reader/issues/155)) |
+| Packed into a Unity 6000.6 `SpriteAtlas` | Not listed or decoded yet (planned, [#155](https://github.com/fatal10110/unity-asset-reader/issues/155)): 6000.6 bundles hold packed sprites only inside the atlas (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects. A `Sprite` object that points at a 6000.6 atlas is refused |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
-| Alpha texture (ETC1 split alpha), variant atlas (`downscaleMultiplier` other than 1) | Refused |
+| Alpha texture (Android ETC1 split alpha, 2019.4.41f2 atlases) | Its red channel is the sprite's alpha, as UnityPy merges it; one of another size than its texture is refused |
+| Variant atlas (`downscaleMultiplier` other than 1) | Refused |
 
 ## Texture formats
 
@@ -249,10 +250,12 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 - `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
   Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
 - Textures built for PS4 or PS5.
-- Sprites with an alpha texture (ETC1 split alpha), and sprites of a variant atlas (a
-  `downscaleMultiplier` other than 1).
+- Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture, and sprites
+  of a variant atlas (a `downscaleMultiplier` other than 1).
 - With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
-- Sprites packed into a Unity 6000.6 `SpriteAtlas`, when that atlas is loaded.
+- A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
+  6000.6 bundle are not `Sprite` objects at all, so `images` does not list them yet; planned
+  under #155.)
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
 `Texture3D` classes; image encoding (PNG, JPEG).

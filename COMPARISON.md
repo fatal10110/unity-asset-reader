@@ -60,7 +60,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Read MonoBehaviour data through type trees | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Decode Texture2D | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Extract Sprite images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| Merge separate sprite alpha textures | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Merge separate sprite alpha textures | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Encode PNG images | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Decode audio to WAV / OGG / MP3 | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✗ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
