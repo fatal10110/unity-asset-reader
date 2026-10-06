@@ -764,7 +764,8 @@ test("split alpha in a variant atlas: the merged texture is what is resized", as
   if (atlas.status !== "found") assert.fail("r_a's atlas is in the fixture");
   const file = env.files.find((f) => !f.path.endsWith(".resS"))!.data;
   const { x, y, width, height } = rect.textureRect;
-  const at = find(atlas.object, file, new Uint8Array(new Float32Array([x, y, width, height]).buffer));
+  const floats = new Float32Array([x, y, width, height]);
+  const at = find(atlas.object, file, new Uint8Array(floats.buffer));
   // After textureRect: the multiplier (1.0f) and settingsRaw, within the entry.
   const tail = new Uint8Array(new Float32Array([1, 0]).buffer);
   new DataView(tail.buffer).setUint32(4, rect.settingsRaw, true);
