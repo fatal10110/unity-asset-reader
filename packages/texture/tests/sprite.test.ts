@@ -16,6 +16,7 @@ import {
   type Env,
   type ObjectReader,
   type Sprite,
+  type Texture2DData,
 } from "unity-asset-reader";
 import {
   golden,
@@ -25,8 +26,14 @@ import {
   type GoldenSprite,
 } from "../../../fixtures/helpers.js";
 import { convertPlain, type RgbaImage } from "../src/convert.js";
-import { initTexture } from "../src/decode.js";
-import { cutSprite, decodeSprite, findSpriteSource, type SpriteRect } from "../src/sprite.js";
+import { decodeTexture2D, initTexture } from "../src/decode.js";
+import {
+  cutSprite,
+  decodeSprite,
+  findSpriteSource,
+  locateSprite,
+  type SpriteRect,
+} from "../src/sprite.js";
 
 // As in decode.test.ts: the WASM half of texture2ddecoder-wasm needs Docker to
 // build, so without it only the tests that need no decoder run, and the CI job
@@ -449,15 +456,27 @@ test("a dangling atlas pointer, with no texture in m_RD to fall back to, is what
   assert.throws(() => findSpriteSource(sprite, env), /'s texture is a null pointer/);
 });
 
-test("a sprite with an alpha texture (ETC1 split alpha) is refused", () => {
+test("an alpha texture pointer: null is none, the wrong class or nothing is CorruptError", () => {
   const { env, sprite, file } = fresh("sheet_a");
+  // m_RD: texture, then alphaTexture, a null pointer: no alpha texture.
+  assert.equal(findSpriteSource(sprite, env).alphaTexture, undefined);
   const texture = sprite.read<Sprite>().m_RD.texture;
   const pair = Uint8Array.from([...pointer(0, texture.m_PathID), ...pointer(0, 0n)]);
-  const at = find(sprite, file, pair);
-  file.set(pointer(0, texture.m_PathID), at + 12);
+  const at = find(sprite, file, pair) + 12;
+  file.set(pointer(0, texture.m_PathID), at);
+  assert.equal(findSpriteSource(sprite, env).alphaTexture?.m_Name, "sheet");
+  file.set(pointer(0, sprite.pathId), at);
   assert.throws(
     () => findSpriteSource(sprite, env),
-    (err: unknown) => err instanceof UnsupportedError && err.kind === "sprite alpha texture",
+    (err: unknown) =>
+      err instanceof CorruptError && /'s alpha texture \(path id -?\d+\) is class 213, not 28/
+        .test(err.message),
+  );
+  file.set(pointer(0, 777n), at);
+  assert.throws(
+    () => findSpriteSource(sprite, env),
+    (err: unknown) =>
+      err instanceof CorruptError && /'s alpha texture \(path id 777\) is not in/.test(err.message),
   );
 });
 
@@ -501,6 +520,122 @@ for (const fixture of FIXTURES) {
     }
   });
 }
+
+// --- split alpha (#152): an Android atlas whose ETC1 textures keep alpha apart ---------
+
+const SPLIT_ALPHA = "editor/2019.4.41f2/split-alpha/sprites";
+
+/** The split-alpha fixture, freshly loaded, its Sprites, and their goldens. */
+function splitAlpha(): { env: Env; sprites: { obj: ObjectReader; golden: GoldenSprite }[] } {
+  const env = load([{ name: SPLIT_ALPHA, data: loadFixture(SPLIT_ALPHA) }]);
+  const [sf] = Object.values(golden(SPLIT_ALPHA).serialized!);
+  const sprites = env.objects
+    .filter((obj) => obj.type === ClassID.Sprite)
+    .map((obj) => ({ obj, golden: sf!.sprites![String(obj.pathId)]! }));
+  return { env, sprites };
+}
+
+/**
+ * A stand-in for a decoded texture, `pixel(x, y)` at each pixel, put into
+ * `textures` where `decodeTexture2D`'s image of `texture` would be, so that
+ * `decodeSprite` takes it without the WASM decoder (the fixture's textures
+ * are ETC1). Its size is `texture`'s, or `size`.
+ */
+function seed(
+  textures: Map<ObjectReader, RgbaImage>,
+  texture: ObjectReader,
+  pixel: (x: number, y: number) => number[],
+  size: { m_Width: number; m_Height: number } = texture.read<Texture2DData>(),
+): RgbaImage {
+  const { m_Width: width, m_Height: height } = size;
+  const data = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) data.set(pixel(x, y), (y * width + x) * 4);
+  }
+  const image = { data, width, height };
+  textures.set(texture, image);
+  return image;
+}
+
+test("split alpha: the alpha texture's red is the alpha, merged before the cut", async () => {
+  const { env, sprites } = splitAlpha();
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  let merged = 0;
+  for (const { obj, golden: g } of sprites) {
+    const { sprite, rect, texture, alphaTexture } = locateSprite(obj, env);
+    if (!alphaTexture) continue;
+    // Every colour pixel differs, and its alpha (to be replaced) is 0x55; the
+    // alpha texture's red varies, and its other channels are not alpha.
+    const colour =
+      decodedTextures.get(texture) ??
+      seed(decodedTextures, texture, (x, y) => [x, y, (x * y) & 0xff, 0x55]);
+    const alpha =
+      decodedTextures.get(alphaTexture) ??
+      seed(decodedTextures, alphaTexture, (x, y) => [(x * 7 + y * 13) & 0xff, 1, 2, 3]);
+    const before = [sha256(colour.data), sha256(alpha.data)];
+    // Merged by hand over the whole texture, then cut as any texture is.
+    const whole = new Uint8Array(colour.data);
+    for (let i = 0; i < whole.length; i += 4) whole[i + 3] = alpha.data[i]!;
+    for (const tightMesh of [false, true]) {
+      const want = cutSprite({ ...colour, data: whole }, sprite, rect, obj.version, tightMesh);
+      const out = await decodeSprite(obj, env, { decodedTextures, tightMesh });
+      assert.deepStrictEqual(out, want, `${g.name}, tightMesh ${tightMesh}`);
+      assert.equal(out.width, tightMesh ? (g.tightWidth ?? g.width) : g.width, g.name);
+    }
+    // The caller's entries are still the two textures' own pixels.
+    assert.deepStrictEqual([sha256(colour.data), sha256(alpha.data)], before, g.name);
+    assert.strictEqual(decodedTextures.get(texture), colour);
+    assert.strictEqual(decodedTextures.get(alphaTexture), alpha);
+    merged++;
+  }
+  // Every atlas entry, of two atlases with a colour and an alpha texture each.
+  assert.equal(merged, 17);
+  assert.equal(decodedTextures.size, 4);
+});
+
+test("split alpha: an alpha texture of another size than its texture is refused", async () => {
+  const { env, sprites } = splitAlpha();
+  const { obj } = sprites.find((s) => s.golden.name === "r_a")!;
+  const { texture, alphaTexture } = locateSprite(obj, env);
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  const colour = seed(decodedTextures, texture, () => [1, 2, 3, 255]);
+  assert.deepStrictEqual([colour.width, colour.height], [64, 64]);
+  seed(decodedTextures, alphaTexture!, () => [9, 9, 9, 255], { m_Width: 32, m_Height: 64 });
+  await assert.rejects(
+    decodeSprite(obj, env, { decodedTextures }),
+    (err: unknown) =>
+      err instanceof UnsupportedError &&
+      err.kind === "sprite alpha texture size" &&
+      err.found === "32 x 64" &&
+      err.message.includes(`"r_a" (path id ${obj.pathId})'s texture is 64 x 64`),
+  );
+});
+
+wasmTest(`${SPLIT_ALPHA}: decodeSprite gives every sprite its golden, alpha merged`, async () => {
+  const { env, sprites } = splitAlpha();
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  let merged = 0;
+  for (const { obj, golden: g } of sprites) {
+    const out = await decodeSprite(obj, env);
+    assert.equal(stored(out), g.rgbaSha256, g.name);
+    // The same through the caller's textures, each decoded once.
+    assert.deepStrictEqual(await decodeSprite(obj, env, { decodedTextures }), out, g.name);
+    // Only where UnityPy and AssetStudio agree on the mesh: no AssetStudio
+    // hashes were made of this fixture's pixels.
+    if (!g.tightOracleNote) {
+      const tight = await decodeSprite(obj, env, { tightMesh: true });
+      assert.equal(stored(tight), g.tightRgbaSha256 ?? g.rgbaSha256, `${g.name} tightMesh`);
+    }
+    if (locateSprite(obj, env).alphaTexture) merged++;
+  }
+  assert.equal(merged, 17);
+  // Two atlases' colour and alpha textures, the sheet and tight: each entry
+  // is its Texture2D's own image, the colour textures' alpha not merged in.
+  assert.equal(decodedTextures.size, 6);
+  for (const [texture, image] of decodedTextures) {
+    assert.deepStrictEqual(image, await decodeTexture2D(texture.read<Texture2DData>()));
+  }
+});
 
 wasmTest("decodeSprite refuses a sprite that is not one of the env's objects", async () => {
   const other = load([{ name: FIXTURES[1]!, data: loadFixture(FIXTURES[1]!) }]);
