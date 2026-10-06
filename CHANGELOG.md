@@ -23,6 +23,16 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.0.2 - Unreleased
 
+- `readSpriteAtlas` reads Unity 6000.6's layout instead of refusing it: no `m_PackedSprites` or
+  `m_PackedSpriteNamesToIndex`, and every `m_RenderDataMap` entry holds its sprite as
+  `*spriteInstanceData` (`SpriteInstanceData`; `spriteInstanceData` in `SpriteAtlasFields`).
+  Tested with `readSprite` on four Unity 6000.6.4f1 fixtures against UnityPy 1.25.4 (#155).
+  **Type change (breaks type-checked code that reads these fields unchecked):**
+  `SpriteAtlas.m_PackedSprites` / `m_PackedSpriteNamesToIndex` and
+  `SpriteAtlasFields.packedSprites` / `packedSpriteNamesToIndex` are optional (absent from
+  6000.6); `SpriteAtlasFields.renderDataMap` entries are `SpriteAtlasDataFields`. The next
+  release's version is the maintainer's decision; this heading's number does not settle it.
+
 - Read SerializedFile format 23 metadata and generic type-tree dumps, tested against five
   Unity 6000.6.4f1 fixtures. Validate the bounded `mhtt` type-tree blobs and retain support
   for zero-length and disabled trees; format 24 remains unsupported (#223).
@@ -81,6 +91,11 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ### 1.0.2 - Unreleased
 
+- Unity 6000.6 bundles hold packed sprites only inside their `SpriteAtlas`
+  (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects, so
+  `images` and `decodeSprite` do not list or decode them yet; that is planned under #155. A
+  `Sprite` object that still points at a 6000.6 atlas is refused with `UnsupportedError` (kind
+  `"Unity version"`) by `decodeSprite`, `imageInfo`, `decodeImage` and `images` (#155).
 - `decodeSprite`, `decodeImage` and `images` decode a sprite with an alpha texture (Android ETC1
   split alpha), with the alpha texture's red channel as its alpha, as UnityPy does; such sprites
   were refused. An alpha texture of another size than its texture is refused with

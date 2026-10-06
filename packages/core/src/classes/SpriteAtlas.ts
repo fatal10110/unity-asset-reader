@@ -1,7 +1,7 @@
 // Ported from AssetStudio/Classes/SpriteAtlas.cs (MIT, © Perfare / RazTools / Razviar)
 
-import { UnsupportedError } from "../errors.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
+import { readCount } from "../serialized/TypeTree.js";
 import type { Rectf } from "./Font.js";
 import type { Vector2 } from "./Material.js";
 import { readNamedObject, type NamedObject } from "./NamedObject.js";
@@ -13,21 +13,59 @@ import {
   isPatchFrom,
   layoutVersion,
   readArray,
+  readBlendShapeData,
+  readBone,
   readGUID,
+  readMatrix,
   readRectf,
   readSecondaryTextures,
+  readSubMesh,
   readVector2,
   readVector4,
+  readVertexData,
+  type BlendShapeData,
   type GUID,
+  type Matrix4x4,
   type SecondarySpriteTexture,
+  type SpriteBone,
+  type SubMesh,
   type Vector4,
+  type VertexData,
 } from "./Sprite.js";
 import { readStringField } from "./strings.js";
 import { atLeast } from "./version.js";
 
 /**
+ * A packed sprite as a Unity 6000.6 atlas holds it (Unity's
+ * `SpriteInstanceData`): what its `Sprite` object held, which a 6000.6 bundle
+ * no longer needs to contain. Keys as `readTypeTree()` gives them.
+ */
+export interface SpriteInstanceData {
+  /** The sprite's name (its `m_Name`). */
+  spriteName: string;
+  /** The sprite's area in its source texture, in pixels from the bottom-left corner. */
+  rect: Rectf;
+  /** The 9-slice border, left, bottom, right, top. */
+  border: Vector4;
+  pivot: Vector2;
+  pixelsToUnits: number;
+  /** Unity's `IndexFormat` of `m_IndexBuffer`: 0 is `UInt16`, 1 is `UInt32`. */
+  m_IndexFormat: number;
+  m_SubMeshes: SubMesh[];
+  /** The indices, as `m_IndexFormat` says: a view into the object's bytes (R7). */
+  m_IndexBuffer: Uint8Array;
+  m_VertexData: VertexData;
+  m_Bindpose: Matrix4x4[];
+  m_BlendShapes: BlendShapeData;
+  spriteBones: SpriteBone[];
+  /** One outline per shape, in units. */
+  physicsShape: Vector2[][];
+}
+
+/**
  * Where one packed sprite sits in its atlas (Unity's `SpriteAtlasData`): the
- * fields of a sprite's `m_RD` that packing changes.
+ * fields of a sprite's `m_RD` that packing changes and, from Unity 6000.6,
+ * the sprite itself.
  */
 export interface SpriteAtlasData {
   texture: PPtr;
@@ -43,6 +81,11 @@ export interface SpriteAtlasData {
   settingsRaw: number;
   /** Unity 2020.2 and later. */
   secondaryTextures?: SecondarySpriteTexture[];
+  /**
+   * Unity 6000.6 and later: the packed sprite. The key keeps the `*` of
+   * Unity's field name (a `SpriteInstanceData *`), as `readTypeTree()` gives it.
+   */
+  "*spriteInstanceData"?: SpriteInstanceData;
 }
 
 /**
@@ -52,9 +95,10 @@ export interface SpriteAtlasData {
  * gives them.
  */
 export interface SpriteAtlas extends NamedObject {
-  m_PackedSprites: PPtr[];
-  /** The names of `m_PackedSprites`, in the same order. */
-  m_PackedSpriteNamesToIndex: string[];
+  /** Before Unity 6000.6. */
+  m_PackedSprites?: PPtr[];
+  /** Before Unity 6000.6: the names of `m_PackedSprites`, in the same order. */
+  m_PackedSpriteNamesToIndex?: string[];
   /** A packed sprite's `m_RenderDataKey` to where it sits in the atlas. */
   m_RenderDataMap: [[GUID, bigint], SpriteAtlasData][];
   m_Tag: string;
@@ -71,24 +115,28 @@ export interface SpriteAtlas extends NamedObject {
  *
  * Where TPK and upstream disagree, TPK's gates are taken: `atlasRectOffset`
  * from 2017.1.1p1 (upstream: 2017.2), and `m_Guid` from 6000.5, which
- * upstream does not read. 6000.6 drops `m_PackedSprites` and adds a
- * `spriteInstanceData` to every entry; that layout is only known from
- * pre-release type trees, so it is refused.
+ * upstream does not read. Unity 6000.6 drops `m_PackedSprites` and
+ * `m_PackedSpriteNamesToIndex` and embeds the packed sprite (its name, rect,
+ * border, pivot, mesh, bones and physics shape) in every `m_RenderDataMap`
+ * entry, as `*spriteInstanceData`. Upstream has no such layout; this one is
+ * Unity's own type tree, as 6000.6.4f1 writes it into its bundles and as TPK
+ * records it.
  *
  * A file whose Unity version is unknown (`[0, 0, 0, 0]`) is read as 2019 when
  * its format is 18 to 21, which only 2019 writes, and refused otherwise, as
  * `readSprite` does (rule for version-stripped files, #36, as amended).
  *
  * ponytail: the gates compare release numbers only (see `atLeast`), except
- * the 2017.1 patch-release gate. 2017.2.0b2 to b8 lack `atlasRectOffset`;
+ * the 2017.1 patch-release gate. 2017.2.0b2 to b8 lack `atlasRectOffset`, and
+ * 6000.6.0a1 and a2 still have 6000.5's layout (TPK: 6000.6.0a3 changed it);
  * such a pre-release fails the end-of-object check with a CorruptError.
  *
  * @param reader the object's reader, rewound first and left at its end
  * @throws {UnsupportedError} of kind `"Unity version"`, with the file's own
  *   `unityVersion` as `found`: when the version is unknown (`[0, 0, 0, 0]`)
  *   unless the format is 18 to 21, and in those formats when the fields after
- *   `m_Name` do not fit 2019's layout; older than 2017.1, which had no sprite
- *   atlases; or 6000.6 and later. Of kind `"build target"` for an editor file
+ *   `m_Name` do not fit 2019's layout; or older than 2017.1, which had no
+ *   sprite atlases. Of kind `"build target"` for an editor file
  *   (`BuildTarget.NoTarget`), which stores the atlas' editor settings in
  *   between
  * @throws {CorruptError} when the object ends early, a count or string length
@@ -97,14 +145,6 @@ export interface SpriteAtlas extends NamedObject {
  */
 export function readSpriteAtlas(reader: ObjectReader): SpriteAtlas {
   const version = layoutVersion(reader, "SpriteAtlas", 2017, 1);
-  if (atLeast(version, 6000, 6)) {
-    throw new UnsupportedError(
-      "Unity version",
-      reader.unityVersion,
-      `object ${reader.pathId}: the SpriteAtlas layout of 6000.6 is not ported`,
-    );
-  }
-
   // Filled in field order, so the keys come out in the order Unity wrote them.
   const out: Partial<SpriteAtlas> & NamedObject = readNamedObject(reader);
   assumingLayout(reader, "SpriteAtlas", () => readAtlasFields(reader, version, out));
@@ -118,13 +158,16 @@ function readAtlasFields(
   version: UnityVersion,
   out: Partial<SpriteAtlas>,
 ): void {
-  out.m_PackedSprites = readArray(reader, "SpriteAtlas", "m_PackedSprites", readPPtr);
-  out.m_PackedSpriteNamesToIndex = readArray(
-    reader,
-    "SpriteAtlas",
-    "m_PackedSpriteNamesToIndex",
-    (r) => readStringField(r, "SpriteAtlas", "m_PackedSpriteNamesToIndex name"),
-  );
+  // Before 6000.6, which holds the packed sprites in m_RenderDataMap instead.
+  if (!atLeast(version, 6000, 6)) {
+    out.m_PackedSprites = readArray(reader, "SpriteAtlas", "m_PackedSprites", readPPtr);
+    out.m_PackedSpriteNamesToIndex = readArray(
+      reader,
+      "SpriteAtlas",
+      "m_PackedSpriteNamesToIndex",
+      (r) => readStringField(r, "SpriteAtlas", "m_PackedSpriteNamesToIndex name"),
+    );
+  }
   out.m_RenderDataMap = readArray(reader, "SpriteAtlas", "m_RenderDataMap", (r) => [
     [readGUID(r), r.readInt64()],
     readSpriteAtlasData(r, version),
@@ -136,7 +179,7 @@ function readAtlasFields(
   endOfObject(reader, "SpriteAtlas");
 }
 
-/** Upstream `SpriteAtlasData(ObjectReader)`. */
+/** Upstream `SpriteAtlasData(ObjectReader)`, with the fields TPK adds. */
 function readSpriteAtlasData(reader: ObjectReader, version: UnityVersion): SpriteAtlasData {
   const out: Partial<SpriteAtlasData> = {
     texture: readPPtr(reader),
@@ -156,5 +199,38 @@ function readSpriteAtlasData(reader: ObjectReader, version: UnityVersion): Sprit
     out.secondaryTextures = readSecondaryTextures(reader, "SpriteAtlas");
     reader.align();
   }
+  // 6000.6+ (TPK: from 6000.6.0a3).
+  if (atLeast(version, 6000, 6)) out["*spriteInstanceData"] = readInstanceData(reader, version);
   return out as SpriteAtlasData;
+}
+
+/**
+ * Unity 6000.6's `SpriteInstanceData`: a `Sprite`'s own fields, then its
+ * `m_RD` mesh (`m_IndexFormat` first, no `m_CurrentChannels`), its bones and
+ * its physics shape, aligned as in a `Sprite`.
+ */
+function readInstanceData(reader: ObjectReader, version: UnityVersion): SpriteInstanceData {
+  const owner = "SpriteAtlas";
+  const out: Partial<SpriteInstanceData> = {
+    spriteName: readStringField(reader, owner, "spriteName"),
+    rect: readRectf(reader),
+    border: readVector4(reader),
+    pivot: readVector2(reader),
+    pixelsToUnits: reader.readFloat32(),
+    m_IndexFormat: reader.readInt32(),
+    m_SubMeshes: readArray(reader, owner, "m_SubMeshes", (r) => readSubMesh(r, version)),
+  };
+  const indexBytes = readCount(reader, `${owner} ${reader.pathId} m_IndexBuffer byte`);
+  out.m_IndexBuffer = reader.readBytes(indexBytes);
+  reader.align();
+  out.m_VertexData = readVertexData(reader, version, owner);
+  out.m_Bindpose = readArray(reader, owner, "m_Bindpose", readMatrix);
+  out.m_BlendShapes = readBlendShapeData(reader, version, owner);
+  out.spriteBones = readArray(reader, owner, "spriteBones", (r) =>
+    readBone(r, version, owner, "spriteBones"),
+  );
+  out.physicsShape = readArray(reader, owner, "physicsShape", (r) =>
+    readArray(r, owner, "physicsShape outline", readVector2),
+  );
+  return out as SpriteInstanceData;
 }

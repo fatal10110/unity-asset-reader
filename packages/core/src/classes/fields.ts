@@ -46,7 +46,7 @@ import type {
   Vector4,
   VertexData,
 } from "./Sprite.js";
-import type { SpriteAtlas, SpriteAtlasData } from "./SpriteAtlas.js";
+import type { SpriteAtlas, SpriteAtlasData, SpriteInstanceData } from "./SpriteAtlas.js";
 import { textAssetString, type TextAsset } from "./TextAsset.js";
 import type { Texture } from "./Texture.js";
 import type { GLTextureSettings, StreamingInfo } from "./Texture2D.js";
@@ -667,17 +667,56 @@ export function toSpriteFields(data: Sprite): SpriteFields {
 // ---------------------------------------------------------------------------
 // SpriteAtlas
 
+/**
+ * The friendly form of {@link SpriteInstanceData}: a packed sprite as a Unity
+ * 6000.6 atlas holds it.
+ */
+export interface SpriteInstanceDataFields {
+  /** The sprite's name, a `Sprite`'s `name`. */
+  spriteName: string;
+  /** The sprite's area in its source texture, in pixels from the bottom-left corner. */
+  rect: Rectf;
+  /** The 9-slice border, left, bottom, right, top. */
+  border: Vector4;
+  pivot: Vector2;
+  pixelsToUnits: number;
+  /** Unity: `m_IndexFormat`. Of `indexBuffer`: 0 is `UInt16`, 1 is `UInt32`. */
+  indexFormat: number;
+  /** Unity: `m_SubMeshes`. */
+  subMeshes: SubMeshFields[];
+  /** Unity: `m_IndexBuffer`. The indices, as `indexFormat` says, a view (R7). */
+  indexBuffer: Uint8Array;
+  /** Unity: `m_VertexData`. */
+  vertexData: VertexDataFields;
+  /** Unity: `m_Bindpose`. */
+  bindpose: Matrix4x4[];
+  /** Unity: `m_BlendShapes`. */
+  blendShapes: BlendShapeData;
+  spriteBones: SpriteBone[];
+  /** One outline per shape, in units. */
+  physicsShape: Vector2[][];
+}
+
+/** The friendly form of {@link SpriteAtlasData}: where one packed sprite sits in its atlas. */
+export interface SpriteAtlasDataFields extends Omit<SpriteAtlasData, "*spriteInstanceData"> {
+  /** Unity: `*spriteInstanceData`. Unity 6000.6 and later: the packed sprite. */
+  spriteInstanceData?: SpriteInstanceDataFields;
+}
+
 /** The friendly form of {@link SpriteAtlas}. */
 export interface SpriteAtlasFields extends NamedObjectFields {
-  /** Unity: `m_PackedSprites`. */
-  packedSprites: PPtr[];
-  /** Unity: `m_PackedSpriteNamesToIndex`. The names of `packedSprites`, in the same order. */
-  packedSpriteNamesToIndex: string[];
+  /** Unity: `m_PackedSprites`. Before Unity 6000.6. */
+  packedSprites?: PPtr[];
+  /**
+   * Unity: `m_PackedSpriteNamesToIndex`. Before Unity 6000.6: the names of
+   * `packedSprites`, in the same order.
+   */
+  packedSpriteNamesToIndex?: string[];
   /**
    * Unity: `m_RenderDataMap`. A packed sprite's `renderDataKey` to where it
    * sits in the atlas.
    */
-  renderDataMap: [[GUID, bigint], SpriteAtlasData][];
+  renderDataMap: [[GUID, bigint], SpriteAtlasDataFields][];
   /** Unity: `m_Tag`. */
   tag: string;
   /** Unity: `m_IsVariant`. */
@@ -696,7 +735,7 @@ export function toSpriteAtlasFields(data: SpriteAtlas): SpriteAtlasFields {
     ...namedObject(data),
     packedSprites: data.m_PackedSprites,
     packedSpriteNamesToIndex: data.m_PackedSpriteNamesToIndex,
-    renderDataMap: data.m_RenderDataMap,
+    renderDataMap: data.m_RenderDataMap.map(([key, entry]) => [key, spriteAtlasData(entry)]),
     tag: data.m_Tag,
     isVariant: data.m_IsVariant,
     guid: data.m_Guid,
@@ -1086,4 +1125,27 @@ function spriteRenderData(rd: SpriteRenderData): SpriteRenderDataFields {
     uvTransform: rd.uvTransform,
     downscaleMultiplier: rd.downscaleMultiplier,
   });
+}
+
+function spriteAtlasData(entry: SpriteAtlasData): SpriteAtlasDataFields {
+  const { "*spriteInstanceData": instance, ...rest } = entry;
+  return defined({ ...rest, spriteInstanceData: instance && spriteInstanceData(instance) });
+}
+
+function spriteInstanceData(data: SpriteInstanceData): SpriteInstanceDataFields {
+  return {
+    spriteName: data.spriteName,
+    rect: data.rect,
+    border: data.border,
+    pivot: data.pivot,
+    pixelsToUnits: data.pixelsToUnits,
+    indexFormat: data.m_IndexFormat,
+    subMeshes: data.m_SubMeshes.map(subMesh),
+    indexBuffer: data.m_IndexBuffer,
+    vertexData: vertexData(data.m_VertexData),
+    bindpose: data.m_Bindpose,
+    blendShapes: data.m_BlendShapes,
+    spriteBones: data.spriteBones,
+    physicsShape: data.physicsShape,
+  };
 }

@@ -25,7 +25,13 @@ import type { ObjectReader } from "../src/serialized/ObjectReader.js";
 import { build, readerOf, template, type Writer } from "./media.js";
 
 /** Fixtures holding real SerializedFiles. */
-const EDITOR = fixtureNames().filter((name) => golden(name).serialized !== undefined);
+const EDITOR = [
+  ...fixtureNames().filter((name) => golden(name).serialized !== undefined),
+  // The 6000.6 candidates (`modern-goldens.json`): its SpriteAtlas layout.
+  ...["sprite", "variant", "sprite-v2", "sprite-v2-rect"].map(
+    (folder) => `editor/6000.6.4f1/${folder}/sprites`,
+  ),
+];
 
 /** The renames beyond the rule, as the fields' JSDoc documents them; `null` drops the key. */
 const RENAMES: Record<string, string | null> = {
@@ -33,6 +39,7 @@ const RENAMES: Record<string, string | null> = {
   m_3D: "is3D",
   m_RD: "renderData",
   m_DataSize: "data",
+  "*spriteInstanceData": "spriteInstanceData",
   m_PixelAspecRatioNum: "pixelAspectRatioNum",
   m_PixelAspecRatioDen: "pixelAspectRatioDen",
   // Folded into `imageData` / `audioData`, which hold the same bytes whenever
@@ -98,8 +105,10 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       }
       assert.deepStrictEqual(asset.data, expected(asset.type, low, asset.reader), id);
       seen.add(asset.type);
+      if (asset.type === "SpriteAtlas" && name.includes("/6000.6.")) seen.add("6000.6 atlas");
     }
   }
+  assert.ok(seen.delete("6000.6 atlas"), "no 6000.6 SpriteAtlas was compared");
   // MovieTexture has no fixture (see the synthetic test below).
   assert.deepStrictEqual(
     [...seen].sort(),

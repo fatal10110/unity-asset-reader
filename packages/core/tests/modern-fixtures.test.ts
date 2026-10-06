@@ -1,5 +1,6 @@
 // Format-23 metadata and generic dumps use the independent UnityPy 1.25.4
-// sidecar; texture conversion and the new atlas class layout remain separate.
+// sidecar; the Sprite and SpriteAtlas class readers are checked against it in
+// Sprite.test.ts, and texture conversion remains separate.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
