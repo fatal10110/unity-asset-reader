@@ -753,6 +753,46 @@ test("split alpha: the alpha texture's red is the alpha, merged before the cut",
   assert.equal(decodedTextures.size, 4);
 });
 
+test("split alpha in a variant atlas: the merged texture is what is resized", async () => {
+  // No editor fixture has both, so r_a's atlas entry gets a downscaleMultiplier of 0.5.
+  const { env, sprites } = splitAlpha();
+  const { obj } = sprites.find((s) => s.golden.name === "r_a")!;
+  const { sprite, rect, texture, alphaTexture } = locateSprite(obj, env);
+  assert.equal(rect.downscaleMultiplier, 1);
+  const atlasPointer = sprite.m_SpriteAtlas!;
+  const atlas = env.resolve(atlasPointer, obj);
+  if (atlas.status !== "found") assert.fail("r_a's atlas is in the fixture");
+  const file = env.files.find((f) => !f.path.endsWith(".resS"))!.data;
+  const { x, y, width, height } = rect.textureRect;
+  const at = find(atlas.object, file, new Uint8Array(new Float32Array([x, y, width, height]).buffer));
+  // After textureRect: the multiplier (1.0f) and settingsRaw, within the entry.
+  const tail = new Uint8Array(new Float32Array([1, 0]).buffer);
+  new DataView(tail.buffer).setUint32(4, rect.settingsRaw, true);
+  let multiplier = -1;
+  for (let i = at + 16; i < at + 80 && multiplier < 0; i++) {
+    if (tail.every((b, k) => file[i + k] === b)) multiplier = i;
+  }
+  assert.ok(multiplier > 0, "downscaleMultiplier not found after textureRect");
+  new DataView(file.buffer, file.byteOffset).setFloat32(multiplier, 0.5, true);
+  const variant = locateSprite(obj, env).rect;
+  assert.equal(variant.downscaleMultiplier, 0.5);
+
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  const colour = seed(decodedTextures, texture, (x, y) => [x * 4, y * 4, 9, 0x55]);
+  const alpha = seed(decodedTextures, alphaTexture!, (x, y) => [((x ^ y) * 37) & 0xff, 1, 2, 3]);
+  const whole = new Uint8Array(colour.data);
+  for (let i = 0; i < whole.length; i += 4) whole[i + 3] = alpha.data[i]!;
+  const out = await decodeSprite(obj, env, { decodedTextures });
+  const merged = { ...colour, data: whole };
+  assert.deepStrictEqual(out, cutSprite(merged, sprite, variant, obj.version, false));
+  // Resampled from the merged pixels: not the colour texture's alpha, and not unscaled.
+  assert.notDeepStrictEqual(out, cutSprite(colour, sprite, variant, obj.version, false));
+  assert.notDeepStrictEqual(out, cutSprite(merged, sprite, rect, obj.version, false));
+  // The caller's textures stay as decoded.
+  assert.strictEqual(decodedTextures.get(texture), colour);
+  assert.equal(colour.data[3], 0x55);
+});
+
 test("split alpha: an alpha texture of another size than its texture is refused", async () => {
   const { env, sprites } = splitAlpha();
   const { obj } = sprites.find((s) => s.golden.name === "r_a")!;
