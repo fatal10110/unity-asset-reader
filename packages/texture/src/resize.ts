@@ -1,6 +1,30 @@
-// Resamples like ImageSharp 2.1.3's default Resize, which upstream AssetStudio
-// (AssetStudio.Utility/SpriteHelper.cs, CutImage) runs on a variant atlas.
-// Written from that resize's arithmetic, not translated from its code: see resizeCrop.
+// Derived from SixLabors/ImageSharp src/ImageSharp/Processing/Processors/Transforms/{Resize,Resamplers}/*.cs and helpers @ v2.1.3 (Apache-2.0, © Six Labors): this whole file, files listed below
+//
+// This file is derived from ImageSharp v2.1.3 (https://github.com/SixLabors/ImageSharp,
+// tag v2.1.3), Copyright (c) Six Labors, licensed under the Apache License,
+// Version 2.0 (see LICENSE-APACHE in this package). It is a modified TypeScript
+// translation of parts of these files of that tag:
+//   src/ImageSharp/Processing/Processors/Transforms/Resize/ResizeKernelMap.cs
+//     (`kernels`: Calculate, BuildKernel)
+//   src/ImageSharp/Processing/Processors/Transforms/Resize/ResizeKernel.cs
+//     (`convolve`: ConvolveCore, its scalar path)
+//   src/ImageSharp/Processing/Processors/Transforms/Resize/ResizeWorker.cs and
+//     ResizeProcessor{TPixel}.cs (`resizeCrop`: rows, then columns, premultiplied)
+//   src/ImageSharp/Processing/Processors/Transforms/Resamplers/BicubicResampler.cs
+//     (`bicubic`: GetValue)
+//   src/ImageSharp/Common/Helpers/TolerantMath.cs (`ceilTolerant`, `floorTolerant`)
+//   src/ImageSharp/Common/Helpers/Numerics.cs (Premultiply, UnPremultiply)
+//   src/ImageSharp/PixelFormats/PixelImplementations/Bgra32.cs
+//     (ToVector4, Pack: `premultiplied`, `toByte`)
+// Changes: translated from C# to TypeScript; cut down to the default bicubic
+// Resize of an RGBA image, computing only a crop of the result, with the scalar
+// arithmetic only (no SIMD paths) and without the kernel map's periodic
+// shortcut (PeriodicKernelMap); the memory pools, parallel row workers and
+// spans are replaced by plain arrays.
+// It is kept derived on purpose: upstream AssetStudio
+// (AssetStudio.Utility/SpriteHelper.cs, CutImage) resizes a variant atlas with
+// ImageSharp 2.1.3, and this makes the result match AssetStudio's to the byte.
+// That code is under the Apache License 2.0; see this package's NOTICE.
 
 import type { RgbaImage } from "./convert.js";
 

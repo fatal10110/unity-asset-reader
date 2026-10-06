@@ -101,6 +101,8 @@ export interface SpriteSource {
  * by the multiplier, truncated, with ImageSharp 2.1.3's default bicubic
  * resampling, which this reproduces (only the sprite's pixels are
  * resampled; see `resize.ts` for how ImageSharp's own output varies by CPU).
+ * That resize is derived from ImageSharp's code and is under the Apache
+ * License 2.0 (this package's `NOTICE` and `LICENSE-APACHE`).
  * With an alpha texture, the merged texture is what is resized. With
  * `tightMesh`, a Tight-packed one is masked after that, as upstream masks it.
  *

@@ -307,6 +307,8 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
   © nesrak1).
 - [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) (Apache-2.0, © Six Labors):
   the tight-mesh triangle fill is a modified translation of parts of it.
+- [ImageSharp](https://github.com/SixLabors/ImageSharp) (Apache-2.0, © Six Labors): the
+  variant-atlas resize is a modified translation of parts of it.
 - [`texture2ddecoder-wasm`](https://www.npmjs.com/package/texture2ddecoder-wasm) (MIT): the block
   and Crunch decoding, which is [K0lb3's texture2ddecoder](https://github.com/K0lb3/texture2ddecoder)
   compiled to WASM with [Emscripten](https://github.com/emscripten-core/emscripten).
@@ -316,9 +318,10 @@ The full list, and a comparison with similar npm packages, is in the
 
 ## License
 
-`MIT AND Apache-2.0`. The package is MIT, except the sprite tight-mesh fill in `decodeSprite`. That
-fill is derived from [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) and is
-under the Apache License 2.0. See
+`MIT AND Apache-2.0`. The package is MIT, except the sprite tight-mesh fill and the variant-atlas
+resize in `decodeSprite`. They are derived from
+[ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) and
+[ImageSharp](https://github.com/SixLabors/ImageSharp) and are under the Apache License 2.0. See
 [`NOTICE`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/NOTICE)
 and
 [`LICENSE-APACHE`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/LICENSE-APACHE).

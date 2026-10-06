@@ -194,6 +194,7 @@ copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` 
 | [AssetRipper TypeTreeDumps](https://github.com/AssetRipper/TypeTreeDumps) and [Tpk](https://github.com/AssetRipper/Tpk) (ds5678) | TypeTreeDumps: no license stated; Tpk: MIT | Indirectly: the type tree data in UnityPy's TPK table, which the common-string table and several class readers' version gates were taken from. |
 | [AssetsTools.NET](https://github.com/nesrak1/AssetsTools.NET) (© nesrak1) | MIT | UnityPy's Switch deswizzle, ported into `unity-asset-reader-texture`, is based on its `SwitchSwizzle.cs`. |
 | [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) (© Six Labors) | Apache-2.0 | The sprite tight-mesh triangle fill in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v1.0.0-beta15, the version AssetStudio uses, so the masks match to the pixel. |
+| [ImageSharp](https://github.com/SixLabors/ImageSharp) (© Six Labors) | Apache-2.0 | The sprite variant-atlas resize in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v2.1.3, the version AssetStudio uses, so the resized sprites match to the byte. |
 | [texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (© K0lb3) | MIT | The C++ block and Crunch decoders that `texture2ddecoder-wasm` compiles to WASM (a git submodule). |
 | Codecs inside texture2ddecoder: [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative) (ATC, BCn), [mikunyan](https://github.com/Ishotihadus/mikunyan) (ASTC, ETC, PVRTC), [FP16](https://github.com/Maratyszcza/FP16), [BinomialLLC/crunch](https://github.com/BinomialLLC/crunch), [Unity-Technologies/crunch](https://github.com/Unity-Technologies/crunch) | MIT; MIT; MIT; public domain; zlib | The block decoders, half floats, and Crunch and Unity Crunch unpacking. |
 | [fflate](https://github.com/101arrowz/fflate) | MIT | Runtime dependency of `unity-asset-reader`: gzip and zlib, synchronously. |
@@ -206,8 +207,9 @@ built with the Unity Editor from our own projects ([`fixtures/BUILDING.md`](fixt
 
 ## License
 
-MIT, except the tight-mesh fill of `unity-asset-reader-texture` (`packages/texture`). That code is
-derived from ImageSharp.Drawing and is under Apache-2.0, so that package is `MIT AND Apache-2.0`
+MIT, except the tight-mesh fill and the variant-atlas resize of `unity-asset-reader-texture`
+(`packages/texture`). That code is derived from ImageSharp.Drawing and ImageSharp and is under
+Apache-2.0, so that package is `MIT AND Apache-2.0`
 (see its `NOTICE` and `LICENSE-APACHE`). The upstreams the repo derives from (AssetStudio, UnityPy
 and others) are listed in [`NOTICE`](NOTICE). Each published package ships its own `NOTICE`, which
 is the authoritative one for its tarball.

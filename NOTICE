@@ -41,9 +41,17 @@ ImageSharp.Drawing -- https://github.com/SixLabors/ImageSharp.Drawing
   (Apache License 2.0, full text in packages/texture/LICENSE-APACHE)
   Copyright (c) Six Labors
   The sprite tight-mesh triangle fill in packages/texture/src/sprite.ts is a
-  modified TypeScript translation of parts of it. That code, and only that
-  code, is under the Apache License 2.0, which makes unity-asset-reader-texture
-  "MIT AND Apache-2.0"; the rest of the repository is under the MIT License.
+  modified TypeScript translation of parts of it.
+
+ImageSharp -- https://github.com/SixLabors/ImageSharp
+  (Apache License 2.0, full text in packages/texture/LICENSE-APACHE)
+  Copyright (c) Six Labors
+  The sprite variant-atlas resize in packages/texture/src/resize.ts is a
+  modified TypeScript translation of parts of ImageSharp v2.1.3.
+
+The code derived from ImageSharp.Drawing and ImageSharp, and only that code,
+is under the Apache License 2.0, which makes unity-asset-reader-texture
+"MIT AND Apache-2.0"; the rest of the repository is under the MIT License.
 
 texture2ddecoder -- https://github.com/K0lb3/texture2ddecoder (MIT)
   Copyright (c) K0lb3
