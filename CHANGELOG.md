@@ -24,10 +24,14 @@ to release is in [RELEASING.md](RELEASING.md).
 ### 1.0.2 - Unreleased
 
 - `readSpriteAtlas` reads Unity 6000.6's layout instead of refusing it: no `m_PackedSprites` or
-  `m_PackedSpriteNamesToIndex` (now optional), and every `m_RenderDataMap` entry holds its
-  sprite as `*spriteInstanceData` (`SpriteInstanceData`; `spriteInstanceData` in
-  `SpriteAtlasFields`). Tested with `readSprite` on four Unity 6000.6.4f1 fixtures against
-  UnityPy 1.25.4 (#155).
+  `m_PackedSpriteNamesToIndex`, and every `m_RenderDataMap` entry holds its sprite as
+  `*spriteInstanceData` (`SpriteInstanceData`; `spriteInstanceData` in `SpriteAtlasFields`).
+  Tested with `readSprite` on four Unity 6000.6.4f1 fixtures against UnityPy 1.25.4 (#155).
+  **Type change (breaks type-checked code that reads these fields unchecked):**
+  `SpriteAtlas.m_PackedSprites` / `m_PackedSpriteNamesToIndex` and
+  `SpriteAtlasFields.packedSprites` / `packedSpriteNamesToIndex` are optional (absent from
+  6000.6); `SpriteAtlasFields.renderDataMap` entries are `SpriteAtlasDataFields`. The next
+  release's version is the maintainer's decision; this heading's number does not settle it.
 
 - Read SerializedFile format 23 metadata and generic type-tree dumps, tested against five
   Unity 6000.6.4f1 fixtures. Validate the bounded `mhtt` type-tree blobs and retain support
