@@ -120,7 +120,8 @@ export interface SpriteInfo {
   /**
    * `textureRect` of the render data the pixels are cut by: its atlas entry,
    * or its own `m_RD`. The sprite's area in {@link texture}, in pixels from
-   * the bottom-left corner.
+   * the bottom-left corner; for a variant atlas (a `downscaleMultiplier`
+   * other than 1), in that texture resized by 1 / `downscaleMultiplier`.
    */
   textureRect: Rectf;
   /** `m_Pivot` (Unity 5.4.1p3+), as a fraction of `rect`; the centre (0.5, 0.5) before. */
@@ -206,8 +207,9 @@ export function isImage(asset: Asset): asset is ImageAsset {
  *   editor file or unknown Unity version, a layout that does not hold
  *   together; for a Sprite also what `decodeSprite`'s lookup throws (a
  *   pointer that is null or dangles, a texture or alpha texture of the wrong
- *   class, a sprite its atlas has no entry for, a `textureRect` outside its
- *   texture)
+ *   class, a sprite its atlas has no entry for, a `downscaleMultiplier` that
+ *   resizes its texture to less than a pixel, a `textureRect` outside its
+ *   (resized) texture)
  * @throws {ResourceNotFoundError} for a Sprite whose texture, alpha texture
  *   or atlas is in a SerializedFile that is not loaded
  */

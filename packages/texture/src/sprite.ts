@@ -24,6 +24,7 @@ import type {
 } from "unity-asset-reader";
 import type { RgbaImage } from "./convert.js";
 import { decodeTextureObject } from "./decode.js";
+import { resizeCrop } from "./resize.js";
 
 /** Options of {@link decodeSprite}. */
 export interface DecodeSpriteOptions {
@@ -95,6 +96,16 @@ export interface SpriteSource {
  * textures are decoded and merged whole, before the cut. AssetStudio ignores
  * the alpha texture and returns such a sprite opaque.
  *
+ * A sprite of a variant atlas (`downscaleMultiplier` above 0 and not 1) is
+ * cut from its texture resized first, as upstream does: to its size divided
+ * by the multiplier, truncated, with ImageSharp 2.1.3's default bicubic
+ * resampling, which this reproduces (only the sprite's pixels are
+ * resampled; see `resize.ts` for how ImageSharp's own output varies by CPU).
+ * That resize is derived from ImageSharp's code and is under the Apache
+ * License 2.0 (this package's `NOTICE` and `LICENSE-APACHE`).
+ * With an alpha texture, the merged texture is what is resized. With
+ * `tightMesh`, a Tight-packed one is masked after that, as upstream masks it.
+ *
  * `Rotate90` is turned back the way upstream turns it (ImageSharp
  * `Rotate(270)`). That direction is not verified against Unity's packer: no
  * fixture editor's packer writes `Rotate90`, and UnityPy, which turns the
@@ -104,7 +115,9 @@ export interface SpriteSource {
  * With `options.decodedTextures`, sequential calls reuse their shared atlas
  * (and its alpha texture). The caller owns the map and decides how long to
  * retain its decoded pixels.
- * Without it, every call decodes the texture again.
+ * Without it, every call decodes the texture again. The map holds textures
+ * as decoded, never resized: a variant sprite is resampled from them on
+ * each call.
  *
  * Unlike upstream, which hands back no image or an unmasked one, this throws
  * where the result would be wrong: see below. A sprite whose atlas is loaded
@@ -123,14 +136,14 @@ export interface SpriteSource {
  *   `fileName`), or a texture's data is in a `.resS` that is not
  * @throws {UnsupportedError} what `obj.read()` and `decodeTexture2D` throw,
  *   and: an alpha texture of another size than the texture (kind
- *   `"sprite alpha texture size"`), a `downscaleMultiplier` other than 1 (a variant
- *   atlas; kind `"sprite downscale"`), a packing rotation Unity does not define
+ *   `"sprite alpha texture size"`), a packing rotation Unity does not define
  *   (kind `"sprite packing rotation"`) and, with `tightMesh`, a mesh whose
  *   positions are not 32-bit floats (kind `"sprite vertex format"`)
  * @throws {CorruptError} when the sprite's atlas does not hold its render
  *   data, a pointer is null or points at nothing or at the wrong class, the
- *   rectangle does not lie in the texture, or, with `tightMesh`, the mesh
- *   does not hold together
+ *   `downscaleMultiplier` resizes the texture to less than a pixel, the
+ *   rectangle does not lie in the (resized) texture, or, with `tightMesh`,
+ *   the mesh does not hold together
  * @example
  * await initTexture();
  * for (const obj of env.objects) {
@@ -345,10 +358,11 @@ function sameKey(a: RenderDataKey, b: RenderDataKey): boolean {
 const f32 = Math.fround;
 
 /**
- * Upstream `CutImage`, over a texture already decoded: cut the rectangle out,
- * undo the packing rotation, and, when asked and the packing mode is Tight,
- * clear the pixels outside the sprite's mesh. Internal: exported for the
- * tests, not from the package.
+ * Upstream `CutImage`, over a texture already decoded: resize it for a
+ * variant atlas, cut the rectangle out, undo the packing rotation, and, when
+ * asked and the packing mode is Tight, clear the pixels outside the sprite's
+ * mesh. `image` is not changed. Internal: exported for the tests, not from
+ * the package.
  *
  * Upstream works on the texture with its rows as Unity stores them, bottom
  * row first, and flips the result at the end; so does this, reading the
@@ -370,20 +384,15 @@ export function cutSprite(
   tightMesh: boolean,
 ): RgbaImage {
   const { textureRect: tr, settingsRaw } = rect;
-  const downscale = rect.downscaleMultiplier ?? 0;
-  if (downscale > 0 && downscale !== 1) {
-    // Upstream resizes the texture with ImageSharp's bicubic resampler first.
-    throw new UnsupportedError(
-      "sprite downscale",
-      downscale,
-      "a variant atlas is scaled; resampling it back is not implemented",
-    );
-  }
+  const size = scaledSize(rect, image.width, image.height);
+  const { x, y, width, height } = cutRect(tr, size.width, size.height);
 
-  const { x, y, width, height } = cutRect(tr, image.width, image.height);
-
-  // Rows bottom first, as upstream holds them until its final flip.
-  let out = crop(image, x, y, width, height);
+  // Rows bottom first, as upstream holds them until its final flip. A
+  // variant atlas is resized first; ImageSharp copies a same-size resize.
+  let out =
+    size.width === image.width && size.height === image.height
+      ? crop(image, x, y, width, height)
+      : resizeCrop(image, size.width, size.height, x, y, width, height);
   if ((settingsRaw & 1) === 1) out = unpack(out, (settingsRaw >> 2) & 0xf);
   if (tightMesh && ((settingsRaw >> 1) & 1) === 0) {
     const mask = meshMask(sprite, rect, version, out.width, out.height);
@@ -398,19 +407,52 @@ export function cutSprite(
 
 /**
  * The size {@link cutSprite} cuts out of a `textureWidth x textureHeight`
- * texture, with a `Rotate90` packing turned back. Internal: for `imageInfo`.
+ * texture, resized first for a variant atlas, with a `Rotate90` packing
+ * turned back. Internal: for `imageInfo`.
  *
- * @throws {CorruptError} when the rectangle does not lie in the texture
+ * @throws {CorruptError} when the texture resizes to less than a pixel, or
+ *   the rectangle does not lie in it
  */
 export function spriteSize(
   rect: SpriteRect,
   textureWidth: number,
   textureHeight: number,
 ): { width: number; height: number } {
-  const { width, height } = cutRect(rect.textureRect, textureWidth, textureHeight);
+  const scaled = scaledSize(rect, textureWidth, textureHeight);
+  const { width, height } = cutRect(rect.textureRect, scaled.width, scaled.height);
   const packed = (rect.settingsRaw & 1) === 1;
   const turned = packed && ((rect.settingsRaw >> 2) & 0xf) === SpritePackingRotation.Rotate90;
   return turned ? { width: height, height: width } : { width, height };
+}
+
+/**
+ * The size upstream resizes a sprite's texture to before cutting it: for a
+ * `downscaleMultiplier` above 0 and not 1 (a variant atlas, scaled down by
+ * it), the texture's size divided by it in floats and truncated, as
+ * `(int)(m_Width / downscaleMultiplier)`; otherwise the texture's own. 0, the
+ * value before 2017.1, means none.
+ *
+ * @throws {CorruptError} when that is not at least one pixel, or past 32 bits
+ */
+function scaledSize(
+  rect: SpriteRect,
+  width: number,
+  height: number,
+): { width: number; height: number } {
+  const multiplier = rect.downscaleMultiplier ?? 0;
+  if (!(multiplier > 0) || multiplier === 1) return { width, height };
+  const scaled = {
+    width: Math.trunc(f32(width / multiplier)),
+    height: Math.trunc(f32(height / multiplier)),
+  };
+  const { width: w, height: h } = scaled;
+  if (!(w >= 1 && h >= 1 && Math.max(w, h) < 2 ** 31)) {
+    throw new CorruptError(
+      `sprite downscaleMultiplier ${multiplier} resizes its ${width} x ${height} texture to ` +
+        `${w} x ${h}`,
+    );
+  }
+  return scaled;
 }
 
 /**

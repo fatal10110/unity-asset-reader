@@ -1,6 +1,7 @@
 // Sprites (#34): the crop, packing rotation and tight-mesh mask, checked against
 // the oracle's sprite goldens (R12), AssetStudio's own CutImage where the two
 // differ (plan §6), and the fixture's own pixels, which encode where they are.
+// A variant atlas' resize (#153) is checked against AssetStudio's CutImage.
 
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
@@ -27,11 +28,13 @@ import {
 } from "../../../fixtures/helpers.js";
 import { convertPlain, type RgbaImage } from "../src/convert.js";
 import { decodeTexture2D, initTexture } from "../src/decode.js";
+import { imageInfo } from "../src/image.js";
 import {
   cutSprite,
   decodeSprite,
   findSpriteSource,
   locateSprite,
+  spriteSize,
   type SpriteRect,
 } from "../src/sprite.js";
 
@@ -340,15 +343,49 @@ test("a textureRect outside its texture throws CorruptError", () => {
   assert.deepEqual([clipped.width, clipped.height], [4, 8]);
 });
 
-test("a variant atlas' downscaleMultiplier is refused: resampling it is not implemented", () => {
-  assert.throws(
-    () => cut({ downscaleMultiplier: 0.5 }),
-    (err: unknown) =>
-      err instanceof UnsupportedError && err.kind === "sprite downscale" && err.found === 0.5,
-  );
-  // 1, and upstream's 0 before 2017.1, mean none.
-  cut({ downscaleMultiplier: 1 });
-  cut({ downscaleMultiplier: 0 });
+test("a downscaleMultiplier of 1, 0 or below, or that keeps the size, does not resample", () => {
+  const plain = stored(cut({}, base.sprite, false));
+  // 1, upstream's 0 before 2017.1, and what upstream's `> 0f` check skips, mean none.
+  for (const downscaleMultiplier of [1, 0, -0.5, NaN]) {
+    assert.equal(stored(cut({ downscaleMultiplier }, base.sprite, false)), plain);
+  }
+  // A size that truncates back to the texture's: ImageSharp copies the pixels as they are.
+  const { width } = base.image;
+  const same = Math.fround(width / (width + 0.5));
+  assert.equal(Math.trunc(Math.fround(width / same)), width);
+  assert.equal(stored(cut({ downscaleMultiplier: same }, base.sprite, false)), plain);
+  // Resampling changes the pixels of the same rectangle.
+  assert.notEqual(stored(cut({ downscaleMultiplier: 0.75 }, base.sprite, false)), plain);
+});
+
+test("the resized size divides in 32-bit floats, as upstream's int / float does", () => {
+  // 64 / 0.8f is 80 in floats; in doubles it is 79.99999880790713, which truncates to 79.
+  const m = Math.fround(0.8);
+  assert.equal(Math.trunc(64 / m), 79);
+  const rect: SpriteRect = {
+    ...base.rect,
+    textureRect: { x: 0, y: 0, width: 80, height: 80 },
+    settingsRaw: 0,
+    downscaleMultiplier: m,
+  };
+  assert.deepEqual(spriteSize(rect, 64, 64), { width: 80, height: 80 });
+  const image = { data: new Uint8Array(64 * 64 * 4).fill(255), width: 64, height: 64 };
+  const out = cutSprite(image, base.sprite, rect, base.obj.version, false);
+  assert.deepEqual([out.width, out.height], [80, 80]);
+  // 1024 / 0.2f likewise: 5120, not 5119.
+  const wide = { ...rect, textureRect: { x: 0, y: 0, width: 5120, height: 1 } };
+  assert.equal(spriteSize({ ...wide, downscaleMultiplier: Math.fround(0.2) }, 1024, 1).width, 5120);
+});
+
+test("a downscaleMultiplier that resizes the texture to nothing throws CorruptError", () => {
+  for (const downscaleMultiplier of [1e6, Infinity]) {
+    assert.throws(
+      () => cut({ downscaleMultiplier }),
+      (err: unknown) =>
+        err instanceof CorruptError && /downscaleMultiplier .* to 0 x 0/.test(err.message),
+    );
+  }
+  assert.throws(() => cut({ downscaleMultiplier: 1e-30 }), /downscaleMultiplier/);
 });
 
 test("a packing rotation Unity does not define is refused, unless the sprite is not packed", () => {
@@ -500,7 +537,130 @@ test("an atlas texture in a .resS that is not loaded throws ResourceNotFoundErro
   assert.throws(() => findSpriteSource(sprite, env), ResourceNotFoundError);
 });
 
+// --- variant atlases: resized as AssetStudio resizes them (#153) ----------------------
+
+/**
+ * A half-scale variant SpriteAtlas (`fixtures/BUILDING.md` sections 14 and 15):
+ * its two sprites' entries have `downscaleMultiplier` 0.5 on a 32x32 texture.
+ * UnityPy ignores the multiplier, so the golden carries AssetStudio's executed
+ * `CutImage` result (ImageSharp 2.1.3 bicubic resize, rectangle path) as
+ * `assetStudioCrossCheck`, rows bottom first like the goldens.
+ */
+const VARIANT = "editor/2019.4.41f2/variant/sprites";
+
+type VariantGolden = GoldenSprite & {
+  assetStudioCrossCheck?: { width: number; height: number; rgbaSha256: string };
+};
+
+const VARIANTS = fixtureSprites(VARIANT);
+
+/** AssetStudio's image of a variant fixture sprite. */
+function assetStudio(s: FixtureSprite): { width: number; height: number; rgbaSha256: string } {
+  const want = (s.golden as VariantGolden).assetStudioCrossCheck;
+  assert.ok(want, `${s.golden.name}: no AssetStudio cross-check`);
+  return want;
+}
+
+test("a variant sprite is cut from its texture resized as AssetStudio does, to the byte", () => {
+  assert.deepEqual(VARIANTS.map((s) => s.golden.name).sort(), ["r_a", "r_b"]);
+  for (const s of VARIANTS) {
+    const want = assetStudio(s);
+    assert.equal(s.rect.downscaleMultiplier, 0.5);
+    assert.deepEqual([s.image.width, s.image.height], [32, 32]);
+    // Packed as rectangles: tightMesh leaves them as they are.
+    for (const tight of [false, true]) {
+      const out = cutSprite(s.image, s.sprite, s.rect, s.obj.version, tight);
+      assert.deepEqual([out.width, out.height], [want.width, want.height], s.golden.name);
+      assert.equal(stored(out), want.rgbaSha256, s.golden.name);
+    }
+    // UnityPy crops the texture unscaled; that is not the answer.
+    assert.notEqual(s.golden.rgbaSha256, want.rgbaSha256);
+  }
+});
+
+test("a tight variant sprite is masked after the resize and cut, as upstream orders them", () => {
+  let cleared = 0;
+  for (const s of VARIANTS) {
+    // The whole resized texture: 64x64, through the same resampling.
+    const all = { x: 0, y: 0, width: 64, height: 64 };
+    const resized = cutSprite(s.image, s.sprite, { ...s.rect, textureRect: all, settingsRaw: 2 },
+      s.obj.version, false);
+    assert.deepEqual([resized.width, resized.height], [64, 64]);
+    // Only the sprite's pixels are resampled, and they are the whole resize's.
+    const unscaled = { ...s.rect, downscaleMultiplier: 1 };
+    assert.equal(stored(cutSprite(resized, s.sprite, unscaled, s.obj.version, false)),
+      assetStudio(s).rgbaSha256);
+    // Packed Tight: the mask is the same mesh over the cut of the resized texture.
+    const tight = { ...s.rect, settingsRaw: s.rect.settingsRaw & ~2 };
+    const out = cutSprite(s.image, s.sprite, tight, s.obj.version, true);
+    const want = cutSprite(resized, s.sprite, { ...tight, downscaleMultiplier: 1 }, s.obj.version,
+      true);
+    assert.equal(stored(out), stored(want), s.golden.name);
+    const rect = cutSprite(s.image, s.sprite, s.rect, s.obj.version, false);
+    for (let i = 3; i < rect.data.length; i += 4) {
+      if (rect.data[i] !== 0 && out.data[i] === 0) cleared++;
+    }
+  }
+  assert.ok(cleared > 0, "r_b's mesh leaves part of its rectangle out");
+});
+
+test("imageInfo gives a variant sprite the size it is cut at, from the resized texture", () => {
+  const env = VARIANTS[0]!.env;
+  for (const asset of env.assets("Sprite")) {
+    const s = VARIANTS.find((x) => x.obj === asset.reader)!;
+    const info = imageInfo(asset);
+    assert.deepEqual([info.width, info.height], [assetStudio(s).width, assetStudio(s).height]);
+    assert.deepEqual([info.sprite.texture.width, info.sprite.texture.height], [32, 32]);
+  }
+});
+
+test("decodeSprite resizes per call; the caller's map keeps the texture as decoded", async () => {
+  // A map holding the decoded texture: decodeSprite takes it from there, without the WASM.
+  const { env } = VARIANTS[0]!;
+  const texture = locateSprite(VARIANTS[0]!.obj, env).texture;
+  const image = VARIANTS[0]!.image;
+  const before = sha256(image.data);
+  const decodedTextures = new Map<ObjectReader, RgbaImage>([[texture, image]]);
+  for (const s of VARIANTS) {
+    assert.strictEqual(locateSprite(s.obj, env).texture, texture, "one atlas texture");
+    const out = await decodeSprite(s.obj, env, { decodedTextures });
+    assert.equal(stored(out), assetStudio(s).rgbaSha256, s.golden.name);
+  }
+  // Nothing resized went into the map: it still holds the texture, unchanged.
+  assert.equal(decodedTextures.size, 1);
+  assert.strictEqual(decodedTextures.get(texture), image);
+  assert.deepEqual([image.width, image.height], [32, 32]);
+  assert.equal(sha256(image.data), before);
+  // Each sprite's own multiplier applies: r_a's rectangle is not even in the unscaled
+  // texture, and another multiplier resamples the same texture to other pixels.
+  const r = VARIANTS.find((s) => s.golden.name === "r_a")!;
+  assert.throws(
+    () => cutSprite(image, r.sprite, { ...r.rect, downscaleMultiplier: 1 }, r.obj.version, false),
+    CorruptError,
+  );
+  const quarter = cutSprite(image, r.sprite, { ...r.rect, downscaleMultiplier: 0.25 },
+    r.obj.version, false);
+  assert.deepEqual([quarter.width, quarter.height], [10, 8]);
+  assert.notEqual(stored(quarter), assetStudio(r).rgbaSha256);
+});
+
 // --- decodeSprite, end to end with the WASM decoder ------------------------------------
+
+wasmTest(`${VARIANT}: decodeSprite decodes the atlas once and resizes it per sprite`, async () => {
+  const env = load([{ name: VARIANT, data: loadFixture(VARIANT) }]);
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  const sprites = env.objects.filter((o) => o.type === ClassID.Sprite);
+  assert.equal(sprites.length, 2);
+  for (const obj of sprites) {
+    const s = VARIANTS.find((x) => x.obj.pathId === obj.pathId)!;
+    assert.equal(stored(await decodeSprite(obj, env)), assetStudio(s).rgbaSha256, s.golden.name);
+    const cached = await decodeSprite(obj, env, { decodedTextures });
+    assert.equal(stored(cached), assetStudio(s).rgbaSha256, s.golden.name);
+  }
+  assert.equal(decodedTextures.size, 1);
+  const [texture] = decodedTextures.values();
+  assert.deepEqual([texture!.width, texture!.height], [32, 32]);
+});
 
 for (const fixture of FIXTURES) {
   wasmTest(`${fixture}: decodeSprite(obj, env) gives every sprite its expected image`, async () => {
@@ -591,6 +751,47 @@ test("split alpha: the alpha texture's red is the alpha, merged before the cut",
   // Every atlas entry, of two atlases with a colour and an alpha texture each.
   assert.equal(merged, 17);
   assert.equal(decodedTextures.size, 4);
+});
+
+test("split alpha in a variant atlas: the merged texture is what is resized", async () => {
+  // No editor fixture has both, so r_a's atlas entry gets a downscaleMultiplier of 0.5.
+  const { env, sprites } = splitAlpha();
+  const { obj } = sprites.find((s) => s.golden.name === "r_a")!;
+  const { sprite, rect, texture, alphaTexture } = locateSprite(obj, env);
+  assert.equal(rect.downscaleMultiplier, 1);
+  const atlasPointer = sprite.m_SpriteAtlas!;
+  const atlas = env.resolve(atlasPointer, obj);
+  if (atlas.status !== "found") assert.fail("r_a's atlas is in the fixture");
+  const file = env.files.find((f) => !f.path.endsWith(".resS"))!.data;
+  const { x, y, width, height } = rect.textureRect;
+  const floats = new Float32Array([x, y, width, height]);
+  const at = find(atlas.object, file, new Uint8Array(floats.buffer));
+  // After textureRect: the multiplier (1.0f) and settingsRaw, within the entry.
+  const tail = new Uint8Array(new Float32Array([1, 0]).buffer);
+  new DataView(tail.buffer).setUint32(4, rect.settingsRaw, true);
+  let multiplier = -1;
+  for (let i = at + 16; i < at + 80 && multiplier < 0; i++) {
+    if (tail.every((b, k) => file[i + k] === b)) multiplier = i;
+  }
+  assert.ok(multiplier > 0, "downscaleMultiplier not found after textureRect");
+  new DataView(file.buffer, file.byteOffset).setFloat32(multiplier, 0.5, true);
+  const variant = locateSprite(obj, env).rect;
+  assert.equal(variant.downscaleMultiplier, 0.5);
+
+  const decodedTextures = new Map<ObjectReader, RgbaImage>();
+  const colour = seed(decodedTextures, texture, (x, y) => [x * 4, y * 4, 9, 0x55]);
+  const alpha = seed(decodedTextures, alphaTexture!, (x, y) => [((x ^ y) * 37) & 0xff, 1, 2, 3]);
+  const whole = new Uint8Array(colour.data);
+  for (let i = 0; i < whole.length; i += 4) whole[i + 3] = alpha.data[i]!;
+  const out = await decodeSprite(obj, env, { decodedTextures });
+  const merged = { ...colour, data: whole };
+  assert.deepStrictEqual(out, cutSprite(merged, sprite, variant, obj.version, false));
+  // Resampled from the merged pixels: not the colour texture's alpha, and not unscaled.
+  assert.notDeepStrictEqual(out, cutSprite(colour, sprite, variant, obj.version, false));
+  assert.notDeepStrictEqual(out, cutSprite(merged, sprite, rect, obj.version, false));
+  // The caller's textures stay as decoded.
+  assert.strictEqual(decodedTextures.get(texture), colour);
+  assert.equal(colour.data[3], 0x55);
 });
 
 test("split alpha: an alpha texture of another size than its texture is refused", async () => {

@@ -188,7 +188,7 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 60
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
 | Alpha texture (Android ETC1 split alpha, 2019.4.41f2 atlases) | Its red channel is the sprite's alpha, as UnityPy merges it; one of another size than its texture is refused |
-| Variant atlas (`downscaleMultiplier` other than 1) | Refused |
+| Variant atlas (`downscaleMultiplier` other than 1) | Texture resized as AssetStudio resizes it (ImageSharp 2.1.3 bicubic), then cut; matches AssetStudio's image to the byte (2019.4 half-scale fixture) |
 
 ## Texture formats
 
@@ -250,8 +250,7 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 - `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
   Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
 - Textures built for PS4 or PS5.
-- Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture, and sprites
-  of a variant atlas (a `downscaleMultiplier` other than 1).
+- Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
 - With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
 - A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
   6000.6 bundle are not `Sprite` objects at all, so `images` does not list them yet; planned
@@ -308,6 +307,8 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
   © nesrak1).
 - [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) (Apache-2.0, © Six Labors):
   the tight-mesh triangle fill is a modified translation of parts of it.
+- [ImageSharp](https://github.com/SixLabors/ImageSharp) (Apache-2.0, © Six Labors): the
+  variant-atlas resize is a modified translation of parts of it.
 - [`texture2ddecoder-wasm`](https://www.npmjs.com/package/texture2ddecoder-wasm) (MIT): the block
   and Crunch decoding, which is [K0lb3's texture2ddecoder](https://github.com/K0lb3/texture2ddecoder)
   compiled to WASM with [Emscripten](https://github.com/emscripten-core/emscripten).
@@ -317,9 +318,10 @@ The full list, and a comparison with similar npm packages, is in the
 
 ## License
 
-`MIT AND Apache-2.0`. The package is MIT, except the sprite tight-mesh fill in `decodeSprite`. That
-fill is derived from [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) and is
-under the Apache License 2.0. See
+`MIT AND Apache-2.0`. The package is MIT, except the sprite tight-mesh fill and the variant-atlas
+resize in `decodeSprite`. They are derived from
+[ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) and
+[ImageSharp](https://github.com/SixLabors/ImageSharp) and are under the Apache License 2.0. See
 [`NOTICE`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/NOTICE)
 and
 [`LICENSE-APACHE`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/LICENSE-APACHE).
