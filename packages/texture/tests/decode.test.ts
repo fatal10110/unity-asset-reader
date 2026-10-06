@@ -394,7 +394,7 @@ wasmTest("PVRTC whose block counts are not powers of two is a CorruptError", asy
 });
 
 wasmTest("DXT3 and formats nothing decodes are an UnsupportedError", async () => {
-  for (const format of [TextureFormat.DXT3, TextureFormat.RG16, 1000]) {
+  for (const format of [TextureFormat.DXT3, 75, 1000]) {
     await assert.rejects(
       decodeTexture2D(texture(format, 4, 4, new Uint8Array(64))),
       (e: Error) =>
@@ -414,6 +414,19 @@ wasmTest("plain formats go through convertPlain", async () => {
     decodeTexture2D(texture(TextureFormat.YUY2, 3, 1, new Uint8Array(8))),
     (e: Error) => e instanceof UnsupportedError && e.kind === "YUY2 texture width",
   );
+});
+
+wasmTest("#108 fixture formats decode through the public API with top row first", async () => {
+  const textures = fixtureTextures("editor/2019.4.41f2/more-plain/textures");
+  assert.equal(textures.length, 5);
+  for (const t of textures) {
+    const expected = t.golden.assetStudioCrossCheck?.rgbaSha256 ?? t.golden.rgbaSha256;
+    assert.ok(expected, t.golden.name);
+    const out = await decodeTexture2D(t.input);
+    assert.equal(out.width, t.input.m_Width);
+    assert.equal(out.height, t.input.m_Height);
+    assert.equal(sha256(reverseRows(out.data, out.width)), expected, t.golden.name);
+  }
 });
 
 wasmTest("a texture 0 pixels wide or high is an empty image", async () => {

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { ClassID, CorruptError, load, UnsupportedError } from "unity-asset-reader";
 import {
@@ -6,6 +7,7 @@ import {
   golden,
   loadFixture,
   sha256,
+  type Golden,
   type GoldenTexture,
 } from "../../../fixtures/helpers.js";
 import { convertPlain, halfToFloat } from "../src/convert.js";
@@ -29,12 +31,12 @@ interface FixtureTexture {
  * `image data` when it is inline, else `m_StreamData`'s slice of the `.resS`
  * node (neither the class reader nor the resolver exists yet).
  */
-function fixtureTextures(): FixtureTexture[] {
+function fixtureTextures(fixtures = fixtureNames(), getGolden = golden): FixtureTexture[] {
   const out: FixtureTexture[] = [];
-  for (const fixture of fixtureNames()) {
+  for (const fixture of fixtures) {
     // Block and Crunch formats go through texture2ddecoder-wasm: decode.test.ts (#32).
     if (fixture.includes("/block/")) continue;
-    const serialized = Object.values(golden(fixture).serialized ?? {});
+    const serialized = Object.values(getGolden(fixture).serialized ?? {});
     if (!serialized.some((s) => s.textures)) continue;
     const env = load([{ name: fixture, data: loadFixture(fixture) }]);
     for (const obj of env.objects.filter((o) => o.type === ClassID.Texture2D)) {
@@ -71,6 +73,12 @@ function fixtureTextures(): FixtureTexture[] {
 
 const TEXTURES = fixtureTextures();
 const PLAIN = "editor/6000.3.25f1/plain/textures";
+const modern = JSON.parse(readFileSync(
+  new URL("../../../fixtures/modern-goldens.json", import.meta.url), "utf8",
+)) as { fixtures: Record<string, Golden> };
+const MODERN_TEXTURES = fixtureTextures(
+  ["editor/6000.6.4f1/more-plain/textures"], (name) => modern.fixtures[name]!,
+);
 
 /**
  * RGBA sha256 of AssetStudio's own decode methods (`Texture2DConverter.cs`
@@ -127,7 +135,7 @@ test("image bytes, inline or sliced from .resS, match the golden", () => {
 });
 
 test("RGBA sha256 = UnityPy golden where the oracle and AssetStudio agree", () => {
-  // Block formats and the pending #108 formats need their own decoders.
+  // The original #31 formats; #108's additional formats are checked below.
   const agreed = TEXTURES.filter((t) => t.format <= 22 && t.golden.rgbaSha256 && !t.golden.oracleNote);
   // Preserve coverage of all six agreed plain formats as fixtures are added.
   assert.deepEqual([...new Set(agreed.map((t) => t.format))].sort((a, b) => a - b),
@@ -137,11 +145,35 @@ test("RGBA sha256 = UnityPy golden where the oracle and AssetStudio agree", () =
   }
 });
 
-test("2019 more-plain formats remain explicit #108 conversion refusals", () => {
-  const pending = TEXTURES.filter((t) => t.fixture === "editor/2019.4.41f2/more-plain/textures");
-  assert.equal(pending.length, 5);
-  for (const texture of pending) {
-    assert.throws(() => decode(texture), UnsupportedError);
+for (const textures of [
+  TEXTURES.filter((t) => t.fixture === "editor/2019.4.41f2/more-plain/textures"),
+  MODERN_TEXTURES.filter((t) => t.format <= 74),
+]) {
+  test(`${textures[0]!.fixture}: all five #108 formats have oracle coverage`, () => {
+    assert.deepEqual(textures.map((t) => t.format).sort((a, b) => a - b), [62, 63, 72, 73, 74]);
+  });
+  for (const t of textures) {
+    test(`${t.fixture} ${t.golden.name}: RGBA equals the independent oracle`, () => {
+      const reference = t.golden.assetStudioCrossCheck;
+      if (t.golden.oracleError || t.golden.oracleNote) {
+        assert.equal(reference?.verdict, "AssetStudio");
+        assert.ok(reference?.rgbaSha256, "a failing or conflicting oracle needs a cross-check");
+      }
+      const expected = reference?.rgbaSha256 ?? t.golden.rgbaSha256;
+      assert.ok(expected, "no independent pixel hash");
+      assert.equal(sha256(t.image), t.golden.imageSha256);
+      assert.equal(sha256(decode(t)), expected);
+    });
+  }
+}
+
+test("signed plain fixture formats remain UnsupportedError, with the found format", () => {
+  const signed = MODERN_TEXTURES.filter((t) => t.format >= 75);
+  assert.deepEqual(signed.map((t) => t.format).sort((a, b) => a - b),
+    [75, 76, 77, 78, 79, 80, 81, 82]);
+  for (const t of signed) {
+    assert.throws(() => decode(t), (e: unknown) =>
+      e instanceof UnsupportedError && e.kind === "texture format" && e.found === t.format);
   }
 });
 
@@ -258,6 +290,29 @@ test("R16: (c * 255 + 32895) >> 16, rounding rather than keeping the high byte",
   assert.ok(r.every((v, i) => (i % 4 === 3 ? v === 255 : i % 4 === 0 || v === 0)));
 });
 
+for (const [name, format, data, expected] of [
+  ["R8", 63, new Uint8Array([0, 255]), [0, 0, 0, 255, 255, 0, 0, 255]],
+  ["RG16", 62, new Uint8Array([1, 2, 3, 4]), [1, 2, 0, 255, 3, 4, 0, 255]],
+  ["RG32", 72, u16(0, 65535, 129, 65280), [0, 255, 0, 255, 1, 254, 0, 255]],
+  ["RGB48", 73, u16(128, 129, 32768, 65535, 0, 65280), [0, 1, 128, 255, 255, 0, 254, 255]],
+  ["RGBA64", 74, u16(128, 129, 32768, 65280, 65535, 0, 257, 32767),
+    [0, 1, 128, 254, 255, 0, 1, 127]],
+] as const) {
+  test(`${name}: channel order, rounding, offset views and first mip only`, () => {
+    const backing = new Uint8Array([0xee, ...data, 0xdd]);
+    const input = backing.subarray(1);
+    const out = convertPlain(input, 2, 1, format);
+    assert.deepEqual([...out.data], expected);
+    assert.deepEqual([...input], [...data, 0xdd]);
+    out.data.fill(0);
+    assert.deepEqual([...input], [...data, 0xdd], "output owns its pixels");
+    assert.deepEqual(convertPlain(new Uint8Array(), 0, 0, format).data, new Uint8Array());
+    assert.throws(() => convertPlain(data.subarray(0, data.length - 1), 2, 1, format),
+      (e: unknown) => e instanceof CorruptError &&
+        e.message.includes(`${data.length - 1} bytes, 2 x 1 needs ${data.length}`));
+  });
+}
+
 test("half-float decode per Half.cs: normals, subnormals, zero signs, infinities, NaN", () => {
   assert.equal(halfToFloat(0x3c00), 1);
   assert.equal(halfToFloat(0xc000), -2);
@@ -341,7 +396,7 @@ test("a 0 x 0 texture converts to an empty image", () => {
 });
 
 test("block, Crunch and unknown formats throw UnsupportedError naming the format", () => {
-  for (const format of [10, 12, 28, 47, 63, 0, 999]) {
+  for (const format of [10, 12, 28, 47, 66, 75, 0, 999]) {
     assert.throws(
       () => convertPlain(new Uint8Array(64), 4, 4, format),
       (e: unknown) =>

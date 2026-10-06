@@ -144,6 +144,8 @@ export interface GoldenTexture {
   oracleError?: string;
   /** Where UnityPy's RGBA is known to differ from AssetStudio's, and the verdict. */
   oracleNote?: string;
+  /** Executed AssetStudio result for a format UnityPy cannot decode or gets wrong. */
+  assetStudioCrossCheck?: { verdict: string; rgbaSha256: string };
 }
 
 export interface Golden {

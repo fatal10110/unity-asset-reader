@@ -39,14 +39,20 @@ const BYTES_PER_PIXEL: ReadonlyMap<number, number> = new Map([
   [TextureFormat.RGBAFloat, 16],
   [TextureFormat.YUY2, 2], // 4 bytes per two pixels
   [TextureFormat.RGB9e5Float, 4],
+  [TextureFormat.R8, 1],
+  [TextureFormat.RG16, 2],
+  [TextureFormat.RG32, 4],
+  [TextureFormat.RGB48, 6],
+  [TextureFormat.RGBA64, 8],
 ]);
 
 /**
  * Convert the first mip level of an uncompressed ("plain") texture to RGBA8.
  *
  * Covers Alpha8, RGB24, RGBA32, ARGB32, BGRA32, RGB565, ARGB4444, RGBA4444,
- * R16, RHalf, RGHalf, RGBAHalf, RFloat, RGFloat, RGBAFloat, RGB9e5Float and
- * YUY2 - the formats upstream decodes in C#, not through the block decoder.
+ * R8, R16, RG16, RG32, RGB48, RGBA64, RHalf, RGHalf, RGBAHalf, RFloat, RGFloat,
+ * RGBAFloat, RGB9e5Float and YUY2 - the formats upstream decodes in C#, not
+ * through the block decoder.
  * Channels a format lacks are 0 (colour) or 255 (alpha); Alpha8's colour is
  * white. Half and float channels are scaled by 255, rounded half to even and
  * clamped to 0..255, so HDR values saturate and NaN becomes 0.
@@ -136,6 +142,24 @@ export function convertPlain(
       break;
     case TextureFormat.R16:
       for (let i = 0; i < pixels; i++) put(out, i, downscale16(u16(i * 2)), 0, 0, 255);
+      break;
+    case TextureFormat.R8:
+      for (let i = 0; i < pixels; i++) put(out, i, data[i]!, 0, 0, 255);
+      break;
+    case TextureFormat.RG16:
+      for (let i = 0; i < pixels; i++) {
+        put(out, i, data[i * 2]!, data[i * 2 + 1]!, 0, 255);
+      }
+      break;
+    case TextureFormat.RG32:
+    case TextureFormat.RGB48:
+    case TextureFormat.RGBA64:
+      for (let i = 0; i < pixels; i++) {
+        const o = i * bpp;
+        put(out, i, downscale16(u16(o)), downscale16(u16(o + 2)),
+          bpp >= 6 ? downscale16(u16(o + 4)) : 0,
+          bpp === 8 ? downscale16(u16(o + 6)) : 255);
+      }
       break;
     case TextureFormat.RGBA4444: // 16-bit little endian, R in the top nibble, A in the bottom
       for (let i = 0; i < pixels; i++) {

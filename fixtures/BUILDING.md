@@ -1238,7 +1238,7 @@ main golden set until the new Sprite/SpriteAtlas layouts and texture conversion 
 
 | Folder / bundle | Content | Evidence / remaining work |
 |---|---|---|
-| `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 and eight signed variants; #108 conversion still required |
+| `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
 | `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry |
 | `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; bicubic cross-check and decoder still required |
 | `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
