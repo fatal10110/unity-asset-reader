@@ -34,6 +34,7 @@ import {
   decodeSprite,
   findSpriteSource,
   locateSprite,
+  spriteSize,
   type SpriteRect,
 } from "../src/sprite.js";
 
@@ -355,6 +356,25 @@ test("a downscaleMultiplier of 1, 0 or below, or that keeps the size, does not r
   assert.equal(stored(cut({ downscaleMultiplier: same }, base.sprite, false)), plain);
   // Resampling changes the pixels of the same rectangle.
   assert.notEqual(stored(cut({ downscaleMultiplier: 0.75 }, base.sprite, false)), plain);
+});
+
+test("the resized size divides in 32-bit floats, as upstream's int / float does", () => {
+  // 64 / 0.8f is 80 in floats; in doubles it is 79.99999880790713, which truncates to 79.
+  const m = Math.fround(0.8);
+  assert.equal(Math.trunc(64 / m), 79);
+  const rect: SpriteRect = {
+    ...base.rect,
+    textureRect: { x: 0, y: 0, width: 80, height: 80 },
+    settingsRaw: 0,
+    downscaleMultiplier: m,
+  };
+  assert.deepEqual(spriteSize(rect, 64, 64), { width: 80, height: 80 });
+  const image = { data: new Uint8Array(64 * 64 * 4).fill(255), width: 64, height: 64 };
+  const out = cutSprite(image, base.sprite, rect, base.obj.version, false);
+  assert.deepEqual([out.width, out.height], [80, 80]);
+  // 1024 / 0.2f likewise: 5120, not 5119.
+  const wide = { ...rect, textureRect: { x: 0, y: 0, width: 5120, height: 1 } };
+  assert.equal(spriteSize({ ...wide, downscaleMultiplier: Math.fround(0.2) }, 1024, 1).width, 5120);
 });
 
 test("a downscaleMultiplier that resizes the texture to nothing throws CorruptError", () => {
