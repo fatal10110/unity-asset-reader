@@ -175,9 +175,9 @@ test("reads script types and ref types of the MonoBehaviour fixture", () => {
 
 // --- unhappy paths ------------------------------------------------------------
 
-test("refuses a format version above 22 as unsupported", () => {
+test("refuses a format version above 23 as unsupported", () => {
   const data = node(FORMAT_22.name, MAIN_CAB).slice();
-  new DataView(data.buffer).setUint32(8, 23);
+  new DataView(data.buffer).setUint32(8, 24);
   assert.throws(() => readSerializedFile(data), UnsupportedError);
 });
 

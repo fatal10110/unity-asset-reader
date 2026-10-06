@@ -1228,13 +1228,13 @@ Scope: Unity 2019 and newer. Unity 5.x layouts are outside this fixture task.
 The existing 2019.4, 2020.3 and 6000.3 bundles are preserved.
 
 These Windows64 builds write **SerializedFile format 23**, even for plain
-textures. Our reader currently supports formats 2-22 and refuses 23.
+textures. Core reads their metadata and generic type-tree dumps (#223).
 UnityPy **1.25.4** reads these files; 1.25.3 fails in the type-tree metadata.
 They are therefore candidate fixtures, with independent goldens in
 `modern-goldens.json`, separate from the supported-fixture `goldens.json`.
 `scripts/make-goldens.py` excludes the sidecar's candidate keys; it continues
 using UnityPy 1.25.3 for the existing fixtures. Do not add the candidates to the
-supported set until format 23 and the new Sprite/SpriteAtlas layouts are ported.
+main golden set until the new Sprite/SpriteAtlas layouts and texture conversion are ported.
 
 | Folder / bundle | Content | Evidence / remaining work |
 |---|---|---|

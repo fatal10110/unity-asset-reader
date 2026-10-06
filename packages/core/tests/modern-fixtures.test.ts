@@ -1,18 +1,50 @@
-// Format-23 fixtures are candidate data for #108, #153, #155 and #160.
-// Check their container bytes against the independent UnityPy oracle while
-// the SerializedFile reader still refuses the format (#155 prerequisite).
+// Format-23 metadata and generic dumps use the independent UnityPy 1.25.4
+// sidecar; texture conversion and the new atlas class layout remain separate.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
-import { loadFixture } from "../../../fixtures/helpers.js";
+import { loadFixture, type Golden, type GoldenType } from "../../../fixtures/helpers.js";
 import { readBundle } from "../src/bundle/BundleFile.js";
-import { UnsupportedError } from "../src/errors.js";
+import { load } from "../src/env.js";
+import { ObjectReader } from "../src/serialized/ObjectReader.js";
 import { readSerializedFile } from "../src/serialized/SerializedFile.js";
+import type { SerializedType } from "../src/serialized/TypeTree.js";
 
-interface CandidateGolden {
-  files: Record<string, { size: number; sha256: string }>;
-  serialized: Record<string, { formatVersion: number; unityVersion: string }>;
+function asGolden(type: SerializedType): GoldenType {
+  const hex = (bytes: Uint8Array | null) => bytes && Buffer.from(bytes).toString("hex");
+  return {
+    classId: type.classId,
+    isStrippedType: type.isStrippedType,
+    scriptTypeIndex: type.scriptTypeIndex,
+    scriptId: hex(type.scriptId),
+    oldTypeHash: hex(type.oldTypeHash),
+    typeDependencies: type.typeDependencies,
+    nodes: type.nodes?.map((n) => [n.level, n.type, n.name, n.byteSize, n.metaFlag]) ?? null,
+  };
+}
+
+/** Plan §5 normalization, using the oracle's float tags to select bit width. */
+function normalize(value: unknown, expected: unknown): unknown {
+  if (typeof value === "bigint") return String(value);
+  if (value instanceof Uint8Array) return `hex:${Buffer.from(value).toString("hex")}`;
+  if (typeof value === "number" && typeof expected === "string" && /^f(32|64):/.test(expected)) {
+    const bytes = Buffer.alloc(expected.startsWith("f32:") ? 4 : 8);
+    if (bytes.length === 4) bytes.writeFloatBE(value);
+    else bytes.writeDoubleBE(value);
+    return `${expected.substring(0, 4)}${bytes.toString("hex")}`;
+  }
+  if (Array.isArray(value)) {
+    assert.ok(Array.isArray(expected));
+    return value.map((item, i) => normalize(item, expected[i]));
+  }
+  if (value !== null && typeof value === "object") {
+    const fields = expected as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(value).map(([key, item]) =>
+      [key, normalize(item, fields[key])],
+    ));
+  }
+  return value;
 }
 
 test("RGB48 records AssetStudio's verdict and labels the conflicting UnityPy hash", () => {
@@ -39,11 +71,11 @@ test("RGB48 records AssetStudio's verdict and labels the conflicting UnityPy has
 
 for (const folder of ["more-plain", "sprite", "variant", "sprite-v2", "sprite-v2-rect"]) {
   const name = `editor/6000.6.4f1/${folder}/${folder === "more-plain" ? "textures" : "sprites"}`;
-  test(`${name}: format-23 candidate unpacks to UnityPy's exact bytes`, () => {
+  test(`${name}: format-23 metadata and type-tree dumps match UnityPy`, () => {
     const path = new URL("../../../fixtures/modern-goldens.json", import.meta.url);
     assert.ok(existsSync(path), "candidate oracle goldens must be generated");
     const candidates = JSON.parse(readFileSync(path, "utf8")) as {
-      fixtures: Record<string, CandidateGolden>;
+      fixtures: Record<string, Golden>;
     };
     const expected = candidates.fixtures[name]!;
     assert.ok(expected, `no candidate golden for ${name}`);
@@ -53,12 +85,39 @@ for (const folder of ["more-plain", "sprite", "variant", "sprite-v2", "sprite-v2
       const golden = expected.files[file.path]!;
       assert.equal(file.data.length, golden.size);
       assert.equal(createHash("sha256").update(file.data).digest("hex"), golden.sha256);
-      const serialized = expected.serialized[file.path];
+      const serialized = expected.serialized![file.path];
       if (serialized) {
-        assert.equal(serialized.formatVersion, 23);
-        assert.equal(serialized.unityVersion, "6000.6.4f1");
-        assert.throws(() => readSerializedFile(file.data), UnsupportedError);
+        const sf = readSerializedFile(file.data);
+        assert.equal(sf.header.version, serialized.formatVersion);
+        assert.equal(sf.header.version, 23);
+        assert.equal(sf.header.fileSize, file.data.length);
+        assert.equal(sf.unityVersion, serialized.unityVersion);
+        assert.equal(sf.targetPlatform, serialized.targetPlatform);
+        assert.equal(sf.bigEndian, serialized.bigEndian);
+        assert.equal(sf.enableTypeTree, serialized.enableTypeTree);
+        assert.deepEqual(sf.externals.map((external) => ({
+          path: external.pathName,
+          guid: external.guid && Buffer.from(external.guid).toString("hex"),
+          type: external.type,
+        })), serialized.externals);
+        assert.deepEqual(sf.types.map(asGolden), serialized.types);
+        assert.deepEqual(sf.refTypes, []);
+        assert.deepEqual(serialized.refTypes, []);
+        const table = sf.objects.map((object) => ({
+          pathId: String(object.pathId), classId: object.classId, byteSize: object.byteSize,
+        })).sort((a, b) => a.pathId < b.pathId ? -1 : a.pathId > b.pathId ? 1 : 0);
+        assert.deepEqual(table, expected.objects[file.path]);
+        for (const object of sf.objects) {
+          assert.ok(object.byteStart >= sf.header.dataOffset);
+          assert.ok(object.byteStart + object.byteSize <= file.data.length);
+          const dump = serialized.typetrees[String(object.pathId)];
+          assert.ok(dump, `no oracle dump for ${object.pathId}`);
+          const value = new ObjectReader(file.data, sf, object).readTypeTree();
+          assert.deepEqual(normalize(value, dump.value), dump.value, `object ${object.pathId}`);
+        }
       }
     }
+    const env = load([{ name, data: loadFixture(name) }]);
+    assert.equal(env.objects.length, Object.values(expected.objects).flat().length);
   });
 }

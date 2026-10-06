@@ -126,7 +126,7 @@ test("keeps a header-only SerializedFile in files; objects throws, naming it", (
 });
 
 test("unpacks a bundle holding a SerializedFile format it does not read; objects refuses it", () => {
-  const node = serializedFile(48, 23);
+  const node = serializedFile(48, 24);
   const env = load([{ name: "next.bundle", data: buildBundle([{ path: "CAB-next", data: node }]) }]);
   // Unpacking is layers 1-2 and does not depend on the SerializedFile inside.
   assert.deepEqual(env.files, [{ path: "CAB-next", data: node }]);
@@ -134,7 +134,7 @@ test("unpacks a bundle holding a SerializedFile format it does not read; objects
   const unsupported = (error: unknown): boolean =>
     error instanceof UnsupportedError &&
     error.kind === "SerializedFile format version" &&
-    error.found === 23 &&
+    error.found === 24 &&
     /^next\.bundle: CAB-next: unsupported/.test(error.message);
   assert.throws(() => env.objects, unsupported);
   // Resolving needs the same parse, so it refuses the same way.

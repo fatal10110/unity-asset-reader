@@ -18,7 +18,9 @@ UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
   common strings past AssetStudio's Hash128 in src/serialized/CommonString.ts
   come from the TPK table behind its helpers/Tpk.py; and
   src/serialized/TypeTreeReader.ts ports its [SerializeReference] ref type
-  lookup and registry reading from its helpers/TypeTreeHelper.py.
+  lookup and registry reading from its helpers/TypeTreeHelper.py. Format-23
+  type-tree metadata and blob headers in src/serialized/TypeTree.ts come from
+  its files/SerializedFile.py and helpers/TypeTreeNode.py (UnityPy 1.25.4).
 
 Runtime dependencies are external (see package.json): dist/ keeps the import and
 npm installs them, so their own LICENSE files ship with them and no copy of

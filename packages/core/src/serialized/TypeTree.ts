@@ -2,6 +2,7 @@
 // Ported from AssetStudio/SerializedType.cs (MIT, © Perfare / RazTools / Razviar)
 // Ported from AssetStudio/TypeTreeNode.cs (MIT, © Perfare / RazTools / Razviar)
 // Ported from AssetStudio/TypeTree.cs (MIT, © Perfare / RazTools / Razviar)
+// Format 23 ported from UnityPy/files/SerializedFile.py and helpers/TypeTreeNode.py (MIT, © K0lb3)
 
 import { CorruptError } from "../errors.js";
 import { BinaryReader } from "../io/BinaryReader.js";
@@ -57,7 +58,7 @@ export interface SerializedType {
    * formats 11 to 16 store it on the object entry, which writes it back here.
    */
   scriptTypeIndex: number;
-  /** Type tree nodes in pre-order; `null` when the file has no type trees. */
+  /** Type tree nodes in pre-order; `null` without trees or for a zero-length format-23 blob. */
   nodes: TypeTreeNode[] | null;
   /** Blob string buffer the node names were read from; `null` without a blob. */
   stringBuffer: Uint8Array | null;
@@ -122,9 +123,32 @@ export function readSerializedType(
 
   // 5.0+ (format 12, and the odd 10) packs the tree into a node blob.
   if (format >= V.Unknown_12 || format === V.Unknown_10) {
-    const blob = readTypeTreeBlob(reader, format);
-    type.nodes = blob.nodes;
-    type.stringBuffer = blob.stringBuffer;
+    let blobReader: BinaryReader | null = reader;
+    let blobOffset = reader.position;
+    // 6000.6+ (format 23): XXH3 content hash and the blob's byte length.
+    if (format >= V.TypeTreeWithHeader) {
+      reader.readBytes(HASH_SIZE); // Content hash is not needed to decode the tree.
+      const size = readCount(reader, "type tree blob size");
+      blobOffset = reader.position;
+      blobReader = size === 0 ? null : new BinaryReader(reader.readBytes(size), reader.endian);
+    }
+    if (blobReader) {
+      try {
+        const blob = readTypeTreeBlob(blobReader, format);
+        if (format >= V.TypeTreeWithHeader && blobReader.remaining !== 0) {
+          throw new CorruptError(
+            `read ${blobReader.position} bytes, expected ${blobReader.length}`,
+          );
+        }
+        type.nodes = blob.nodes;
+        type.stringBuffer = blob.stringBuffer;
+      } catch (error) {
+        if (format >= V.TypeTreeWithHeader && error instanceof CorruptError) {
+          error.message = `type tree blob at offset ${blobOffset}: ${error.message}`;
+        }
+        throw error;
+      }
+    }
   } else {
     type.nodes = readTypeTreeLegacy(reader, format);
   }
@@ -197,6 +221,17 @@ function readTypeTreeBlob(
   reader: BinaryReader,
   format: number,
 ): { nodes: TypeTreeNode[]; stringBuffer: Uint8Array } {
+  // 6000.6+ (format 23): the bounded blob starts with mhtt and its format number.
+  if (format >= V.TypeTreeWithHeader) {
+    const magic = reader.readString(4);
+    if (magic !== "mhtt") {
+      throw new CorruptError(`magic ${JSON.stringify(magic)}, expected "mhtt"`);
+    }
+    const blobFormat = reader.readInt32();
+    if (blobFormat !== format) {
+      throw new CorruptError(`blob format ${blobFormat}, expected ${format}`);
+    }
+  }
   const nodeCount = readCount(reader, "type tree node");
   const stringBufferSize = readCount(reader, "type tree string buffer size");
 
