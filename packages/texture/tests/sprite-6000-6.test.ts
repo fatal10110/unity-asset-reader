@@ -273,6 +273,57 @@ test(`${FIXTURE}: tightMesh masks as AssetStudio masks the 6000.3 sprite`, async
   assert.equal(assetStudio, 11);
 });
 
+/**
+ * The sprite cut with `tightMesh` out of a fully opaque stand-in of its atlas
+ * texture: what is left opaque is exactly its mask (in sprite space, packing
+ * undone), whatever the atlas' real pixels are. So it needs no WASM for the
+ * DXT5 atlases.
+ */
+function maskOf(p: Packed): { width: number; height: number; alpha: number[] } {
+  const { m_Width: width, m_Height: height } = p.location.texture.read<Texture2DData>();
+  const opaque = { data: new Uint8Array(width * height * 4).fill(255), width, height };
+  const { sprite, rect, version } = p.location;
+  const out = cutSprite(opaque, sprite, rect, version, true);
+  const alpha = Array.from({ length: out.width * out.height }, (_, i) => out.data[i * 4 + 3]!);
+  return { width: out.width, height: out.height, alpha };
+}
+
+test("the V2 atlases' masks are those of the same sprites in the V1 build, flips too", () => {
+  const v1 = new Map(
+    PACKED.filter((p) => p.fixture === FIXTURE).map((p) => [p.golden.name, maskOf(p)]),
+  );
+  const rotations = new Set<number>();
+  let compared = 0;
+  for (const p of PACKED.filter((x) => V2.includes(x.fixture))) {
+    const what = `${p.fixture} ${p.golden.name}`;
+    // Every V2 packed sprite is tight-packed: the mask applies.
+    assert.equal((p.golden.settingsRaw >> 1) & 1, 0, what);
+    const mask = maskOf(p);
+    if (p.golden.name === "r_b") {
+      // Verdict: no reference. r_b is rectangle-packed in the V1 and 6000.3 builds, so
+      // its 8-vertex V2 mask has nothing to equal. Only checked: it keeps every pixel
+      // of r_b's diamond (BUILDING.md section 12's `Pixels`), and clears some corner.
+      const { width: w, height: h } = mask;
+      for (let row = 0; row < h; row++) {
+        for (let x = 0; x < w; x++) {
+          const y = h - 1 - row;
+          const inside = Math.abs(x + 0.5 - w / 2) / (w / 2) + Math.abs(y + 0.5 - h / 2) / (h / 2);
+          if (inside <= 1) assert.equal(mask.alpha[row * w + x], 255, `${what} (${x}, ${y})`);
+        }
+      }
+      assert.ok(mask.alpha.includes(0), `${what}: its mesh is more than its rectangle`);
+      continue;
+    }
+    // The V1 masks are pinned above, to AssetStudio's or UnityPy's (oracles agreeing).
+    assert.deepStrictEqual(mask, v1.get(p.golden.name), what);
+    rotations.add((p.golden.settingsRaw >> 2) & 0xf);
+    compared++;
+  }
+  // 16 sprites per V2 build; V2 is where a mask runs over FlipHorizontal (p_tri3, p_tri5).
+  assert.equal(compared, 32);
+  assert.ok(rotations.has(1), "a FlipHorizontal-packed sprite is masked");
+});
+
 // --- imageInfo -----------------------------------------------------------------------
 
 test("imageInfo describes a packed sprite from its atlas entry and instance data", () => {
@@ -341,14 +392,17 @@ test(`${VARIANT}: a half-scale packed sprite is cut from its atlas resized`, asy
   const half = variant.filter((p) => p.golden.variantOracleNote);
   assert.deepEqual(half.map((p) => p.golden.name).sort(), ["r_a", "r_b"]);
   for (const p of half) {
-    const master = variant.find((x) => !x.golden.variantOracleNote && x.golden.name === p.golden.name)!;
+    const master = variant.find(
+      (x) => !x.golden.variantOracleNote && x.golden.name === p.golden.name,
+    )!;
     assert.equal(p.location.rect.downscaleMultiplier, 0.5);
     assert.deepEqual([p.image!.width, p.image!.height], [32, 32]);
     const out = await decodePlain(p);
     // AssetStudio's size: the texture resized to 64x64, the rectangle cut out of it.
     assert.deepEqual([out.width, out.height], [p.golden.width, p.golden.height]);
     const info = imageInfo(p.packed);
-    assert.deepEqual([info.width, info.height, info.sprite.texture.width], [out.width, out.height, 32]);
+    const sizes = [info.width, info.height, info.sprite.texture.width];
+    assert.deepEqual(sizes, [out.width, out.height, 32]);
     // UnityPy crops the texture unscaled; that is not the answer.
     assert.notEqual(stored(out), p.golden.rgbaSha256);
     // Not bit-exactly checkable (no AssetStudio run of this 6000.6 variant, #230), but
@@ -397,6 +451,47 @@ test("tightMesh refuses a packed sprite's indices that are not UInt16", () => {
 
 /** Little-endian `UInt32`s. */
 const words = (...values: number[]): Uint8Array => new Uint8Array(new Uint32Array(values).buffer);
+
+test("split alpha: a packed sprite's entry alpha texture is merged before the cut", async () => {
+  // No 6000.6 fixture has an alpha texture (no Android build, BUILDING.md section 13), so
+  // the rect atlas' first entry gets one: its alphaTexture pointer, null after its
+  // texture pointer, is pointed at that same 64x64 texture.
+  const env = load([{ name: FIXTURE, data: loadFixture(FIXTURE) }]);
+  const atlas = [...env.assets("SpriteAtlas")].find((a) => a.name === "rect")!;
+  const [first] = packedSprites(atlas);
+  const before = locateSprite(first!, env);
+  assert.equal(before.alphaTexture, undefined);
+  const texture = before.texture;
+  const file = env.files.find((f) => !f.path.endsWith(".resS"))!.data;
+  const { byteStart, byteSize } = atlas.reader;
+  const bytes = file.subarray(byteStart, byteStart + byteSize);
+  // texture (m_FileID 0, m_PathID), then alphaTexture (0, 0): PPtrs of 12 bytes.
+  const pointer = new Uint8Array(24);
+  new DataView(pointer.buffer).setBigInt64(4, texture.pathId, true);
+  const at = [...bytes.keys()].find((i) => pointer.every((b, k) => bytes[i + k] === b))!;
+  assert.ok(at !== undefined, "the first entry's texture pointer");
+  new DataView(bytes.buffer, bytes.byteOffset).setBigInt64(at + 16, texture.pathId, true);
+  const located = locateSprite(first!, env);
+  assert.strictEqual(located.alphaTexture, texture);
+
+  // Its alpha is 0x55; as its own alpha texture, its red (x) becomes the alpha.
+  const data = new Uint8Array(64 * 64 * 4);
+  for (let i = 0; i < 64 * 64; i++) data.set([i % 64, i >> 6, 9, 0x55], i * 4);
+  const image = { data, width: 64, height: 64 };
+  const merged = new Uint8Array(data);
+  for (let i = 0; i < merged.length; i += 4) merged[i + 3] = merged[i]!;
+  const decodedTextures = new Map<ObjectReader, RgbaImage>([[texture, image]]);
+  for (const tightMesh of [false, true]) {
+    const out = await decodeSprite(first!, env, { decodedTextures, tightMesh });
+    const { sprite, rect, version } = located;
+    const want = cutSprite({ ...image, data: merged }, sprite, rect, version, tightMesh);
+    assert.deepStrictEqual(out, want, `tightMesh ${tightMesh}`);
+    assert.notDeepStrictEqual(out, cutSprite(image, sprite, rect, version, tightMesh));
+  }
+  // The caller's texture stays as decoded.
+  assert.strictEqual(decodedTextures.get(texture), image);
+  assert.equal(image.data[3], 0x55);
+});
 
 test("a Sprite object packed into a 6000.6 atlas is still refused: UnsupportedError", async () => {
   const env = load([{ name: FIXTURE, data: loadFixture(FIXTURE) }]);

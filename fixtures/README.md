@@ -386,8 +386,11 @@ sprites (#34).
   UnityPy tight image of them. `packages/texture/tests/sprite-6000-6.test.ts`
   checks their tight masks against the AssetStudio cross-check hashes of the
   same sprites in the 6000.3 build (same source images, same meshes), and every
-  opaque pixel against section 12's recipe. The 6000.6 variant's half-scale
-  sprites are checked for size and closeness only (#230).
+  opaque pixel against section 12's recipe. The V2 builds' masks (DXT5
+  atlases) are checked, over an opaque stand-in texture, against those V1
+  masks; `r_b`, rectangle-packed in V1 and 6000.3, has none to equal. The
+  6000.6 variant's half-scale sprites are checked for size and closeness only
+  (#230).
 
 ## Regenerating
 

@@ -1247,7 +1247,7 @@ would mix two oracle versions in one file for no extra check.
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
 | `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`). #229: its 17 packed sprites (RGBA32) are cut to UnityPy's crop, every opaque pixel of its own image lands where section 12's recipe drew it, and their tight masks equal AssetStudio's images of the same sprites in the 6000.3 build |
 | `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is checked to the byte on the 2019.4 variant (section 14). #229: this variant's half-scale sprites are cut at AssetStudio's size and checked for closeness to the master's crop only; their pixels differ from 2019.4's, and no AssetStudio run of them exists yet (#230) |
-| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder |
+| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder; their tight masks (all tight-packed) against `sprite/sprites`' masks, without it |
 | `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4. #229: as `sprite-v2` |
 
 The 6000.6 atlas holds the imported sprites' names, rects, pivots, border,
@@ -1375,8 +1375,14 @@ refuses format 23. This proves container integrity, not pixel decoder support.
   `cross-check-fixture-oracles.py` extended to format 23 (#230).
 - #229: a Sprite object that points at a 6000.6 atlas is still refused with
   `UnsupportedError`: no fixture has one, to show whether its own `m_RD` or the
-  atlas' `*spriteInstanceData` holds its mesh. The V2 atlases' tight masks have
-  no reference (their DXT5 pixels differ from the 6000.3 build's).
+  atlas' `*spriteInstanceData` holds its mesh. The V2 atlases' tight masks do
+  not depend on their DXT5 pixels: over an opaque stand-in texture, all 32 but
+  `r_b` equal the masks of the same sprites in `sprite/sprites`, which are
+  pinned to AssetStudio's and UnityPy's images (including the only masks over
+  a FlipHorizontal packing). `r_b` has no reference: it is rectangle-packed in
+  the V1 and 6000.3 builds, so its 8-vertex V2 mask is only checked to keep its
+  whole diamond. No 6000.6 fixture has an alpha texture; a packed sprite's
+  split alpha is tested on a patched entry only.
 - Format 23 is read since #223.
 
 ### RGB48 AssetStudio verdict (PR #221 review)
