@@ -1,7 +1,7 @@
 {
   "_oracle": "UnityPy 1.25.4",
   "_generator": "scripts/make-modern-goldens.py",
-  "_status": "Format-23 metadata and generic dumps supported; texture/atlas features remain candidates.",
+  "_status": "Format-23 metadata and generic dumps supported; 6000.6 packed sprites have UnityPy crops through a stand-in sprite (#229); the signed plain formats remain candidates.",
   "fixtures": {
     "editor/6000.6.4f1/more-plain/textures": {
       "signature": "UnityFS",
@@ -7025,6 +7025,182 @@
               "tightHeight": 6,
               "tightRgbaSha256": "832c5a1ff570cbaa52d986e246e56aee2fef6845c6157e5bcab5c6429055d52c"
             }
+          },
+          "packedSprites": {
+            "3255119205692623646": [
+              {
+                "name": "r_a",
+                "index": 0,
+                "settingsRaw": 3075,
+                "downscaleMultiplier": 1.0,
+                "width": 10,
+                "height": 8,
+                "rgbaSha256": "acaa178d1886894a250c103d7c458f904a0321e9e4e1a5e35f31eb90c2fd5d6b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "r_b",
+                "index": 1,
+                "settingsRaw": 3139,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 33,
+                "rgbaSha256": "668515e982e5d591df276e168a188ee3862ceb06e5bfe9f32c51dfe4aec210eb",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ],
+            "5520511008713762383": [
+              {
+                "name": "p_wide",
+                "index": 0,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 8,
+                "rgbaSha256": "7de29d721db8b6edeb5bf2e1decf5edd51dc5197b602c1812f0319659c133b36",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_diamond",
+                "index": 1,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 40,
+                "rgbaSha256": "dc2b38e959c4f01c70ec433cd736f888ab1258b87e1a80aee677182750203f5a",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri",
+                "index": 2,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "51d7a9112bfcce12c55b0becb9f512735e4c19fe6ed368ac92805c71dd7ea9df",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell",
+                "index": 3,
+                "settingsRaw": 3149,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "e7df32a5f6774a7d4857e11c361aac2305d3b656d969e84d7e7d4cafb5c4ebfb",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri5",
+                "index": 4,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "a1161f0f89ff33877cda59b55df72c0193d6cf3cc9bc549f4af001b53556fbca",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell3",
+                "index": 5,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "e6601efc247d060e1fb60530b6dbacfcc2754d9746d95156760cfba5605fb850",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell2",
+                "index": 6,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "79cc3cd0c4de26f0817d7869cf78aae6afd29a65387b46c3561589230d5182d5",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri4",
+                "index": 7,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "19a2c3c2f8313bac613d40cf5cb234e2fccd8fd9cc40f4b0f05cf2303cc724c1",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri6",
+                "index": 8,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "ac48b269c355a997811d4ea55ece04c789a78d34610637a14b4cd53c0f5d5c0c",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar2",
+                "index": 9,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 6,
+                "height": 36,
+                "rgbaSha256": "cb1ae34b9aa0ce22486e167059faafe89bf4a1a134b503caddac042a01db54fa",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_margin",
+                "index": 10,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 28,
+                "height": 28,
+                "rgbaSha256": "54b118ad3d66cba094baf4cbabb1f982cf88e70319a93ce4d71b6c505898f254",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri2",
+                "index": 11,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "65229b723ded049fadea3abc17318796bf150a2a1956aac3106dab1dbd8c3bec",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tall",
+                "index": 12,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 8,
+                "height": 40,
+                "rgbaSha256": "af16faa78239534f7327f7930562b6db67e8842bbb6c46002fbc8c788fe52f39",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar",
+                "index": 13,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 6,
+                "rgbaSha256": "f62c5b688475589a439e4e3a82f97afe466490c2ff622d773a9c6c11709f7d11",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri3",
+                "index": 14,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "61f2ee77f67919f447f2b0eaf2bdeff0a8956cdefdaa8039eaffb0a5675dbc65",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ]
           }
         }
       },
@@ -8630,6 +8806,54 @@
               "imageSha256": "2c24801450f23cda37c1d03041655de08f1ce7eb0b06882a0e97dfb509c935fd",
               "rgbaSha256": "2c24801450f23cda37c1d03041655de08f1ce7eb0b06882a0e97dfb509c935fd"
             }
+          },
+          "packedSprites": {
+            "-5560115647431006049": [
+              {
+                "name": "r_b",
+                "index": 0,
+                "settingsRaw": 3139,
+                "downscaleMultiplier": 0.5,
+                "width": 34,
+                "height": 33,
+                "rgbaSha256": "6beb20ced1316d749127a02cfb1dab33b23bb41b2bd4b307d5799e234f4812b1",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229).",
+                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this 6000.6 variant yet (#230)."
+              },
+              {
+                "name": "r_a",
+                "index": 1,
+                "settingsRaw": 3075,
+                "downscaleMultiplier": 0.5,
+                "width": 10,
+                "height": 8,
+                "rgbaSha256": "7b6436b0c98f62380866d9432c2af0ee08ce16a171bda6951aecd95ee1307d61",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229).",
+                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this 6000.6 variant yet (#230)."
+              }
+            ],
+            "-5205555241037833595": [
+              {
+                "name": "r_b",
+                "index": 0,
+                "settingsRaw": 3139,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 33,
+                "rgbaSha256": "668515e982e5d591df276e168a188ee3862ceb06e5bfe9f32c51dfe4aec210eb",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "r_a",
+                "index": 1,
+                "settingsRaw": 3075,
+                "downscaleMultiplier": 1.0,
+                "width": 10,
+                "height": 8,
+                "rgbaSha256": "acaa178d1886894a250c103d7c458f904a0321e9e4e1a5e35f31eb90c2fd5d6b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ]
           }
         }
       },
@@ -14524,6 +14748,182 @@
               "tightRgbaSha256": "7716de4e1a3996c9e03ae3d21c7e13093aabbb3915502c93498021248a26cb09",
               "tightOracleNote": "Tight mesh: UnityPy copies the mesh's triangles out of the texture by their UVs (render_sprite_mesh), AssetStudio cuts the rectangle and clears what its triangles do not cover (ImageSharp.Drawing fill, no antialiasing); they differ wherever the mesh is more than the sprite's rectangle. They also differ on every pixel of alpha 0: AssetStudio's DestOut blend clears its colour too, UnityPy keeps it. Verdict: AssetStudio - see #34"
             }
+          },
+          "packedSprites": {
+            "-8988653913857473827": [
+              {
+                "name": "p_tri4",
+                "index": 0,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "44679d6a0d0fbb3376884ac80c7c21f6549674f01016162561bd1d06faac1000",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell2",
+                "index": 1,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "34fb612637cf0f95277a23666e8aea93fb87378c230d3e9b82de09ea9e200ec2",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri2",
+                "index": 2,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "1d86919b78ede5a34aa80f7bb9894f9e3ce5c47a361fa2ea3929488245ba0542",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri3",
+                "index": 3,
+                "settingsRaw": 3141,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "abe10858d7c8a2eeb295d8a059903b8c71412bd4353bd2735f15a14228598c22",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell",
+                "index": 4,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "739592df7abc3e4b39421eb4ccba85b6fc96b2aca39942b9dfcb64910d87ea45",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri5",
+                "index": 5,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "51b082e3ceba15b50685a56306968b23cbd8f7860cfddf34374f5d59bfbf102b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar",
+                "index": 6,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 6,
+                "rgbaSha256": "ebccb2084f11efffbb7176f4a2c32ac8c585fc52787ae3ba66784c819586a1b5",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_diamond",
+                "index": 7,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 40,
+                "rgbaSha256": "325f1081091cf0e89e018ab88837edddaddc3eb031f845cb9c2ce958b9a125da",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri6",
+                "index": 8,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "840f12e8d364cc2186ad830df3d00b9c2b8f72ecda90b784ad1b08af3ba569b1",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar2",
+                "index": 9,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 6,
+                "height": 36,
+                "rgbaSha256": "d0c956cdaba1a03bd3be738fb57420ffeb724f5099a1f632eb8cf537fa98c93b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri",
+                "index": 10,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "39fdc44c7480f668453c7af1b017c233623bffe9fb1a1df23cd7f554f11f66b9",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_wide",
+                "index": 11,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 8,
+                "rgbaSha256": "5e1e29078bb3a290ec6e3f58e21e58f7fd6b8e814471e8be38a87890c3baf84e",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_margin",
+                "index": 12,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 28,
+                "height": 28,
+                "rgbaSha256": "b551258824824109664005668118daed42ecee750ffd2db9cf95ea4fbd6b1021",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tall",
+                "index": 13,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 8,
+                "height": 40,
+                "rgbaSha256": "a2f31fe2113a09a21788d24915d8635c8d816cd1a21ad0d67e839a877ded08af",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell3",
+                "index": 14,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "ea022e6b28caa1ad1522557627e47b6a4f47c924294303b15e99f836e91d5930",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ],
+            "-4142110162561824900": [
+              {
+                "name": "r_b",
+                "index": 0,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 33,
+                "rgbaSha256": "eec129baed6b52e4733117322c11277df1c2483ea3c0427822ca5b7514a00243",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "r_a",
+                "index": 1,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 10,
+                "height": 8,
+                "rgbaSha256": "c413946ab76387f6aac9d9e12ceea6d7fa1c98fd2971d4513dac8845d73bbc9b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ]
           }
         }
       },
@@ -20518,6 +20918,182 @@
               "tightHeight": 15,
               "tightRgbaSha256": "a1c13d0d34ccc89c04f64a84156cdcbc9036afc6e35830c4688d0c850239e36c"
             }
+          },
+          "packedSprites": {
+            "-8349325044889523511": [
+              {
+                "name": "r_b",
+                "index": 0,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 33,
+                "rgbaSha256": "eec129baed6b52e4733117322c11277df1c2483ea3c0427822ca5b7514a00243",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "r_a",
+                "index": 1,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 10,
+                "height": 8,
+                "rgbaSha256": "c413946ab76387f6aac9d9e12ceea6d7fa1c98fd2971d4513dac8845d73bbc9b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ],
+            "-1734585323543695781": [
+              {
+                "name": "p_margin",
+                "index": 0,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 28,
+                "height": 28,
+                "rgbaSha256": "04071e9a41226f3ed321c36afeb220262bdcce6ea65cdf7774c702b3fbb5983c",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell3",
+                "index": 1,
+                "settingsRaw": 3149,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "b2f9335396df0ecd664dc5c85b2433df5df3c7db7b883345dec7eece5c99ef58",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell2",
+                "index": 2,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "b512e5c7ddab249fdf050ee00a7e573b6d699c555d18863ef53a84e42f195c1b",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri",
+                "index": 3,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "c59679fe68833d20fab2241db6adbc57e637b8335740542ba4ee4f3dca26295c",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri5",
+                "index": 4,
+                "settingsRaw": 3141,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "e3451f96f767903b76b1af713216adf68a3cf600039a94f276437b861095d7e4",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_ell",
+                "index": 5,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "739592df7abc3e4b39421eb4ccba85b6fc96b2aca39942b9dfcb64910d87ea45",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar",
+                "index": 6,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 6,
+                "rgbaSha256": "2915664a7329cf3d57e9ddd121273ce82cffe1570f7cd481f9e69e408f62a44f",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_bar2",
+                "index": 7,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 6,
+                "height": 36,
+                "rgbaSha256": "9383dabbb5dce19356e581b88d11c27f0af2fe9e3d99e4da6299af80ab662766",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_wide",
+                "index": 8,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 8,
+                "rgbaSha256": "f9ad70428002d518a619dfd1869c2ba5dd4ce0e83e7147cfb0fe053385120c28",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tall",
+                "index": 9,
+                "settingsRaw": 3073,
+                "downscaleMultiplier": 1.0,
+                "width": 8,
+                "height": 40,
+                "rgbaSha256": "a2f31fe2113a09a21788d24915d8635c8d816cd1a21ad0d67e839a877ded08af",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_diamond",
+                "index": 10,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 34,
+                "height": 40,
+                "rgbaSha256": "db3128987dba4a85dc1c95c7e1c6f063b769561234141face8ee7e7fbaf3fb80",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri2",
+                "index": 11,
+                "settingsRaw": 3137,
+                "downscaleMultiplier": 1.0,
+                "width": 36,
+                "height": 36,
+                "rgbaSha256": "ecf3c899aa9ef8941b1cb22dfe3440e267f5d3678140a3ac13f52e048d20aca4",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri6",
+                "index": 12,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 40,
+                "height": 32,
+                "rgbaSha256": "cc5c9445feb779367f51c94684b7b1c9c51829e8295ed51c0157655bbae7afe1",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri3",
+                "index": 13,
+                "settingsRaw": 3141,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 40,
+                "rgbaSha256": "076d946ec15aae684819786dceacce1b4b8f7567287a77d436e2ee880cc0aedc",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              },
+              {
+                "name": "p_tri4",
+                "index": 14,
+                "settingsRaw": 3145,
+                "downscaleMultiplier": 1.0,
+                "width": 32,
+                "height": 32,
+                "rgbaSha256": "6415b089878a2836e1d2ddcb6100fbae57cd3c3712b2b44cf4e14a1e37e88c81",
+                "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+              }
+            ]
           }
         }
       },

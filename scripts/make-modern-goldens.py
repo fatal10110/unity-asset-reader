@@ -1,22 +1,78 @@
 #!/usr/bin/env python3
-"""Candidate format-23 goldens (#108, #153, #155, #160), UnityPy 1.25.4.
+"""Candidate format-23 goldens (#108, #153, #155, #160, #229), UnityPy 1.25.4.
 
 Use a separate oracle environment from the format-21/22 goldens. These files
 have metadata/generic dump coverage; their texture and atlas features remain candidates.
+The sprites a 6000.6 atlas holds itself get UnityPy's crop (`packedSprites`).
 No decoded output from the library under test is used here.
 """
 import importlib.util
 import json
 import pathlib
 import sys
+import types
 
 import UnityPy
+from UnityPy.enums import SpritePackingMode
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.dont_write_bytecode = True
 spec = importlib.util.spec_from_file_location("oracle", ROOT / "scripts/make-goldens.py")
 oracle = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(oracle)
+
+PACKED_SPRITE_NOTE = (
+    "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. "
+    "This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode "
+    "forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names "
+    "only the atlas and this entry's render-data key; no tight mesh is applied (#229)."
+)
+PACKED_VARIANT_NOTE = (
+    "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash "
+    "is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this "
+    "6000.6 variant yet (#230)."
+)
+
+
+def packed_sprite_goldens(path):
+    """UnityPy's image of every sprite a 6000.6 atlas holds itself (#229).
+
+    They have no Sprite objects, so `get_image_from_sprite` gets a stand-in:
+    the atlas, the entry's key and the file, the only fields it reads with
+    the packing mode forced to Rectangle. By atlas path id, in
+    `m_RenderDataMap` order; rows as stored, bottom row first.
+    """
+    out = {}
+    for obj in UnityPy.load(str(path)).objects:
+        if obj.type.name != "SpriteAtlas":
+            continue
+        atlas = obj.read()
+        entries = []
+        for index, (key, data) in enumerate(atlas.m_RenderDataMap):
+            pointer = types.SimpleNamespace(deref_parse_as_object=lambda atlas=atlas: atlas)
+            stand_in = types.SimpleNamespace(
+                m_SpriteAtlas=pointer,
+                m_AtlasTags=None,
+                m_RenderDataKey=key,
+                assets_file=obj.assets_file,
+            )
+            rgba, width, height, raw = oracle.sprite_image(
+                stand_in, packingMode=SpritePackingMode.kSPMRectangle)
+            entry = {
+                "name": data.spriteInstanceData.spriteName,
+                "index": index,
+                "settingsRaw": raw,
+                "downscaleMultiplier": data.downscaleMultiplier,
+                "width": width,
+                "height": height,
+                "rgbaSha256": oracle.sha256(rgba),
+                "oracleNote": PACKED_SPRITE_NOTE,
+            }
+            if data.downscaleMultiplier != 1:
+                entry["variantOracleNote"] = PACKED_VARIANT_NOTE
+            entries.append(entry)
+        out.setdefault(obj.assets_file.name, {})[str(obj.path_id)] = entries
+    return out
 
 
 def evidence(name, path):
@@ -67,13 +123,17 @@ def main():
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
         "_generator": "scripts/make-modern-goldens.py",
-        "_status": "Format-23 metadata and generic dumps supported; texture/atlas features remain candidates.",
+        "_status": ("Format-23 metadata and generic dumps supported; 6000.6 packed sprites have "
+                    "UnityPy crops through a stand-in sprite (#229); the signed plain formats "
+                    "remain candidates."),
         "fixtures": {},
     }
     for name in paths:
         path = oracle.FIXTURES / name
         result["fixtures"][name] = oracle.read_fixture(path)
         result["fixtures"][name]["evidence"] = evidence(name, path)
+        for file, atlases in packed_sprite_goldens(path).items():
+            result["fixtures"][name]["serialized"][file]["packedSprites"] = atlases
         if "/more-plain/" in name:
             cross_check = json.loads((ROOT / "fixtures/assetstudio-rgb48.json").read_text())
             for serialized in result["fixtures"][name]["serialized"].values():

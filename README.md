@@ -112,7 +112,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 | SerializedFile formats | 2 to 22, little- and big-endian |
 | Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font` and `MovieTexture` |
 | Texture formats | 17 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
-| Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh |
+| Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
 | Platforms | Xbox 360 textures are byte-swapped back and Switch textures deswizzled. Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)) |
 | Runtimes | Browsers and Web Workers (ES2020, WebAssembly for textures); Node.js `^20.19.0 \|\| >=22.12.0`, `import` and `require` |
 
@@ -130,10 +130,9 @@ The short answer. The full tables, with what each claim is tested on, are in the
   tree reads work on every one of them, whatever the Unity version. The class readers know the
   layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6, `SpriteAtlas` from 2017.1) up
   to 6000.6, and read a newer version with the newest layout they know. `SpriteAtlas`'s 6000.6
-  layout is tested on Unity 6000.6.4f1 bundles; the texture package does not list or decode
-  its packed sprites yet (planned,
-  [#155](https://github.com/fatal10110/unity-asset-reader/issues/155)). A class reader refuses
-  a version older than its first layout;
+  layout is tested on Unity 6000.6.4f1 bundles, and so are the texture package's cuts of the
+  sprites such an atlas holds ([#229](https://github.com/fatal10110/unity-asset-reader/issues/229)).
+  A class reader refuses a version older than its first layout;
   `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,
   with gates at 2.6 and 3.0 that no test covers, and reads any older version with its oldest
   layout.
@@ -153,14 +152,11 @@ Each of these throws `UnsupportedError`, naming what it found:
 - Texture formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, `R8`, `RG16`, `RG32`, `RGB48`,
   `RGBA64`. Textures built for PS4 or PS5. Sprites whose alpha texture (ETC1 split
   alpha) is not the size of their texture. A `Sprite` object that points at a Unity 6000.6
-  `SpriteAtlas`.
+  `SpriteAtlas` (the atlas' own packed sprites are supported).
 
 Not provided at all: decoding audio, video or meshes; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or
-repacking bundles. Sprites packed into a Unity 6000.6 `SpriteAtlas`, which such bundles hold only
-inside the atlas, not as `Sprite` objects: the core reads them (`spriteInstanceData`), the texture
-package does not list or decode them yet (planned,
-[#155](https://github.com/fatal10110/unity-asset-reader/issues/155)).
+repacking bundles.
 
 ## Development
 

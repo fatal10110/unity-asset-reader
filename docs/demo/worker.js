@@ -307,8 +307,16 @@ const handlers = {
   async decodeAll(lib, _args, progress) {
     const { env, indexOf } = loaded();
     // Each image's place among them, for the progress: a skipped image still counts as done.
+    // A Unity 6000.6 atlas' packed sprites, which have no Sprite objects, come at its place
+    // and carry its path id, so they are keyed by name too (#229).
     const order = new Map();
-    for (const a of env.assets("Texture2D", "Sprite")) order.set(assetKey(a.file, a.pathId), order.size);
+    for (const a of env.assets("Texture2D", "Sprite", "SpriteAtlas")) {
+      const key = assetKey(a.file, a.pathId);
+      if (a.type !== "SpriteAtlas") order.set(key, order.size);
+      else for (const p of attempt(() => lib.packedSprites?.(a)).value ?? []) {
+        order.set(`${key} ${p.name}`, order.size);
+      }
+    }
     const total = order.size;
     let decoded = 0;
     progress({ done: 0, total });
@@ -321,7 +329,7 @@ const handlers = {
       const thumb = thumbnail(image.rgba, image.width, image.height, 96);
       progress(
         {
-          done: order.get(key) + 1,
+          done: (order.get(key) ?? order.get(`${key} ${image.name}`)) + 1,
           total,
           image: {
             index: indexOf.get(key),

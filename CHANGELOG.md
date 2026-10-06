@@ -91,11 +91,19 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ### 1.0.2 - Unreleased
 
-- Unity 6000.6 bundles hold packed sprites only inside their `SpriteAtlas`
-  (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects, so
-  `images` and `decodeSprite` do not list or decode them yet; that is planned under #155. A
-  `Sprite` object that still points at a 6000.6 atlas is refused with `UnsupportedError` (kind
-  `"Unity version"`) by `decodeSprite`, `imageInfo`, `decodeImage` and `images` (#155).
+- Decode the sprites a Unity 6000.6 `SpriteAtlas` holds itself
+  (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), which 6000.6 bundles have no
+  `Sprite` objects for. New `packedSprites(atlas)` lists them as `PackedSprite`s (`[]` before
+  6000.6); `imageInfo`, `decodeImage` and `decodeSprite` take one where they take a Sprite, and
+  `images` yields them at their atlas' place. They are cut from the atlas entry (flip, split
+  alpha and variant resize as for any atlas entry), with `tightMesh` masked by the instance
+  data's mesh; a mesh whose indices are not 16-bit is refused with `UnsupportedError` (kind
+  `"sprite index format"`). Tested on four Unity 6000.6.4f1 fixtures against UnityPy 1.25.4's
+  crop, the fixtures' position-encoding pixels and AssetStudio's masks of the same sprites
+  built by 6000.3 (#229). No 6000.6 fixture has an alpha texture: split alpha takes the same
+  path as any atlas entry and is tested on a patched entry only. A `Sprite` object that points
+  at a 6000.6 atlas, which no fixture has, is still refused with `UnsupportedError` (kind
+  `"Unity version"`) (#155, #229).
 - `decodeSprite`, `decodeImage` and `images` decode a sprite with an alpha texture (Android ETC1
   split alpha), with the alpha texture's red channel as its alpha, as UnityPy does; such sprites
   were refused. An alpha texture of another size than its texture is refused with

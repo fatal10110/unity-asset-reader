@@ -59,7 +59,8 @@ for await (const image of images(env)) {    // every Texture2D and Sprite, decod
 - **`decodeImage(asset, options?)`** returns `imageInfo(asset)` plus `rgba`: RGBA8 pixels, top
   row first, `width * height * 4` bytes. A Sprite is cut out of its texture or atlas, as
   `decodeSprite` does.
-- **`images(env, { onError })`** decodes every Texture2D and Sprite, in `env.assets()` order. An
+- **`images(env, { onError })`** decodes every Texture2D and Sprite, in `env.assets()` order,
+  and, at each Unity 6000.6 `SpriteAtlas`, the sprites it holds itself (see "Sprites"). An
   image that fails to decode throws (`onError: "throw"`, the default) or is left out
   (`onError: "skip"`). It gives the event loop a turn between images, so a loop on a page's main
   thread keeps the page responsive.
@@ -177,18 +178,36 @@ the same `load()`.
 With `decodeSprite`'s `{ tightMesh: true }`, pixels outside a tight-packed sprite's mesh become
 transparent, as AssetStudio does. The default, and `decodeImage`, return the whole rectangle.
 
-What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 6000.3.25f1):
+From Unity 6000.6 a `SpriteAtlas` holds its packed sprites itself (each `renderDataMap` entry's
+`spriteInstanceData`), and the bundle has no `Sprite` objects for them. `packedSprites(atlas)`
+lists them as `PackedSprite`s (`{ type: "PackedSprite", name, atlas, index }`), which
+`imageInfo`, `decodeImage` and `decodeSprite` take where they take a Sprite, and `images` lists
+them at their atlas' place. One is described and cut as a Sprite, from its atlas entry and the
+name, rectangle, pivot, border and mesh it holds; its `pathId` and `file` are its atlas', and its
+`path` is `undefined`. Before 6000.6 `packedSprites` returns `[]`:
+
+```ts
+for (const atlas of env.assets("SpriteAtlas")) {
+  for (const sprite of packedSprites(atlas)) {
+    const { name, rgba, width, height } = await decodeImage(sprite);
+    const masked = await decodeSprite(sprite, env, { tightMesh: true });
+  }
+}
+```
+
+What is supported, and what it is tested on (sprites built by 2019.4.41f2, 6000.3.25f1 and
+6000.6.4f1):
 
 | Sprite | Support |
 |---|---|
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
-| Packed into a Unity 6000.6 `SpriteAtlas` | Not listed or decoded yet (planned, [#155](https://github.com/fatal10110/unity-asset-reader/issues/155)): 6000.6 bundles hold packed sprites only inside the atlas (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects. A `Sprite` object that points at a 6000.6 atlas is refused |
+| Packed into a Unity 6000.6 `SpriteAtlas` (V1 and V2 fixtures, tight or rectangle packing, a half-scale variant) | Yes, as a `PackedSprite` (`packedSprites`). A `Sprite` object that points at a 6000.6 atlas, which no fixture has, is refused. No 6000.6 fixture has an alpha texture: split alpha is tested on a patched entry only |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
 | Alpha texture (Android ETC1 split alpha, 2019.4.41f2 atlases) | Its red channel is the sprite's alpha, as UnityPy merges it; one of another size than its texture is refused |
-| Variant atlas (`downscaleMultiplier` other than 1) | Texture resized as AssetStudio resizes it (ImageSharp 2.1.3 bicubic), then cut; matches AssetStudio's image to the byte (2019.4 half-scale fixture) |
+| Variant atlas (`downscaleMultiplier` other than 1) | Texture resized as AssetStudio resizes it (ImageSharp 2.1.3 bicubic), then cut; matches AssetStudio's image to the byte (2019.4 half-scale fixture). The 6000.6 half-scale fixture is checked for size and closeness only ([#230](https://github.com/fatal10110/unity-asset-reader/issues/230)) |
 
 ## Texture formats
 
@@ -251,10 +270,10 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
   Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
 - Textures built for PS4 or PS5.
 - Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
-- With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
+- With `tightMesh`, a sprite mesh whose positions are not 32-bit floats, or a 6000.6 packed
+  sprite's whose indices are not 16-bit.
 - A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
-  6000.6 bundle are not `Sprite` objects at all, so `images` does not list them yet; planned
-  under #155.)
+  6000.6 bundle are not `Sprite` objects at all; `packedSprites` lists them.)
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
 `Texture3D` classes; image encoding (PNG, JPEG).
@@ -280,9 +299,11 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | Export | What |
 |---|---|
 | `isImage(asset)` | Type guard: whether an asset is a `Texture2D` or `Sprite` (an `ImageAsset`) |
-| `imageInfo(asset)` | An image asset's `ImageInfo`, sync, no WASM, no image data read |
-| `decodeImage(asset, options?)` | An image asset decoded: its `ImageInfo` plus `rgba`, top row first. Loads the WASM on first use |
-| `images(env, options?)` | Async generator: every `Texture2D` and `Sprite` of `env`, decoded |
+| `imageInfo(asset)` | An image asset's (or a `PackedSprite`'s) `ImageInfo`, sync, no WASM, no image data read |
+| `decodeImage(asset, options?)` | An image asset (or a `PackedSprite`) decoded: its `ImageInfo` plus `rgba`, top row first. Loads the WASM on first use |
+| `images(env, options?)` | Async generator: every `Texture2D`, `Sprite` and 6000.6 packed sprite of `env`, decoded |
+| `packedSprites(atlas)` | The sprites a Unity 6000.6 `SpriteAtlas` asset holds itself, as `PackedSprite`s; `[]` before 6000.6 |
+| `PackedSprite` | `{ type: "PackedSprite", name, atlas, index }`: one of them, by its `renderDataMap` index |
 | `ImageAsset` | `Asset<"Texture2D" \| "Sprite">` |
 | `ImageInfo`, `TextureImageInfo`, `SpriteImageInfo`, `SpriteInfo` | What `imageInfo` returns; `kind` tells the two apart |
 | `ImageCompression` | `compression`'s values |
@@ -291,7 +312,7 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `initTexture(options?)` | Load the WASM decoder. Optional before `decodeImage` and `images`; call it once, and await it, before `decodeTexture2D` and `decodeSprite` |
 | `InitTextureOptions` | `{ wasmPath?, locateFile? }`, passed to `texture2ddecoder-wasm`'s `initialize` |
 | `decodeTexture2D(texture)` | A `Texture2D`, as `obj.read()` returns it, to RGBA, top row first |
-| `decodeSprite(obj, env, options?)` | A `Sprite` to RGBA, top row first, cut out of its texture or atlas |
+| `decodeSprite(obj, env, options?)` | A `Sprite` (or a `PackedSprite`) to RGBA, top row first, cut out of its texture or atlas |
 | `DecodeSpriteOptions` | `{ tightMesh?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
