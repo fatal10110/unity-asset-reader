@@ -1233,14 +1233,16 @@ UnityPy **1.25.4** reads these files; 1.25.3 fails in the type-tree metadata.
 They are therefore candidate fixtures, with independent goldens in
 `modern-goldens.json`, separate from the supported-fixture `goldens.json`.
 `scripts/make-goldens.py` excludes the sidecar's candidate keys; it continues
-using UnityPy 1.25.3 for the existing fixtures. Do not add the candidates to the
-main golden set until the new Sprite/SpriteAtlas layouts and texture conversion are ported.
+using UnityPy 1.25.3 for the existing fixtures. The core reads their Sprite and
+SpriteAtlas layouts and compares them with these dumps (#155). Do not add the
+candidates to the main golden set until their texture conversion is ported too:
+sprites cut out of a 6000.6 atlas, and the signed plain formats.
 
 | Folder / bundle | Content | Evidence / remaining work |
 |---|---|---|
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
-| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry |
-| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is implemented and checked on the 2019.4 variant (section 14); decoding this one needs the 6000.6 SpriteAtlas layout (#155) |
+| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`), cutting sprites out of it remains |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is implemented and checked on the 2019.4 variant (section 14); this variant's sprites are in a 6000.6 atlas, which the texture package does not cut sprites out of yet (#155) |
 | `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
 | `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4 |
 
@@ -1355,9 +1357,13 @@ refuses format 23. This proves container integrity, not pixel decoder support.
 - #153: the variant's type-tree bytes are validated; UnityPy ignores its
   downscale field for sprite export. The resampler is chosen and checked to the
   byte against the AssetStudio bicubic cross-check of the 2019.4 variant
-  (sections 14 and 15); this 6000.6 variant also needs #155's atlas layout.
-- Format 23 must be ported before any of these new files can be consumed by
-  the current reader. Merely installing Android support does not resolve this.
+  (sections 14 and 15); this 6000.6 variant's sprites wait for
+  the texture package to cut sprites out of a 6000.6 atlas (#155).
+- #155: the core reads the 6000.6 SpriteAtlas layout. Its packed sprites exist
+  only inside the atlas (`*spriteInstanceData`), not as Sprite objects, and the
+  texture package does not list or decode them yet; a Sprite object that points
+  at a 6000.6 atlas is refused with `UnsupportedError`.
+- Format 23 is read since #223.
 
 ### RGB48 AssetStudio verdict (PR #221 review)
 

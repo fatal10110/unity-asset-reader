@@ -125,7 +125,9 @@ or if either loses a non-empty or empty `TypelessData`, a `.resS` node or one
 of the two NaN patterns (#86).
 Format 20 and older are ported but have no fixture.
 Format 23 (Unity 6000.6.4f1) metadata and generic dumps are checked against
-`modern-goldens.json` in `packages/core/tests/modern-fixtures.test.ts` (#223).
+`modern-goldens.json` in `packages/core/tests/modern-fixtures.test.ts` (#223),
+and the `Sprite` and `SpriteAtlas` readers on them in
+`packages/core/tests/Sprite.test.ts` (#155).
 
 ## M1 container fixtures (`bundles/*.bundle`)
 

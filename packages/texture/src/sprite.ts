@@ -118,7 +118,9 @@ export interface SpriteSource {
  * each call.
  *
  * Unlike upstream, which hands back no image or an unmasked one, this throws
- * where the result would be wrong: see below.
+ * where the result would be wrong: see below. A sprite whose atlas is loaded
+ * and has Unity 6000.6's layout, which holds the packed sprites' meshes
+ * itself, is refused for now: `UnsupportedError` of kind `"Unity version"`.
  *
  * @param sprite a Sprite (`ClassID.Sprite`) from `env.objects`
  * @param env the env that loaded it, and the files its texture and atlas are in
@@ -215,6 +217,14 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
   if (atlas?.status === "found") {
     const atlasObj = checkClass(atlas.object, ClassID.SpriteAtlas, `${what}'s atlas`);
     const data = atlasObj.read<SpriteAtlas>();
+    if (!data.m_PackedSprites) {
+      // 6000.6+: the atlas holds its sprites' meshes (spriteInstanceData), not ported here (#155).
+      throw new UnsupportedError(
+        "Unity version",
+        atlasObj.unityVersion,
+        `${what}: cutting a sprite out of a 6000.6 SpriteAtlas is not implemented`,
+      );
+    }
     const key = sprite.m_RenderDataKey;
     const entry = key && data.m_RenderDataMap.find(([k]) => sameKey(k, key))?.[1];
     if (!entry) {

@@ -183,6 +183,7 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 60
 |---|---|
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
+| Packed into a Unity 6000.6 `SpriteAtlas` | Not listed or decoded yet (planned, [#155](https://github.com/fatal10110/unity-asset-reader/issues/155)): 6000.6 bundles hold packed sprites only inside the atlas (`SpriteAtlasFields.renderDataMap[i][1].spriteInstanceData`), not as `Sprite` objects. A `Sprite` object that points at a 6000.6 atlas is refused |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
@@ -251,6 +252,9 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 - Textures built for PS4 or PS5.
 - Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
 - With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
+- A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
+  6000.6 bundle are not `Sprite` objects at all, so `images` does not list them yet; planned
+  under #155.)
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
 `Texture3D` classes; image encoding (PNG, JPEG).

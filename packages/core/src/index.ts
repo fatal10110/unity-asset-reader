@@ -80,8 +80,10 @@ export type {
   MonoScriptFields,
   MovieTextureFields,
   NamedObjectFields,
+  SpriteAtlasDataFields,
   SpriteAtlasFields,
   SpriteFields,
+  SpriteInstanceDataFields,
   SpriteRenderDataFields,
   StreamedResourceFields,
   SubMeshFields,
@@ -140,4 +142,4 @@ export type {
   VertexData,
 } from "./classes/Sprite.js";
 export { readSpriteAtlas } from "./classes/SpriteAtlas.js";
-export type { SpriteAtlas, SpriteAtlasData } from "./classes/SpriteAtlas.js";
+export type { SpriteAtlas, SpriteAtlasData, SpriteInstanceData } from "./classes/SpriteAtlas.js";

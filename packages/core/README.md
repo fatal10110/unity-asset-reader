@@ -267,8 +267,8 @@ version; `Texture2D` has no floor: it reads any older version with its oldest la
 | `MonoScript` (`MonoScriptFields`) | `className`, `namespace`, `assemblyName` | 3.4 | Yes |
 | `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
 | `Texture2D` (`Texture2DFields`) | `width`, `height`, `format` (a `TextureFormat`), `mipCount`, `textureSettings`, `platform` and `imageData`, still encoded (inline or from the `.resS`). Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | Any (gates from 2.6; tested from 3.4) | Yes |
-| `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3 |
-| `SpriteAtlas` (`SpriteAtlasFields`) | `packedSprites` and `renderDataMap`. Refused from 6000.6 on, whose layout is not ported | 2017.1 | 2019.4, 6000.3 |
+| `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3, 6000.6 |
+| `SpriteAtlas` (`SpriteAtlasFields`) | `renderDataMap`; before 6000.6 also `packedSprites`, from 6000.6 each entry holds its sprite instead (`spriteInstanceData`: name, rect, pivot, border, mesh) | 2017.1 | 2019.4, 6000.3, 6000.6 |
 | `AudioClip` (`AudioClipFields`) | `channels`, `frequency`, `length`, `compressionFormat` and `audioData`: the sound bank as stored (usually FSB5), not decoded | 3.4 | Yes |
 | `VideoClip` (`VideoClipFields`) | `width`, `height`, `frameRate`, `frameCount` and `videoData`: the video file as imported (e.g. WebM, MP4), not decoded | 5.6 | Yes |
 | `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
@@ -284,11 +284,11 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | | Unity versions |
 |---|---|
 | **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
-| **Tested** format-23 metadata and generic type-tree dumps | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. New Sprite/SpriteAtlas class layouts and additional plain texture conversion remain separate work |
+| **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. Cutting sprites out of a 6000.6 atlas remains separate work |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
-A class reader reads a version newer than its newest gate (6000.5) with the newest layout it
+A class reader reads a version newer than its newest gate (6000.6) with the newest layout it
 knows. `readTypeTree()` does not depend on the Unity version, so it reads every format from 2 to
 23. Format 23's type-tree content hashes and blob headers follow UnityPy 1.25.4; AssetStudio
 does not yet handle that layout. A zero-length blob has no embedded tree, so a generic dump
@@ -343,7 +343,7 @@ Each of these throws `UnsupportedError` naming what it found:
   that modified the format.
 - One bundle that unpacks to more than `0x7fffffff` bytes (2 GiB).
 - A class reader for a version it has no layout for: before its "From" version in
-  [Classes](#classes) (`Texture2D` has none), `SpriteAtlas` from 6000.6 on, or a
+  [Classes](#classes) (`Texture2D` has none), or a
   version-stripped file where the bytes do not decide the layout
   ([Version-stripped files](#version-stripped-files)). `readTypeTree()` still works on such files.
 - An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
@@ -415,7 +415,7 @@ Call one yourself only to read an object as a specific class.
 | `readMaterial` | `Material`, `UnityPropertySheet`, `UnityTexEnv`, `BuildTextureStackReference`, `Color`, `Vector2` |
 | `readTexture`, `readTexture2D`, `TextureFormat` | `Texture`, `Texture2D`, `StreamingInfo`, `GLTextureSettings`; `Texture2DData` is what `obj.read()` returns |
 | `readSprite`, `SpritePackingRotation` | `Sprite`, `SpriteRenderData`, `SpriteVertex`, `SpriteBone`, `SecondarySpriteTexture`, `VertexData`, `ChannelInfo`, `SubMesh`, `BlendShapeData`, `BlendShapeVertex`, `MeshBlendShape`, `MeshBlendShapeChannel`, `BoneWeights4`, `AABB`, `Matrix4x4`, `Vector4`, `GUID` |
-| `readSpriteAtlas` | `SpriteAtlas`, `SpriteAtlasData` |
+| `readSpriteAtlas` | `SpriteAtlas`, `SpriteAtlasData`, `SpriteInstanceData` |
 | `readAudioClip` | `AudioClip`; `AudioClipData` is what `obj.read()` returns |
 | `readVideoClip` | `VideoClip`, `StreamedResource`; `VideoClipData` is what `obj.read()` returns |
 | `readFont` | `Font`, `CharacterInfo`, `Rectf` |
@@ -428,7 +428,7 @@ it; `env.assets()` calls them for you.
 
 | Export | Result types |
 |---|---|
-| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields`, `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields` |
+| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields` |
 | `toMonoBehaviourFields(data, obj)` | `MonoBehaviourFields`; it takes the object too, whose type tree tells whether `data` holds the script's fields |
 | `EditorExtensionFields`, `NamedObjectFields`, `TextureFields` | The fields every class, every named class and every texture starts with |
 
