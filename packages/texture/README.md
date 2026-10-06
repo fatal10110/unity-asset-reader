@@ -202,7 +202,7 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2, 6000.
 |---|---|
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
-| Packed into a Unity 6000.6 `SpriteAtlas` (V1 and V2 fixtures, tight or rectangle packing, a half-scale variant) | Yes, as a `PackedSprite` (`packedSprites`). A `Sprite` object that points at a 6000.6 atlas, which no fixture has, is refused |
+| Packed into a Unity 6000.6 `SpriteAtlas` (V1 and V2 fixtures, tight or rectangle packing, a half-scale variant) | Yes, as a `PackedSprite` (`packedSprites`). A `Sprite` object that points at a 6000.6 atlas, which no fixture has, is refused. No 6000.6 fixture has an alpha texture: split alpha is tested on a patched entry only |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
