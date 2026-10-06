@@ -1240,7 +1240,7 @@ main golden set until the new Sprite/SpriteAtlas layouts and texture conversion 
 |---|---|---|
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
 | `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry |
-| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; bicubic cross-check and decoder still required |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is implemented and checked on the 2019.4 variant (section 14); decoding this one needs the 6000.6 SpriteAtlas layout (#155) |
 | `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
 | `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4 |
 
@@ -1353,8 +1353,9 @@ refuses format 23. This proves container integrity, not pixel decoder support.
   rotation value 4. The probe bundles are reproducible evidence, not acceptance
   of Rotate90. Its UV0-derived direction and source-image comparison remain open.
 - #153: the variant's type-tree bytes are validated; UnityPy ignores its
-  downscale field for sprite export. A separate AssetStudio bicubic cross-check
-  is still needed before choosing a resampler or claiming decoded pixels agree.
+  downscale field for sprite export. The resampler is chosen and checked to the
+  byte against the AssetStudio bicubic cross-check of the 2019.4 variant
+  (sections 14 and 15); this 6000.6 variant also needs #155's atlas layout.
 - Format 23 must be ported before any of these new files can be consumed by
   the current reader. Merely installing Android support does not resolve this.
 
@@ -1443,7 +1444,8 @@ conflicting image hash with an explicit AssetStudio verdict.
 The variant has two native render-data entries with `downscaleMultiplier = 0.5`.
 UnityPy ignores this multiplier when exporting sprites. Its hashes are labeled
 unsuitable for #153 resize acceptance. The executed AssetStudio bicubic reference
-pixels are available through section 15; the resize implementation remains #153.
+pixels are available through section 15; the texture package's sprite tests check
+its resize (#153) against them to the byte.
 
 The Android atlases use ETC_RGB4 with `allowsAlphaSplitting = true`. All 17
 atlas sprite entries resolve to distinct, non-null ETC1 color and alpha textures.

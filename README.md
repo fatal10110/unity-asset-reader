@@ -148,8 +148,7 @@ Each of these throws `UnsupportedError`, naming what it found:
 - Containers: `UnityArchive`, zip archives, encrypted bundles (UnityCN and other game-specific
   encryption).
 - Texture formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, `R8`, `RG16`, `RG32`, `RGB48`,
-  `RGBA64`. Textures built for PS4 or PS5. Sprites with an alpha texture (ETC1 split alpha) or
-  from a variant atlas.
+  `RGBA64`. Textures built for PS4 or PS5. Sprites with an alpha texture (ETC1 split alpha).
 
 Not provided at all: decoding audio, video or meshes; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or

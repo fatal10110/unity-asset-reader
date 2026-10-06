@@ -13,7 +13,8 @@ AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
   for which block or Crunch decoder each texture format goes to
   (Texture2DConverter.cs), for the Xbox 360 byte swap (Texture2DConverter.cs),
   for the vertical flip (Texture2DExtensions.cs), and for sprites: the crop,
-  the packing rotation and the tight-mesh mask (SpriteHelper.cs, Mesh.cs).
+  the packing rotation, the tight-mesh mask and the variant-atlas resize step
+  (SpriteHelper.cs, Mesh.cs).
 
 ImageSharp.Drawing -- https://github.com/SixLabors/ImageSharp.Drawing
   (Apache License 2.0, full text in LICENSE-APACHE)

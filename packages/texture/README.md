@@ -186,7 +186,8 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 60
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
-| Alpha texture (ETC1 split alpha), variant atlas (`downscaleMultiplier` other than 1) | Refused |
+| Variant atlas (`downscaleMultiplier` other than 1) | Texture resized as AssetStudio resizes it (ImageSharp 2.1.3 bicubic), then cut; matches AssetStudio's image to the byte (2019.4 half-scale fixture) |
+| Alpha texture (ETC1 split alpha) | Refused |
 
 ## Texture formats
 
@@ -248,8 +249,7 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 - `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
   Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
 - Textures built for PS4 or PS5.
-- Sprites with an alpha texture (ETC1 split alpha), and sprites of a variant atlas (a
-  `downscaleMultiplier` other than 1).
+- Sprites with an alpha texture (ETC1 split alpha).
 - With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
