@@ -1222,7 +1222,7 @@ check the test that the fixtures still cover FlipHorizontal, FlipVertical and
 Rotate180, and regenerate the AssetStudio sprite cross-check hashes with the
 goldens.
 
-## 13. Unity 6000.6.4f1 candidate fixtures (#108, #153, #155, #160)
+## 13. Unity 6000.6.4f1 candidate fixtures (#108, #153, #155, #160, #229)
 
 Scope: Unity 2019 and newer. Unity 5.x layouts are outside this fixture task.
 The existing 2019.4, 2020.3 and 6000.3 bundles are preserved.
@@ -1234,23 +1234,36 @@ They are therefore candidate fixtures, with independent goldens in
 `modern-goldens.json`, separate from the supported-fixture `goldens.json`.
 `scripts/make-goldens.py` excludes the sidecar's candidate keys; it continues
 using UnityPy 1.25.3 for the existing fixtures. The core reads their Sprite and
-SpriteAtlas layouts and compares them with these dumps (#155). Do not add the
-candidates to the main golden set until their texture conversion is ported too:
-sprites cut out of a 6000.6 atlas, and the signed plain formats.
+SpriteAtlas layouts and compares them with these dumps (#155), and the texture
+package cuts the sprites a 6000.6 atlas holds out of it (#229).
+
+They stay out of the main golden set (decided on #229): the signed plain
+formats of `more-plain` are still not converted, and `goldens.json` is made by
+UnityPy 1.25.3, which cannot read format 23; moving the sprite bundles alone
+would mix two oracle versions in one file for no extra check.
 
 | Folder / bundle | Content | Evidence / remaining work |
 |---|---|---|
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
-| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`), cutting sprites out of it remains |
-| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is implemented and checked on the 2019.4 variant (section 14); this variant's sprites are in a 6000.6 atlas, which the texture package does not cut sprites out of yet (#155) |
-| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4 |
-| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4 |
+| `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`). #229: its 17 packed sprites (RGBA32) are cut to UnityPy's crop, every opaque pixel of its own image lands where section 12's recipe drew it, and their tight masks equal AssetStudio's images of the same sprites in the 6000.3 build |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is checked to the byte on the 2019.4 variant (section 14). #229: this variant's half-scale sprites are cut at AssetStudio's size and checked for closeness to the master's crop only; their pixels differ from 2019.4's, and no AssetStudio run of them exists yet (#230) |
+| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder |
+| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4. #229: as `sprite-v2` |
 
 The 6000.6 atlas holds the imported sprites' names, rects, pivots, border,
 vertex data and indices inside `*spriteInstanceData`; individual packed Sprite
 objects are no longer necessary in the bundle. The sheet and unpacked tight
 sprite are still individual Sprite objects. Inspect the oracle type-tree dumps,
-not only the old `sprites` image map, when implementing #155 and #160.
+not only the old `sprites` image map, when implementing #160.
+
+UnityPy 1.25.4 exports Sprite objects only, so it has no image of a packed
+sprite of its own. `make-modern-goldens.py` gives its `get_image_from_sprite`
+a stand-in sprite that names only the atlas and the entry's render-data key,
+which is all that function reads with the packing mode forced to Rectangle
+(as `make-goldens.py`'s `rgbaSha256`): `serialized.<file>.packedSprites`, by
+atlas path id, in `m_RenderDataMap` order, each with that `oracleNote`. It has
+no tight image (UnityPy's differs from AssetStudio's anyway, section 12's
+notes), and a variant entry's hash ignores the downscale (`variantOracleNote`).
 
 ### Prepare and build
 
@@ -1357,12 +1370,13 @@ refuses format 23. This proves container integrity, not pixel decoder support.
 - #153: the variant's type-tree bytes are validated; UnityPy ignores its
   downscale field for sprite export. The resampler is chosen and checked to the
   byte against the AssetStudio bicubic cross-check of the 2019.4 variant
-  (sections 14 and 15); this 6000.6 variant's sprites wait for
-  the texture package to cut sprites out of a 6000.6 atlas (#155).
-- #155: the core reads the 6000.6 SpriteAtlas layout. Its packed sprites exist
-  only inside the atlas (`*spriteInstanceData`), not as Sprite objects, and the
-  texture package does not list or decode them yet; a Sprite object that points
-  at a 6000.6 atlas is refused with `UnsupportedError`.
+  (sections 14 and 15). This 6000.6 variant's sprites are cut since #229, but
+  checked for size and closeness only: an AssetStudio run of them needs
+  `cross-check-fixture-oracles.py` extended to format 23 (#230).
+- #229: a Sprite object that points at a 6000.6 atlas is still refused with
+  `UnsupportedError`: no fixture has one, to show whether its own `m_RD` or the
+  atlas' `*spriteInstanceData` holds its mesh. The V2 atlases' tight masks have
+  no reference (their DXT5 pixels differ from the 6000.3 build's).
 - Format 23 is read since #223.
 
 ### RGB48 AssetStudio verdict (PR #221 review)

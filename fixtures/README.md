@@ -127,7 +127,8 @@ Format 20 and older are ported but have no fixture.
 Format 23 (Unity 6000.6.4f1) metadata and generic dumps are checked against
 `modern-goldens.json` in `packages/core/tests/modern-fixtures.test.ts` (#223),
 and the `Sprite` and `SpriteAtlas` readers on them in
-`packages/core/tests/Sprite.test.ts` (#155).
+`packages/core/tests/Sprite.test.ts` (#155); the sprites their atlases hold are
+cut in `packages/texture/tests/sprite-6000-6.test.ts` (#229).
 
 ## M1 container fixtures (`bundles/*.bundle`)
 
@@ -357,7 +358,7 @@ sprites (#34).
     Rotate90. #160 tracks settling it with a real Rotate90 sprite, whose mesh
     UV0 against its positions gives the direction independently of both oracles.
 - <a id="assetstudio-sprite-cross-check"></a>**AssetStudio sprite cross-check
-  hashes** (`ASSETSTUDIO_RGBA` in `packages/texture/tests/sprite.test.ts`).
+  hashes** (`ASSETSTUDIO_RGBA` in `packages/texture/tests/assetstudio-sprites.ts`).
   Cross-check values under plan §6, **not goldens**, for the golden entries
   above that carry a note, and for three hand-made triangles (a quad, a
   triangle with corners off the grid, and a 0.2-wide sliver, over a 16x16
@@ -377,6 +378,16 @@ sprites (#34).
     once, then sha256 of the RGBA8. For every crop, flip and Rotate180, and
     for the tight images of the 4-vertex meshes, the harness gives the UnityPy
     golden exactly; both editors give the same image for the same sprite.
+- **Sprites a Unity 6000.6 atlas holds itself** (`packedSprites` in
+  `modern-goldens.json`, #229) have no Sprite objects, which is all UnityPy
+  exports. Their goldens are UnityPy's own `get_image_from_sprite`, given a
+  stand-in sprite that names the atlas entry, with the packing mode forced to
+  Rectangle as above; [`BUILDING.md`](BUILDING.md) section 13. There is no
+  UnityPy tight image of them. `packages/texture/tests/sprite-6000-6.test.ts`
+  checks their tight masks against the AssetStudio cross-check hashes of the
+  same sprites in the 6000.3 build (same source images, same meshes), and every
+  opaque pixel against section 12's recipe. The 6000.6 variant's half-scale
+  sprites are checked for size and closeness only (#230).
 
 ## Regenerating
 
