@@ -334,7 +334,9 @@ function readSpriteFields(
     );
   }
   if (atLeast(version, 2018, 1)) {
-    out.m_Bones = readArray(reader, "Sprite", "m_Bones", (r) => readBone(r, version));
+    out.m_Bones = readArray(reader, "Sprite", "m_Bones", (r) =>
+      readBone(r, version, "Sprite", "m_Bones"),
+    );
   }
   if (atLeast(version, 2023, 1)) {
     out.m_ScriptableObjects = readArray(reader, "Sprite", "m_ScriptableObjects", readPPtr);
@@ -352,7 +354,7 @@ function readSpriteRenderData(reader: ObjectReader, version: UnityVersion): Spri
     const indexBytes = readCount(reader, `Sprite ${reader.pathId} m_IndexBuffer byte`);
     out.m_IndexBuffer = reader.readBytes(indexBytes);
     reader.align();
-    out.m_VertexData = readVertexData(reader, version);
+    out.m_VertexData = readVertexData(reader, version, "Sprite");
   } else {
     out.vertices = readArray(reader, "Sprite", "vertices", (r) => readSpriteVertex(r, version));
     out.indices = readArray(reader, "Sprite", "indices", (r) => r.readUInt16());
@@ -365,7 +367,7 @@ function readSpriteRenderData(reader: ObjectReader, version: UnityVersion): Spri
       out.m_SourceSkin = readArray(reader, "Sprite", "m_SourceSkin", readBoneWeights);
     }
   }
-  if (atLeast(version, 6000, 5)) out.m_BlendShapes = readBlendShapeData(reader, version);
+  if (atLeast(version, 6000, 5)) out.m_BlendShapes = readBlendShapeData(reader, version, "Sprite");
   out.textureRect = readRectf(reader);
   out.textureRectOffset = readVector2(reader);
   // 5.4.6+, 5.5.3+ and 5.6+ (TPK; upstream reads it from 5.6 only).
@@ -391,8 +393,11 @@ function readSpriteVertex(reader: ObjectReader, version: UnityVersion): SpriteVe
   return atLeast(version, 4, 5) ? { pos } : { pos, uv: readVector2(reader) };
 }
 
-/** Upstream `SubMesh(ObjectReader)`, for the versions a sprite has one (5.6+). */
-function readSubMesh(reader: ObjectReader, version: UnityVersion): SubMesh {
+/**
+ * Upstream `SubMesh(ObjectReader)`, for the versions a sprite has one (5.6+).
+ * Internal: shared with `SpriteAtlas.ts`.
+ */
+export function readSubMesh(reader: ObjectReader, version: UnityVersion): SubMesh {
   const out: Partial<SubMesh> = {
     firstByte: reader.readUInt32(),
     indexCount: reader.readUInt32(),
@@ -406,25 +411,34 @@ function readSubMesh(reader: ObjectReader, version: UnityVersion): SubMesh {
   return out as SubMesh;
 }
 
-/** Upstream `VertexData(ObjectReader)`, for the versions a sprite has one (5.6+). */
-function readVertexData(reader: ObjectReader, version: UnityVersion): VertexData {
+/**
+ * Upstream `VertexData(ObjectReader)`, for the versions a sprite has one (5.6+).
+ * Internal: shared with `SpriteAtlas.ts`.
+ *
+ * @param owner the class, for error messages
+ */
+export function readVertexData(
+  reader: ObjectReader,
+  version: UnityVersion,
+  owner: string,
+): VertexData {
   const out: Partial<VertexData> = {};
   // Before 2018.1 (TPK: gone in 2018.1.0b2; upstream: before 2018).
   if (!atLeast(version, 2018, 1)) out.m_CurrentChannels = reader.readInt32();
   out.m_VertexCount = reader.readUInt32();
-  out.m_Channels = readArray(reader, "Sprite", "m_Channels", (r) => ({
+  out.m_Channels = readArray(reader, owner, "m_Channels", (r) => ({
     stream: r.readUInt8(),
     offset: r.readUInt8(),
     format: r.readUInt8(),
     dimension: r.readUInt8(),
   }));
-  out.m_DataSize = reader.readBytes(readCount(reader, `Sprite ${reader.pathId} m_DataSize byte`));
+  out.m_DataSize = reader.readBytes(readCount(reader, `${owner} ${reader.pathId} m_DataSize byte`));
   reader.align();
   return out as VertexData;
 }
 
-/** A `Matrix4x4f`, `e00` to `e33`. */
-function readMatrix(reader: ObjectReader): Matrix4x4 {
+/** A `Matrix4x4f`, `e00` to `e33`. Internal: shared with `SpriteAtlas.ts`. */
+export function readMatrix(reader: ObjectReader): Matrix4x4 {
   const out: Partial<Matrix4x4> = {};
   for (let row = 0; row < 4; row++) {
     for (let column = 0; column < 4; column++) {
@@ -448,16 +462,25 @@ function readBoneWeights(reader: ObjectReader): BoneWeights4 {
   };
 }
 
-/** Upstream `BlendShapeData(ObjectReader)`, as Unity 6000.5 writes it into a sprite. */
-function readBlendShapeData(reader: ObjectReader, version: UnityVersion): BlendShapeData {
+/**
+ * Upstream `BlendShapeData(ObjectReader)`, as Unity 6000.5 writes it into a
+ * sprite. Internal: shared with `SpriteAtlas.ts`.
+ *
+ * @param owner the class, for error messages
+ */
+export function readBlendShapeData(
+  reader: ObjectReader,
+  version: UnityVersion,
+  owner: string,
+): BlendShapeData {
   const out: BlendShapeData = {
-    vertices: readArray(reader, "Sprite", "m_BlendShapes vertices", (r) => ({
+    vertices: readArray(reader, owner, "m_BlendShapes vertices", (r) => ({
       vertex: vector3(r, version),
       normal: vector3(r, version),
       tangent: vector3(r, version),
       index: r.readUInt32(),
     })),
-    shapes: readArray(reader, "Sprite", "m_BlendShapes shapes", (r) => {
+    shapes: readArray(reader, owner, "m_BlendShapes shapes", (r) => {
       const shape = {
         firstVertex: r.readUInt32(),
         vertexCount: r.readUInt32(),
@@ -467,23 +490,34 @@ function readBlendShapeData(reader: ObjectReader, version: UnityVersion): BlendS
       r.align();
       return shape;
     }),
-    channels: readArray(reader, "Sprite", "m_BlendShapes channels", (r) => ({
-      name: readStringField(r, "Sprite", "m_BlendShapes channel name"),
+    channels: readArray(reader, owner, "m_BlendShapes channels", (r) => ({
+      name: readStringField(r, owner, "m_BlendShapes channel name"),
       nameHash: r.readUInt32(),
       frameIndex: r.readInt32(),
       frameCount: r.readInt32(),
     })),
-    fullWeights: readArray(reader, "Sprite", "m_BlendShapes fullWeights", (r) => r.readFloat32()),
+    fullWeights: readArray(reader, owner, "m_BlendShapes fullWeights", (r) => r.readFloat32()),
   };
   reader.align();
   return out;
 }
 
-/** A `SpriteBone`: 2021.1 added `guid` after the name and `color` at the end. */
-function readBone(reader: ObjectReader, version: UnityVersion): SpriteBone {
+/**
+ * A `SpriteBone`: 2021.1 added `guid` after the name and `color` at the end.
+ * Internal: shared with `SpriteAtlas.ts`.
+ *
+ * @param owner the class, for error messages
+ * @param field the array the bone is in, for error messages
+ */
+export function readBone(
+  reader: ObjectReader,
+  version: UnityVersion,
+  owner: string,
+  field: string,
+): SpriteBone {
   const v2021 = atLeast(version, 2021, 1);
-  const out: Partial<SpriteBone> = { name: readStringField(reader, "Sprite", "m_Bones name") };
-  if (v2021) out.guid = readStringField(reader, "Sprite", "m_Bones guid");
+  const out: Partial<SpriteBone> = { name: readStringField(reader, owner, `${field} name`) };
+  if (v2021) out.guid = readStringField(reader, owner, `${field} guid`);
   out.position = vector3(reader, version);
   out.rotation = {
     x: reader.readFloat32(),

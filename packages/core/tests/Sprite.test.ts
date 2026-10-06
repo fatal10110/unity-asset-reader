@@ -3,16 +3,28 @@
 // against hand-built layouts at every version gate of Unity's type trees.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { golden, type GoldenNode, type GoldenSerialized } from "../../../fixtures/helpers.js";
+import {
+  golden,
+  loadFixture,
+  type Golden,
+  type GoldenNode,
+  type GoldenSerialized,
+} from "../../../fixtures/helpers.js";
 import { readSprite, SpritePackingRotation, type Sprite } from "../src/classes/Sprite.js";
 import { readSpriteAtlas, type SpriteAtlas } from "../src/classes/SpriteAtlas.js";
+import { load } from "../src/env.js";
 import { CorruptError, UnsupportedError } from "../src/errors.js";
 import { BuildTarget } from "../src/serialized/BuildTarget.js";
 import { ClassID } from "../src/serialized/ClassID.js";
 import { ObjectReader } from "../src/serialized/ObjectReader.js";
-import type { SerializedFile, UnityVersion } from "../src/serialized/SerializedFile.js";
+import {
+  readSerializedFile,
+  type SerializedFile,
+  type UnityVersion,
+} from "../src/serialized/SerializedFile.js";
 import { fixturesWith, objectBytes, objectsOf, withTail } from "./class-readers.js";
 
 const FIXTURES = fixturesWith(ClassID.Sprite);
@@ -95,6 +107,55 @@ for (const { classId, read } of READERS) {
       }
     });
   }
+}
+
+// --- Unity 6000.6.4f1 (format 23): the candidate fixtures and their UnityPy 1.25.4 goldens ----
+
+/** `fixtures/modern-goldens.json`: the 6000.6 fixtures are not in the main golden set. */
+const MODERN = (
+  JSON.parse(
+    readFileSync(new URL("../../../fixtures/modern-goldens.json", import.meta.url), "utf8"),
+  ) as { fixtures: Record<string, Golden> }
+).fixtures;
+const U6000_6 = ["sprite", "variant", "sprite-v2", "sprite-v2-rect"].map(
+  (folder) => `editor/6000.6.4f1/${folder}/sprites`,
+);
+
+for (const name of U6000_6) {
+  test(`${name}: every Sprite and SpriteAtlas equals the golden dump and readTypeTree()`, () => {
+    const sf = Object.values(MODERN[name]!.serialized!)[0]!;
+    assert.equal(sf.formatVersion, 23);
+    const env = load([{ name, data: loadFixture(name) }]);
+    const atlases: SpriteAtlas[] = [];
+    for (const reader of env.objects) {
+      const read = READERS.find((r) => r.classId === reader.type)?.read;
+      if (!read) continue;
+      const dump = sf.typetrees[String(reader.pathId)]?.value;
+      assert.ok(dump, `no golden dump for ${reader.pathId}`);
+      const value = read(reader);
+      assert.equal(reader.position, reader.byteSize, "byteSize not consumed exactly");
+      const node = tree(sf, reader.type);
+      assert.equal(JSON.stringify(normalize(node, value)), JSON.stringify(dump));
+      const typed = reader.readTypeTree();
+      assert.equal(JSON.stringify(normalize(node, typed)), JSON.stringify(dump));
+      assert.deepEqual(value, typed);
+      assert.deepEqual(reader.read(), value);
+      if (reader.type === ClassID.SpriteAtlas) atlases.push(value as SpriteAtlas);
+    }
+    // Two atlases each, and the 6000.6 layout: no packed sprite list, the
+    // sprites themselves in the entries.
+    assert.equal(atlases.length, 2);
+    for (const atlas of atlases) {
+      assert.equal("m_PackedSprites" in atlas, false);
+      assert.equal("m_PackedSpriteNamesToIndex" in atlas, false);
+      assert.ok(atlas.m_RenderDataMap.length > 0);
+      for (const [, entry] of atlas.m_RenderDataMap) {
+        const instance = entry["*spriteInstanceData"];
+        assert.ok(instance && instance.spriteName.length > 0);
+        assert.ok(instance.m_VertexData.m_VertexCount > 0);
+      }
+    }
+  });
 }
 
 test("the fixtures cover formats 21 and 22, packing flips, tight meshes, trimmed sprites", () => {
@@ -401,6 +462,12 @@ const V2017 = { border: true, pivot: true, polygon: true, atlas: true, alpha: tr
 const V2017_REST = { atlasRectOffset: true, uvTransform: true, tail: PHYSICS };
 const V2018 = { ...V2017, ...V2017_REST, mesh: [...SUBMESH(true), ...VERTEX_DATA(false)] };
 const V2019 = { ...V2018, secondary: true, bindpose: BINDPOSE };
+const V6000_5 = sprite({
+  ...V2019,
+  polygon: false,
+  blendShapes: true,
+  tail: [...PHYSICS, ...BONES(true), ...SCRIPTABLE],
+});
 
 /**
  * Each Sprite layout at the version it appears, and, around each gate, the
@@ -460,15 +527,9 @@ const SPRITE_LAYOUTS: { unity: UnityVersion; buildType?: string; fields: Field[]
     unity: [2023, 1, 0, 1],
     fields: sprite({ ...V2019, tail: [...PHYSICS, ...BONES(true), ...SCRIPTABLE] }),
   },
-  {
-    unity: [6000, 5, 0, 1],
-    fields: sprite({
-      ...V2019,
-      polygon: false,
-      blendShapes: true,
-      tail: [...PHYSICS, ...BONES(true), ...SCRIPTABLE],
-    }),
-  },
+  { unity: [6000, 5, 0, 1], fields: V6000_5 },
+  // 6000.6 changed the Sprite's flags only (TPK), as the 6000.6.4f1 fixtures confirm.
+  { unity: [6000, 6, 0, 1], fields: V6000_5 },
 ];
 
 for (const { unity, buildType = "f", fields } of SPRITE_LAYOUTS) {
@@ -546,6 +607,39 @@ const atlas = (atlasRectOffset: boolean, secondary: boolean, guid = false): Fiel
   ...(guid ? ["guid m_Guid"] : []),
 ];
 
+/** Sprite segments moved to another path: `m_RD.m_SubMeshes` -> `<to>.m_SubMeshes`. */
+const moved = (fields: Field[], from: string, to: string): Field[] =>
+  fields.map((f) =>
+    typeof f === "string" ? f.replace(` ${from}`, ` ${to}`) : ["n", f[1].replace(from, to), f[2]],
+  );
+
+/** 6000.6's `SpriteInstanceData` of the first entry: a Sprite's head, mesh, bones, shape. */
+const INSTANCE = (() => {
+  const at = "m_RenderDataMap.0.1.*spriteInstanceData";
+  return [
+    `str ${at}.spriteName`,
+    `rect ${at}.rect`,
+    `v4 ${at}.border`,
+    `v2 ${at}.pivot`,
+    `f32 ${at}.pixelsToUnits`,
+    `i32 ${at}.m_IndexFormat`,
+    ...moved([...SUBMESH(true), ...VERTEX_DATA(false), ...BINDPOSE, ...BLEND_SHAPES], "m_RD", at),
+    ...moved(BONES(true), "m_Bones", `${at}.spriteBones`),
+    ...moved(PHYSICS, "m_PhysicsShape", `${at}.physicsShape`),
+  ] satisfies Field[];
+})();
+
+/** 6000.6: no m_PackedSprites or m_PackedSpriteNamesToIndex, the sprite in every entry. */
+const ATLAS_6000_6: Field[] = [
+  "str m_Name",
+  ...ATLAS_DATA(true, true),
+  ...INSTANCE,
+  "str m_Tag",
+  "bool m_IsVariant",
+  "align",
+  "guid m_Guid",
+];
+
 const ATLAS_LAYOUTS: { unity: UnityVersion; buildType?: string; fields: Field[] }[] = [
   { unity: [2017, 1, 0, 1], fields: atlas(false, false) },
   { unity: [2017, 1, 1, 1], fields: atlas(false, false) },
@@ -557,6 +651,7 @@ const ATLAS_LAYOUTS: { unity: UnityVersion; buildType?: string; fields: Field[] 
   { unity: [2020, 2, 0, 1], fields: atlas(true, true) },
   { unity: [6000, 4, 0, 1], fields: atlas(true, true) },
   { unity: [6000, 5, 0, 1], fields: atlas(true, true, true) },
+  { unity: [6000, 6, 0, 1], fields: ATLAS_6000_6 },
 ];
 
 for (const { unity, buildType = "f", fields } of ATLAS_LAYOUTS) {
@@ -580,6 +675,7 @@ for (const { unity, buildType = "f", fields } of ATLAS_LAYOUTS) {
  * below format 7 (`"2.5.0f5"`, #98).
  */
 for (const [text, format] of [
+  ["0.0.0", 23],
   ["0.0.0", 22],
   ["0.0.0", 17],
   ["2.5.0f5", 6],
@@ -648,10 +744,20 @@ test("a version before the class is refused: Sprite before 4.3, SpriteAtlas befo
   assert.throws(() => readSpriteAtlas(atlas), refused);
 });
 
-test("a SpriteAtlas of 6000.6, known only from pre-release type trees, is refused", () => {
+test("the 6000.6 SpriteAtlas gate: either layout read as the other is refused", () => {
+  const v6000_5 = build(atlas(true, true, true)).bytes;
+  const v6000_6 = build(ATLAS_6000_6).bytes;
+  // Each reads as its own version, and its bytes misread under the other gate.
+  const read = (bytes: Uint8Array, unity: UnityVersion) =>
+    readSpriteAtlas(synthetic(fromAtlas, bytes, unity));
+  read(v6000_5, [6000, 5, 9, 1]);
+  read(v6000_6, [6000, 6, 0, 1]);
+  assert.throws(() => read(v6000_5, [6000, 6, 0, 1]), CorruptError);
+  assert.throws(() => read(v6000_6, [6000, 5, 9, 1]), CorruptError);
+  // The real 6000.3 atlas, read as 6000.6, too.
   assert.throws(
     () => readSpriteAtlas(synthetic(fromAtlas, fromAtlas.bytes, [6000, 6, 0, 1])),
-    (err: unknown) => err instanceof UnsupportedError && /6000\.6 is not ported/.test(err.message),
+    CorruptError,
   );
 });
 
@@ -721,6 +827,59 @@ test("a negative or oversized count throws CorruptError naming the field", () =>
     assert.throws(
       () => readSprite(synthetic(fromSprite, copy, [2019, 1, 0, 1])),
       (err: unknown) => err instanceof CorruptError && /m_AtlasTags count/.test(err.message),
+    );
+  }
+});
+
+/** The largest object of a class in a 6000.6 fixture: its bytes, file and entry. */
+function modernObject(name: string, classId: number): typeof fromSprite {
+  const env = load([{ name, data: loadFixture(name) }]);
+  const data = env.files.find((f) => Boolean(MODERN[name]!.serialized![f.path]))!.data;
+  const sf = readSerializedFile(data);
+  const info = sf.objects
+    .filter((o) => o.classId === classId)
+    .sort((a, b) => b.byteSize - a.byteSize)[0]!;
+  // A copy, so a test can change it.
+  const bytes = new Uint8Array(data.subarray(info.byteStart, info.byteStart + info.byteSize));
+  return { bytes, sf, info };
+}
+
+const U6000_6_4: UnityVersion = [6000, 6, 4, 1];
+const modernAtlas = modernObject("editor/6000.6.4f1/sprite/sprites", ClassID.SpriteAtlas);
+const modern = (bytes: Uint8Array) =>
+  synthetic(modernAtlas, bytes, U6000_6_4, "f", { format: 23 });
+
+test("6000.6: every cut through the packed SpriteAtlas throws CorruptError", () => {
+  // The packed atlas: 15 entries, each with its spriteInstanceData.
+  assert.equal(readSpriteAtlas(modern(modernAtlas.bytes)).m_RenderDataMap.length, 15);
+  // The last 3 bytes may be only padding; every shorter cut loses data.
+  for (let cut = 0; cut <= modernAtlas.bytes.length - 4; cut++) {
+    const reader = modern(modernAtlas.bytes.subarray(0, cut));
+    assert.throws(() => readSpriteAtlas(reader), CorruptError, `cut at ${cut}`);
+  }
+});
+
+test("6000.6: bytes left after the SpriteAtlas' last field throw CorruptError", () => {
+  const reader = modern(withTail(modernAtlas.bytes, 0, 0, 0, 0));
+  assert.throws(
+    () => readSpriteAtlas(reader),
+    (err: unknown) =>
+      err instanceof CorruptError &&
+      err.message.includes(`SpriteAtlas ${reader.pathId} ends at ${modernAtlas.bytes.length}`),
+  );
+});
+
+test("6000.6: a negative or oversized count in spriteInstanceData throws CorruptError", () => {
+  const { bytes } = build(ATLAS_6000_6);
+  const at = ATLAS_6000_6.findIndex((f) => Array.isArray(f) && f[1].endsWith(".m_SubMeshes"));
+  const head = build(ATLAS_6000_6.slice(0, at)).bytes.length;
+  for (const count of [-1, 0x7fff_ffff]) {
+    const copy = new Uint8Array(bytes);
+    new DataView(copy.buffer).setInt32(head, count, true);
+    assert.throws(
+      () => readSpriteAtlas(synthetic(fromAtlas, copy, [6000, 6, 0, 1])),
+      (err: unknown) =>
+        err instanceof CorruptError && /SpriteAtlas -?\d+ m_SubMeshes count/.test(err.message),
     );
   }
 });
