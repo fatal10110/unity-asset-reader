@@ -37,10 +37,7 @@ interface Kernel {
  *   of radius 2, widened by `from / to` when shrinking, over the source
  *   pixels within its radius (window ends within 1e-8 of an integer are
  *   that integer). Weights are computed in double, divided by their sum and
- *   stored as floats. When the kernels repeat with a period of
- *   `to / gcd(from, to)` and there are two periods between the edge kernels,
- *   ImageSharp computes one period and reuses its weights for the rest, at
- *   each kernel's own start, and so does this.
+ *   stored as floats.
  * - Rows are resampled first, then columns: each a sum, term by term in
  *   order, of pixel times weight.
  * - Colour is divided by alpha, and a float `v` becomes the byte
@@ -163,12 +160,6 @@ function floorTolerant(value: number): number {
   return Math.abs(value - nearest) < EPSILON ? nearest : Math.floor(value);
 }
 
-/** Greatest common divisor of two positive integers. */
-function gcd(a: number, b: number): number {
-  while (b !== 0) [a, b] = [b, a % b];
-  return a;
-}
-
 /** Keys' cubic convolution kernel with a = -0.5, in floats. */
 function bicubic(distance: number): number {
   const x = Math.abs(distance);
@@ -185,10 +176,9 @@ function kernels(from: number, to: number, first: number, count: number): Kernel
   const ratio = from / to;
   const scale = Math.max(ratio, 1);
   const radius = ceilTolerant(scale * 2);
-  const center = (i: number) => (i + 0.5) * ratio - 0.5;
-
-  const build = (i: number): Kernel => {
-    const c = center(i);
+  const out: Kernel[] = [];
+  for (let i = first; i < first + count; i++) {
+    const c = (i + 0.5) * ratio - 0.5;
     const start = Math.max(ceilTolerant(c - radius), 0);
     const end = Math.min(floorTolerant(c + radius), from - 1);
     const values: number[] = [];
@@ -198,24 +188,7 @@ function kernels(from: number, to: number, first: number, count: number): Kernel
       sum += value;
       values.push(value);
     }
-    return { start, weights: Float32Array.from(values, (v) => (sum > 0 ? v / sum : v)) };
-  };
-
-  // The edge kernels: as many as it takes for a window to start at 0 or more.
-  const leftmost = (radius - (ratio - 1) * 0.5 - 1) / ratio;
-  let edge = ceilTolerant(leftmost);
-  if (Math.abs(leftmost - edge) < EPSILON) edge++;
-  const period = to / gcd(from, to);
-  const repeats = 2 * (edge + period) < to;
-
-  const out: Kernel[] = [];
-  for (let i = first; i < first + count; i++) {
-    if (repeats && i >= edge + period && i < to - edge) {
-      const { weights } = build(edge + ((i - edge) % period));
-      out.push({ start: ceilTolerant(center(i) - radius), weights });
-    } else {
-      out.push(build(i));
-    }
+    out.push({ start, weights: Float32Array.from(values, (v) => (sum > 0 ? v / sum : v)) });
   }
   return out;
 }
