@@ -198,6 +198,7 @@ generated block data; no current editor writes those formats.
 | Group | Formats | Decoded by | Tested on |
 |---|---|---|---|
 | Plain | `Alpha8`, `ARGB4444`, `RGB24`, `RGBA32`, `ARGB32`, `RGB565`, `R16`, `RGBA4444`, `BGRA32`, `RHalf`, `RGHalf`, `RGBAHalf`, `RFloat`, `RGFloat`, `RGBAFloat`, `RGB9e5Float`, `YUY2` | TypeScript | editor-built (6000.3), all 17 |
+| | `R8`, `RG16`, `RG32`, `RGB48`, `RGBA64` | TypeScript | editor-built (2019.4, 6000.6), all five |
 | BC | `DXT1` (BC1), `DXT5` (BC3), `BC4`, `BC5`, `BC6H`, `BC7` | WASM `decode_bc1`, `decode_bc3` to `decode_bc7` | editor-built (6000.3) |
 | ETC | `ETC_RGB4` (ETC1), `ETC2_RGB`, `ETC2_RGBA1`, `ETC2_RGBA8` | WASM `decode_etc1`, `decode_etc2`, `decode_etc2a1`, `decode_etc2a8` | editor-built (6000.3) |
 | | `ETC_RGB4_3DS`, `ETC_RGBA8_3DS` | WASM, the decoder of `ETC_RGB4` / `ETC2_RGBA8` | `ETC_RGB4` / `ETC2_RGBA8` fixture data |
@@ -215,6 +216,9 @@ Details worth knowing:
 
 - Output is 8 bits per channel. Half and float channels are scaled by 255 and clamped, so HDR
   values saturate.
+- Unsigned 16-bit channels (`R16`, `RG32`, `RGB48`, `RGBA64`) use AssetStudio's rounded
+  `(component * 255 + 32895) >> 16` conversion. `R8` uses UnityPy's golden; the other four new
+  plain formats use the executed AssetStudio cross-checks where UnityPy fails or disagrees.
 - Channels a format lacks are 0 (color) or 255 (alpha); `Alpha8` is white with that alpha.
 - `DXT1Crunched` / `DXT5Crunched` from before Unity 2017.3 use the original crunch format. It is
   unpacked too, and checked against AssetStudio's decoder only.
@@ -239,8 +243,10 @@ data checked against UnityPy, not on real console builds.
 
 Each of these throws `UnsupportedError`, whose `kind` and `found` say what was refused:
 
-- Formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, `R8`, `RG16`, `RG32`, `RGB48`, `RGBA64`.
+- Formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, and signed plain formats (values 75–82).
   `YUY2` of odd width. (A swizzled Switch texture stores `BGR24` as `BGRA32`; that one decodes.)
+- `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
+  Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
 - Textures built for PS4 or PS5.
 - Sprites with an alpha texture (ETC1 split alpha), and sprites of a variant atlas (a
   `downscaleMultiplier` other than 1).

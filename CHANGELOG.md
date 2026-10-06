@@ -81,6 +81,8 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ### 1.0.2 - Unreleased
 
+- Decode `R8`, `RG16`, `RG32`, `RGB48` and `RGBA64` to RGBA with AssetStudio's rounded
+  16-bit channel conversion, tested on the existing 2019.4 and 6000.6 fixtures (#108).
 - Add a caller-owned `decodedTextures` map to `decodeSprite`, `decodeImage` and `images`,
   so sequential sprite decodes reuse their atlas pixels. The demo retains textures for
   its "Decode all images" batch only (#154).
