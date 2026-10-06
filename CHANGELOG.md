@@ -29,12 +29,6 @@ to release is in [RELEASING.md](RELEASING.md).
 
 - Update repository metadata and documentation links after the GitHub repository rename to
   `fatal10110/unity-asset-reader` (#199).
-- `decodeSprite` decodes sprites of a variant SpriteAtlas (`downscaleMultiplier` other than 1)
-  instead of refusing them with `UnsupportedError("sprite downscale")`: as AssetStudio does, the
-  texture is resized by the multiplier with ImageSharp 2.1.3's bicubic resampling before the
-  sprite is cut, matching AssetStudio's image to the byte on the 2019.4 half-scale fixture.
-  `imageInfo` reports such a sprite's resized size. A `decodedTextures` map keeps the texture
-  as decoded (#153).
 
 - `load()` and `open()` accept a `unityVersion` fallback for version-stripped files and files
   below SerializedFile format 7. Recorded versions and usable enclosing-bundle revisions take
@@ -97,6 +91,12 @@ First release. The core: isomorphic, synchronous, no WASM.
 - Add a caller-owned `decodedTextures` map to `decodeSprite`, `decodeImage` and `images`,
   so sequential sprite decodes reuse their atlas pixels. The demo retains textures for
   its "Decode all images" batch only (#154).
+- `decodeSprite` decodes sprites of a variant SpriteAtlas (`downscaleMultiplier` other than 1)
+  instead of refusing them with `UnsupportedError("sprite downscale")`: as AssetStudio does, the
+  texture (with its alpha texture merged in) is resized by the multiplier with ImageSharp
+  2.1.3's bicubic resampling before the sprite is cut, matching AssetStudio's image to the
+  byte on the 2019.4 half-scale fixture. `imageInfo` reports such a sprite's resized size. A
+  `decodedTextures` map keeps the texture as decoded (#153).
 - Update repository metadata and documentation links after the GitHub repository rename to
   `fatal10110/unity-asset-reader` (#199).
 
