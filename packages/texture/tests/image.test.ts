@@ -61,6 +61,9 @@ const PACKAGE = dirname(HERE);
 
 const SPRITES = "editor/6000.3.25f1/sprite/sprites";
 const SPRITE_FIXTURES = ["editor/2019.4.41f2/sprite/sprites", SPRITES];
+// Android, ETC1 with split alpha (#152): the same sprites, in atlases that keep
+// their alpha in a texture of its own.
+const SPLIT_ALPHA = "editor/2019.4.41f2/split-alpha/sprites";
 const PLAIN = "editor/6000.3.25f1/plain/textures";
 const STREAMED = "editor/6000.3.25f1/lz4/texture";
 const STRIPPED = "editor/6000.3.25f1/stripped/font";
@@ -191,7 +194,8 @@ test("the usage block compiles under strict, and isImage / imageInfo narrow", ()
   assert.deepStrictEqual(problems, []);
 });
 
-for (const fixture of [...SPRITE_FIXTURES, "editor/6000.3.25f1/block/windows", STREAMED]) {
+const BLOCK_WINDOWS = "editor/6000.3.25f1/block/windows";
+for (const fixture of [...SPRITE_FIXTURES, SPLIT_ALPHA, BLOCK_WINDOWS, STREAMED]) {
   wasmTest(`${fixture}: the usage block runs, with pixels equal to the goldens`, async () => {
     const env = loadEnv(fixture);
     const { rows, all } = await usage(env);
@@ -403,7 +407,7 @@ test("imageInfo needs no image data: a texture in a .resS that is not loaded", (
   assert.equal(imageInfo(packed).sprite.texture.streamed, true);
 });
 
-for (const fixture of SPRITE_FIXTURES) {
+for (const fixture of [...SPRITE_FIXTURES, SPLIT_ALPHA]) {
   test(`${fixture}: imageInfo of each Sprite = the oracle's fields and cut-out size`, () => {
     const env = loadEnv(fixture);
     const paths = containerPaths(fixture);
@@ -485,7 +489,7 @@ test("a sprite's info size is the size cutSprite cuts, for every packing rotatio
   }
 });
 
-test("imageInfo describes a sprite with an alpha texture, which decoding refuses", async () => {
+test("imageInfo describes a sprite with an alpha texture, which decoding merges", async () => {
   const env = loadEnv(SPRITES);
   const asset = [...env.assets("Sprite")].find((a) => a.name === "sheet_a")!;
   const file = env.files.find((f) => !f.path.endsWith(".resS"))!.data;
@@ -497,12 +501,45 @@ test("imageInfo describes a sprite with an alpha texture, which decoding refuses
   const hits = [...bytes.keys()].filter((i) => pair.every((b, k) => bytes[i + k] === b));
   assert.equal(hits.length, 1);
   file.set(pair.subarray(0, 12), asset.reader.byteStart + hits[0]! + 12);
-  assert.equal(imageInfo(asset).sprite.texture.pathId, texture.m_PathID);
+  const info = imageInfo(asset);
+  assert.equal(info.sprite.texture.pathId, texture.m_PathID);
   if (skip) return;
-  await assert.rejects(
-    decodeImage(asset),
-    (e: unknown) => e instanceof UnsupportedError && e.kind === "sprite alpha texture",
-  );
+  // Its own texture's red as its alpha: the sprite as it was, alpha = red.
+  const plain = [...loadEnv(SPRITES).assets("Sprite")].find((a) => a.name === "sheet_a")!;
+  const want = (await decodeImage(plain)).rgba;
+  for (let i = 0; i < want.length; i += 4) want[i + 3] = want[i]!;
+  const image = await decodeImage(asset);
+  assert.deepStrictEqual({ ...image, rgba: undefined }, { ...info, rgba: undefined });
+  assert.deepStrictEqual(image.rgba, want);
+  assert.ok(want.some((v, i) => i % 4 === 3 && v !== 255));
+});
+
+// --- split alpha and the caller's textures -----------------------------------------------
+
+wasmTest("split alpha: caller-owned textures keep each texture's own pixels", async () => {
+  const env = loadEnv(SPLIT_ALPHA);
+  const textures = new Map([...env.assets("Texture2D")].map((t) => [t.reader, t]));
+  for (const textureFirst of [false, true]) {
+    const decodedTextures = new Map<ObjectReader, RgbaImage>();
+    let merged = 0;
+    for (const asset of env.assets("Sprite")) {
+      const { texture, alphaTexture } = locateSprite(asset.reader, env);
+      if (!alphaTexture) continue;
+      // The colour texture through the same map first: it must not be taken as merged.
+      if (textureFirst) await decodeImage(textures.get(texture)!, { decodedTextures });
+      const image = await decodeImage(asset, { decodedTextures });
+      assert.equal(sha256(reverseRows(image.rgba, image.width)), goldenRgba(SPLIT_ALPHA, asset));
+      merged++;
+    }
+    assert.equal(merged, 17);
+    // Colour and alpha textures, each its own decode and golden, never merged.
+    assert.equal(decodedTextures.size, 4);
+    for (const [reader, image] of decodedTextures) {
+      const asset = textures.get(reader)!;
+      assert.equal(sha256(reverseRows(image.data, image.width)), goldenRgba(SPLIT_ALPHA, asset));
+      assert.strictEqual((await decodeImage(asset, { decodedTextures })).rgba, image.data);
+    }
+  }
 });
 
 // --- decodeImage -----------------------------------------------------------------------
