@@ -11,6 +11,7 @@ import {
   UnsupportedError,
 } from "unity-asset-reader";
 import type {
+  Asset,
   Env,
   ObjectReader,
   PPtr,
@@ -60,9 +61,86 @@ export type SpriteRect = Pick<
 /** A sprite's key into its atlas' `m_RenderDataMap`. */
 type RenderDataKey = NonNullable<Sprite["m_RenderDataKey"]>;
 
+/**
+ * A sprite that a Unity 6000.6 (or later) `SpriteAtlas` holds itself, as the
+ * `spriteInstanceData` of one of its `renderDataMap` entries, with no `Sprite`
+ * object of its own: what {@link packedSprites} lists. {@link decodeSprite},
+ * `imageInfo` and `decodeImage` take it where they take a Sprite, and `images`
+ * lists it.
+ */
+export interface PackedSprite {
+  /** Discriminant: tells it from an `Asset` (`imageInfo`, `decodeImage`). */
+  readonly type: "PackedSprite";
+  /** The sprite's name: `spriteName` of its `spriteInstanceData`. */
+  readonly name: string;
+  /** The SpriteAtlas asset holding it. */
+  readonly atlas: Asset<"SpriteAtlas">;
+  /** Its entry's index in the atlas' `renderDataMap` (`m_RenderDataMap`). */
+  readonly index: number;
+}
+
+/**
+ * The fields of a sprite that cutting it reads: a Sprite's own, or what a
+ * 6000.6 atlas holds of a packed sprite under the same names. Internal.
+ */
+export interface SpriteShape extends Pick<
+  Sprite,
+  "m_Name" | "m_Rect" | "m_Pivot" | "m_Border" | "m_PixelsToUnits"
+> {
+  /** The mesh, for `tightMesh`. */
+  m_RD: Pick<
+    SpriteRenderData,
+    "vertices" | "indices" | "m_VertexData" | "m_SubMeshes" | "m_IndexBuffer"
+  > & {
+    /** 6000.6's `m_IndexFormat` of `m_IndexBuffer`: 0 is `UInt16`, 1 `UInt32`. */
+    m_IndexFormat?: number;
+  };
+}
+
+/**
+ * The sprites a Unity 6000.6 (or later) SpriteAtlas holds itself, one per
+ * `renderDataMap` entry, in that order. A 6000.6 bundle has no `Sprite`
+ * objects for them, so this is how to reach them; each is a sprite for
+ * {@link decodeSprite}, `imageInfo` and `decodeImage`. Before 6000.6 an
+ * atlas' packed sprites are `Sprite` objects, and this returns `[]`, without
+ * reading the atlas.
+ *
+ * @param atlas a SpriteAtlas asset of `env.assets()`
+ * @returns a new array of {@link PackedSprite}
+ * @throws {TypeError} when `atlas` is not a SpriteAtlas asset
+ * @throws {UnsupportedError} / {CorruptError} what reading the atlas (`obj.read()`) throws
+ * @example
+ * for (const atlas of env.assets("SpriteAtlas")) {
+ *   for (const sprite of packedSprites(atlas)) {
+ *     const { rgba, width, height } = await decodeImage(sprite);
+ *   }
+ * }
+ */
+export function packedSprites(atlas: Asset<"SpriteAtlas">): PackedSprite[] {
+  if (atlas?.type !== "SpriteAtlas") {
+    const { typeName } = (atlas ?? {}) as { typeName?: unknown };
+    const got = typeName === undefined ? String(atlas) : `an asset of class ${String(typeName)}`;
+    throw new TypeError(`packedSprites: expected a SpriteAtlas asset, got ${got}`);
+  }
+  const [major, minor] = atlas.reader.version;
+  // 6000.6+: the atlas holds its sprites (spriteInstanceData) instead of pointing at them.
+  if (major < 6000 || (major === 6000 && minor < 6)) return [];
+  const data = atlas.reader.read<SpriteAtlas>();
+  return data.m_RenderDataMap.flatMap(([, entry], index) => {
+    const instance = entry["*spriteInstanceData"];
+    if (!instance) return [];
+    return [{ type: "PackedSprite" as const, name: instance.spriteName, atlas, index }];
+  });
+}
+
+/** Whether a sprite argument is a {@link PackedSprite} rather than an `ObjectReader`. */
+function isPacked(sprite: ObjectReader | PackedSprite): sprite is PackedSprite {
+  return (sprite as { type?: unknown } | undefined)?.type === "PackedSprite";
+}
+
 /** A sprite, the texture it is drawn from and where in it. Internal: for the tests. */
 export interface SpriteSource {
-  sprite: Sprite;
+  sprite: SpriteShape;
   rect: SpriteRect;
   texture: Texture2DData;
   /** The texture holding its alpha (ETC1 split alpha), when `rect` names one. */
@@ -119,28 +197,40 @@ export interface SpriteSource {
  * as decoded, never resized: a variant sprite is resampled from them on
  * each call.
  *
- * Unlike upstream, which hands back no image or an unmasked one, this throws
- * where the result would be wrong: see below. A sprite whose atlas is loaded
- * and has Unity 6000.6's layout, which holds the packed sprites' meshes
- * itself, is refused for now: `UnsupportedError` of kind `"Unity version"`.
+ * A sprite packed into a Unity 6000.6 (or later) atlas has no `Sprite` object:
+ * the atlas holds it, and {@link packedSprites} lists it as a
+ * {@link PackedSprite}, which this takes in place of the Sprite's reader. It
+ * is cut as an atlas entry is (texture, alpha texture, rectangle, packing and
+ * multiplier from the entry), with the name, rectangle, pivot, pixels per unit
+ * and mesh that the entry's `spriteInstanceData` holds.
  *
- * @param sprite a Sprite (`ClassID.Sprite`) from `env.objects`
+ * Unlike upstream, which hands back no image or an unmasked one, this throws
+ * where the result would be wrong: see below. A `Sprite` object whose atlas is
+ * loaded and has Unity 6000.6's layout is refused, as no fixture has one to
+ * show which of the two (its own fields or the atlas') holds its mesh:
+ * `UnsupportedError` of kind `"Unity version"`.
+ *
+ * @param sprite a Sprite (`ClassID.Sprite`) from `env.objects`, or a
+ *   {@link PackedSprite} of an atlas the env loaded
  * @param env the env that loaded it, and the files its texture and atlas are in
  * @param options see {@link DecodeSpriteOptions}
  * @returns a new RGBA image, top row first
- * @throws {TypeError} when `sprite` is not a Sprite
- * @throws {Error} before `initTexture` has finished, or when `sprite` is not
- *   one of `env.objects`
+ * @throws {TypeError} when `sprite` is neither a Sprite nor a {@link PackedSprite}
+ * @throws {Error} before `initTexture` has finished, or when `sprite` (or its
+ *   atlas) is not one of `env.objects`
  * @throws {ResourceNotFoundError} when the texture, its alpha texture, or the
  *   atlas it is in, is in a SerializedFile that is not loaded (its
  *   `fileName`), or a texture's data is in a `.resS` that is not
  * @throws {UnsupportedError} what `obj.read()` and `decodeTexture2D` throw,
- *   and: an alpha texture of another size than the texture (kind
+ *   and: a `Sprite` object packed into a 6000.6 atlas (kind `"Unity
+ *   version"`), an alpha texture of another size than the texture (kind
  *   `"sprite alpha texture size"`), a packing rotation Unity does not define
  *   (kind `"sprite packing rotation"`) and, with `tightMesh`, a mesh whose
- *   positions are not 32-bit floats (kind `"sprite vertex format"`)
+ *   positions are not 32-bit floats (kind `"sprite vertex format"`) or, for a
+ *   packed sprite, whose indices are not 16-bit (kind `"sprite index format"`)
  * @throws {CorruptError} when the sprite's atlas does not hold its render
- *   data, a pointer is null or points at nothing or at the wrong class, the
+ *   data (or, for a {@link PackedSprite}, has no packed sprite at its index), a
+ *   pointer is null or points at nothing or at the wrong class, the
  *   `downscaleMultiplier` resizes the texture to less than a pixel, the
  *   rectangle does not lie in the (resized) texture, or, with `tightMesh`,
  *   the mesh does not hold together
@@ -153,7 +243,7 @@ export interface SpriteSource {
  * }
  */
 export async function decodeSprite(
-  sprite: ObjectReader,
+  sprite: ObjectReader | PackedSprite,
   env: Env,
   options: DecodeSpriteOptions = {},
 ): Promise<RgbaImage> {
@@ -161,10 +251,10 @@ export async function decodeSprite(
   let image = await decodeTextureObject(source.texture, options.decodedTextures);
   if (source.alphaTexture) {
     const alpha = await decodeTextureObject(source.alphaTexture, options.decodedTextures);
-    const what = `sprite "${source.sprite.m_Name}" (path id ${sprite.pathId})`;
-    image = mergeAlpha(image, alpha, what);
+    image = mergeAlpha(image, alpha, source.what);
   }
-  return cutSprite(image, source.sprite, source.rect, sprite.version, options.tightMesh === true);
+  const tight = options.tightMesh === true;
+  return cutSprite(image, source.sprite, source.rect, source.version, tight);
 }
 
 /**
@@ -173,7 +263,7 @@ export async function decodeSprite(
  *
  * @throws what {@link decodeSprite} throws, but for decoding
  */
-export function findSpriteSource(obj: ObjectReader, env: Env): SpriteSource {
+export function findSpriteSource(obj: ObjectReader | PackedSprite, env: Env): SpriteSource {
   const { sprite, rect, texture, alphaTexture } = locateSprite(obj, env);
   return {
     sprite,
@@ -185,7 +275,7 @@ export function findSpriteSource(obj: ObjectReader, env: Env): SpriteSource {
 
 /** A sprite, where its pixels are, and the objects holding them. */
 export interface SpriteLocation {
-  sprite: Sprite;
+  sprite: SpriteShape;
   rect: SpriteRect;
   /** The Texture2D its pixels are in, not read. */
   texture: ObjectReader;
@@ -193,26 +283,33 @@ export interface SpriteLocation {
   alphaTexture: ObjectReader | undefined;
   /** The atlas it was found through; `undefined` when `rect` is its own `m_RD`. */
   atlas: SpriteAtlas | undefined;
+  /** The Unity version of the file its mesh is in: the Sprite's, or the atlas' when packed. */
+  version: UnityVersion;
+  /** The sprite, named for error messages. */
+  what: string;
 }
 
 /**
  * Upstream `GetImage`'s lookup: the sprite's atlas entry when its atlas is
  * loaded, its own `m_RD` otherwise; then the texture and alpha texture it
  * names, found but not read, so their image data (maybe in a `.resS`) is not
- * needed. Internal: exported for `imageInfo`, not from the package.
+ * needed. A {@link PackedSprite} is its atlas entry and the sprite that entry
+ * holds. Internal: exported for `imageInfo`, not from the package.
  *
  * @throws what {@link decodeSprite} throws, but for decoding and for reading
  *   the textures
  */
-export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
+export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): SpriteLocation {
+  if (isPacked(obj)) return locatePacked(obj, env);
   if (obj?.type !== ClassID.Sprite) {
     throw new TypeError(
-      `decodeSprite: expected the ObjectReader of a Sprite (class ${ClassID.Sprite}), ` +
-        `got ${obj?.type === undefined ? String(obj) : `class ${obj.type}`}`,
+      `decodeSprite: expected the ObjectReader of a Sprite (class ${ClassID.Sprite}) or a ` +
+        `PackedSprite, got ${obj?.type === undefined ? String(obj) : `class ${obj.type}`}`,
     );
   }
   const sprite = obj.read<Sprite>();
   const what = `sprite "${sprite.m_Name}" (path id ${obj.pathId})`;
+  const { version } = obj;
 
   const atlasPointer = sprite.m_SpriteAtlas;
   const atlas = atlasPointer ? env.resolve(atlasPointer, obj) : undefined;
@@ -220,11 +317,14 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
     const atlasObj = checkClass(atlas.object, ClassID.SpriteAtlas, `${what}'s atlas`);
     const data = atlasObj.read<SpriteAtlas>();
     if (!data.m_PackedSprites) {
-      // 6000.6+: the atlas holds its sprites' meshes (spriteInstanceData), not ported here (#155).
+      // 6000.6+: the atlas holds its sprites (spriteInstanceData), which packedSprites()
+      // lists. No fixture has a Sprite object packed into one, to show whether its own
+      // m_RD or the atlas' instance data holds its mesh.
       throw new UnsupportedError(
         "Unity version",
         atlasObj.unityVersion,
-        `${what}: cutting a sprite out of a 6000.6 SpriteAtlas is not implemented`,
+        `${what}: a Sprite object packed into a 6000.6 SpriteAtlas is not supported; the ` +
+          "atlas' own packed sprites are (packedSprites)",
       );
     }
     const key = sprite.m_RenderDataKey;
@@ -242,7 +342,7 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
       atlasObj,
       `${what}'s atlas alpha texture`,
     );
-    return { sprite, rect: entry, texture, alphaTexture, atlas: data };
+    return { sprite, rect: entry, texture, alphaTexture, atlas: data, version, what };
   }
 
   // Upstream falls back to m_RD for any atlas it cannot get. When that has
@@ -254,7 +354,45 @@ export function locateSprite(obj: ObjectReader, env: Env): SpriteLocation {
   }
   const texture = findTexture(env, rd.texture, obj, `${what}'s texture`);
   const alphaTexture = findAlphaTexture(env, rd.alphaTexture, obj, `${what}'s alpha texture`);
-  return { sprite, rect: rd, texture, alphaTexture, atlas: undefined };
+  return { sprite, rect: rd, texture, alphaTexture, atlas: undefined, version, what };
+}
+
+/**
+ * A 6000.6 atlas' packed sprite: its `renderDataMap` entry says where its
+ * pixels are, as an atlas entry does for a Sprite, and the entry's
+ * `spriteInstanceData` is the sprite, under a `Sprite`'s field names.
+ */
+function locatePacked(packed: PackedSprite, env: Env): SpriteLocation {
+  const atlasObj = checkClass(packed.atlas.reader, ClassID.SpriteAtlas, "a PackedSprite's atlas");
+  const data = atlasObj.read<SpriteAtlas>();
+  const what =
+    `packed sprite "${packed.name}" of atlas "${data.m_Name}" (path id ${atlasObj.pathId})`;
+  const entry = data.m_RenderDataMap[packed.index]?.[1];
+  const instance = entry?.["*spriteInstanceData"];
+  if (!entry || !instance) {
+    throw new CorruptError(
+      `${what}: the atlas has no packed sprite at renderDataMap index ${packed.index} ` +
+        `(${data.m_RenderDataMap.length} entries)`,
+    );
+  }
+  const sprite: SpriteShape = {
+    m_Name: instance.spriteName,
+    m_Rect: instance.rect,
+    m_Pivot: instance.pivot,
+    m_Border: instance.border,
+    m_PixelsToUnits: instance.pixelsToUnits,
+    m_RD: {
+      m_SubMeshes: instance.m_SubMeshes,
+      m_IndexBuffer: instance.m_IndexBuffer,
+      m_VertexData: instance.m_VertexData,
+      m_IndexFormat: instance.m_IndexFormat,
+    },
+  };
+  const texture = findTexture(env, entry.texture, atlasObj, `${what}'s texture`);
+  const alphaWhat = `${what}'s alpha texture`;
+  const alphaTexture = findAlphaTexture(env, entry.alphaTexture, atlasObj, alphaWhat);
+  const { version } = atlasObj;
+  return { sprite, rect: entry, texture, alphaTexture, atlas: data, version, what };
 }
 
 /** The Texture2D a pointer names. */
@@ -378,7 +516,7 @@ const f32 = Math.fround;
  */
 export function cutSprite(
   image: RgbaImage,
-  sprite: Sprite,
+  sprite: SpriteShape,
   rect: SpriteRect,
   version: UnityVersion,
   tightMesh: boolean,
@@ -565,7 +703,7 @@ type Point = readonly [x: number, y: number];
  * differ, and the mask here is the image's size.
  */
 function meshMask(
-  sprite: Sprite,
+  sprite: SpriteShape,
   rect: SpriteRect,
   version: UnityVersion,
   width: number,
@@ -590,14 +728,16 @@ function meshMask(
  * Upstream `GetTriangles`: the sprite mesh's triangles, as x and y in units.
  * Before 5.6 from `vertices` and `indices`; from 5.6 from each sub-mesh of
  * `m_VertexData` and `m_IndexBuffer` (`UInt16`, little-endian, as upstream
- * reads it), whatever the sub-mesh's topology.
+ * reads it), whatever the sub-mesh's topology. A 6000.6 packed sprite's mesh
+ * is read the same way.
  *
- * @throws {UnsupportedError} for positions that are not 32-bit floats, or a
- *   vertex format upstream does not know
+ * @throws {UnsupportedError} for positions that are not 32-bit floats, a
+ *   vertex format upstream does not know, or a 6000.6 `m_IndexFormat` that
+ *   is not `UInt16`
  * @throws {CorruptError} for an index past its vertices, or a read past the
  *   vertex or index data
  */
-function meshTriangles(sprite: Sprite, version: UnityVersion): Point[][] {
+function meshTriangles(sprite: SpriteShape, version: UnityVersion): Point[][] {
   const rd = sprite.m_RD;
   const triangles: Point[][] = [];
   if (rd.vertices && rd.indices) {
@@ -624,6 +764,15 @@ function meshTriangles(sprite: Sprite, version: UnityVersion): Point[][] {
       "sprite vertex format",
       channel.format,
       "upstream reads sprite positions as 32-bit floats only",
+    );
+  }
+  // 6000.6's packed sprites say how their indices are stored; every fixture's are UInt16 (0).
+  const indexFormat = rd.m_IndexFormat ?? 0;
+  if (indexFormat !== 0) {
+    throw new UnsupportedError(
+      "sprite index format",
+      indexFormat,
+      "sprite mesh indices are read as UInt16 (IndexFormat 0) only",
     );
   }
   const stream = streamLayout(vd.m_Channels, vd.m_VertexCount, version)[channel.stream]!;

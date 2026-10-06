@@ -241,7 +241,7 @@ test("imageInfo and decodeImage refuse what is not an image asset with a TypeErr
   const bundle = [...env.assets("AssetBundle")][0] as unknown as Asset<"Texture2D">;
   assert.throws(
     () => imageInfo(bundle),
-    /^TypeError: imageInfo: expected a Texture2D or Sprite asset, got an asset of class AssetBundle$/,
+    /^TypeError: imageInfo: expected a Texture2D or Sprite asset or a PackedSprite, got an asset of class AssetBundle$/,
   );
   assert.throws(() => imageInfo(undefined as unknown as Asset<"Texture2D">), TypeError);
   await assert.rejects(decodeImage(bundle), TypeError);

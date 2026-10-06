@@ -9,8 +9,8 @@ import type {
   Vector4,
 } from "unity-asset-reader";
 import { decodeTextureObject, ensureTexture, FORMAT_NAMES } from "./decode.js";
-import { decodeSprite, locateSprite, spriteSize } from "./sprite.js";
-import type { DecodeSpriteOptions } from "./sprite.js";
+import { decodeSprite, locateSprite, packedSprites, spriteSize } from "./sprite.js";
+import type { DecodeSpriteOptions, PackedSprite } from "./sprite.js";
 
 // ES2020 has no timers in its lib, and this package takes no DOM or Node
 // types (R4); every browser, Worker and Node.js has this one.
@@ -38,15 +38,19 @@ export type ImageCompression =
   | "crunch"
   | "unknown";
 
-/** The fields every {@link ImageInfo} has. */
+/**
+ * The fields every {@link ImageInfo} has. A {@link PackedSprite} has no object
+ * of its own: its `name` is its `spriteName`, its `path` is `undefined`, and
+ * its `pathId` and `file` are its atlas'.
+ */
 interface ImageInfoFields {
   /** The asset's `name` (`m_Name`). */
   name: string;
   /** The asset's container path (`m_Container`), or `undefined`. */
   path: string | undefined;
-  /** The asset's path id. */
+  /** The asset's path id; for a packed sprite, its atlas'. */
   pathId: bigint;
-  /** The SerializedFile holding the asset. */
+  /** The SerializedFile holding the asset (for a packed sprite, its atlas). */
   file: string;
   /**
    * Pixels across: `m_Width` for a Texture2D; for a Sprite, the width of what
@@ -139,7 +143,10 @@ export interface SpriteInfo {
    * `SpritePackingRotation` value; `decodeImage` turns it back.
    */
   rotation: number;
-  /** `m_Name` of the SpriteAtlas it is packed into, when that atlas is loaded. */
+  /**
+   * `m_Name` of the SpriteAtlas it is packed into, when that atlas is loaded;
+   * always set for a {@link PackedSprite}.
+   */
   atlas: string | undefined;
   /** The texture it is cut from. */
   texture: TextureImageInfo;
@@ -198,39 +205,44 @@ export function isImage(asset: Asset): asset is ImageAsset {
  * too.
  *
  * A Sprite's texture is found as `decodeSprite` finds it: through its
- * SpriteAtlas when that atlas is loaded, its own `m_RD` otherwise.
+ * SpriteAtlas when that atlas is loaded, its own `m_RD` otherwise. A sprite
+ * packed into a Unity 6000.6 atlas, which has no Sprite object, is described
+ * from its {@link PackedSprite} (see `packedSprites`), as a Sprite.
  *
- * @param asset a Texture2D or Sprite asset (see {@link isImage})
+ * @param asset a Texture2D or Sprite asset (see {@link isImage}), or a {@link PackedSprite}
  * @returns a new {@link ImageInfo}
- * @throws {TypeError} when `asset` is not a Texture2D or Sprite asset
+ * @throws {TypeError} when `asset` is not a Texture2D or Sprite asset or a PackedSprite
  * @throws {UnsupportedError} / {CorruptError} what the readers throw: an
  *   editor file or unknown Unity version, a layout that does not hold
  *   together; for a Sprite also what `decodeSprite`'s lookup throws (a
  *   pointer that is null or dangles, a texture or alpha texture of the wrong
  *   class, a sprite its atlas has no entry for, a `downscaleMultiplier` that
  *   resizes its texture to less than a pixel, a `textureRect` outside its
- *   (resized) texture)
+ *   (resized) texture, a `Sprite` object packed into a 6000.6 atlas)
  * @throws {ResourceNotFoundError} for a Sprite whose texture, alpha texture
  *   or atlas is in a SerializedFile that is not loaded
  */
 export function imageInfo(asset: Asset<"Texture2D">): TextureImageInfo;
-export function imageInfo(asset: Asset<"Sprite">): SpriteImageInfo;
-export function imageInfo(asset: ImageAsset): ImageInfo;
-export function imageInfo(asset: ImageAsset): ImageInfo {
+export function imageInfo(asset: Asset<"Sprite"> | PackedSprite): SpriteImageInfo;
+export function imageInfo(asset: ImageAsset | PackedSprite): ImageInfo;
+export function imageInfo(asset: ImageAsset | PackedSprite): ImageInfo {
   checkImage(asset, "imageInfo");
   if (asset.type === "Texture2D") return textureInfo(asset);
 
-  const { sprite, rect, texture: textureObj, atlas } = locateSprite(asset.reader, asset.env);
-  const texture = textureInfo(textureAsset(asset.env, textureObj));
+  const packed = asset.type === "PackedSprite";
+  const env = packed ? asset.atlas.env : asset.env;
+  const located = locateSprite(packed ? asset : asset.reader, env);
+  const { sprite, rect, texture: textureObj, atlas } = located;
+  const texture = textureInfo(textureAsset(env, textureObj));
   const size = spriteSize(rect, texture.width, texture.height);
   const { settingsRaw } = rect;
   return {
     ...texture,
     kind: "Sprite",
     name: asset.name,
-    path: asset.path,
-    pathId: asset.pathId,
-    file: asset.file,
+    path: packed ? undefined : asset.path,
+    pathId: packed ? asset.atlas.pathId : asset.pathId,
+    file: packed ? asset.atlas.file : asset.file,
     width: size.width,
     height: size.height,
     sprite: {
@@ -251,21 +263,22 @@ export function imageInfo(asset: ImageAsset): ImageInfo {
 
 /**
  * Decode an image asset to RGBA8, top row first, with its {@link imageInfo}:
- * a Texture2D's first mip level through `decodeTexture2D`, a Sprite cut out
- * of its texture through `decodeSprite` (without `tightMesh`). `width` and
- * `height` are the decoded image's, for a Sprite its own cut-out size.
+ * a Texture2D's first mip level through `decodeTexture2D`, a Sprite (or a
+ * {@link PackedSprite} of a Unity 6000.6 atlas) cut out of its texture through
+ * `decodeSprite` (without `tightMesh`). `width` and `height` are the decoded
+ * image's, for a Sprite its own cut-out size.
  *
  * The WASM decoder is loaded on first use (`initTexture(options)`), so
  * calling `initTexture` first is optional. Node.js needs no options; a
  * browser passes `options.wasmPath` or calls `initTexture({ wasmPath })`
  * before.
  *
- * @param asset a Texture2D or Sprite asset (see {@link isImage})
+ * @param asset a Texture2D or Sprite asset (see {@link isImage}), or a {@link PackedSprite}
  * @param options WASM location and an optional caller-owned decoded texture map
  * @returns a new {@link DecodedImage}; a cached Texture2D shares its RGBA array
  *   with the map, so keep it unmodified and do not transfer its buffer while
  *   retaining that entry. Sprite pixels are always a new array.
- * @throws {TypeError} when `asset` is not a Texture2D or Sprite asset
+ * @throws {TypeError} when `asset` is not a Texture2D or Sprite asset or a PackedSprite
  * @throws {Error} when the WASM decoder cannot be loaded
  * @throws {UnsupportedError} for a format with no decoder here, and what
  *   `decodeTexture2D` and `decodeSprite` refuse (R9)
@@ -281,42 +294,48 @@ export async function decodeImage(
   options?: DecodeImageOptions,
 ): Promise<DecodedImage<TextureImageInfo>>;
 export async function decodeImage(
-  asset: Asset<"Sprite">,
+  asset: Asset<"Sprite"> | PackedSprite,
   options?: DecodeImageOptions,
 ): Promise<DecodedImage<SpriteImageInfo>>;
 export async function decodeImage(
-  asset: ImageAsset,
+  asset: ImageAsset | PackedSprite,
   options?: DecodeImageOptions,
 ): Promise<DecodedImage>;
 export async function decodeImage(
-  asset: ImageAsset,
+  asset: ImageAsset | PackedSprite,
   options: DecodeImageOptions = {},
 ): Promise<DecodedImage> {
   const info = imageInfo(asset);
   await ensureTexture({ wasmPath: options.wasmPath });
+  const { decodedTextures } = options;
   // The reader, not `asset.data`: `decodeTexture2D` takes `obj.read()`'s shape.
   const image =
     asset.type === "Texture2D"
-      ? await decodeTextureObject(asset.reader, options.decodedTextures)
-      : await decodeSprite(asset.reader, asset.env, { decodedTextures: options.decodedTextures });
+      ? await decodeTextureObject(asset.reader, decodedTextures)
+      : asset.type === "PackedSprite"
+        ? await decodeSprite(asset, asset.atlas.env, { decodedTextures })
+        : await decodeSprite(asset.reader, asset.env, { decodedTextures });
   return { ...info, width: image.width, height: image.height, rgba: image.data };
 }
 
 /**
  * Every Texture2D and Sprite of an env, decoded by {@link decodeImage}, in
- * `env.assets()` order. It hands the event loop a turn (a zero timeout)
+ * `env.assets()` order; at each Unity 6000.6 SpriteAtlas' place, the sprites
+ * it holds itself (`packedSprites`, which have no Sprite objects), in its
+ * `renderDataMap` order. It hands the event loop a turn (a zero timeout)
  * before each image after the first, so a loop over it on a page's main
  * thread keeps the page responsive between images.
  *
- * With `onError: "skip"` an image that fails to decode is left out; by
- * default it ends the iteration with its error (R9). Either way, a WASM
- * decoder that cannot be loaded throws, and so does parsing the env.
+ * With `onError: "skip"` an image that fails to decode is left out (and a
+ * 6000.6 atlas that cannot be read, with its sprites); by default it ends
+ * the iteration with its error (R9). Either way, a WASM decoder that cannot
+ * be loaded throws, and so does parsing the env.
  *
  * @param env the env to decode the images of
  * @param options `onError`, `wasmPath` for auto-init, and `decodedTextures` to
  *   reuse atlas pixels. The caller owns the map; no implicit cache is created.
  * @throws {TypeError} for an `onError` other than `"throw"` or `"skip"`
- * @throws what {@link decodeImage} throws, with `onError: "throw"`
+ * @throws what {@link decodeImage} and `packedSprites` throw, with `onError: "throw"`
  * @example
  * for await (const { name, rgba, width, height } of images(env)) show(name, rgba, width, height);
  */
@@ -329,19 +348,29 @@ export async function* images(
     throw new TypeError(`images: onError must be "throw" or "skip", got ${String(onError)}`);
   }
   let first = true;
-  for (const asset of env.assets("Texture2D", "Sprite")) {
-    if (!first) await new Promise<void>((resolve) => setTimeout(resolve, 0));
-    first = false;
-    // Outside the try: a decoder that does not load is no image's fault.
-    await ensureTexture({ wasmPath: options.wasmPath });
-    let image: DecodedImage;
+  for (const asset of env.assets("Texture2D", "Sprite", "SpriteAtlas")) {
+    let items: (ImageAsset | PackedSprite)[];
     try {
-      image = await decodeImage(asset, options);
+      // Before 6000.6 an atlas holds no sprites itself: `[]`, without reading it.
+      items = asset.type === "SpriteAtlas" ? packedSprites(asset) : [asset];
     } catch (error) {
       if (onError === "skip") continue;
       throw error;
     }
-    yield image;
+    for (const item of items) {
+      if (!first) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      first = false;
+      // Outside the try: a decoder that does not load is no image's fault.
+      await ensureTexture({ wasmPath: options.wasmPath });
+      let image: DecodedImage;
+      try {
+        image = await decodeImage(item, options);
+      } catch (error) {
+        if (onError === "skip") continue;
+        throw error;
+      }
+      yield image;
+    }
   }
 }
 
@@ -419,7 +448,7 @@ function textureAsset(env: Env, obj: ObjectReader): Asset<"Texture2D"> {
 /** `asset` is checked at run time: a JavaScript caller's type is only a claim. */
 function checkImage(asset: unknown, fn: string): void {
   const { type, typeName } = (asset ?? {}) as { type?: unknown; typeName?: unknown };
-  if (type === "Texture2D" || type === "Sprite") return;
+  if (type === "Texture2D" || type === "Sprite" || type === "PackedSprite") return;
   const got = typeName === undefined ? String(asset) : `an asset of class ${String(typeName)}`;
-  throw new TypeError(`${fn}: expected a Texture2D or Sprite asset, got ${got}`);
+  throw new TypeError(`${fn}: expected a Texture2D or Sprite asset or a PackedSprite, got ${got}`);
 }
