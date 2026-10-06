@@ -101,8 +101,9 @@ First release. The core: isomorphic, synchronous, no WASM.
   `"sprite index format"`). Tested on four Unity 6000.6.4f1 fixtures against UnityPy 1.25.4's
   crop, the fixtures' position-encoding pixels and AssetStudio's masks of the same sprites
   built by 6000.3 (#229). No 6000.6 fixture has an alpha texture: split alpha takes the same
-  path as any atlas entry and is tested on a patched entry only. A `Sprite` object that points at a 6000.6 atlas, which no fixture
-  has, is still refused with `UnsupportedError` (kind `"Unity version"`) (#155, #229).
+  path as any atlas entry and is tested on a patched entry only. A `Sprite` object that points
+  at a 6000.6 atlas, which no fixture has, is still refused with `UnsupportedError` (kind
+  `"Unity version"`) (#155, #229).
 - `decodeSprite`, `decodeImage` and `images` decode a sprite with an alpha texture (Android ETC1
   split alpha), with the alpha texture's red channel as its alpha, as UnityPy does; such sprites
   were refused. An alpha texture of another size than its texture is refused with
