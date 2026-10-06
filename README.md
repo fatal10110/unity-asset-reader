@@ -129,8 +129,10 @@ The short answer. The full tables, with what each claim is tested on, are in the
 - **Handled in code:** SerializedFile formats 2 to 22 (Unity 2020.1 to 6000.x write 22). Type
   tree reads work on every one of them, whatever the Unity version. The class readers know the
   layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6, `SpriteAtlas` from 2017.1) up
-  to 6000.5, and read a newer version with the newest layout they know; `SpriteAtlas` refuses
-  6000.6 and later. A class reader refuses a version older than its first layout;
+  to 6000.6, and read a newer version with the newest layout they know. `SpriteAtlas`'s 6000.6
+  layout is tested on Unity 6000.6.4f1 bundles; cutting a sprite out of such an atlas is not
+  implemented yet ([#155](https://github.com/fatal10110/unity-asset-reader/issues/155)). A
+  class reader refuses a version older than its first layout;
   `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,
   with gates at 2.6 and 3.0 that no test covers, and reads any older version with its oldest
   layout.
@@ -149,7 +151,7 @@ Each of these throws `UnsupportedError`, naming what it found:
   encryption).
 - Texture formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, `R8`, `RG16`, `RG32`, `RGB48`,
   `RGBA64`. Textures built for PS4 or PS5. Sprites with an alpha texture (ETC1 split alpha) or
-  from a variant atlas.
+  from a variant atlas. Sprites packed into a Unity 6000.6 `SpriteAtlas`.
 
 Not provided at all: decoding audio, video or meshes; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or

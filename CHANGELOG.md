@@ -23,6 +23,12 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.0.2 - Unreleased
 
+- `readSpriteAtlas` reads Unity 6000.6's layout instead of refusing it: no `m_PackedSprites` or
+  `m_PackedSpriteNamesToIndex` (now optional), and every `m_RenderDataMap` entry holds its
+  sprite as `*spriteInstanceData` (`SpriteInstanceData`; `spriteInstanceData` in
+  `SpriteAtlasFields`). Tested with `readSprite` on four Unity 6000.6.4f1 fixtures against
+  UnityPy 1.25.4 (#155).
+
 - Read SerializedFile format 23 metadata and generic type-tree dumps, tested against five
   Unity 6000.6.4f1 fixtures. Validate the bounded `mhtt` type-tree blobs and retain support
   for zero-length and disabled trees; format 24 remains unsupported (#223).
@@ -81,6 +87,9 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ### 1.0.2 - Unreleased
 
+- A sprite packed into a Unity 6000.6 `SpriteAtlas` is refused with `UnsupportedError` (kind
+  `"Unity version"`) by `decodeSprite`, `imageInfo`, `decodeImage` and `images`, now that the
+  core reads that atlas; cutting it out by the atlas' own mesh is not implemented yet (#155).
 - Decode `R8`, `RG16`, `RG32`, `RGB48` and `RGBA64` to RGBA with AssetStudio's rounded
   16-bit channel conversion, tested on the existing 2019.4 and 6000.6 fixtures (#108).
 - Add a caller-owned `decodedTextures` map to `decodeSprite`, `decodeImage` and `images`,

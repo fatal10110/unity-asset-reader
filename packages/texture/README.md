@@ -183,6 +183,7 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2 and 60
 |---|---|
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
+| Packed into a Unity 6000.6 `SpriteAtlas`, which holds its sprites' meshes itself | Refused ([#155](https://github.com/fatal10110/unity-asset-reader/issues/155)) |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
@@ -251,6 +252,7 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 - Sprites with an alpha texture (ETC1 split alpha), and sprites of a variant atlas (a
   `downscaleMultiplier` other than 1).
 - With `tightMesh`, a sprite mesh whose positions are not 32-bit floats.
+- Sprites packed into a Unity 6000.6 `SpriteAtlas`, when that atlas is loaded.
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
 `Texture3D` classes; image encoding (PNG, JPEG).
