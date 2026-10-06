@@ -119,11 +119,13 @@ editor wrote `0xFFC00000` into the first variant it built (`lz4`) and
 `0x7FC00000` into the rest (see `BUILDING.md` section 4). The goldens record the
 bytes as written, so the reader has to keep a NaN's sign bit.
 
-The tested SerializedFile range is **formats 21 and 22** (Unity 2019.4 to
-6000.x); `scripts/tests/fixtures.test.ts` fails if either format goes missing,
+The main golden set tests **formats 21 and 22** (Unity 2019.4 to
+6000.3); `scripts/tests/fixtures.test.ts` fails if either format goes missing,
 or if either loses a non-empty or empty `TypelessData`, a `.resS` node or one
 of the two NaN patterns (#86).
 Format 20 and older are ported but have no fixture.
+Format 23 (Unity 6000.6.4f1) metadata and generic dumps are checked against
+`modern-goldens.json` in `packages/core/tests/modern-fixtures.test.ts` (#223).
 
 ## M1 container fixtures (`bundles/*.bundle`)
 
@@ -415,7 +417,8 @@ RGBA8 bytes (`rgbaHex`), dimensions, input hashes, output hashes and execution
 provenance for RG16, RG32, RGBA64 and the 2019 variant's `r_a` and `r_b`.
 `goldens.json` attaches content-bound summaries under `assetStudioCrossCheck`.
 The same unsigned plain inputs in `modern-goldens.json` receive these references;
-format-23 reader support is still unimplemented.
+Format-23 metadata and generic dumps are tested against the sidecar (#223);
+texture conversion and the new Sprite/SpriteAtlas class layouts remain separate work.
 
 The external .NET harness executes unmodified methods from the same pinned
 AssetStudio revision as RGB48, including `SpriteHelper.CutImage`. Its pinned

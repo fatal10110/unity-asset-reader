@@ -26,7 +26,7 @@ export interface SerializedFileHeader {
   metadataSize: number;
   /** Size of the whole file as the header records it. */
   fileSize: number;
-  /** Format version, 2 to 22; see `SerializedFileFormatVersion`. */
+  /** Format version, 2 to 23; see `SerializedFileFormatVersion`. */
   version: number;
   /** Where object data starts; object `byteStart`s are relative to it on disk. */
   dataOffset: number;
@@ -127,13 +127,13 @@ export interface SerializedFile {
  * types, object table, script types, externals and ref types.
  *
  * Object data is not read; each {@link ObjectInfo} says where it is. Every
- * format version upstream handles is ported (2 to 22); only 21 and 22 are
- * tested against editor-built fixtures.
+ * format version AssetStudio handles is ported (2 to 22), with format 23's
+ * type-tree additions from UnityPy. Formats 21–23 have editor-built fixtures.
  *
  * @param data the whole SerializedFile, e.g. one of `load().files`; kept by
  *   reference, and hashes and GUIDs in the result are views into it (R7)
  * @returns the header and metadata
- * @throws {UnsupportedError} for a format version outside 2 to 22
+ * @throws {UnsupportedError} for a format version outside 2 to 23
  * @throws {CorruptError} when the metadata is truncated or holds a count,
  *   offset or type index that cannot be right
  */
@@ -149,8 +149,8 @@ export function readSerializedFile(data: Uint8Array): SerializedFile {
     reserved: new Uint8Array(0),
   };
   const format = header.version;
-  if (format <= V.Unsupported || format > V.LargeFilesSupport) {
-    throw new UnsupportedError("SerializedFile format version", format, "expected 2 to 22");
+  if (format <= V.Unsupported || format > V.TypeTreeWithHeader) {
+    throw new UnsupportedError("SerializedFile format version", format, "expected 2 to 23");
   }
 
   if (format >= V.Unknown_9) {

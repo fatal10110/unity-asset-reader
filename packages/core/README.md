@@ -248,7 +248,7 @@ hand-written byte layout in this package's tests.
 | `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
 | Split files (`.split0`, `.split1`, ...) | Pass the joined file to `load()`; [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` joins them | Unit tests of `-node` |
 | Bundle block compression | None, LZMA, LZ4, LZ4HC (LZ4HC blocks decode as LZ4) | Fixtures (none, LZMA, LZ4), generated |
-| SerializedFile format versions | 2 to 22, little- and big-endian. See [Unity versions](#unity-versions) | Fixtures (21, 22), unit tests (6, 8, 15) |
+| SerializedFile format versions | 2 to 23, little- and big-endian. See [Unity versions](#unity-versions) | Fixtures (21, 22, 23), unit tests (6, 8, 15; format-23 blob validation) |
 
 ### Classes
 
@@ -284,12 +284,15 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | | Unity versions |
 |---|---|
 | **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
+| **Tested** format-23 metadata and generic type-tree dumps | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. New Sprite/SpriteAtlas class layouts and additional plain texture conversion remain separate work |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
 A class reader reads a version newer than its newest gate (6000.5) with the newest layout it
 knows. `readTypeTree()` does not depend on the Unity version, so it reads every format from 2 to
-22.
+23. Format 23's type-tree content hashes and blob headers follow UnityPy 1.25.4; AssetStudio
+does not yet handle that layout. A zero-length blob has no embedded tree, so a generic dump
+of an object using it throws `UnsupportedError`, as it does when type trees are disabled.
 
 A SerializedFile of format 6 or older records no Unity version. In a bundle it takes the
 bundle's `unityRevision`. A loose one has version `[0, 0, 0, 0]`, and the class readers treat it

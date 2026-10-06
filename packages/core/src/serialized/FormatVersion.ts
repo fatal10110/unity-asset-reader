@@ -6,7 +6,7 @@
  * the gate says what it is about rather than which number it is.
  *
  * The Unity release that first wrote each version is noted where upstream
- * knows it. Only 21 and 22 have fixtures (#82); the rest are ported, untested.
+ * knows it. Formats 21–23 have fixtures; the rest are ported, untested.
  */
 export const SerializedFileFormatVersion = {
   /** Upstream's marker for "too old to read"; nothing below 2 is parsed. */
@@ -47,6 +47,8 @@ export const SerializedFileFormatVersion = {
   SupportsRefObject: 20,
   /** 2019.3 to 2019.4 */
   StoresTypeDependencies: 21,
-  /** 2020.1 to 6000.x */
+  /** 2020.1 to 6000.5 */
   LargeFilesSupport: 22,
+  /** 6000.6+: content hash, serialized blob size and mhtt header (UnityPy). */
+  TypeTreeWithHeader: 23,
 } as const;

@@ -2,7 +2,7 @@
 """Candidate format-23 goldens (#108, #153, #155, #160), UnityPy 1.25.4.
 
 Use a separate oracle environment from the format-21/22 goldens. These files
-are independently readable but not yet supported by our SerializedFile reader.
+have metadata/generic dump coverage; their texture and atlas features remain candidates.
 No decoded output from the library under test is used here.
 """
 import importlib.util
@@ -67,7 +67,7 @@ def main():
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
         "_generator": "scripts/make-modern-goldens.py",
-        "_status": "Candidate format-23 fixtures; reader support is not implemented.",
+        "_status": "Format-23 metadata and generic dumps supported; texture/atlas features remain candidates.",
         "fixtures": {},
     }
     for name in paths:

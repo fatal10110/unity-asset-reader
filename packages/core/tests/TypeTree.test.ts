@@ -181,6 +181,113 @@ test("a blob node offset past its string buffer throws CorruptError", () => {
   );
 });
 
+/** Format-23 type: hashes, blob byte length, mhtt header, one node, then dependencies/names. */
+function blobType23(little = true, isRefType = false, withBlob = true): Uint8Array {
+  const strings = new TextEncoder().encode("Base\0");
+  const blobSize = withBlob ? 16 + 32 + strings.length : 0;
+  const suffix = isRefType ? new TextEncoder().encode("Example\0Tests\0Assembly\0") : null;
+  const data = new Uint8Array(43 + blobSize + (suffix?.length ?? 8));
+  const view = new DataView(data.buffer);
+  view.setInt32(0, 1, little); // classId
+  view.setInt16(5, -1, little); // scriptTypeIndex
+  data.fill(0x42, 7, 23); // oldTypeHash
+  data.fill(0xa5, 23, 39); // XXH3 content hash
+  view.setInt32(39, blobSize, little);
+  if (withBlob) {
+    data.set(new TextEncoder().encode("mhtt"), 43);
+    view.setInt32(47, 23, little);
+    view.setInt32(51, 1, little); // node count
+    view.setInt32(55, strings.length, little);
+    view.setUint16(59, 1, little); // node version
+    view.setUint32(63, 0x80000000 + 263, little); // common MonoBehaviour
+    view.setInt32(71, -1, little); // byteSize
+    view.setInt32(79, 0x8000, little); // metaFlag
+    view.setBigUint64(83, 0xfedcba9876543210n, little);
+    data.set(strings, 91);
+  }
+  const tail = 43 + blobSize;
+  if (suffix) data.set(suffix, tail);
+  else {
+    view.setInt32(tail, 1, little); // one dependency
+    view.setInt32(tail + 4, 7, little);
+  }
+  return data;
+}
+
+for (const endian of ["little", "big"] as const) {
+  test(`format 23 reads the bounded mhtt blob in ${endian}-endian metadata`, () => {
+    const data = blobType23(endian === "little");
+    const reader = new BinaryReader(data, endian);
+    const type = readSerializedType(reader, 23, true, false);
+    assert.deepEqual(type.nodes!.map((node) => [
+      node.type, node.name, node.version, node.byteSize, node.metaFlag, node.refTypeHash,
+    ]), [["MonoBehaviour", "Base", 1, -1, 0x8000, 0xfedcba9876543210n]]);
+    assert.deepEqual(type.typeDependencies, [7]);
+    assert.equal(reader.remaining, 0);
+    assert.equal(type.stringBuffer!.buffer, data.buffer, "string bytes remain a view (R7)");
+  });
+}
+
+for (const isRefType of [false, true]) {
+  test(`format 23 reads fields after a zero-length ${isRefType ? "ref " : ""}type tree`, () => {
+    const reader = new BinaryReader(blobType23(true, isRefType, false), "little");
+    const type = readSerializedType(reader, 23, true, isRefType);
+    assert.equal(type.nodes, null);
+    assert.equal(type.stringBuffer, null);
+    if (isRefType) {
+      assert.deepEqual([type.className, type.namespace, type.assemblyName],
+        ["Example", "Tests", "Assembly"]);
+    } else assert.deepEqual(type.typeDependencies, [7]);
+    assert.equal(reader.remaining, 0);
+  });
+}
+
+test("format 23 reads ref-type names after a non-empty blob", () => {
+  const reader = new BinaryReader(blobType23(true, true), "little");
+  const type = readSerializedType(reader, 23, true, true);
+  assert.equal(type.nodes![0]!.name, "Base");
+  assert.deepEqual([type.className, type.namespace, type.assemblyName],
+    ["Example", "Tests", "Assembly"]);
+  assert.equal(type.typeDependencies, null);
+  assert.equal(reader.remaining, 0);
+});
+
+test("format 23 without type trees consumes neither the blob nor its new hash", () => {
+  const data = blobType23();
+  const reader = new BinaryReader(data, "little");
+  const type = readSerializedType(reader, 23, false, false);
+  assert.equal(type.nodes, null);
+  assert.equal(type.typeDependencies, null);
+  assert.equal(reader.position, 23);
+  assert.equal(reader.readUInt8(), 0xa5, "the content hash was not consumed");
+});
+
+for (const [what, mutate, message] of [
+  ["bad magic", (data: Uint8Array) => { data[43] = 0; }, /magic.*mhtt/],
+  ["inconsistent format", (data: Uint8Array) => {
+    new DataView(data.buffer).setInt32(47, 22, true);
+  }, /format.*22.*23/],
+  ["negative length", (data: Uint8Array) => {
+    new DataView(data.buffer).setInt32(39, -1, true);
+  }, /size.*negative/],
+  ["length past the input", (data: Uint8Array) => {
+    new DataView(data.buffer).setInt32(39, data.length, true);
+  }, /size.*bytes left/],
+  ["blob truncated inside the string buffer", (data: Uint8Array) => {
+    new DataView(data.buffer).setInt32(39, 52, true);
+  }, /type tree.*read of 5 bytes.*4 of 52/],
+  ["blob with trailing bytes", (data: Uint8Array) => {
+    new DataView(data.buffer).setInt32(39, 54, true);
+  }, /type tree.*53.*54/],
+] as const) {
+  test(`format 23 refuses ${what} with CorruptError`, () => {
+    const data = blobType23();
+    mutate(data);
+    assert.throws(() => readSerializedType(new BinaryReader(data, "little"), 23, true, false),
+      (error: unknown) => error instanceof CorruptError && message.test(error.message));
+  });
+}
+
 // --- the pre-5.0 inline layout --------------------------------------------------
 
 /** A pre-blob (format 8) node written depth-first, as Unity stores it. */

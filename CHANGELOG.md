@@ -23,6 +23,10 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.0.2 - Unreleased
 
+- Read SerializedFile format 23 metadata and generic type-tree dumps, tested against five
+  Unity 6000.6.4f1 fixtures. Validate the bounded `mhtt` type-tree blobs and retain support
+  for zero-length and disabled trees; format 24 remains unsupported (#223).
+
 - Update repository metadata and documentation links after the GitHub repository rename to
   `fatal10110/unity-asset-reader` (#199).
 

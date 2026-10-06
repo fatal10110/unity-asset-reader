@@ -1,7 +1,7 @@
 {
   "_oracle": "UnityPy 1.25.4",
   "_generator": "scripts/make-modern-goldens.py",
-  "_status": "Candidate format-23 fixtures; reader support is not implemented.",
+  "_status": "Format-23 metadata and generic dumps supported; texture/atlas features remain candidates.",
   "fixtures": {
     "editor/6000.6.4f1/more-plain/textures": {
       "signature": "UnityFS",
