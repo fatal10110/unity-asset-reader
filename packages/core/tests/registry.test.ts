@@ -45,6 +45,7 @@ const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.TextAsset,
   ClassID.MonoScript,
   ClassID.Material,
+  ClassID.Shader,
   ClassID.AudioClip,
   ClassID.Font,
   ClassID.VideoClip,

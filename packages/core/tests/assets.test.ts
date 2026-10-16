@@ -23,6 +23,7 @@ const KNOWN = new Set([
   "MonoScript",
   "MonoBehaviour",
   "Material",
+  "Shader",
   "AudioClip",
   "Font",
   "VideoClip",
