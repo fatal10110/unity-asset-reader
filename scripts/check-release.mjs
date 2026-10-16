@@ -19,7 +19,13 @@ import { fileURLToPath } from "node:url";
  * The published packages' directories under `packages/`, in publish order: each one only
  * depends on packages before it.
  */
-export const PACKAGE_DIRS = ["decoder", "core", "texture", "node"];
+export const PACKAGE_DIRS = ["decoder", "core", "texture", "node", "mesh"];
+
+/**
+ * The version of a package that is scaffolded but not released yet: never published. Its first
+ * release sets a real version (RELEASING.md).
+ */
+export const UNRELEASED = "0.0.0";
 
 /** The dependency fields whose ranges must be on npm before a package is published. */
 const DEPENDENCY_FIELDS = ["dependencies", "peerDependencies"];
@@ -63,7 +69,8 @@ export function satisfies(version, range) {
  *   {@link PACKAGE_DIRS} order
  * @param {({ version: string } | null)[] | undefined} base the same packages' manifests at the
  *   base commit (`null` for a package that did not exist there), or `undefined` to take every
- *   package whose version is not on npm (the manual dispatch)
+ *   package whose version is not on npm (the manual dispatch). A package at {@link UNRELEASED}
+ *   is never taken.
  * @param {(spec: string) => string[]} view the versions npm has for a `name@range` spec
  * @returns {{ name: string, version: string }[]} empty when nothing is to be released
  * @throws {Error} when a package's range on another package of this repo is satisfied neither
@@ -73,7 +80,10 @@ export function planRelease(head, base, view) {
   if (base !== undefined && base.length !== head.length) {
     throw new Error(`${base.length} base manifests for ${head.length} packages`);
   }
-  const changed = head.filter((pkg, i) => base === undefined || base[i]?.version !== pkg.version);
+  const changed = head.filter(
+    (pkg, i) =>
+      pkg.version !== UNRELEASED && (base === undefined || base[i]?.version !== pkg.version),
+  );
   const release = changed.filter(
     ({ name, version }) => !view(`${name}@${version}`).includes(version),
   );
