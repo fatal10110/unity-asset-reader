@@ -51,7 +51,7 @@ async function assertValid(glb: Uint8Array): Promise<void> {
   );
 }
 
-// --- reading the .glb back (glTF 2.0 spec, 4.4 and 5) --------------------------------
+// --- reading the .glb back (glTF 2.0 spec: GLB container, accessors) ------------------
 
 interface Gltf {
   asset: { version: string };

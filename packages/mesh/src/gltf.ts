@@ -12,7 +12,7 @@ import { CorruptError, UnsupportedError, type MeshData } from "unity-asset-reade
  */
 declare const TextEncoder: { new (): { encode(input?: string): Uint8Array } };
 
-// glTF enums (glTF 2.0 spec, 5.11 and 5.1).
+// glTF enums: buffer view targets and accessor component types.
 const ARRAY_BUFFER = 34962;
 const ELEMENT_ARRAY_BUFFER = 34963;
 const FLOAT = 5126;
@@ -20,7 +20,7 @@ const UNSIGNED_SHORT = 5123;
 const UNSIGNED_INT = 5125;
 const VECTOR = ["SCALAR", "VEC2", "VEC3", "VEC4"];
 
-// GLB container (glTF 2.0 spec, 4.4): "glTF", version 2, chunks "JSON" and "BIN\0".
+// The GLB container (glTF 2.0 spec, GLB File Format): "glTF", version 2, chunks "JSON" and "BIN\0".
 const GLB_MAGIC = 0x46546c67;
 const CHUNK_JSON = 0x4e4f534a;
 const CHUNK_BIN = 0x004e4942;
@@ -205,7 +205,7 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
   }
 
   // A 16-bit index of 65535 is the primitive restart value, which glTF
-  // forbids in a triangle list (spec 3.7.2.1), so such a mesh goes 32-bit.
+  // forbids in indices (glTF 2.0 spec, Meshes), so such a mesh goes 32-bit.
   const wide = mesh.m_IndexFormat !== 0 || mesh.indices.some((part) => part.includes(0xffff));
   const size = wide ? 4 : 2;
   const primitives: { attributes: Record<string, number>; indices: number }[] = [];
