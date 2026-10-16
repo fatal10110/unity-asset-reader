@@ -63,6 +63,9 @@ packages/
   node/                 npm: unity-asset-reader-node     Node only; deps: core (peer)
     src/         index.ts   fs + dir scan + sidecar resolution
     tests/
+  audio/                npm: unity-asset-reader-audio    isomorphic, sync; deps: core (peer)
+    src/         fsb5.ts adpcm.ts wav.ts index.ts   FSB5 → WAV (#236)
+    tests/
   decoder/              npm: texture2ddecoder-wasm       standalone WASM texture decoder, own version line
     src/ tests/ scripts/ examples/ texture2ddecoder/ (submodule) wasm_bindings.cpp
 examples/               cdn.html, vite/   (reader examples; use core + texture together)
@@ -70,7 +73,7 @@ examples/               cdn.html, vite/   (reader examples; use core + texture t
 
 What belongs in core: anything two packages need, and anything that reads Unity bytes into fields (so `classes/Texture2D.ts` and `classes/Sprite.ts` live in core; turning their bytes into pixels lives in `texture`). What does not: WASM, pixel conversion, `fs`, anything with a heavy or optional dependency. The decoder shares no code with core today; if a second WASM package appears (LZMA fallback, M6 — #69), its emscripten loader is extracted then, not before.
 
-Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core` and `texture` use `resolve({ browser: true })` with **no** node builtins in `external`; only `node` may externalize them.
+Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core`, `texture` and `audio` use `resolve({ browser: true })` with **no** node builtins in `external`; only `node` may externalize them.
 
 **Externalization rule (#71, decided):** *everything a package declares in `dependencies`, `peerDependencies` or `optionalDependencies` is `external`; everything else is bundled, except the node builtins `packages/node` passes through `external` itself.* One rule for workspace siblings and npm deps alike — `rollup.reader.mjs` reads the package's own manifest, so adding a dep to `package.json` is the only step. `dist/` keeps the bare `import`, npm resolves it at install time. Consequences, accepted:
 
@@ -269,3 +272,5 @@ Revision 2026-10-16 (#235, PR #243, maintainer decision): **Unity 2019.1 is the 
 Revision 2026-10-16b (#233, maintainer decision): AssetStudio at `c37af7d`, executed outside the repo (R2), is the golden oracle for **export output** (images, models, audio, shader text), since it is already the behavior source of truth and section 15 of `fixtures/BUILDING.md` already runs its pinned methods in an external .NET 8 harness (#221, #230). UnityPy stays the oracle for parsing goldens and names and checks the harness inputs. `scripts/make-export-goldens.py` is the one entry point; it writes `fixtures/assetstudio-export-goldens.json` (PNG pixels, OBJ and WAV hashes and sizes), each entry matched on the UnityPy input metadata as `make-goldens.py` matches its cross-checks. Shader text has no fixture yet and is left to #52. The header, §5, the §6 oracle risk row and R12 name the harness. Replaces §5's "use [AssetStudio] only to cross-check disagreements, not in the harness".
 
 Revision 2026-10-16c (#234, maintainer decision): **PNG encoding is in scope**; §7 keeps only JPEG encoding. `unity-asset-reader-texture` exports `encodePng(image)`, an RGBA8 `RgbaImage` (top row first) to a PNG file. It stays sync (D4) and browser-safe (D3, R4), so `CompressionStream` is out, and it adds no dependency (§1, R8): the zlib stream holds stored deflate blocks, so the file is about the size of the raw pixels, and callers who want smaller files keep using an image library. D5 is unchanged: core encodes nothing. Tested against AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json` (2026-10-16b), pixels compared, not file bytes.
+
+Revision 2026-10-16d (#236, PR #248): §2 lists `packages/audio` (`unity-asset-reader-audio`, the M6 audio item's own package per D7), isomorphic and sync like `texture`; R4 names it.
