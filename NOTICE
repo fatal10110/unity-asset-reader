@@ -9,6 +9,7 @@ that package's tarball:
   packages/core/NOTICE       unity-asset-reader
   packages/texture/NOTICE    unity-asset-reader-texture
   packages/node/NOTICE       unity-asset-reader-node
+  packages/spine/NOTICE      unity-asset-reader-spine
   packages/decoder/LICENSE   texture2ddecoder-wasm
 
 They say which package uses which upstream, and for what. Runtime npm

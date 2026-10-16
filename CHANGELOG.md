@@ -204,6 +204,18 @@ First release. Peer: `unity-asset-reader@^1`.
 - `loadPath(fileOrDir)`: loads a file or a directory tree from disk, merges `.split0..n` parts and
   picks up `.resS`/`.resource` sidecars.
 
+## unity-asset-reader-spine
+
+### 1.0.0 - Unreleased
+
+First release. Peer: `unity-asset-reader@^1`.
+
+- `spineSkeletons(env)`: every Spine skeleton spine-unity (3.8 to 4.2) stores in the env, with
+  its skeleton data TextAsset (`skeletonJSON`) and, per atlas (`atlasAssets`), the atlas text
+  TextAsset (`atlasFile`) and the page Texture2Ds (each material's `_MainTex`). Found by field
+  names through type trees; a skeleton in a file without type trees, an atlas that loads its
+  textures on demand (4.1+) and an atlas type without `atlasFile` throw `UnsupportedError` (#238).
+
 ## texture2ddecoder-wasm
 
 ### 1.2.6 - 2026-10-16

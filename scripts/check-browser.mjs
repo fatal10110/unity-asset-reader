@@ -1,6 +1,6 @@
 // Browser-safety and dependency-direction guard (R4, R14).
 //
-//   node scripts/check-browser.mjs [core|texture|decoder ...]
+//   node scripts/check-browser.mjs [core|texture|spine|decoder ...]
 //
 // With no arguments every guarded package is checked. Exits 1 and prints every
 // problem found, so a red run says what to fix.
@@ -21,6 +21,7 @@ const READER_DEEP = /^(unity-asset-reader(-[\w-]+)?|texture2ddecoder-wasm)\//;
 export const PACKAGES = {
   core: { browser: true, noReader: true },
   texture: { browser: true, noReader: false },
+  spine: { browser: true, noReader: false },
   decoder: { browser: false, noReader: true },
 };
 

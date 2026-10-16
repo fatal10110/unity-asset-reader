@@ -23,8 +23,8 @@ const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const manifest = (dir) => JSON.parse(read(`packages/${dir}/package.json`));
 
-const READERS = ["core", "texture", "node"];
-const FEATURES = ["texture", "node"];
+const READERS = ["core", "texture", "node", "spine"];
+const FEATURES = ["texture", "node", "spine"];
 
 /** `### <version> - <date>` headings under the `## <section>` heading of CHANGELOG.md. */
 function changelogHeadings(section) {
