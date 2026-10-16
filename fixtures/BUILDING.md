@@ -1642,7 +1642,7 @@ be used as a tight-mask oracle.
 
 ## 17. Export goldens: the AssetStudio harness (#233)
 
-Export output (PNG, OBJ, WAV, later shader text) has its own oracle: AssetStudio
+Export output (PNG, OBJ, WAV, TextAsset files, later shader text) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -1680,7 +1680,7 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh and AudioClip of `goldens.json` and
+3. Lists every Texture2D, Mesh, TextAsset and AudioClip of `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
    it loads).
@@ -1690,24 +1690,27 @@ What it does, all inside `<external-harness>`:
    then for each object: Texture2D `Exporter.ExportTexture2D(item, dir,
    ImageFormat.Png)` of `AssetStudio.CLI`, PNG decoded back to RGBA8; Mesh
    `Exporter.ExportMesh(item, dir)`, the `.obj` file; AudioClip
-   `AudioClipConverter.ConvertToWav()`. The exporters run on en-US, the culture
-   the GUI's export thread sets (the CLI would use the host's, which changes
-   the OBJ's numbers).
+   `AudioClipConverter.ConvertToWav()`; TextAsset
+   `Exporter.ExportTextAsset(item, dir)`, the file it writes (`m_Script` as
+   is). The exporters run on en-US, the culture the GUI's export thread sets
+   (the CLI would use the host's, which changes the OBJ's numbers).
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
-   the fixture), texture format, size and image data hash, audio data hash.
+   the fixture), texture format, size and image data hash, audio data hash,
+   TextAsset script size and hash (from the type tree dump, where there is one).
 
 Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
 pathId) and holds `input` (the metadata it was matched on) and one of `png`
 (`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
-**top row first**, plus the PNG file's own size and hash), `obj` or `wav`
-(`size`, `sha256` of the file), or `exportError`:
+**top row first**, plus the PNG file's own size and hash), `obj`, `wav` or
+`bytes` (`size`, `sha256` of the file), or `exportError`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 12 Mesh (`main` bundles) | 12 OBJ | |
 | 18 AudioClip (`audio` bundles) | 18 WAV | |
-| 129 Texture2D | 88 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
+| 28 TextAsset | 28 files | |
+| 138 Texture2D | 97 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
 which call the right `Decode*` method by name, stay the AssetStudio verdict.
@@ -1718,9 +1721,415 @@ changes between runs, get an `exportError` instead of a golden. On these
 fixtures that only ever hit the misnumbered ASTC_HDR_4x4 (decoded as `R16_Alt`).
 
 Checks that need no AssetStudio run, in `scripts/tests/export-goldens.test.ts`:
-every PCM clip exports to `tone.wav` of section 11 to the byte, and the RG16
+every PCM clip exports to `tone.wav` of section 11 to the byte, every `hello`
+TextAsset to `hello.txt` of section 1, and the RG16
 PNG equals section 15's executed `DecodeRG16`, turned top-down.
 
 Section 15's script stays as it is: it executes single pinned methods
 (`CutImage`'s rectangle path, the plain decoders by name) that the full
 exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
+
+## 18. The `spine` bundles (#238)
+
+Spine skeletons as spine-unity stores them, for `unity-asset-reader-spine`,
+built with **2019.4.41f2** only (format 21, which AssetStudio `c37af7d` reads,
+so the TextAssets and pages get export goldens, section 17). No spine-unity
+package is involved: the project holds stub scripts with spine-unity's
+serialized fields, the same names, types and order, and a skeleton JSON and
+atlas text written for it.
+
+The field names come from spine-unity's sources (EsotericSoftware/spine-runtimes,
+`spine-unity/Assets/Spine/Runtime/spine-unity/Asset Types/`, branches `3.8`,
+`4.0`, `4.1` and `4.2`), read outside the repository for the names only; the
+Spine Runtimes License covers that code, and none of it is copied here.
+`SkeletonDataAsset.cs`, `SpineAtlasAsset.cs` and `BlendModeMaterials.cs`
+declare the same serialized fields on all four branches. `AtlasAssetBase.cs`
+has none, except on 4.1 and 4.2 built with `SPINE_OPTIONAL_ON_DEMAND_LOADING`,
+where it adds `textureLoadingMode` (`LoadingMode`: `Normal` = 0, `OnDemand`)
+and `onDemandTextureLoader` before the atlas' own fields. The project has
+both layouts: `Spine.Unity` (3.8 to 4.2) and `Spine.Unity.OnDemand` (4.1+ with
+the define).
+
+What `spineSkeletons(env)` must return for each bundle, one row per atlas, in
+order (`packages/spine/tests/spine.test.ts` reads this table):
+
+| Bundle | Skeleton | Skeleton data | Atlas | Pages |
+|---|---|---|---|---|
+| `spine/lz4/skeletons` | `hero_SkeletonData` | `hero` | `hero.atlas` | `hero`, `hero2` |
+| `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp.atlas` | `imp` |
+| `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp-fx.atlas` | `imp-fx` |
+
+- `hero_SkeletonData` (4.1+ layout): one atlas, `hero_Atlas`, with two pages,
+  `textureLoadingMode` `Normal`.
+- `imp_SkeletonData` (3.8 to 4.2 layout): `atlasAssets` is `imp_Atlas`, a null
+  entry, `imp-fx_Atlas`. spine-unity skips the null entry
+  (`SkeletonDataAsset.GetAtlasArray`), so the skeleton has two atlases.
+- `spine/lz4/ondemand`: `ghost_SkeletonData`, whose atlas `ghost_Atlas` has
+  `textureLoadingMode` `OnDemand`, which spine-unity builds with placeholder
+  textures in the materials: `spineSkeletons` refuses it.
+- `spine/lz4-notypetree/skeletons`: the `skeletons` bundle built with
+  `DisableWriteTypeTree`, which has no field names to go by: `spineSkeletons`
+  refuses it, naming the `SkeletonDataAsset` script.
+
+Names are `m_Name`s: Unity names a TextAsset after its file without the last
+extension (`hero.atlas.txt` is `hero.atlas`) and a texture after its file.
+A page is the `_MainTex` of each of the atlas asset's `materials`
+(`<page>_Material`), in that order; the shader those Materials use goes into a
+bundle of its own, `spinedeps`, which is not committed.
+
+### Source assets
+
+Under `<project>/Assets/Fixtures/spine/`. The JSON and atlas files are written
+byte-exact (LF, no BOM):
+
+```bash
+printf '{"skeleton":{"hash":"uarhero","spine":"4.2.00","x":-4,"y":0,"width":8,"height":16},"bones":[{"name":"root"}],"slots":[{"name":"head","bone":"root","attachment":"head"},{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"head":{"head":{"y":12,"width":8,"height":8}},"body":{"body":{"y":4,"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > hero.json
+printf 'hero.png\nsize:8,8\nfilter:Linear,Linear\nhead\nbounds:0,0,8,8\n\nhero2.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > hero.atlas.txt
+printf '{"skeleton":{"hash":"uarimp","spine":"3.8.99","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"},{"name":"spark","bone":"root","attachment":"spark"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}},"spark":{"spark":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > imp.json
+printf '\nimp.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nbody\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n' > imp.atlas.txt
+printf '\nimp-fx.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nspark\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n' > imp-fx.atlas.txt
+printf '{"skeleton":{"hash":"uarghost","spine":"4.2.00","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > ghost.json
+printf 'ghost.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > ghost.atlas.txt
+```
+
+The hero JSON and atlas text are Spine 4.x's export format, the imp ones 3.8's;
+nothing reads them as Spine data, they only have to come back byte for byte.
+The pages are 8x8 RGBA PNGs, every pixel distinct within and across pages
+(stored deflate, so the bytes do not depend on the zlib version):
+
+```python
+import struct, zlib
+def png(name, page):
+    px = [[((32 * x + 4 * page) % 256, (32 * y + 3) % 256, (40 * page + 4 * x + y) % 256, 255 - 8 * (x + y)) for x in range(8)] for y in range(8)]
+    raw = b"".join(b"\x00" + bytes(c for p in row for c in p) for row in px)
+    chunk = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
+    data = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 8, 8, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 0)) + chunk(b"IEND", b"")
+    open(name, "wb").write(data)
+for page, name in enumerate(["hero.png", "hero2.png", "imp.png", "imp-fx.png", "ghost.png"], 1):
+    png(name, page)
+```
+
+sha256 of each file:
+
+```
+77b9da52d4b22be22a18b32d668ce49086745af5562df63c36fe07573e970ff9  hero.json
+9ba4fae5677381ee0b1ed848183797a60c52848f36dd733557ee3afdad9c92af  hero.atlas.txt
+98767306c19f9306753272348ede1eb10ea6fe3b2007f1cb15b48f5a62d3b8ae  hero.png
+5d63131a81a671ab079f0a54ba201d5a358f0264d2173722f0d4e5aa33ebe030  hero2.png
+64ebbd5f211bb27b246f901626c22c5cac06add9cff06d5ca2f9925c5ed1ef24  imp.json
+25f4fffdeca789d74a8079272f885eda44965f55715465e9e1774fdadb13be4c  imp.atlas.txt
+330ce484fb0f86e29d836cfa7546389838ff2126906dfe261c0317346f5ee6ed  imp.png
+8cff25a19d77c886a6b35ffdb3baa26e98e6f2d33e60809a273ab6ddcd05ba08  imp-fx.atlas.txt
+408e078298da49777fec9d0522da5e33492ac341a61473e80159e58479c1b345  imp-fx.png
+8946f6c1e5e8a71196fb5c0e4ed4053ff881d2ca5f5e41cb844006ef038d286d  ghost.json
+1d804a8efa9ced3f9601ec44ccfc94626427ee1dcfd4df08afe0b061f2f297c8  ghost.atlas.txt
+8aafa8abaf30aa4912faca2c62285194457902e1ba9c870851d5c089c791faf1  ghost.png
+```
+
+`page.shader`, the smallest shader with a `_MainTex` slot:
+
+```shaderlab
+// The smallest shader with a _MainTex slot, for the page Materials (#238).
+Shader "UAR/SpinePage"
+{
+    Properties { _MainTex ("Page", 2D) = "white" {} }
+    SubShader
+    {
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            sampler2D _MainTex;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return tex2D(_MainTex, float2(0, 0)); }
+            ENDCG
+        }
+    }
+}
+```
+
+### Stub scripts
+
+The 3.8 to 4.2 layout, under `Assets/Scripts/Spine/`, one file per class named
+after it (`AtlasAssetBase.cs`, `BlendModeMaterials.cs`,
+`SkeletonDataAsset.cs`, `SkeletonDataModifierAsset.cs`,
+`SpineAtlasAsset.cs`):
+
+```csharp
+// AtlasAssetBase.cs
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    // 3.8 to 4.2 without SPINE_OPTIONAL_ON_DEMAND_LOADING: no serialized fields.
+    public abstract class AtlasAssetBase : ScriptableObject { }
+}
+
+// BlendModeMaterials.cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    [System.Serializable]
+    public class BlendModeMaterials
+    {
+        [System.Serializable]
+        public class ReplacementMaterial
+        {
+            public string pageName;
+            public Material material;
+        }
+
+        [SerializeField, HideInInspector] protected bool requiresBlendModeMaterials = false;
+        public bool applyAdditiveMaterial = false;
+        public List<ReplacementMaterial> additiveMaterials = new List<ReplacementMaterial>();
+        public List<ReplacementMaterial> multiplyMaterials = new List<ReplacementMaterial>();
+        public List<ReplacementMaterial> screenMaterials = new List<ReplacementMaterial>();
+    }
+}
+
+// SkeletonDataAsset.cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    // Stub of spine-unity's SkeletonDataAsset (3.8 to 4.2): the serialized fields
+    // only, same names, types and order (#238). No spine-unity code.
+    public class SkeletonDataAsset : ScriptableObject
+    {
+        public AtlasAssetBase[] atlasAssets = new AtlasAssetBase[0];
+        public float scale = 0.01f;
+        public TextAsset skeletonJSON;
+        public bool isUpgradingBlendModeMaterials = false;
+        public BlendModeMaterials blendModeMaterials = new BlendModeMaterials();
+        public List<SkeletonDataModifierAsset> skeletonDataModifiers = new List<SkeletonDataModifierAsset>();
+        public string[] fromAnimation = new string[0];
+        public string[] toAnimation = new string[0];
+        public float[] duration = new float[0];
+        public float defaultMix;
+        public RuntimeAnimatorController controller;
+    }
+}
+
+// SkeletonDataModifierAsset.cs
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    public abstract class SkeletonDataModifierAsset : ScriptableObject { }
+}
+
+// SpineAtlasAsset.cs
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    public class SpineAtlasAsset : AtlasAssetBase
+    {
+        public TextAsset atlasFile;
+        public Material[] materials;
+    }
+}
+```
+
+The 4.1+ layout with `SPINE_OPTIONAL_ON_DEMAND_LOADING`, under
+`Assets/Scripts/SpineOnDemand/` (`AtlasAssetBase.cs`,
+`OnDemandTextureLoader.cs`, `SkeletonDataAsset.cs`, `SpineAtlasAsset.cs`).
+Unity takes two scripts of the same file name in different folders, as long
+as their namespaces differ:
+
+```csharp
+// AtlasAssetBase.cs
+using UnityEngine;
+
+namespace Spine.Unity.OnDemand
+{
+    // 4.1 and 4.2 with SPINE_OPTIONAL_ON_DEMAND_LOADING: two serialized fields.
+    public abstract class AtlasAssetBase : ScriptableObject
+    {
+        public enum LoadingMode { Normal = 0, OnDemand }
+
+        [SerializeField] protected LoadingMode textureLoadingMode = LoadingMode.Normal;
+        [SerializeField] protected OnDemandTextureLoader onDemandTextureLoader = null;
+    }
+}
+
+// OnDemandTextureLoader.cs
+using UnityEngine;
+
+namespace Spine.Unity.OnDemand
+{
+    public abstract class OnDemandTextureLoader : ScriptableObject { }
+}
+
+// SkeletonDataAsset.cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Spine.Unity.OnDemand
+{
+    // The same SkeletonDataAsset fields; its own copy only so that atlasAssets can
+    // hold this namespace's AtlasAssetBase (the 4.1+ layout).
+    public class SkeletonDataAsset : ScriptableObject
+    {
+        public AtlasAssetBase[] atlasAssets = new AtlasAssetBase[0];
+        public float scale = 0.01f;
+        public TextAsset skeletonJSON;
+        public bool isUpgradingBlendModeMaterials = false;
+        public Spine.Unity.BlendModeMaterials blendModeMaterials = new Spine.Unity.BlendModeMaterials();
+        public List<Spine.Unity.SkeletonDataModifierAsset> skeletonDataModifiers = new List<Spine.Unity.SkeletonDataModifierAsset>();
+        public string[] fromAnimation = new string[0];
+        public string[] toAnimation = new string[0];
+        public float[] duration = new float[0];
+        public float defaultMix;
+        public RuntimeAnimatorController controller;
+    }
+}
+
+// SpineAtlasAsset.cs
+using UnityEngine;
+
+namespace Spine.Unity.OnDemand
+{
+    public class SpineAtlasAsset : AtlasAssetBase
+    {
+        public TextAsset atlasFile;
+        public Material[] materials;
+    }
+}
+```
+
+`Assets/Editor/BuildSpine.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using Plain = Spine.Unity;
+using OnDemand = Spine.Unity.OnDemand;
+
+// Spine skeletons as spine-unity stores them (#238), with stub scripts of the
+// same field names: hero (4.1+ atlas layout, one atlas, two pages), imp (3.8 to
+// 4.2 layout, two atlases and a null entry between them, one page each), and
+// ghost (4.1+ layout, texture loading mode OnDemand) in a bundle of its own.
+public static class BuildSpine
+{
+    const string Dir = "Assets/Fixtures/spine";
+
+    static T Load<T>(string file) where T : Object
+    {
+        var asset = AssetDatabase.LoadAssetAtPath<T>(Dir + "/" + file);
+        if (asset == null) throw new System.Exception("missing " + file);
+        return asset;
+    }
+
+    static string Save(Object asset, string name)
+    {
+        var path = Dir + "/" + name + ".asset";
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.CreateAsset(asset, path);
+        return path;
+    }
+
+    // A page: an uncompressed RGBA32 texture without mips, and its Material.
+    static Material Page(string page)
+    {
+        var tex = (TextureImporter)AssetImporter.GetAtPath(Dir + "/" + page + ".png");
+        tex.textureCompression = TextureImporterCompression.Uncompressed;
+        tex.mipmapEnabled = false;
+        tex.SaveAndReimport();
+        var path = Dir + "/" + page + "_Material.mat";
+        AssetDatabase.DeleteAsset(path);
+        var mat = new Material(Load<Shader>("page.shader"));
+        mat.SetTexture("_MainTex", Load<Texture2D>(page + ".png"));
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
+    static Plain.SpineAtlasAsset PlainAtlas(string name, params string[] pages)
+    {
+        var atlas = ScriptableObject.CreateInstance<Plain.SpineAtlasAsset>();
+        atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
+        atlas.materials = System.Array.ConvertAll(pages, Page);
+        Save(atlas, name + "_Atlas");
+        return atlas;
+    }
+
+    static OnDemand.SpineAtlasAsset OnDemandAtlas(string name, int loadingMode, params string[] pages)
+    {
+        var atlas = ScriptableObject.CreateInstance<OnDemand.SpineAtlasAsset>();
+        atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
+        atlas.materials = System.Array.ConvertAll(pages, Page);
+        Save(atlas, name + "_Atlas");
+        var so = new SerializedObject(atlas);
+        so.FindProperty("textureLoadingMode").intValue = loadingMode;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        return atlas;
+    }
+
+    public static void Build()
+    {
+        var hero = ScriptableObject.CreateInstance<OnDemand.SkeletonDataAsset>();
+        hero.atlasAssets = new OnDemand.AtlasAssetBase[] { OnDemandAtlas("hero", 0, "hero", "hero2") };
+        hero.skeletonJSON = Load<TextAsset>("hero.json");
+        hero.fromAnimation = new[] { "idle" };
+        hero.toAnimation = new[] { "idle" };
+        hero.duration = new[] { 0.2f };
+        hero.defaultMix = 0.1f;
+        var heroPath = Save(hero, "hero_SkeletonData");
+
+        var imp = ScriptableObject.CreateInstance<Plain.SkeletonDataAsset>();
+        // A null entry, which spine-unity skips (SkeletonDataAsset.GetAtlasArray).
+        imp.atlasAssets = new Plain.AtlasAssetBase[] { PlainAtlas("imp", "imp"), null, PlainAtlas("imp-fx", "imp-fx") };
+        imp.skeletonJSON = Load<TextAsset>("imp.json");
+        var impPath = Save(imp, "imp_SkeletonData");
+
+        var ghost = ScriptableObject.CreateInstance<OnDemand.SkeletonDataAsset>();
+        ghost.atlasAssets = new OnDemand.AtlasAssetBase[] { OnDemandAtlas("ghost", 1, "ghost") };
+        ghost.skeletonJSON = Load<TextAsset>("ghost.json");
+        var ghostPath = Save(ghost, "ghost_SkeletonData");
+
+        foreach (var asset in new Object[] { hero, imp, ghost }) EditorUtility.SetDirty(asset);
+        AssetDatabase.SaveAssets();
+
+        // The shader goes into a bundle of its own (not committed), so the page
+        // Materials point at another file for it and the bundles stay small.
+        var builds = new[] {
+            new AssetBundleBuild { assetBundleName = "skeletons", assetNames = new[] { heroPath, impPath } },
+            new AssetBundleBuild { assetBundleName = "ondemand", assetNames = new[] { ghostPath } },
+            new AssetBundleBuild { assetBundleName = "spinedeps", assetNames = new[] { Dir + "/page.shader" } },
+        };
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4, builds);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree, builds);
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts, AssetBundleBuild[] builds)
+    {
+        var dir = Path.Combine("Build", "spine-" + name);
+        Directory.CreateDirectory(dir);
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: spine " + name);
+        Debug.Log("FIXTURE-OK spine " + name + " -> " + dir);
+    }
+}
+```
+
+### Build
+
+Same command as section 2, with `-executeMethod BuildSpine.Build`; the log
+must hold two `FIXTURE-OK spine` lines. Copy only these three files:
+
+```
+Build/spine-lz4/skeletons             -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/skeletons
+Build/spine-lz4/ondemand              -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/ondemand
+Build/spine-lz4-notypetree/skeletons  -> fixtures/bundles/editor/2019.4.41f2/spine/lz4-notypetree/skeletons
+```
+
+then rerun `make-goldens.py` (it dumps the MonoBehaviours', Materials',
+TextAssets' and Texture2Ds' type trees) and `make-export-goldens.py`
+(section 17: each TextAsset's file and each page's PNG).

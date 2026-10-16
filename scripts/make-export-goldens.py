@@ -4,17 +4,18 @@
 AssetStudio (Razviar/assetstudio at REVISION) is the golden oracle for export
 output (plan section 5, R12). This script builds that revision, unmodified,
 from a local clone outside the repository, and runs on every fixture object
-of the three exported classes:
+of the four exported classes:
 
   Texture2D  AssetStudio.CLI  Exporter.ExportTexture2D(item, dir, ImageFormat.Png);
              the PNG it writes is decoded back to RGBA in the harness
   Mesh       AssetStudio.CLI  Exporter.ExportMesh(item, dir), the .obj file
   AudioClip  AssetStudio.Utility  new AudioClipConverter(clip).ConvertToWav()
+  TextAsset  AssetStudio.CLI  Exporter.ExportTextAsset(item, dir), the file it writes
 
 UnityPy stays the oracle for what goes in. The objects come from the committed
 UnityPy goldens (goldens.json, modern-goldens.json), each with the input
 metadata recorded there (name, object size, texture format, size and image
-data hash, audio data hash); UnityPy 1.25.3 hashes each object's bytes in the
+data hash, audio data hash, TextAsset script hash); UnityPy 1.25.3 hashes each object's bytes in the
 fixtures it reads. AssetStudio's AssetsManager loads the same bundle, and an
 object's export is recorded only when AssetStudio reports the same input.
 
@@ -57,8 +58,10 @@ OUTPUT = ROOT / "fixtures" / "assetstudio-export-goldens.json"
 REVISION = "c37af7dfcdafee93e33b5da9f0285c97998d6ae3"
 # git rev-parse c37af7d^{tree}: the extracted source is exactly this tree.
 TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
-TEXTURE2D, MESH, AUDIOCLIP = 28, 43, 83
-CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", AUDIOCLIP: "AudioClip"}
+TEXTURE2D, MESH, TEXTASSET, AUDIOCLIP = 28, 43, 49, 83
+CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", TEXTASSET: "TextAsset", AUDIOCLIP: "AudioClip"}
+# The output each class's entry holds.
+OUTPUTS = ["png", "obj", "wav", "bytes"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
 # extracted tree. FMOD's own license, never committed.
 FMOD = "AssetStudio.GUI/Libraries/x64/fmod.dll"
@@ -95,6 +98,7 @@ METHODS = {
     "Texture2D": "AssetStudio.CLI.Exporter.ExportTexture2D(item, dir, ImageFormat.Png)",
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
+    "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
 }
 
 HARNESS = r'''using System;
@@ -150,6 +154,7 @@ public static class Program {
             ?? throw new Exception("AssetStudio.CLI.Exporter." + name + " not found");
         var exportTexture2D = Method("ExportTexture2D");
         var exportMesh = Method("ExportMesh");
+        var exportTextAsset = Method("ExportTextAsset");
         var game = GameManager.GetGame(GameType.Normal);
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
@@ -244,6 +249,18 @@ public static class Program {
                             result["wav"] = new Dictionary<string, object> { ["size"] = wav.Length, ["sha256"] = Sha(wav) };
                             break;
                         }
+                        case TextAsset textAsset: {
+                            input["name"] = textAsset.m_Name;
+                            input["scriptSize"] = textAsset.m_Script.Length;
+                            input["scriptSha256"] = Sha(textAsset.m_Script);
+                            if (!(bool)exportTextAsset.Invoke(null, new object[] { item, outDir })) {
+                                result["exportError"] = "ExportTextAsset returned false";
+                                break;
+                            }
+                            var bytes = File.ReadAllBytes(Single(outDir));
+                            result["bytes"] = new Dictionary<string, object> { ["size"] = bytes.Length, ["sha256"] = Sha(bytes) };
+                            break;
+                        }
                         default:
                             result["exportError"] = "AssetStudio read class " + obj.type + " as " + obj.GetType().Name;
                             break;
@@ -319,6 +336,12 @@ def expected_jobs() -> dict[str, list[dict]]:
                     raw = serialized.get("rawData", {}).get(path_id)
                     if class_id == AUDIOCLIP and raw:
                         expected.update({"dataSize": raw["size"], "dataSha256": raw["sha256"]})
+                    dump = serialized.get("typetrees", {}).get(path_id)
+                    if class_id == TEXTASSET and dump:
+                        # make-goldens.py keeps m_Script as UnityPy decodes it (UTF-8,
+                        # surrogateescape), so this gives back the bytes UnityPy read.
+                        script = dump["value"]["m_Script"].encode("utf-8", "surrogateescape")
+                        expected.update({"scriptSize": len(script), "scriptSha256": sha256(script)})
                     jobs.setdefault(key, []).append(
                         {"file": file, "pathId": path_id, "golden": golden, "expected": expected})
     return jobs
@@ -457,7 +480,8 @@ def main() -> None:
     results, again = run("a"), run("b")
     for index, result in results.items():
         if result != again.get(index):
-            result.pop("png", None), result.pop("obj", None), result.pop("wav", None)
+            for output in OUTPUTS:
+                result.pop(output, None)
             result["exportError"] = "nondeterministic: AssetStudio's output differs between two runs"
 
     hashes: dict[str, dict | None] = {}
@@ -496,13 +520,13 @@ def main() -> None:
             else:
                 entry["inputOracle"] += "; object bytes: UnityPy 1.25.3"
             entry["input"] = actual
-        for output in ["png", "obj", "wav", "exportError"]:
+        for output in [*OUTPUTS, "exportError"]:
             if output in result:
                 entry[output] = result[output]
-        if ("exportError" in entry) == any(k in entry for k in ["png", "obj", "wav"]):
+        if ("exportError" in entry) == any(k in entry for k in OUTPUTS):
             raise SystemExit(f"{where}: want an export or an exportError, got {sorted(result)}")
         fixtures.setdefault(key, {}).setdefault(job["file"], {})[job["pathId"]] = entry
-        status = result.get("exportError") or next(k for k in ["png", "obj", "wav"] if k in result)
+        status = result.get("exportError") or next(k for k in OUTPUTS if k in result)
         print(f"  {where:<90} {entry['class']:<10} {status}")
 
     golden = {

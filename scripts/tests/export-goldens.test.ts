@@ -10,12 +10,13 @@ import { test } from "node:test";
 import { reverseRows, sha256 } from "../../fixtures/helpers.js";
 
 interface Entry {
-  class: "Texture2D" | "Mesh" | "AudioClip";
+  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset";
   input: Record<string, string | number>;
   inputOracle: string;
   png?: { width: number; height: number; rgbaSha256: string };
   obj?: { size: number; sha256: string };
   wav?: { size: number; sha256: string };
+  bytes?: { size: number; sha256: string };
   exportError?: string;
 }
 
@@ -30,6 +31,7 @@ interface UnityPyGolden {
           names: Record<string, string>;
           textures?: Record<string, Record<string, string | number>>;
           rawData?: Record<string, { size: number; sha256: string }>;
+          typetrees?: Record<string, { value: Record<string, unknown> }>;
         }
       >;
     }
@@ -47,10 +49,15 @@ const sources = {
   "goldens.json": json<UnityPyGolden>("goldens.json"),
   "modern-goldens.json": json<UnityPyGolden>("modern-goldens.json"),
 };
-const CLASSES: Record<number, Entry["class"]> = { 28: "Texture2D", 43: "Mesh", 83: "AudioClip" };
-const OUTPUT = { Texture2D: "png", Mesh: "obj", AudioClip: "wav" } as const;
+const CLASSES: Record<number, Entry["class"]> = {
+  28: "Texture2D",
+  43: "Mesh",
+  49: "TextAsset",
+  83: "AudioClip",
+};
+const OUTPUT = { Texture2D: "png", Mesh: "obj", AudioClip: "wav", TextAsset: "bytes" } as const;
 
-/** Every Texture2D, Mesh and AudioClip the UnityPy goldens list, with its export entry. */
+/** Every Texture2D, Mesh, TextAsset and AudioClip the UnityPy goldens list, with its export entry. */
 function objects() {
   const out = [];
   for (const [source, golden] of Object.entries(sources)) {
@@ -77,7 +84,7 @@ test("the export goldens come from AssetStudio c37af7d through the export harnes
   assert.equal(exports._generator, "scripts/make-export-goldens.py");
 });
 
-test("every Texture2D, Mesh and AudioClip of the fixtures has an entry, and nothing else", () => {
+test("every Texture2D, Mesh, TextAsset and AudioClip of the fixtures has an entry, and nothing else", () => {
   assert.ok(all.length > 0);
   for (const o of all) {
     assert.ok(o.entry, `${at(o)}: no export golden entry`);
@@ -107,6 +114,14 @@ test("each entry carries the UnityPy input it was matched on", () => {
       assert.equal(input.dataSize, raw.size, where);
       assert.equal(input.dataSha256, raw.sha256, where);
     }
+    const dump = o.serialized.typetrees?.[o.row.pathId];
+    if (o.cls === "TextAsset" && dump) {
+      // make-goldens.py keeps m_Script as UnityPy decodes it, from UTF-8. Every
+      // fixture TextAsset is valid UTF-8, so encoding it again gives its bytes.
+      const script = Buffer.from(dump.value.m_Script as string, "utf8");
+      assert.equal(input.scriptSize, script.length, where);
+      assert.equal(input.scriptSha256, sha256(script), where);
+    }
     assert.match(o.entry!.inputOracle, new RegExp(`^${o.source.replace(".", "\\.")}`), where);
   }
 });
@@ -114,7 +129,7 @@ test("each entry carries the UnityPy input it was matched on", () => {
 test("each entry holds its class's export or an exportError, never both", () => {
   for (const o of all) {
     const e = o.entry!;
-    const outputs = (["png", "obj", "wav"] as const).filter((k) => e[k]);
+    const outputs = (["png", "obj", "wav", "bytes"] as const).filter((k) => e[k]);
     if (e.exportError) assert.deepEqual(outputs, [], at(o));
     else assert.deepEqual(outputs, [OUTPUT[o.cls]], at(o));
   }
@@ -144,7 +159,22 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     all.filter((o) => o.cls === cls && !o.entry!.exportError).length;
   assert.equal(exported("Mesh"), 12, "the one-triangle Mesh of every main bundle");
   assert.equal(exported("AudioClip"), 18, "both clips of every audio bundle");
-  assert.equal(exported("Texture2D"), 88);
+  assert.equal(exported("TextAsset"), 28);
+  assert.equal(exported("Texture2D"), 97);
+});
+
+test("hello.txt exports back to the file it was imported from", () => {
+  // fixtures/BUILDING.md section 1: ExportTextAsset writes m_Script as is, an
+  // oracle check that needs no AssetStudio.
+  const hello = all.filter((o) => o.cls === "TextAsset" && o.entry!.input.name === "hello");
+  assert.equal(hello.length, 16);
+  for (const o of hello) {
+    assert.deepEqual(
+      o.entry!.bytes,
+      { size: 58, sha256: "3606049155e66b287de2e2ff7d5c19473df8c3f6ae817c2c67856ff74783ba06" },
+      at(o),
+    );
+  }
 });
 
 test("the PCM clip exports back to the WAV it was imported from", () => {

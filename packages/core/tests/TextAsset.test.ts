@@ -78,6 +78,8 @@ test("the UTF-8 text keeps the fixture's 4-byte emoji", () => {
   for (const name of FIXTURES) {
     for (const { reader } of objectsOf(name, ClassID.TextAsset)) {
       const asset = readTextAsset(reader);
+      // The spine bundles' TextAssets (#238) are Spine's files, not hello.txt.
+      if (name.includes("/spine/")) continue;
       // hello.txt: 58 bytes, ending "é€😀\n" (fixtures/BUILDING.md).
       assert.equal(asset.m_Script.length, 58, name);
       assert.deepEqual([...asset.m_Script.subarray(-5, -1)], [0xf0, 0x9f, 0x98, 0x80]);
