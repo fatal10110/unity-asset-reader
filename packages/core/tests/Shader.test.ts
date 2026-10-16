@@ -1,10 +1,10 @@
 // Shader (#237): the hardcoded reader against readTypeTree() on the shader
 // fixtures (fixtures/BUILDING.md section 18: our own shaders, built by
-// 2019.4.41f2 and 6000.6.4f1 for DX11, GLES3 and Vulkan), and against
-// UnityPy's reading of a synthetic object for every Shader layout of Unity's
-// type trees from 2019.1, the oldest the reader supports
-// (fixtures/shader-layouts.json, R12), the 2020.3.30f1 and 6000.3.25f1 fixture
-// editors among them.
+// 2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1 for DX11, GLES3 and
+// Vulkan, and by 2020.3 and 6000.3 for Metal too), and against UnityPy's
+// reading of a synthetic object for every Shader layout of Unity's type trees
+// from 2019.1, the oldest the reader supports (fixtures/shader-layouts.json,
+// R12).
 
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -30,18 +30,34 @@ import {
   type UnityVersion,
 } from "../src/serialized/SerializedFile.js";
 
-const EDITORS = ["2019.4.41f2", "6000.6.4f1"];
-const TARGETS = ["windows", "android"];
+/** The fixture editors and their targets: Metal (`ios`) where the editor has the iOS module. */
+const EDITORS: Record<string, string[]> = {
+  "2019.4.41f2": ["windows", "android"],
+  "2020.3.30f1": ["windows", "android", "ios"],
+  "6000.3.26f1": ["windows", "android", "ios"],
+  "6000.6.4f1": ["windows", "android"],
+};
 /** The shader bundles built with type trees. */
-const TYPED = EDITORS.flatMap((v) => TARGETS.map((t) => `editor/${v}/shader/lz4/${t}`));
+const TYPED = Object.entries(EDITORS).flatMap(([v, targets]) =>
+  targets.map((t) => `editor/${v}/shader/lz4/${t}`),
+);
 const twin = (name: string): string => name.replace("/lz4/", "/lz4-notypetree/");
 
 /** Upstream's `ShaderCompilerPlatform`. */
 const D3D11 = 4;
 const GLES3_PLUS = 9;
 const VULKAN = 18;
+const METAL = 14;
+/** The platforms each target was built for. */
+const PLATFORMS: Record<string, number[]> = {
+  windows: [D3D11],
+  android: [GLES3_PLUS, VULKAN],
+  ios: [METAL],
+};
 /** Upstream's `ShaderGpuProgramType`. */
 const GPU = { GLES31AEP: 2, GLES3: 4, DX11VertexSM50: 16, DX11GeometrySM50: 20, SPIRV: 25 };
+const METAL_VS = 23;
+const METAL_FS = 24;
 
 const loadName = (name: string): Env => load([{ name, data: loadFixture(name) }]);
 const shadersOf = (env: Env): ObjectReader[] =>
@@ -106,13 +122,13 @@ function subProgramsOf(pass: SerializedPass): SerializedSubProgram[] {
     .flatMap((program) => program.m_SubPrograms);
 }
 
-test("the fixtures hold DX11, GLES3 and Vulkan shaders with every kind of field filled", () => {
+test("the fixtures hold DX11, GLES3, Vulkan and Metal shaders with every kind of field filled", () => {
   const byEditor = new Map<string, Shader[]>();
   for (const name of TYPED) {
     const shaders = shadersOf(loadName(name)).map(readShader);
     const editor = name.split("/")[1]!;
     byEditor.set(editor, [...(byEditor.get(editor) ?? []), ...shaders]);
-    const want = name.endsWith("/windows") ? [D3D11] : [GLES3_PLUS, VULKAN];
+    const want = PLATFORMS[name.split("/").pop()!]!;
     for (const shader of shaders) assert.deepEqual(shader.platforms, want, name);
     const names = shaders.map((s) => s.m_ParsedForm!.m_Name).sort();
     assert.deepEqual(names, ["UAR/ShaderFixture", "UAR/ShaderFixtureSecond"]);
@@ -134,18 +150,39 @@ test("the fixtures hold DX11, GLES3 and Vulkan shaders with every kind of field 
   }
   assert.ok(old.some((s) => s.m_Dependencies!.length > 0), "no dependency");
 
-  // 6000.6 lists a player's variants in m_PlayerSubPrograms, not m_SubPrograms.
-  const modern = byEditor.get("6000.6.4f1")!;
-  const players = modern
-    .flatMap(passesOf)
-    .flatMap((p) => p.progVertex.m_PlayerSubPrograms!.flat());
-  const modernTypes = new Set(players.map((p) => p.m_GpuProgramType));
-  for (const type of [GPU.GLES3, GPU.SPIRV]) assert.ok(modernTypes.has(type), `6000.6: ${type}`);
-  assert.ok([...modernTypes].some((t) => t >= 15 && t <= 22), "6000.6: no DX11 program");
-  for (const shader of modern) {
-    assert.ok(shader.m_ParsedForm!.m_KeywordNames!.length > 0);
-    assert.equal(Object.keys(shader.m_AssetGUID!).length, 4);
-    assert.equal(typeof shader.m_AssetLocalIdentifierInFile, "bigint");
+  // 2020.3: the positive side of the #52 gate and the 2020.3.2 program
+  // parameters, in a real format-22 file, and Metal programs.
+  const mid = byEditor.get("2020.3.30f1")!;
+  for (const pass of mid.flatMap(passesOf)) {
+    // Every pass has the four fields; a GrabPass or UsePass has no hash in them.
+    assert.ok(pass.m_EditorDataHash && pass.m_Platforms, "2020.3: no m_EditorDataHash");
+    assert.equal(pass.m_EditorDataHash.length, pass.m_Platforms.length);
+    if (pass.m_Type === 0) assert.ok(pass.m_EditorDataHash.length > 0, "2020.3: an empty hash list");
+    assert.ok(pass.m_LocalKeywordMask && pass.m_GlobalKeywordMask, "2020.3: no keyword masks");
+    assert.ok(pass.progVertex.m_CommonParameters, "2020.3: no m_CommonParameters");
+  }
+  const midSubs = mid.flatMap(passesOf).flatMap(subProgramsOf);
+  assert.ok(midSubs.every((s) => s.m_Parameters), "2020.3: a sub-program without m_Parameters");
+  const midTypes = new Set(midSubs.map((s) => s.m_GpuProgramType));
+  for (const type of [METAL_VS, METAL_FS]) assert.ok(midTypes.has(type), `2020.3: no ${type}`);
+
+  // 6000.3 and 6000.6 list a player's variants in m_PlayerSubPrograms, not
+  // m_SubPrograms, and have none of the four pass fields of #52.
+  for (const editor of ["6000.3.26f1", "6000.6.4f1"]) {
+    const modern = byEditor.get(editor)!;
+    const players = modern
+      .flatMap(passesOf)
+      .flatMap((p) => p.progVertex.m_PlayerSubPrograms!.flat());
+    const modernTypes = new Set(players.map((p) => p.m_GpuProgramType));
+    for (const type of [GPU.GLES3, GPU.SPIRV]) assert.ok(modernTypes.has(type), `${editor}: ${type}`);
+    assert.ok([...modernTypes].some((t) => t >= 15 && t <= 22), `${editor}: no DX11 program`);
+    if (editor === "6000.3.26f1") assert.ok(modernTypes.has(METAL_VS), `${editor}: no Metal`);
+    for (const shader of modern) {
+      assert.equal(passesOf(shader)[0]!.m_EditorDataHash, undefined);
+      assert.ok(shader.m_ParsedForm!.m_KeywordNames!.length > 0);
+      assert.equal(Object.keys(shader.m_AssetGUID!).length, 4);
+      assert.equal(typeof shader.m_AssetLocalIdentifierInFile, "bigint");
+    }
   }
 });
 

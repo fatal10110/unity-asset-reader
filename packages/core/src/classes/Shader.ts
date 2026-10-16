@@ -276,7 +276,7 @@ export interface SerializedPlayerSubProgram {
 /** One program stage of a pass, every variant of it (Unity's `SerializedProgram`). */
 export interface SerializedProgram {
   /**
-   * Every variant with its parameters. Empty in the 6000.6.4f1 player builds,
+   * Every variant with its parameters. Empty in the 6000.3 and 6000.6 fixtures,
    * which list theirs in `m_PlayerSubPrograms`.
    */
   m_SubPrograms: SerializedSubProgram[];
