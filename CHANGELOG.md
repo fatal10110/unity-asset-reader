@@ -1,7 +1,7 @@
 # Changelog
 
-This repo publishes four npm packages. Each has its own section below, newest version first. How
-to release is in [RELEASING.md](RELEASING.md).
+This repo publishes its npm packages from `packages/`. Each has its own section below, newest
+version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## Versioning policy
 
@@ -18,8 +18,9 @@ to release is in [RELEASING.md](RELEASING.md).
   a minor, with a **Behavior change** note listing what changes for that class: its `type`, the
   shape of its `data` and `obj.read()`, and every input that now throws.
 - Between packages of this repo, ranges say what goes together. A feature package's
-  `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`), so any core of that
-  major works with it; a breaking core release moves the feature packages' peer range with it.
+  `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`) when any core of that
+  major works with it, or `^<major>.<minor>.<patch>` naming the oldest core it works with (for
+  example `^1.2.0`); a breaking core release moves the feature packages' peer range with it.
   The texture package's `^` range on `texture2ddecoder-wasm` names the oldest decoder it works
   with. A package is never published before a version its ranges need is on npm.
 - Changes that are not on npm yet collect under a `### <next version> - Unreleased` heading in
@@ -214,16 +215,34 @@ First release. Peer: `unity-asset-reader@^1`.
 - `loadPath(fileOrDir)`: loads a file or a directory tree from disk, merges `.split0..n` parts and
   picks up `.resS`/`.resource` sidecars.
 
-## unity-asset-reader-audio
+## unity-asset-reader-mesh
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
 
 ### 1.0.0 - Unreleased
 
-- New package (#236): `fsb5ToWav()` converts an `AudioClip`'s FSB5 sound bank to WAV, as
-  AssetStudio's `AudioClipConverter.ConvertToWav()` does, for PCM8, PCM16, PCM32, IMAADPCM (mono,
-  stereo), FADPCM and GCADPCM (mono); `readFsb5()` parses the bank. Pure TypeScript, sync,
-  browser-safe; `unity-asset-reader` is a peer dependency. The PCM clips of the 2019.4.41f2,
-  2020.3.30f1 and 6000.3.25f1 fixture bundles convert to AssetStudio's WAV byte for byte. Vorbis
-  and the other codecs throw `UnsupportedError`.
+First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `MeshData`.
+
+- `meshToObj(mesh)`: a decoded mesh as Wavefront OBJ text, byte for byte what AssetStudio's
+  `ExportMesh` writes, floats written as .NET writes them under en-US. Equal to AssetStudio's OBJ
+  for the 12 fixture meshes (#239).
+
+## unity-asset-reader-audio
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
+
+### 1.0.0 - Unreleased
+
+First release. Peer: `unity-asset-reader@^1`.
+
+- `fsb5ToWav()` converts an `AudioClip`'s FSB5 sound bank to WAV, as AssetStudio's
+  `AudioClipConverter.ConvertToWav()` does, for PCM8, PCM16, PCM32, IMAADPCM (mono, stereo),
+  FADPCM and GCADPCM (mono); `readFsb5()` parses the bank (#236). Pure TypeScript, sync,
+  browser-safe. The PCM clips of the 2019.4.41f2, 2020.3.30f1 and 6000.3.25f1 fixture bundles
+  convert to AssetStudio's WAV byte for byte. Vorbis and the other codecs throw
+  `UnsupportedError`.
 
 ## texture2ddecoder-wasm
 

@@ -1,0 +1,50 @@
+{
+  "name": "unity-asset-reader-mesh",
+  "version": "0.0.0",
+  "description": "Mesh export for unity-asset-reader: Wavefront OBJ, as AssetStudio writes it.",
+  "license": "MIT",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/**/*",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "pretest": "npm run build",
+    "build": "rollup -c rollup.config.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "check:browser": "node ../../scripts/check-browser.mjs mesh",
+    "prepublishOnly": "npm run verify --prefix ../.."
+  },
+  "keywords": [
+    "unity",
+    "mesh",
+    "obj",
+    "wavefront",
+    "browser"
+  ],
+  "peerDependencies": {
+    "unity-asset-reader": "^1.2.0"
+  },
+  "devDependencies": {
+    "unity-asset-reader": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fatal10110/unity-asset-reader.git",
+    "directory": "packages/mesh"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

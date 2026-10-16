@@ -67,10 +67,10 @@ const BUILTIN = new Set([...builtinModules, ...builtinModules.map((m) => `node:$
  * instead: the day it imports a declared dep, that row fails until it is added
  * here, so it cannot quietly stay vacuous.
  */
-const IMPORTS_DECLARED = new Set(["core", "texture", "node", "audio"]);
+const IMPORTS_DECLARED = new Set(["core", "texture", "node", "mesh", "audio"]);
 
 // Runs after `npm run build` (root `verify` order, and each package's `pretest`).
-for (const pkg of ["core", "texture", "node", "audio"]) {
+for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
   const root = join(repo, "packages", pkg);
 
   // Rollup does not catch this: npm hoists every root devDependency and symlinks

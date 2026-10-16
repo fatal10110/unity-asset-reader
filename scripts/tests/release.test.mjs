@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import {
   PACKAGE_DIRS,
+  UNRELEASED,
   planRelease,
   readManifests,
   readManifestsAt,
@@ -23,8 +24,8 @@ const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const manifest = (dir) => JSON.parse(read(`packages/${dir}/package.json`));
 
-const READERS = ["core", "texture", "node", "audio"];
-const FEATURES = ["texture", "node", "audio"];
+const READERS = ["core", "texture", "node", "mesh"];
+const FEATURES = ["texture", "node", "mesh"];
 
 /** `### <version> - <date>` headings under the `## <section>` heading of CHANGELOG.md. */
 function changelogHeadings(section) {
@@ -42,11 +43,13 @@ test("the decoder keeps its npm name and its own version line", () => {
   assert.match(decoder.version, /^1\.\d+\.\d+$/);
 });
 
-test("feature packages peer on core's major", () => {
+test("feature packages peer on core's major, or on the oldest core of it they work with", () => {
   const major = manifest("core").version.split(".")[0];
   for (const dir of FEATURES) {
     const pkg = manifest(dir);
-    assert.equal(pkg.peerDependencies?.["unity-asset-reader"], `^${major}`, pkg.name);
+    const range = pkg.peerDependencies?.["unity-asset-reader"] ?? "";
+    // `^1` or `^1.2.0`: never a range that admits another major (a second core API).
+    assert.match(range, new RegExp(`^\\^${major}(\\.\\d+\\.\\d+)?$`), `${pkg.name}: ${range}`);
     // A regular dependency would install a second core next to the app's (plan §1).
     assert.equal(pkg.dependencies?.["unity-asset-reader"], undefined, pkg.name);
   }
@@ -79,7 +82,14 @@ test("every reader package gates npm publish on the root verify", () => {
 test("CHANGELOG.md has a dated entry for each package's version", () => {
   for (const dir of PACKAGE_DIRS) {
     const { name, version } = manifest(dir);
-    const date = changelogHeadings(name).get(version);
+    const headings = changelogHeadings(name);
+    // Not released yet: nothing on disk is published, so there is no entry to date, only the
+    // first release's (RELEASING.md).
+    if (version === UNRELEASED) {
+      assert.equal(headings.get("1.0.0"), "Unreleased", `## ${name}: no "### 1.0.0 - Unreleased"`);
+      continue;
+    }
+    const date = headings.get(version);
     assert.ok(date !== undefined, `## ${name}: no "### ${version} - "`);
     // The version on disk is published on merge, so its entry is not "Unreleased" (RELEASING.md).
     assert.match(date, /^\d{4}-\d{2}-\d{2}$/, `## ${name}: "### ${version} - ${date}"`);
@@ -88,8 +98,15 @@ test("CHANGELOG.md has a dated entry for each package's version", () => {
 
 // The release plan (#192, scripts/check-release.mjs).
 
-/** The four packages as this repo has them, at the given versions, in publish order. */
-function repo({ decoder = "1.2.3", core = "1.0.0", texture = "1.0.0", node = "1.0.0" } = {}) {
+/** The packages as this repo has them, at the given versions, in publish order. */
+function repo({
+  decoder = "1.2.3",
+  core = "1.0.0",
+  texture = "1.0.0",
+  node = "1.0.0",
+  mesh = UNRELEASED,
+  audio = UNRELEASED,
+} = {}) {
   return [
     { name: "texture2ddecoder-wasm", version: decoder },
     { name: "unity-asset-reader", version: core },
@@ -103,6 +120,18 @@ function repo({ decoder = "1.2.3", core = "1.0.0", texture = "1.0.0", node = "1.
     {
       name: "unity-asset-reader-node",
       version: node,
+      peerDependencies: { "unity-asset-reader": "^1" },
+      devDependencies: { "unity-asset-reader": "*" },
+    },
+    {
+      name: "unity-asset-reader-mesh",
+      version: mesh,
+      peerDependencies: { "unity-asset-reader": "^1.2.0" },
+      devDependencies: { "unity-asset-reader": "*" },
+    },
+    {
+      name: "unity-asset-reader-audio",
+      version: audio,
       peerDependencies: { "unity-asset-reader": "^1" },
       devDependencies: { "unity-asset-reader": "*" },
     },
@@ -223,9 +252,40 @@ test("release plan: a dispatch takes every package whose version is not on npm",
 });
 
 test("release plan: a package new since the base commit is a candidate", () => {
-  const base = [...repo().slice(0, 3), null];
+  const base = [...repo().slice(0, 3), null, ...repo().slice(4)];
   const plan = planRelease(repo(), base, registry(...RELEASED.slice(0, 4)));
   assert.deepEqual(specs(plan), ["unity-asset-reader-node@1.0.0"]);
+});
+
+test("release plan: a package at 0.0.0 is scaffolded, never published", () => {
+  const view = registry(...RELEASED);
+  // New since the base commit, by push or by dispatch: still not a candidate.
+  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null, null], view), []);
+  assert.deepEqual(planRelease(repo(), undefined, view), []);
+  // Its first release is a version change like any other, once the core it peers on is out.
+  const withCore = registry(...RELEASED, "unity-asset-reader@1.2.0");
+  assert.deepEqual(specs(planRelease(repo({ mesh: "1.0.0" }), repo(), withCore)), [
+    "unity-asset-reader-mesh@1.0.0",
+  ]);
+});
+
+test("release plan: a feature package's peer minimum must be on npm or in the same run", () => {
+  // mesh peers on ^1.2.0; npm has core 1.0.0 only.
+  assert.throws(
+    () => planRelease(repo({ mesh: "1.0.0" }), repo(), registry(...RELEASED)),
+    /unity-asset-reader-mesh@1\.0\.0 needs unity-asset-reader@\^1\.2\.0 \(peerDependencies\), but npm has 1\.0\.0; release a matching unity-asset-reader first/,
+  );
+  // Core 1.2.0 in the same run, published before it: fine.
+  const both = repo({ core: "1.2.0", mesh: "1.0.0" });
+  assert.deepEqual(specs(planRelease(both, repo(), registry(...RELEASED))), [
+    "unity-asset-reader@1.2.0",
+    "unity-asset-reader-mesh@1.0.0",
+  ]);
+  // A core of the run that does not reach the minimum: refused, naming it.
+  assert.throws(
+    () => planRelease(repo({ core: "1.1.0", mesh: "1.0.0" }), repo(), registry(...RELEASED)),
+    /and this run releases unity-asset-reader@1\.1\.0; release a matching/,
+  );
 });
 
 test("release plan: ranges follow npm's caret rules", () => {
@@ -263,6 +323,8 @@ test("release plan: publish order puts every package after what it depends on", 
       "unity-asset-reader",
       "unity-asset-reader-texture",
       "unity-asset-reader-node",
+      "unity-asset-reader-mesh",
+      "unity-asset-reader-audio",
     ],
   );
   const names = manifests.map((pkg) => pkg.name);
@@ -305,10 +367,11 @@ function gitRepo() {
 
 test("release plan: base manifests come from the base commit", () => {
   const { dir, commit } = gitRepo();
-  const first = commit([...repo().slice(0, 3), null]);
+  const first = commit([...repo().slice(0, 3), null, null, null]);
   const second = commit(repo({ texture: "1.0.1" }));
   const base = readManifestsAt(dir, first);
-  assert.deepEqual(base.map((pkg) => pkg?.version ?? null), ["1.2.3", "1.0.0", "1.0.0", null]);
+  const versions = base.map((pkg) => pkg?.version ?? null);
+  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null, null]);
   const head = readManifestsAt(dir, second).map((pkg) => pkg ?? assert.fail("missing"));
   assert.deepEqual(specs(planRelease(head, base, registry(...RELEASED))), [
     "unity-asset-reader-texture@1.0.1",
