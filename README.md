@@ -131,8 +131,9 @@ The short answer. The full tables, with what each claim is tested on, are in the
 - **Handled in code:** SerializedFile formats 2 to 23 (Unity 2020.1 to 6000.3 write 22, 6000.6
   writes 23). Type tree reads work on every one of them, whatever the Unity version. The class
   readers know the layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6,
-  `SpriteAtlas` from 2017.1, `Mesh` from 2019.1) up to 6000.6, and read a newer version with the newest layout they
-  know. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
+  `SpriteAtlas` from 2017.1, `Mesh` from 2019.1) up to 6000.6, and read a newer version with the
+  newest layout they know. Unity 2019.1 is the supported floor: readers added since that
+  decision (`Mesh`) start there, and the older readers keep their older layouts. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
   texture package's cuts of the sprites such an atlas holds ([#229](https://github.com/fatal10110/unity-asset-reader/issues/229)).
   A class reader refuses a version older than its first layout;
   `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,

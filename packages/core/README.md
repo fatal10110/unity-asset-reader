@@ -257,7 +257,9 @@ hand-written reader for the classes below. Those readers also work on bundles bu
 trees (`BuildAssetBundleOptions.DisableWriteTypeTree`). The table lists the main fields of
 `asset.data` (the type in brackets); the JSDoc of each type has every field, with its Unity name.
 "From" is the first Unity version whose layout the reader knows. The other readers refuse an older
-version; `Texture2D` has no floor: it reads any older version with its oldest layout.
+version; `Texture2D` has no floor: it reads any older version with its oldest layout. Unity 2019.1
+is the supported floor: a reader added since that decision (`Mesh`) starts there, and the older
+readers keep the older layouts they already had.
 
 | Class | Main fields of `asset.data` | From | Fixture |
 |---|---|---|---|
