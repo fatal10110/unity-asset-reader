@@ -21,6 +21,7 @@ const READER_DEEP = /^(unity-asset-reader(-[\w-]+)?|texture2ddecoder-wasm)\//;
 export const PACKAGES = {
   core: { browser: true, noReader: true },
   texture: { browser: true, noReader: false },
+  mesh: { browser: true, noReader: false },
   decoder: { browser: false, noReader: true },
 };
 

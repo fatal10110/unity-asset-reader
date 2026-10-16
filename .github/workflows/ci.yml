@@ -37,7 +37,7 @@ jobs:
             exit 0
           fi
           files=$(git diff --name-only "$BASE...$HEAD")
-          if echo "$files" | grep -qE '^(packages/(core|texture|node)/|fixtures/|scripts/|\.github/|package(-lock)?\.json$|tsconfig[^/]*\.json$|rollup\.reader\.mjs$)'; then
+          if echo "$files" | grep -qE '^(packages/(core|texture|node|mesh)/|fixtures/|scripts/|\.github/|package(-lock)?\.json$|tsconfig[^/]*\.json$|rollup\.reader\.mjs$)'; then
             echo "reader=true" >> "$GITHUB_OUTPUT"
           else
             echo "reader=false" >> "$GITHUB_OUTPUT"

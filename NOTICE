@@ -9,6 +9,7 @@ that package's tarball:
   packages/core/NOTICE       unity-asset-reader
   packages/texture/NOTICE    unity-asset-reader-texture
   packages/node/NOTICE       unity-asset-reader-node
+  packages/mesh/NOTICE       unity-asset-reader-mesh
   packages/decoder/LICENSE   texture2ddecoder-wasm
 
 They say which package uses which upstream, and for what. Runtime npm
@@ -22,7 +23,7 @@ to the file it was ported from.
 
 AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
   Copyright (c) Perfare, RazTools, Razviar
-  Source of truth for the ported behaviour (core, texture, node).
+  Source of truth for the ported behaviour (core, texture, node, mesh).
 
 UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
   Copyright (c) K0lb3

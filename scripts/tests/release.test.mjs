@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import {
   PACKAGE_DIRS,
+  UNRELEASED,
   planRelease,
   readManifests,
   readManifestsAt,
@@ -23,8 +24,8 @@ const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const manifest = (dir) => JSON.parse(read(`packages/${dir}/package.json`));
 
-const READERS = ["core", "texture", "node"];
-const FEATURES = ["texture", "node"];
+const READERS = ["core", "texture", "node", "mesh"];
+const FEATURES = ["texture", "node", "mesh"];
 
 /** `### <version> - <date>` headings under the `## <section>` heading of CHANGELOG.md. */
 function changelogHeadings(section) {
@@ -79,7 +80,10 @@ test("every reader package gates npm publish on the root verify", () => {
 test("CHANGELOG.md has a dated entry for each package's version", () => {
   for (const dir of PACKAGE_DIRS) {
     const { name, version } = manifest(dir);
-    const date = changelogHeadings(name).get(version);
+    const headings = changelogHeadings(name);
+    // Not released yet: nothing on disk is published, so there is no entry to date.
+    if (version === UNRELEASED) continue;
+    const date = headings.get(version);
     assert.ok(date !== undefined, `## ${name}: no "### ${version} - "`);
     // The version on disk is published on merge, so its entry is not "Unreleased" (RELEASING.md).
     assert.match(date, /^\d{4}-\d{2}-\d{2}$/, `## ${name}: "### ${version} - ${date}"`);
@@ -88,8 +92,14 @@ test("CHANGELOG.md has a dated entry for each package's version", () => {
 
 // The release plan (#192, scripts/check-release.mjs).
 
-/** The four packages as this repo has them, at the given versions, in publish order. */
-function repo({ decoder = "1.2.3", core = "1.0.0", texture = "1.0.0", node = "1.0.0" } = {}) {
+/** The packages as this repo has them, at the given versions, in publish order. */
+function repo({
+  decoder = "1.2.3",
+  core = "1.0.0",
+  texture = "1.0.0",
+  node = "1.0.0",
+  mesh = UNRELEASED,
+} = {}) {
   return [
     { name: "texture2ddecoder-wasm", version: decoder },
     { name: "unity-asset-reader", version: core },
@@ -103,6 +113,12 @@ function repo({ decoder = "1.2.3", core = "1.0.0", texture = "1.0.0", node = "1.
     {
       name: "unity-asset-reader-node",
       version: node,
+      peerDependencies: { "unity-asset-reader": "^1" },
+      devDependencies: { "unity-asset-reader": "*" },
+    },
+    {
+      name: "unity-asset-reader-mesh",
+      version: mesh,
       peerDependencies: { "unity-asset-reader": "^1" },
       devDependencies: { "unity-asset-reader": "*" },
     },
@@ -223,9 +239,20 @@ test("release plan: a dispatch takes every package whose version is not on npm",
 });
 
 test("release plan: a package new since the base commit is a candidate", () => {
-  const base = [...repo().slice(0, 3), null];
+  const base = [...repo().slice(0, 3), null, repo()[4]];
   const plan = planRelease(repo(), base, registry(...RELEASED.slice(0, 4)));
   assert.deepEqual(specs(plan), ["unity-asset-reader-node@1.0.0"]);
+});
+
+test("release plan: a package at 0.0.0 is scaffolded, never published", () => {
+  const view = registry(...RELEASED);
+  // New since the base commit, by push or by dispatch: still not a candidate.
+  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null], view), []);
+  assert.deepEqual(planRelease(repo(), undefined, view), []);
+  // Its first release is a version change like any other.
+  assert.deepEqual(specs(planRelease(repo({ mesh: "1.0.0" }), repo(), view)), [
+    "unity-asset-reader-mesh@1.0.0",
+  ]);
 });
 
 test("release plan: ranges follow npm's caret rules", () => {
@@ -263,6 +290,7 @@ test("release plan: publish order puts every package after what it depends on", 
       "unity-asset-reader",
       "unity-asset-reader-texture",
       "unity-asset-reader-node",
+      "unity-asset-reader-mesh",
     ],
   );
   const names = manifests.map((pkg) => pkg.name);
@@ -305,10 +333,11 @@ function gitRepo() {
 
 test("release plan: base manifests come from the base commit", () => {
   const { dir, commit } = gitRepo();
-  const first = commit([...repo().slice(0, 3), null]);
+  const first = commit([...repo().slice(0, 3), null, null]);
   const second = commit(repo({ texture: "1.0.1" }));
   const base = readManifestsAt(dir, first);
-  assert.deepEqual(base.map((pkg) => pkg?.version ?? null), ["1.2.3", "1.0.0", "1.0.0", null]);
+  const versions = base.map((pkg) => pkg?.version ?? null);
+  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null]);
   const head = readManifestsAt(dir, second).map((pkg) => pkg ?? assert.fail("missing"));
   assert.deepEqual(specs(planRelease(head, base, registry(...RELEASED))), [
     "unity-asset-reader-texture@1.0.1",

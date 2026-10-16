@@ -13,6 +13,12 @@ will publish), merge, and the [Release workflow](.github/workflows/release.yml) 
 | `unity-asset-reader` | `packages/core` | 2 |
 | `unity-asset-reader-texture` | `packages/texture` | 3 |
 | `unity-asset-reader-node` | `packages/node` | 4 |
+| `unity-asset-reader-mesh` | `packages/mesh` | 5 |
+
+A new package starts at version `0.0.0`, which the workflow never publishes, and gets its
+`CHANGELOG.md` section with a `### 1.0.0 - Unreleased` heading. Its first release is a bump like
+any other, to `1.0.0`; npm has no package of that name yet, so it cannot have a trusted publisher
+and needs a token once, as in [Bootstrap](#bootstrap-the-first-publish-with-a-token).
 
 Releases are published by the workflow, never from a laptop. It publishes with
 [trusted publishing](https://docs.npmjs.com/trusted-publishers): npm authenticates the job by its

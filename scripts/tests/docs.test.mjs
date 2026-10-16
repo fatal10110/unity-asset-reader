@@ -12,7 +12,7 @@ const read = (path) => readFileSync(join(root, path), "utf8");
 const REPO_BLOB = "https://github.com/fatal10110/unity-asset-reader/blob/main/";
 
 test("package repository metadata points at the renamed repo (#199)", () => {
-  for (const pkg of ["core", "texture", "node", "decoder"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "decoder"]) {
     const { repository } = JSON.parse(read(`packages/${pkg}/package.json`));
     assert.equal(repository.type, "git");
     assert.equal(repository.url, "https://github.com/fatal10110/unity-asset-reader.git");
@@ -28,6 +28,7 @@ const PACKAGE_READMES = {
   core: "packages/core/README.md",
   texture: "packages/texture/README.md",
   node: "packages/node/README.md",
+  mesh: "packages/mesh/README.md",
 };
 
 /** Markdown with fenced and inline code removed, so code is never read as a link. */

@@ -1,7 +1,7 @@
 # Changelog
 
-This repo publishes four npm packages. Each has its own section below, newest version first. How
-to release is in [RELEASING.md](RELEASING.md).
+This repo publishes its npm packages from `packages/`. Each has its own section below, newest
+version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## Versioning policy
 
@@ -203,6 +203,20 @@ First release. Peer: `unity-asset-reader@^1`.
 
 - `loadPath(fileOrDir)`: loads a file or a directory tree from disk, merges `.split0..n` parts and
   picks up `.resS`/`.resource` sidecars.
+
+## unity-asset-reader-mesh
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
+
+### 1.0.0 - Unreleased
+
+First release. Peer: `unity-asset-reader@^1`; it reads the `MeshData` that `unity-asset-reader`
+1.2.0 decodes.
+
+- `meshToObj(mesh)`: a decoded mesh as Wavefront OBJ text, byte for byte what AssetStudio's
+  `ExportMesh` writes, floats written as .NET writes them under en-US. Equal to AssetStudio's OBJ
+  for the 12 fixture meshes (#239).
 
 ## texture2ddecoder-wasm
 
