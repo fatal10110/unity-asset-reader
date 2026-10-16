@@ -1,0 +1,59 @@
+unity-asset-reader-shader
+Copyright (c) 2026 fatal10110
+
+This product is a derivative work: the shader text it writes, and the code
+that writes it, are hand-ported from the projects below. Their copyright
+notices are kept per their licenses, and every ported source file carries a
+one-line attribution to the file it was ported from.
+
+AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
+  Copyright (c) Perfare, RazTools, Razviar
+  Source of truth for the text (AssetStudio.Utility/ShaderConverter.cs and
+  SpirVShaderConverter.cs, in src/convert.ts), the SMOL-V decoder
+  (AssetStudio.Utility/Smolv/, in src/smolv.ts), and the oracle of the test
+  goldens.
+
+CSspv -- https://github.com/Anteru/csspv (BSD 2-Clause License, full text in
+  LICENSE-BSD and below)
+  Copyright (c) 2017, Matthäus G. Chajdas
+  The SPIR-V disassembler, as AssetStudio vendors it
+  (AssetStudio.Utility/CSspv/, in src/spirv.ts and src/grammar.ts).
+
+smol-v -- https://github.com/aras-p/smol-v (MIT or public domain, at your
+  choice)
+  Copyright (c) 2016-2018 Aras Pranckevicius
+  The SMOL-V format; AssetStudio's decoder is a C# port of its decoder.
+
+UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
+  Copyright (c) K0lb3
+  Oracle that names the inputs of the test goldens.
+
+The code ported from CSspv, and only that code, is under the BSD 2-Clause
+License, which makes this package "MIT AND BSD-2-Clause"; the rest is under
+the MIT License (LICENSE). CSspv's license:
+
+  BSD 2-Clause License
+
+  Copyright (c) 2017, Matthäus G. Chajdas
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
