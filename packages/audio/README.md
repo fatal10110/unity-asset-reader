@@ -45,7 +45,7 @@ sample, a 44-byte header, then the sample frames, interleaved, little-endian.
 Tested on editor-built bundles: the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and
 **6000.3.25f1** bundles (with and without type trees, and version-stripped) converts to
 AssetStudio's WAV byte for byte. The ADPCM codecs are tested on hand-built banks only: no fixture
-holds an ADPCM clip yet.
+holds an ADPCM clip yet ([#251](https://github.com/fatal10110/unity-asset-reader/issues/251)).
 
 ## Not supported
 
