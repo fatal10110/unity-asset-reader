@@ -10,7 +10,10 @@ to release is in [RELEASING.md](RELEASING.md).
   is published only when its version changes. Changing the `version` in a package's
   `package.json` on `main` is the release.
 - Each follows [semver](https://semver.org/). For the reader packages the public API is what the
-  package's `dist/index.d.ts` exports.
+  package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
+  an exported type that narrows only for input earlier versions refused, such as a field made
+  optional because a newly supported layout lacks it, ships as a minor, with a **Type change**
+  note in its entry.
 - Between packages of this repo, ranges say what goes together. A feature package's
   `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`), so any core of that
   major works with it; a breaking core release moves the feature packages' peer range with it.
