@@ -6,8 +6,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 ## Versioning policy
 
 - **Every package versions on its own**: `unity-asset-reader`, `unity-asset-reader-texture`,
-  `unity-asset-reader-node` and `texture2ddecoder-wasm` each have their own version, and a package
-  is published only when its version changes. Changing the `version` in a package's
+  `unity-asset-reader-node`, `unity-asset-reader-mesh`, `unity-asset-reader-spine` and
+  `texture2ddecoder-wasm` each have their own version, and a package is published only when its
+  version changes. Changing the `version` in a package's
   `package.json` on `main` is the release.
 - Each follows [semver](https://semver.org/). For the reader packages the public API is what the
   package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
@@ -229,6 +230,9 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
   for the 12 fixture meshes (#239).
 
 ## unity-asset-reader-spine
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
 
 ### 1.0.0 - Unreleased
 

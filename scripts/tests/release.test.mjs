@@ -317,6 +317,7 @@ test("release plan: publish order puts every package after what it depends on", 
       "unity-asset-reader-texture",
       "unity-asset-reader-node",
       "unity-asset-reader-mesh",
+      "unity-asset-reader-spine",
     ],
   );
   const names = manifests.map((pkg) => pkg.name);
