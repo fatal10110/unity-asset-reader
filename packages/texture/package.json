@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-texture",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Texture2D and Sprite decoding to RGBA for unity-asset-reader.",
   "license": "MIT AND Apache-2.0",
   "main": "dist/index.cjs",
