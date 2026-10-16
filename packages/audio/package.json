@@ -1,0 +1,50 @@
+{
+  "name": "unity-asset-reader-audio",
+  "version": "0.0.0",
+  "description": "AudioClip (FSB5) to WAV conversion for unity-asset-reader.",
+  "license": "MIT",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/**/*",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "pretest": "npm run build",
+    "build": "rollup -c rollup.config.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "check:browser": "node ../../scripts/check-browser.mjs audio",
+    "prepublishOnly": "npm run verify --prefix ../.."
+  },
+  "keywords": [
+    "unity",
+    "audioclip",
+    "fsb5",
+    "wav",
+    "browser"
+  ],
+  "peerDependencies": {
+    "unity-asset-reader": "^1"
+  },
+  "devDependencies": {
+    "unity-asset-reader": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fatal10110/unity-asset-reader.git",
+    "directory": "packages/audio"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

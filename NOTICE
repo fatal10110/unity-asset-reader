@@ -9,6 +9,8 @@ that package's tarball:
   packages/core/NOTICE       unity-asset-reader
   packages/texture/NOTICE    unity-asset-reader-texture
   packages/node/NOTICE       unity-asset-reader-node
+  packages/mesh/NOTICE       unity-asset-reader-mesh
+  packages/audio/NOTICE      unity-asset-reader-audio
   packages/decoder/LICENSE   texture2ddecoder-wasm
 
 They say which package uses which upstream, and for what. Runtime npm
@@ -22,7 +24,8 @@ to the file it was ported from.
 
 AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
   Copyright (c) Perfare, RazTools, Razviar
-  Source of truth for the ported behaviour (core, texture, node).
+  Source of truth for the ported behaviour (core, texture, node, mesh,
+  audio).
 
 UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
   Copyright (c) K0lb3
@@ -52,6 +55,15 @@ ImageSharp -- https://github.com/SixLabors/ImageSharp
 The code derived from ImageSharp.Drawing and ImageSharp, and only that code,
 is under the Apache License 2.0, which makes unity-asset-reader-texture
 "MIT AND Apache-2.0"; the rest of the repository is under the MIT License.
+
+Fmod5Sharp -- https://github.com/SamboyCoding/Fmod5Sharp (MIT)
+  Copyright (c) 2021 Sam Byass
+  The FSB5 parser and the ADPCM decoders of packages/audio are hand-ported
+  from it.
+
+python-fsb5 -- https://github.com/HearthSim/python-fsb5 (MIT)
+  Copyright (c) 2016 Simon Pinfold
+  Second reference for the FSB5 parser of packages/audio.
 
 texture2ddecoder -- https://github.com/K0lb3/texture2ddecoder (MIT)
   Copyright (c) K0lb3

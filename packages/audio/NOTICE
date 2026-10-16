@@ -1,0 +1,27 @@
+unity-asset-reader-audio
+Copyright (c) 2026 fatal10110
+
+This product is a derivative work: its FSB5 and WAV handling is hand-ported
+from the projects below. Their copyright notices are kept per the MIT License,
+and every ported source file carries a one-line attribution to the file it was
+ported from.
+
+AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
+  Copyright (c) Perfare, RazTools, Razviar
+  Source of truth for the WAV it writes (AudioClipConverter.cs: the header,
+  the first subsound only) and the oracle of the WAV test goldens.
+
+Fmod5Sharp -- https://github.com/SamboyCoding/Fmod5Sharp (MIT)
+  Copyright (c) 2021 Sam Byass
+  The FSB5 container parser (FsbLoader.cs, FmodTypes/, ChunkData/) and the
+  GCADPCM, IMAADPCM and FADPCM decoders (CodecRebuilders/), in src/fsb5.ts
+  and src/adpcm.ts.
+
+python-fsb5 -- https://github.com/HearthSim/python-fsb5 (MIT)
+  Copyright (c) 2016 Simon Pinfold
+  Second reference for the FSB5 container parser (fsb5/__init__.py), in
+  src/fsb5.ts.
+
+UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
+  Copyright (c) K0lb3
+  Oracle that names the inputs of the test goldens.
