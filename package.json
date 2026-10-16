@@ -5,8 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build:rollup -w texture2ddecoder-wasm && npm run build -w unity-asset-reader -w unity-asset-reader-texture -w unity-asset-reader-node -w unity-asset-reader-mesh -w unity-asset-reader-audio -w unity-asset-reader-spine",
-    "test": "npm test -w unity-asset-reader -w unity-asset-reader-texture -w unity-asset-reader-node -w unity-asset-reader-mesh -w unity-asset-reader-audio -w unity-asset-reader-spine && node scripts/test-decoder.mjs && tsx --test scripts/tests/*.test.mjs scripts/tests/*.test.ts",
+    "build": "npm run build:rollup -w texture2ddecoder-wasm && npm run build -w unity-asset-reader -w unity-asset-reader-texture -w unity-asset-reader-node -w unity-asset-reader-mesh -w unity-asset-reader-audio -w unity-asset-reader-spine -w unity-asset-reader-shader",
+    "test": "npm test -w unity-asset-reader -w unity-asset-reader-texture -w unity-asset-reader-node -w unity-asset-reader-mesh -w unity-asset-reader-audio -w unity-asset-reader-spine -w unity-asset-reader-shader && node scripts/test-decoder.mjs && tsx --test scripts/tests/*.test.mjs scripts/tests/*.test.ts",
     "verify": "npm run build && npm test && npm run check:browser && npm run check:no-csharp",
     "build:wasm": "npm run build:wasm -w texture2ddecoder-wasm",
     "build:rollup": "npm run build:rollup -w texture2ddecoder-wasm",

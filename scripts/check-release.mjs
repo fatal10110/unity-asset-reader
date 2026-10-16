@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
  * The published packages' directories under `packages/`, in publish order: each one only
  * depends on packages before it.
  */
-export const PACKAGE_DIRS = ["decoder", "core", "texture", "node", "mesh", "audio", "spine"];
+export const PACKAGE_DIRS = ["decoder", "core", "texture", "node", "mesh", "audio", "spine", "shader"];
 
 /**
  * The version of a package that is scaffolded but not released yet: never published. Its first

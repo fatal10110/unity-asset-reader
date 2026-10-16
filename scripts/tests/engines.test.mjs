@@ -16,7 +16,7 @@ const read = (path) => readFileSync(join(root, path), "utf8");
  */
 const ENGINES = "^20.19.0 || >=22.12.0";
 const FLOORS = ["20.19.0", "22.12.0"];
-const READERS = ["core", "texture", "node", "mesh", "audio", "spine"];
+const READERS = ["core", "texture", "node", "mesh", "audio", "spine", "shader"];
 
 /** The lowest version of each `||` part of a range made of `^x.y.z` and `>=x.y.z`. */
 function floors(range) {

@@ -16,7 +16,7 @@ function upstreams(notice) {
 test("root NOTICE names every upstream of the per-package NOTICE files", () => {
   const rootNotice = read("NOTICE");
   const rootUpstreams = new Set(upstreams(rootNotice));
-  for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "audio", "shader"]) {
     const named = upstreams(read(`packages/${pkg}/NOTICE`));
     assert.ok(named.length > 0, `packages/${pkg}/NOTICE lists no upstream`);
     for (const url of named) {
@@ -37,6 +37,7 @@ test("root NOTICE points at every per-package notice file", () => {
     "packages/mesh/NOTICE",
     "packages/audio/NOTICE",
     "packages/spine/NOTICE",
+    "packages/shader/NOTICE",
     "packages/decoder/LICENSE",
   ]) {
     assert.ok(rootNotice.includes(path), `root NOTICE does not mention ${path}`);
@@ -85,7 +86,7 @@ function portedProjects(pkg) {
 test("root README Acknowledgements link every upstream with its license", () => {
   const credits = section(read("README.md"), "Acknowledgements");
   const urls = new Set(upstreams(read("NOTICE")));
-  for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "audio", "shader"]) {
     for (const url of upstreams(read(`packages/${pkg}/NOTICE`))) urls.add(url);
   }
   for (const source of decoderCodecSources()) urls.add(`https://github.com/${source}`);
@@ -94,14 +95,14 @@ test("root README Acknowledgements link every upstream with its license", () => 
   for (const url of urls) {
     const row = credits.split("\n").find((line) => line.includes(`](${url}`));
     assert.ok(row, `root README Acknowledgements do not link ${url}`);
-    assert.match(row, /MIT|Apache-2\.0|zlib|public domain/, `no license next to ${url}`);
+    assert.match(row, /MIT|Apache-2\.0|BSD-2-Clause|zlib|public domain/, `no license next to ${url}`);
   }
 });
 
 test("root README Acknowledgements name every project a Ported from line cites", () => {
   const credits = section(read("README.md"), "Acknowledgements");
   const projects = new Set();
-  for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "audio", "shader"]) {
     for (const project of portedProjects(pkg)) projects.add(project);
   }
   assert.ok(projects.has("AssetStudio") && projects.has("UnityPy"), [...projects].join(", "));
@@ -111,7 +112,7 @@ test("root README Acknowledgements name every project a Ported from line cites",
 });
 
 test("each reader package README credits its NOTICE upstreams and ported sources", () => {
-  for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "audio", "shader"]) {
     const readme = `packages/${pkg}/README.md`;
     const credits = section(read(readme), "Acknowledgements");
     for (const url of upstreams(read(`packages/${pkg}/NOTICE`))) {
