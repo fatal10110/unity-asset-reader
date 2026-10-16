@@ -113,7 +113,7 @@ const env3 = await open('https://cdn.example.com/ui.bundle') // URL | string | R
 
 for (const asset of env.assets()) {            // every object, in env.objects order
   asset.type      // 'Texture2D' | 'Sprite' | ... (classes with a hand reader) | 'Other'
-  asset.typeName  // class name for every class ('Mesh' when type is 'Other')
+  asset.typeName  // class name for every class ('GameObject' when type is 'Other')
   asset.classId; asset.pathId; asset.file; asset.byteSize
   asset.name      // m_Name, '' when the class has none; reads only as far as m_Name
   asset.path      // first m_Container path pointing at it, or undefined

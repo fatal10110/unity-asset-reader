@@ -24,6 +24,17 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
+### 1.2.0 - Unreleased
+
+- A hand-written `Mesh` reader, `readMesh`, for Unity 2019.1 to 6000.6 (#235): its fields equal
+  `readTypeTree()` on the 12 fixture meshes, and bundles built without type trees read too.
+  `obj.read()` also decodes its vertices and triangles as AssetStudio does (`MeshData`:
+  `vertices`, `normals`, `tangents`, `colors`, `uv`, `skin`, `indices`), from `m_VertexData`,
+  the `.resS` `m_StreamData` names, or `m_CompressedMesh`. **Behavior change:** a Mesh asset's
+  `type` is now `"Mesh"` and its `data` a `MeshFields`, where it was `"Other"` and the type tree;
+  `obj.read()` of a Mesh gives `MeshData`, whose fields are the type tree's except
+  `m_StreamData.offset`, a `number`.
+
 ### 1.1.0 - 2026-10-16
 
 - `readSpriteAtlas` reads Unity 6000.6's layout instead of refusing it: no `m_PackedSprites` or
