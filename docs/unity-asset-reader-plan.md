@@ -66,6 +66,9 @@ packages/
   mesh/                 npm: unity-asset-reader-mesh     isomorphic; deps: core (peer)   (M6, #239)
     src/         obj.ts (OBJ writer) float.ts (.NET float text) index.ts
     tests/
+  audio/                npm: unity-asset-reader-audio    isomorphic, sync; deps: core (peer)   (M6, #236)
+    src/         fsb5.ts adpcm.ts wav.ts index.ts   FSB5 → WAV
+    tests/
   spine/                npm: unity-asset-reader-spine    isomorphic; deps: core (peer)     (M6, #238)
     src/         skeletons.ts (spine-unity objects by type tree field name) index.ts
     tests/
@@ -76,7 +79,7 @@ examples/               cdn.html, vite/   (reader examples; use core + texture t
 
 What belongs in core: anything two packages need, and anything that reads Unity bytes into fields (so `classes/Texture2D.ts` and `classes/Sprite.ts` live in core; turning their bytes into pixels lives in `texture`). What does not: WASM, pixel conversion, `fs`, anything with a heavy or optional dependency. The decoder shares no code with core today; if a second WASM package appears (LZMA fallback, M6 — #69), its emscripten loader is extracted then, not before.
 
-Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core` and `texture` use `resolve({ browser: true })` with **no** node builtins in `external`; only `node` may externalize them.
+Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core`, `texture`, `mesh` and `audio` use `resolve({ browser: true })` with **no** node builtins in `external`; only `node` may externalize them.
 
 **Externalization rule (#71, decided):** *everything a package declares in `dependencies`, `peerDependencies` or `optionalDependencies` is `external`; everything else is bundled, except the node builtins `packages/node` passes through `external` itself.* One rule for workspace siblings and npm deps alike — `rollup.reader.mjs` reads the package's own manifest, so adding a dep to `package.json` is the only step. `dist/` keeps the bare `import`, npm resolves it at install time. Consequences, accepted:
 
@@ -278,5 +281,7 @@ Revision 2026-10-16b (#233, maintainer decision): AssetStudio at `c37af7d`, exec
 Revision 2026-10-16c (#234, maintainer decision): **PNG encoding is in scope**; §7 keeps only JPEG encoding. `unity-asset-reader-texture` exports `encodePng(image)`, an RGBA8 `RgbaImage` (top row first) to a PNG file. It stays sync (D4) and browser-safe (D3, R4), so `CompressionStream` is out, and it adds no dependency (§1, R8): the zlib stream holds stored deflate blocks, so the file is about the size of the raw pixels, and callers who want smaller files keep using an image library. D5 is unchanged: core encodes nothing. Tested against AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json` (2026-10-16b), pixels compared, not file bytes.
 
 Revision 2026-10-16d (#239, PR #249, maintainer decision): a feature package's peer range on core may name the oldest core it works with, `^<major>.<minor>.<patch>`, instead of `^<major>`, as the texture package's range on the decoder does; it never admits another major. `unity-asset-reader-mesh` peers on `^1.2.0`, the first core that decodes `MeshData`. The release plan already refuses a package whose range is neither on npm nor met by a package released earlier in the same run, so a feature package never ships ahead of its core. Also from PR #249: a new package enters the release order at version `0.0.0`, which the release workflow never publishes; its first release is a bump to 1.0.0 (RELEASING.md). D7 updated.
+
+Revision 2026-10-16e (#236, PR #248): §2 lists `packages/audio` (`unity-asset-reader-audio`, the M6 audio item's own package per D7), isomorphic and sync, and the `resolve({ browser: true })` line names it and `mesh`; R4 names both, as `check:browser` already holds them to it. Audio enters the release order at `0.0.0` (2026-10-16d) and peers on `^1`.
 
 Revision 2026-10-16f (#238): M6 gets a **Spine export** row and its package, `unity-asset-reader-spine` (`packages/spine`, §2), a feature package on core as a peer dependency (D7, R14), isomorphic like core. It groups what spine-unity stores per skeleton - the `SkeletonDataAsset`'s skeleton data TextAsset, and per `SpineAtlasAsset` the atlas text TextAsset and the page Texture2Ds of its materials - by MonoBehaviour field names read through type trees, so bundles built without type trees are not readable (§7, Mono.Cecil). AssetStudio has no Spine export: the grouping is checked against the table `fixtures/BUILDING.md` writes before the build, and its parts against #233's export goldens, which now also cover every fixture TextAsset (`ExportTextAsset`).

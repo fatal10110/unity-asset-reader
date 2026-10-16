@@ -24,8 +24,8 @@ const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 const manifest = (dir) => JSON.parse(read(`packages/${dir}/package.json`));
 
-const READERS = ["core", "texture", "node", "mesh", "spine"];
-const FEATURES = ["texture", "node", "mesh", "spine"];
+const READERS = ["core", "texture", "node", "mesh"];
+const FEATURES = ["texture", "node", "mesh"];
 
 /** `### <version> - <date>` headings under the `## <section>` heading of CHANGELOG.md. */
 function changelogHeadings(section) {
@@ -105,6 +105,7 @@ function repo({
   texture = "1.0.0",
   node = "1.0.0",
   mesh = UNRELEASED,
+  audio = UNRELEASED,
   spine = UNRELEASED,
 } = {}) {
   return [
@@ -127,6 +128,12 @@ function repo({
       name: "unity-asset-reader-mesh",
       version: mesh,
       peerDependencies: { "unity-asset-reader": "^1.2.0" },
+      devDependencies: { "unity-asset-reader": "*" },
+    },
+    {
+      name: "unity-asset-reader-audio",
+      version: audio,
+      peerDependencies: { "unity-asset-reader": "^1" },
       devDependencies: { "unity-asset-reader": "*" },
     },
     {
@@ -260,7 +267,7 @@ test("release plan: a package new since the base commit is a candidate", () => {
 test("release plan: a package at 0.0.0 is scaffolded, never published", () => {
   const view = registry(...RELEASED);
   // New since the base commit, by push or by dispatch: still not a candidate.
-  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null, null], view), []);
+  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null, null, null], view), []);
   assert.deepEqual(planRelease(repo(), undefined, view), []);
   // Its first release is a version change like any other, once the core it peers on is out.
   const withCore = registry(...RELEASED, "unity-asset-reader@1.2.0");
@@ -328,6 +335,7 @@ test("release plan: publish order puts every package after what it depends on", 
       "unity-asset-reader-texture",
       "unity-asset-reader-node",
       "unity-asset-reader-mesh",
+      "unity-asset-reader-audio",
       "unity-asset-reader-spine",
     ],
   );
@@ -371,11 +379,11 @@ function gitRepo() {
 
 test("release plan: base manifests come from the base commit", () => {
   const { dir, commit } = gitRepo();
-  const first = commit([...repo().slice(0, 3), null, null, null]);
+  const first = commit([...repo().slice(0, 3), null, null, null, null]);
   const second = commit(repo({ texture: "1.0.1" }));
   const base = readManifestsAt(dir, first);
   const versions = base.map((pkg) => pkg?.version ?? null);
-  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null, null]);
+  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null, null, null]);
   const head = readManifestsAt(dir, second).map((pkg) => pkg ?? assert.fail("missing"));
   assert.deepEqual(specs(planRelease(head, base, registry(...RELEASED))), [
     "unity-asset-reader-texture@1.0.1",

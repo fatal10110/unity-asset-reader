@@ -8,6 +8,7 @@ npm-workspaces monorepo (`unity-asset-reader`): a shared parser core, feature pa
 | `unity-asset-reader-texture` | `packages/texture/` | in development | Texture2D / Sprite → RGBA. Depends on core (peer) and `texture2ddecoder-wasm`. |
 | `unity-asset-reader-node` | `packages/node/` | in development | Node adapter: `loadPath()`, dir scan, sidecars. Depends on core (peer). |
 | `unity-asset-reader-mesh` | `packages/mesh/` | in development | Mesh export: `meshToObj()` (Wavefront OBJ, as AssetStudio writes it). Depends on core (peer). |
+| `unity-asset-reader-audio` | `packages/audio/` | in development | AudioClip (FSB5) → WAV, pure TS. Depends on core (peer). |
 | `unity-asset-reader-spine` | `packages/spine/` | in development | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
 | `texture2ddecoder-wasm` | `packages/decoder/` | published, stable | WASM bindings (emscripten, C++ submodule `texture2ddecoder/`) decoding BC/ETC/PVRTC/ASTC/ATC/Crunch textures to **BGRA**. Node + browser. |
 

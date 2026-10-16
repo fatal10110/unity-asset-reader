@@ -20,6 +20,7 @@ CommonJS). For `texture2ddecoder-wasm` on its own, see its
 | `unity-asset-reader-texture` | Serve the two WASM files as static files, and pass their URL to `initTexture({ wasmPath })`. |
 | `unity-asset-reader-node` | Node.js only (`node:fs`). Never import it in browser code. |
 | `unity-asset-reader-mesh` | Nothing, like `unity-asset-reader`. |
+| `unity-asset-reader-audio` | Nothing, like `unity-asset-reader`. |
 
 None of them needs COOP/COEP headers or `SharedArrayBuffer`: everything is single-threaded. The
 pages work from any static host. They have to be served over HTTP; `file://` does not work.

@@ -10,14 +10,14 @@ A ✗ does not prove that an undocumented feature is absent.
 
 The **Our library** column covers this project as one library: `unity-asset-reader`,
 `unity-asset-reader-texture`, `unity-asset-reader-node`, `unity-asset-reader-mesh`,
-`unity-asset-reader-spine` and `texture2ddecoder-wasm`.
+`unity-asset-reader-audio`, `unity-asset-reader-spine` and `texture2ddecoder-wasm`.
 CLI features include those provided by its required AssetStudioMod application.
 
 ## Libraries and sources
 
 | Column | Library | Documentation |
 |---|---|---|
-| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [Spine](packages/spine/README.md), [decoder](packages/decoder/README.md) |
+| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [audio](packages/audio/README.md), [Spine](packages/spine/README.md), [decoder](packages/decoder/README.md) |
 | unity-js | `@arkntools/unity-js` | [npm README](https://www.npmjs.com/package/@arkntools/unity-js), [tools README](https://www.npmjs.com/package/@arkntools/unity-js-tools) |
 | unityfs-js | `unityfs-js` | [npm README](https://www.npmjs.com/package/unityfs-js) |
 | Studio JS | `node-asset-studio-mod-js` | [npm README](https://www.npmjs.com/package/node-asset-studio-mod-js) |
@@ -70,7 +70,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Extract sprites of a variant (scaled) SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Extract sprites packed in a Unity 6000.6 SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Encode PNG images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| Decode audio to WAV / OGG / MP3 | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Decode audio to WAV / OGG / MP3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Export Spine | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -78,7 +78,8 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Edit assets and repack bundles | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
-Our library exposes raw audio, video and font bytes; it does not decode audio or video.
+Our library converts audio to WAV only, and only PCM and ADPCM clips (`unity-asset-reader-audio`):
+not Vorbis yet. It exposes raw video and font bytes and does not decode video.
 Our library exports a Mesh as Wavefront OBJ through `unity-asset-reader-mesh`'s `meshToObj()`,
 byte for byte AssetStudio's OBJ for every fixture mesh; it writes no other model format.
 Exporting Spine means grouping each spine-unity skeleton's data, atlas text and page textures
