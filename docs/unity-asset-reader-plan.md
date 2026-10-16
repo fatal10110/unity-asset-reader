@@ -69,6 +69,9 @@ packages/
   audio/                npm: unity-asset-reader-audio    isomorphic, sync; deps: core (peer)   (M6, #236)
     src/         fsb5.ts adpcm.ts wav.ts index.ts   FSB5 → WAV
     tests/
+  spine/                npm: unity-asset-reader-spine    isomorphic; deps: core (peer)     (M6, #238)
+    src/         skeletons.ts (spine-unity objects by type tree field name) index.ts
+    tests/
   decoder/              npm: texture2ddecoder-wasm       standalone WASM texture decoder, own version line
     src/ tests/ scripts/ examples/ texture2ddecoder/ (submodule) wasm_bindings.cpp
 examples/               cdn.html, vite/   (reader examples; use core + texture together)
@@ -198,12 +201,13 @@ Each item that brings a decoder or writer ships as its own package on top of cor
 | Game variants: zstd, UnityCN / game crypto | `fzstd`; `Crypto/*`, `aes-js`; plugin hook in `BundleFile` block read. Fixtures are third-party by nature → kept out of repo. | specific game |
 | Blob-backed reads for big `.resS` | introduce `ByteSource` seam (`read(offset,len)`, `size`) here; `FileReaderSync` in a Worker keeps it **sync** — no async variant | OOM on big `.resS` |
 | Shader | smol-v TS + spirv-cross wasm | unlikely |
+| Spine export | `unity-asset-reader-spine`: per spine-unity `SkeletonDataAsset`, the skeleton data TextAsset (`skeletonJSON`), and per `SpineAtlasAsset` the atlas text (`atlasFile`) and page Texture2Ds (`materials[]._MainTex`), found by field names through type trees (3.8 to 4.2). No pixel or text conversion: pages go through the texture package. Type-tree-stripped builds are not readable (DLL reflection, §7). AssetStudio has no Spine export, so only the parts are checked against #233's goldens | #238 |
 
 ## 5. Testing
 
 - Runner: `tsx --test` (same as existing lib), tests in `packages/<pkg>/tests/`; fixtures and goldens shared from root `fixtures/`.
 - **Golden oracle for parsing: UnityPy** (`pip install UnityPy`; MIT, cross-platform, scriptable). One script `scripts/make-goldens.py` emits per fixture: raw file hashes (`env.files`), object table, typetree JSON (`read_typetree()`), RGBA hashes. UnityPy also names the inputs of the export oracle.
-- **Golden oracle for export output: AssetStudio** at `c37af7d` (Razviar/assetstudio), the behavior source of truth itself, for images, models, audio and shader text (2026-10-16b). `scripts/make-export-goldens.py` builds that revision unmodified from a clone **outside the repo** (R2) in an external .NET 8 harness and runs its own exporters (`ExportTexture2D` to PNG, `ExportMesh` to OBJ, `AudioClipConverter.ConvertToWav`) on every fixture object the UnityPy goldens list, recording output hashes and sizes in `fixtures/assetstudio-export-goldens.json` only where AssetStudio reads the same input metadata as UnityPy. No C#, NuGet package or FMOD library is committed (`fixtures/BUILDING.md` section 17).
+- **Golden oracle for export output: AssetStudio** at `c37af7d` (Razviar/assetstudio), the behavior source of truth itself, for images, models, audio, TextAsset files and shader text (2026-10-16b, 2026-10-16f). `scripts/make-export-goldens.py` builds that revision unmodified from a clone **outside the repo** (R2) in an external .NET 8 harness and runs its own exporters (`ExportTexture2D` to PNG, `ExportMesh` to OBJ, `AudioClipConverter.ConvertToWav`, `ExportTextAsset`) on every fixture object the UnityPy goldens list, recording output hashes and sizes in `fixtures/assetstudio-export-goldens.json` only where AssetStudio reads the same input metadata as UnityPy. No C#, NuGet package or FMOD library is committed (`fixtures/BUILDING.md` section 17).
 - Goldens generated **once**, committed. The oracle is not a dependency of the package or CI.
 - Typetree comparison normalization (both sides): int64 → decimal string; floats compared by float32 bit pattern (NaN/-0 safe), not by printed text; byte arrays → hex or hash.
 - Fixtures: small bundles per (compression × editor version × texture family), zipped like `samples.zip`, built with own Unity Editor projects.
@@ -279,3 +283,5 @@ Revision 2026-10-16c (#234, maintainer decision): **PNG encoding is in scope**; 
 Revision 2026-10-16d (#239, PR #249, maintainer decision): a feature package's peer range on core may name the oldest core it works with, `^<major>.<minor>.<patch>`, instead of `^<major>`, as the texture package's range on the decoder does; it never admits another major. `unity-asset-reader-mesh` peers on `^1.2.0`, the first core that decodes `MeshData`. The release plan already refuses a package whose range is neither on npm nor met by a package released earlier in the same run, so a feature package never ships ahead of its core. Also from PR #249: a new package enters the release order at version `0.0.0`, which the release workflow never publishes; its first release is a bump to 1.0.0 (RELEASING.md). D7 updated.
 
 Revision 2026-10-16e (#236, PR #248): §2 lists `packages/audio` (`unity-asset-reader-audio`, the M6 audio item's own package per D7), isomorphic and sync, and the `resolve({ browser: true })` line names it and `mesh`; R4 names both, as `check:browser` already holds them to it. Audio enters the release order at `0.0.0` (2026-10-16d) and peers on `^1`.
+
+Revision 2026-10-16f (#238): M6 gets a **Spine export** row and its package, `unity-asset-reader-spine` (`packages/spine`, §2), a feature package on core as a peer dependency (D7, R14), isomorphic like core. It groups what spine-unity stores per skeleton - the `SkeletonDataAsset`'s skeleton data TextAsset, and per `SpineAtlasAsset` the atlas text TextAsset and the page Texture2Ds of its materials - by MonoBehaviour field names read through type trees, so bundles built without type trees are not readable (§7, Mono.Cecil). AssetStudio has no Spine export: the grouping is checked against the table `fixtures/BUILDING.md` writes before the build, and its parts against #233's export goldens, which now also cover every fixture TextAsset (`ExportTextAsset`).

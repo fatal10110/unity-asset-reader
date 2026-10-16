@@ -18,6 +18,7 @@ You do not need Unity, .NET, or a native application installed.
 | Load files or folders from disk | Add `unity-asset-reader-node` |
 | Export meshes as OBJ or glTF | Add `unity-asset-reader-mesh` |
 | Convert audio clips to WAV | Add `unity-asset-reader-audio` |
+| Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
 
 The texture package installs `texture2ddecoder-wasm` automatically.
@@ -32,6 +33,8 @@ The texture package installs `texture2ddecoder-wasm` automatically.
   `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`.
 - **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
   `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound (not Vorbis).
+- **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
+  page textures with `spineSkeletons(env)`.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -104,6 +107,7 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-node`](packages/node/README.md): `loadPath()`.
   - [`unity-asset-reader-mesh`](packages/mesh/README.md): `meshToObj()`, `meshToGltf()`.
   - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
+  - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 
@@ -119,7 +123,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 | Containers | UnityFS; UnityWeb and UnityRaw (legacy web player bundles); `UnityWebData1.0` (a WebGL `.data` file); a gzip-wrapped file; loose SerializedFiles (`.assets`, `level0`, `globalgamemanagers`); `.resS` and `.resource` resource files. Split files (`.split0`, `.split1`, ...) through `unity-asset-reader-node` |
 | Bundle compression | None, LZ4, LZ4HC, LZMA |
 | SerializedFile formats | 2 to 23, little- and big-endian |
-| Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture` and `Mesh` (its vertices and triangles decoded) |
+| Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture` and `Mesh` (its vertices and triangles decoded) |
 | Texture formats | 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
 | Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
 | Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
@@ -133,7 +137,8 @@ The short answer. The full tables, with what each claim is tested on, are in the
   uncompressed blocks, with and without type trees, and version-stripped. PVRTC comes from
   2019.4 only (Unity 6 no longer writes it), sprites and atlases from 2019.4 and 6000.3.
   Also **6000.6.4f1**: SerializedFile format 23 metadata, type-tree dumps, `Sprite` and
-  `SpriteAtlas`.
+  `SpriteAtlas`. `Shader` comes from 2019.4, 2020.3, 6000.3.26f1 and 6000.6 (DX11, GLES3 and
+  Vulkan; Metal from 2020.3 and 6000.3).
 - **Tested on generated or hand-written bytes only:** the class readers' version gates from
   Unity 3.4 to 6000.6; SerializedFile formats 6, 8 and 15; UnityFS format 6; UnityWeb and
   UnityRaw formats 2, 3, 4 and 6; `UnityWebData` and gzip. No real Unity build of those versions
@@ -141,9 +146,9 @@ The short answer. The full tables, with what each claim is tested on, are in the
 - **Handled in code:** SerializedFile formats 2 to 23 (Unity 2020.1 to 6000.3 write 22, 6000.6
   writes 23). Type tree reads work on every one of them, whatever the Unity version. The class
   readers know the layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6,
-  `SpriteAtlas` from 2017.1, `Mesh` from 2019.1) up to 6000.6, and read a newer version with the
+  `SpriteAtlas` from 2017.1, `Mesh` and `Shader` from 2019.1) up to 6000.6, and read a newer version with the
   newest layout they know. Unity 2019.1 is the supported floor: readers added since that
-  decision (`Mesh`) start there, and the older readers keep their older layouts. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
+  decision (`Mesh`, `Shader`) start there, and the older readers keep their older layouts. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
   texture package's cuts of the sprites such an atlas holds ([#229](https://github.com/fatal10110/unity-asset-reader/issues/229)).
   A class reader refuses a version older than its first layout;
   `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,
@@ -152,7 +157,8 @@ The short answer. The full tables, with what each claim is tested on, are in the
 - **Version-stripped files** (`AssetBundleStripUnityVersion`): type tree reads work. A class
   reader reads the object when its bytes or the SerializedFile format decide the layout, and
   refuses it otherwise: `Texture2D`, `MovieTexture` and `MonoScript` always; `Material`,
-  `Sprite`, `SpriteAtlas` and `Mesh` outside formats 18 to 21, so in every file from Unity 2020.1 on.
+  `Sprite`, `SpriteAtlas` and `Mesh` outside formats 18 to 21, and `Shader` outside format 21,
+  so in every file from Unity 2020.1 on.
   If you know the editor that built the file, `load()` and `open()` take it as a `unityVersion`
   fallback, and the class readers then read such objects too. The table per class is in
   [the core README](packages/core/README.md#version-stripped-files).

@@ -62,15 +62,15 @@ const BUILTIN = new Set([...builtinModules, ...builtinModules.map((m) => `node:$
  * this, the dist/ row below passes on an empty list: nothing to look for, so
  * nothing can be found inlined. core imports fflate and lzma1, texture imports
  * core (#31) and texture2ddecoder-wasm (#32), node imports core (#43), audio
- * imports core (#236). A
+ * imports core (#236), spine imports core (#238). A
  * package left out of this set gets its row asserting the list is empty
  * instead: the day it imports a declared dep, that row fails until it is added
  * here, so it cannot quietly stay vacuous.
  */
-const IMPORTS_DECLARED = new Set(["core", "texture", "node", "mesh", "audio"]);
+const IMPORTS_DECLARED = new Set(["core", "texture", "node", "mesh", "audio", "spine"]);
 
 // Runs after `npm run build` (root `verify` order, and each package's `pretest`).
-for (const pkg of ["core", "texture", "node", "mesh", "audio"]) {
+for (const pkg of ["core", "texture", "node", "mesh", "audio", "spine"]) {
   const root = join(repo, "packages", pkg);
 
   // Rollup does not catch this: npm hoists every root devDependency and symlinks

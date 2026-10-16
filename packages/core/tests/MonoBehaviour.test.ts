@@ -34,7 +34,8 @@ const firstFields = (value: Record<string, unknown>, count: number): Record<stri
 for (const name of FIXTURES) {
   test(`${name}: readMonoBehaviour is the first fields of the golden and readTypeTree()`, () => {
     const objects = objectsOf(name, ClassID.MonoBehaviour);
-    assert.equal(objects.length, 1);
+    // One in most bundles; the spine bundles' skeletons and atlases (#238) are several.
+    assert.ok(objects.length > 0);
     for (const { env, reader, dump, enableTypeTree } of objects) {
       assert.ok(dump, `no golden dump for MonoBehaviour ${reader.pathId}`);
       const header = readMonoBehaviour(reader);
@@ -59,8 +60,12 @@ for (const name of FIXTURES) {
       assert.equal(found.status, "found");
       if (found.status === "found") {
         const script = readMonoScript(found.object);
-        const className = name.endsWith("/registry/refs") ? "RegistryData" : "FixtureData";
-        assert.equal(script.m_ClassName, className);
+        const classNames = name.endsWith("/registry/refs")
+          ? ["RegistryData"]
+          : name.includes("/spine/")
+            ? ["SkeletonDataAsset", "SpineAtlasAsset"]
+            : ["FixtureData"];
+        assert.ok(classNames.includes(script.m_ClassName), script.m_ClassName);
       }
 
       const obj = env.objects.find((o) => o.pathId === reader.pathId)!;

@@ -8,8 +8,9 @@ bundles/          M1 container fixtures (generated, see below)
 bundles/editor/   editor-built bundles, one folder per Unity version and build variant
 BUILDING.md       how the editor-built bundles were made, and how to rebuild them
 goldens.json      what the oracle says each fixture unpacks to and contains
-assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip
+assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip, TextAsset
 tpk-trees.json    Unity's player type trees of a class from 2019.1, from UnityPy's TPK
+shader-layouts.json  UnityPy's synthetic Shader objects, one per type tree layout (#237)
 helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shapes
 ```
 
@@ -99,6 +100,20 @@ and `stripped` (#41), built from generated source files
 2019.4.41f2's `stripped` bundles are format 21, the others' format 22. No
 fixture holds a MovieTexture (no fixture editor makes one with a movie).
 
+2019.4.41f2 (format 21), 2020.3.30f1 and 6000.3.26f1 (format 22) and
+6000.6.4f1 (format 23) have `shader/lz4/<target>` and
+`shader/lz4-notypetree/<target>` (#237): two shaders of our own, built for
+`windows` (DX11) and `android` (GLES3 and Vulkan), and by 2020.3 and 6000.3,
+which have the iOS module, for `ios` (Metal) too
+([`BUILDING.md`](BUILDING.md) section 18). The 6000.3 build is 6000.3.26f1,
+as 6000.3.25f1 was no longer installed; both write the same Shader layout. No
+editor here has the macOS module. The format 21 and 22 bundles are in
+`goldens.json` without a Shader dump. The typed 6000.6 ones are in
+`modern-goldens.json` (UnityPy 1.25.4, format 23), with a dump of every
+object, their Shaders included. The Shader reader is checked against
+`readTypeTree()` on all of them, and against `shader-layouts.json` for every
+Shader layout of Unity's type trees from 2019.1 (UnityPy's TPK data).
+
 2019.4.41f2 (format 21) and 6000.3.25f1 (format 22) also have `sprite/sprites`
 (LZ4, #34): 22 Sprites and two Sprite Atlas V1 assets, with every source pixel
 saying where it is (R, G from x, y and B naming the image;
@@ -115,6 +130,16 @@ saying where it is (R, G from x, y and B naming the image;
 Every texture is RGBA32. Neither editor's packer writes Rotate90, and no
 sprite has an alpha texture, secondary textures, bones or a variant atlas's
 downscale.
+
+2019.4.41f2 also has `spine/lz4/skeletons`, `spine/lz4/ondemand` and
+`spine/lz4-notypetree/skeletons` (LZ4, #238): Spine skeletons as spine-unity
+stores them, made with our own stub scripts that serialize the same fields, and
+a skeleton JSON and atlas text written for them. Two skeletons, one per atlas
+layout (3.8 and 4.0, and 4.1+, which compiles in on-demand texture loading), with
+two atlases and a null entry, or one atlas of two pages; a third whose atlas
+loads its textures on demand; and the first bundle again without type trees.
+The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 19
+lists what each skeleton is grouped as.
 
 NaN does not have one bit pattern everywhere, and that comes from Unity: every
 editor wrote `0xFFC00000` into the first variant it built (`lz4`) and

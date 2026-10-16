@@ -40,6 +40,22 @@ import type { NamedObject } from "./NamedObject.js";
 import type { PPtr } from "./PPtr.js";
 import type { MonoBehaviourData, Texture2DData } from "./registry.js";
 import type {
+  Binding,
+  BufferBinding,
+  MatrixParameter,
+  ProgramParameters,
+  SerializedPass,
+  SerializedProgram,
+  SerializedProperty,
+  SerializedShader,
+  SerializedShaderState,
+  SerializedSubProgram,
+  SerializedTagMap,
+  Shader,
+  ShaderBindChannel,
+  VectorParameter,
+} from "./Shader.js";
+import type {
   AABB,
   BlendShapeData,
   BoneWeights4,
@@ -408,6 +424,352 @@ export function toMaterialFields(data: Material): MaterialFields {
       colors: sheet.m_Colors,
     }),
     buildTextureStacks: data.m_BuildTextureStacks,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Shader
+
+/** The friendly form of {@link SerializedShaderState}: a pass's render state. */
+export interface SerializedShaderStateFields
+  extends Omit<SerializedShaderState, "m_Name" | "m_Tags" | "m_LOD"> {
+  /** Unity: `m_Name`. The pass's name, as written in the shader. */
+  name: string;
+  /** Unity: `m_Tags`. */
+  tags: SerializedTagMap;
+  /** Unity: `m_LOD`. */
+  lod: number;
+}
+
+/** The friendly form of {@link VectorParameter}. */
+export interface VectorParameterFields {
+  /** Unity: `m_NameIndex`. */
+  nameIndex: number;
+  /** Unity: `m_Index`. Before Unity 6000.6. */
+  index?: number;
+  /** Unity: `m_OffsetInConstantBuffer`. Unity 6000.6 and later: `index` renamed. */
+  offsetInConstantBuffer?: number;
+  /** Unity: `m_ArraySize`. */
+  arraySize: number;
+  /** Unity: `m_Type`. */
+  type: number;
+  /** Unity: `m_Dim`. */
+  dim: number;
+}
+
+/** The friendly form of {@link MatrixParameter}. */
+export interface MatrixParameterFields extends Omit<VectorParameterFields, "dim"> {
+  /** Unity: `m_RowCount`. */
+  rowCount: number;
+}
+
+/** The friendly form of {@link StructParameter}. */
+export interface StructParameterFields extends Omit<VectorParameterFields, "type" | "dim"> {
+  /** Unity: `m_StructSize`. */
+  structSize: number;
+  /** Unity: `m_VectorMembers`. */
+  vectorMembers: VectorParameterFields[];
+  /** Unity: `m_MatrixMembers`. */
+  matrixMembers: MatrixParameterFields[];
+}
+
+/** The friendly form of {@link Binding}. */
+export interface BindingFields {
+  /** Unity: `m_EncodedData`. */
+  encodedData: number;
+  /** Unity: `m_Slot`. */
+  slot: number;
+}
+
+/** The friendly form of {@link TextureParameter}. */
+export interface TextureParameterFields {
+  /** Unity: `m_NameIndex`. */
+  nameIndex: number;
+  /** Unity: `m_Index`. Before Unity 6000.6. */
+  index?: number;
+  /** Unity: `m_SamplerIndex`. Before Unity 6000.6. */
+  samplerIndex?: number;
+  /** Unity: `m_Binding`. Unity 6000.6 and later. */
+  binding?: BindingFields;
+  /** Unity: `m_SamplerBinding`. Unity 6000.6 and later. */
+  samplerBinding?: BindingFields;
+  /** Unity: `m_MultiSampled`. */
+  multiSampled: boolean;
+  /** Unity: `m_Dim`. */
+  dim: number;
+}
+
+/** The friendly form of {@link BufferBinding}. */
+export interface BufferBindingFields {
+  /** Unity: `m_NameIndex`. */
+  nameIndex: number;
+  /** Unity: `m_Index`. Before Unity 6000.6. */
+  index?: number;
+  /** Unity: `m_Binding`. Unity 6000.6 and later. */
+  binding?: BindingFields;
+  /** Unity: `m_ArraySize`. Unity 2020.1 and later. */
+  arraySize?: number;
+  /** Unity: `m_ResourceType`. Unity 6000.6 and later. */
+  resourceType?: number;
+}
+
+/** The friendly form of {@link ConstantBuffer}. */
+export interface ConstantBufferFields {
+  /** Unity: `m_NameIndex`. */
+  nameIndex: number;
+  /** Unity: `m_MatrixParams`. */
+  matrixParams: MatrixParameterFields[];
+  /** Unity: `m_VectorParams`. */
+  vectorParams: VectorParameterFields[];
+  /** Unity: `m_StructParams`. */
+  structParams: StructParameterFields[];
+  /** Unity: `m_Size`. */
+  size: number;
+  /** Unity: `m_IsPartialCB`. Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
+  isPartialCB?: boolean;
+}
+
+/** The friendly form of {@link UAVParameter}. */
+export interface UAVParameterFields {
+  /** Unity: `m_NameIndex`. */
+  nameIndex: number;
+  /** Unity: `m_Index`. Before Unity 6000.6. */
+  index?: number;
+  /** Unity: `m_OriginalIndex`. Before Unity 6000.6. */
+  originalIndex?: number;
+  /** Unity: `m_Binding`. Unity 6000.6 and later. */
+  binding?: BindingFields;
+  /** Unity: `m_OriginalBinding`. Unity 6000.6 and later. */
+  originalBinding?: BindingFields;
+}
+
+/** The friendly form of {@link SamplerParameter}. */
+export interface SamplerParameterFields {
+  sampler: number;
+  /** Before Unity 6000.6. */
+  bindPoint?: number;
+  /** Unity: `m_Binding`. Unity 6000.6 and later. */
+  binding?: BindingFields;
+}
+
+/** The friendly form of {@link ProgramParameters}. */
+export interface ProgramParametersFields {
+  /** Unity: `m_VectorParams`. */
+  vectorParams: VectorParameterFields[];
+  /** Unity: `m_MatrixParams`. */
+  matrixParams: MatrixParameterFields[];
+  /** Unity: `m_TextureParams`. */
+  textureParams: TextureParameterFields[];
+  /** Unity: `m_BufferParams`. */
+  bufferParams: BufferBindingFields[];
+  /** Unity: `m_ConstantBuffers`. */
+  constantBuffers: ConstantBufferFields[];
+  /** Unity: `m_ConstantBufferBindings`. */
+  constantBufferBindings: BufferBindingFields[];
+  /** Unity: `m_UAVParams`. */
+  uavParams: UAVParameterFields[];
+  /** Unity: `m_Samplers`. */
+  samplers: SamplerParameterFields[];
+}
+
+/** The friendly form of {@link SerializedSubProgram}: one compiled variant of a stage. */
+export interface SerializedSubProgramFields extends Partial<ProgramParametersFields> {
+  /** Unity: `m_BlobIndex`. */
+  blobIndex: number;
+  /** Unity: `m_Channels`, with its `m_Channels` and `m_SourceMap`. */
+  channels: { channels: ShaderBindChannel[]; sourceMap: number };
+  /** Unity: `m_GlobalKeywordIndices`. Before Unity 2021.2. */
+  globalKeywordIndices?: number[];
+  /** Unity: `m_LocalKeywordIndices`. Before Unity 2021.2. */
+  localKeywordIndices?: number[];
+  /** Unity: `m_KeywordIndices`. Unity 2021.2 and later. */
+  keywordIndices?: number[];
+  /** Unity: `m_ShaderHardwareTier`. */
+  shaderHardwareTier: number;
+  /** Unity: `m_GpuProgramType`. */
+  gpuProgramType: number;
+  /** Unity: `m_Parameters`. Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
+  parameters?: ProgramParametersFields;
+  /** Unity: `m_ShaderRequirements`. A `bigint` from Unity 2021.1. */
+  shaderRequirements: number | bigint;
+}
+
+/** The friendly form of {@link SerializedPlayerSubProgram}. */
+export interface SerializedPlayerSubProgramFields {
+  /** Unity: `m_BlobIndex`. */
+  blobIndex: number;
+  /** Unity: `m_KeywordIndices`. */
+  keywordIndices: number[];
+  /** Unity: `m_ShaderRequirements`. */
+  shaderRequirements: bigint;
+  /** Unity: `m_GpuProgramType`. */
+  gpuProgramType: number;
+}
+
+/** The friendly form of {@link SerializedProgram}: one stage of a pass, every variant. */
+export interface SerializedProgramFields {
+  /** Unity: `m_SubPrograms`. */
+  subPrograms: SerializedSubProgramFields[];
+  /** Unity: `m_PlayerSubPrograms`. Unity 2021.3.10+, 2022.1.13+ and 2022.2 and later. */
+  playerSubPrograms?: SerializedPlayerSubProgramFields[][];
+  /** Unity: `m_ParameterBlobIndices`. As `playerSubPrograms`. */
+  parameterBlobIndices?: number[][];
+  /** Unity: `m_CommonParameters`. Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
+  commonParameters?: ProgramParametersFields;
+  /** Unity: `m_SerializedKeywordStateMask`. Unity 2022.1 and later. */
+  serializedKeywordStateMask?: number[];
+}
+
+/** The friendly form of {@link SerializedPass}. */
+export interface SerializedPassFields {
+  /** Unity: `m_EditorDataHash`. Unity 2020.2 to 2022.x. */
+  editorDataHash?: Hash128[];
+  /** Unity: `m_Platforms`. Unity 2020.2 to 2022.x. */
+  platforms?: Uint8Array;
+  /** Unity: `m_LocalKeywordMask`. Unity 2020.2 to 2021.1. */
+  localKeywordMask?: number[];
+  /** Unity: `m_GlobalKeywordMask`. Unity 2020.2 to 2021.1. */
+  globalKeywordMask?: number[];
+  /** Unity: `m_NameIndices`. Parameter, buffer and keyword names to `nameIndex`. */
+  nameIndices: [string, number][];
+  /** Unity: `m_Type`. 0 normal, 1 `UsePass`, 2 `GrabPass`. */
+  type: number;
+  /** Unity: `m_State`. */
+  state: SerializedShaderStateFields;
+  /** Unity: `m_ProgramMask`. */
+  programMask: number;
+  progVertex: SerializedProgramFields;
+  progFragment: SerializedProgramFields;
+  progGeometry: SerializedProgramFields;
+  progHull: SerializedProgramFields;
+  progDomain: SerializedProgramFields;
+  /** Unity 2019.3 and later. */
+  progRayTracing?: SerializedProgramFields;
+  /** Unity: `m_HasInstancingVariant`. */
+  hasInstancingVariant: boolean;
+  /** Unity: `m_HasProceduralInstancingVariant`. */
+  hasProceduralInstancingVariant: boolean;
+  /** Unity: `m_UseName`. For a `UsePass`, the pass it names. */
+  useName: string;
+  /** Unity: `m_Name`. */
+  name: string;
+  /** Unity: `m_TextureName`. For a `GrabPass`, the texture it grabs into. */
+  textureName: string;
+  /** Unity: `m_Tags`. */
+  tags: SerializedTagMap;
+  /** Unity: `m_SerializedKeywordStateMask`. Unity 2021.2 to 2021.x. */
+  serializedKeywordStateMask?: number[];
+}
+
+/** The friendly form of {@link SerializedSubShader}. */
+export interface SerializedSubShaderFields {
+  /** Unity: `m_Passes`. */
+  passes: SerializedPassFields[];
+  /** Unity: `m_Tags`. */
+  tags: SerializedTagMap;
+  /** Unity: `m_LOD`. */
+  lod: number;
+}
+
+/** The friendly form of {@link SerializedProperty}: a property of the `Properties` block. */
+export interface SerializedPropertyFields {
+  /** Unity: `m_Name`. */
+  name: string;
+  /** Unity: `m_Description`. */
+  description: string;
+  /** Unity: `m_Attributes`. */
+  attributes: string[];
+  /** Unity: `m_Type`. 0 Color, 1 Vector, 2 Float, 3 Range, 4 Texture, 5 Int. */
+  type: number;
+  /** Unity: `m_Flags`. */
+  flags: number;
+  /** Unity: `m_DefValue[0]`. The default value; for a `Range`, `[default, min, max, 0]`. */
+  "defValue[0]": number;
+  /** Unity: `m_DefValue[1]`. */
+  "defValue[1]": number;
+  /** Unity: `m_DefValue[2]`. */
+  "defValue[2]": number;
+  /** Unity: `m_DefValue[3]`. */
+  "defValue[3]": number;
+  /** Unity: `m_DefTexture`, with its `m_DefaultName` and `m_TexDim`. */
+  defTexture: { defaultName: string; texDim: number };
+}
+
+/** The friendly form of {@link SerializedShader}: the parsed ShaderLab. */
+export interface SerializedShaderFields {
+  /** Unity: `m_PropInfo`, with its `m_Props`. */
+  propInfo: { props: SerializedPropertyFields[] };
+  /** Unity: `m_SubShaders`. */
+  subShaders: SerializedSubShaderFields[];
+  /** Unity: `m_KeywordNames`. Unity 2021.2 and later. */
+  keywordNames?: string[];
+  /** Unity: `m_KeywordFlags`. Unity 2021.2 and later. */
+  keywordFlags?: Uint8Array;
+  /** Unity: `m_Name`. The shader's name, such as `"UAR/ShaderFixture"`. */
+  name: string;
+  /** Unity: `m_CustomEditorName`. */
+  customEditorName: string;
+  /** Unity: `m_FallbackName`. */
+  fallbackName: string;
+  /** Unity: `m_Dependencies`. The `Dependency` lines. */
+  dependencies: { from: string; to: string }[];
+  /** Unity: `m_CustomEditorForRenderPipelines`. Unity 2021.1 and later. */
+  customEditorForRenderPipelines?: { customEditorName: string; renderPipelineType: string }[];
+  /** Unity: `m_DisableNoSubshadersMessage`. */
+  disableNoSubshadersMessage: boolean;
+}
+
+/** The friendly form of {@link Shader}. */
+export interface ShaderFields extends NamedObjectFields {
+  /**
+   * Unity: `m_ParsedForm`. The parsed ShaderLab, whose `name` is the
+   * shader's (`name`, `m_Name`, is empty).
+   */
+  parsedForm: SerializedShaderFields;
+  /** The `ShaderCompilerPlatform` of each part of `compressedBlob`. */
+  platforms: number[];
+  /** One offset per platform; from Unity 2019.3 a list of them per platform. */
+  offsets: number[] | number[][];
+  /** As `offsets`. */
+  compressedLengths: number[] | number[][];
+  /** As `offsets`. */
+  decompressedLengths: number[] | number[][];
+  /** Every platform's compiled programs. */
+  compressedBlob: Uint8Array;
+  /** Unity 2021.3.12 to 2021.3.x, 2022.1.21 to 2022.1.x, and 2022.2 and later. */
+  stageCounts?: number[];
+  /** Unity: `m_Dependencies`. */
+  dependencies: PPtr[];
+  /** Unity: `m_NonModifiableTextures`. Property name to texture. */
+  nonModifiableTextures: [string, PPtr][];
+  /** Unity: `m_ShaderIsBaked`. */
+  shaderIsBaked: boolean;
+  /** Unity: `m_AssetGUID`. Unity 6000.0 and later. */
+  assetGUID?: GUID;
+  /** Unity: `m_AssetLocalIdentifierInFile`. Unity 6000.3 and later. */
+  assetLocalIdentifierInFile?: bigint;
+}
+
+/**
+ * A `Shader` as {@link ShaderFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toShaderFields(data: Shader): ShaderFields {
+  return defined({
+    ...namedObject(data),
+    parsedForm: serializedShader(data.m_ParsedForm),
+    platforms: data.platforms,
+    offsets: data.offsets,
+    compressedLengths: data.compressedLengths,
+    decompressedLengths: data.decompressedLengths,
+    compressedBlob: data.compressedBlob,
+    stageCounts: data.stageCounts,
+    dependencies: data.m_Dependencies,
+    nonModifiableTextures: data.m_NonModifiableTextures,
+    shaderIsBaked: data.m_ShaderIsBaked,
+    assetGUID: data.m_AssetGUID,
+    assetLocalIdentifierInFile: data.m_AssetLocalIdentifierInFile,
   });
 }
 
@@ -1411,4 +1773,202 @@ function spriteInstanceData(data: SpriteInstanceData): SpriteInstanceDataFields 
     spriteBones: data.spriteBones,
     physicsShape: data.physicsShape,
   };
+}
+
+function serializedShader(shader: SerializedShader): SerializedShaderFields {
+  return defined({
+    propInfo: { props: shader.m_PropInfo.m_Props.map(serializedProperty) },
+    subShaders: shader.m_SubShaders.map((sub) => ({
+      passes: sub.m_Passes.map(serializedPass),
+      tags: sub.m_Tags,
+      lod: sub.m_LOD,
+    })),
+    keywordNames: shader.m_KeywordNames,
+    keywordFlags: shader.m_KeywordFlags,
+    name: shader.m_Name,
+    customEditorName: shader.m_CustomEditorName,
+    fallbackName: shader.m_FallbackName,
+    dependencies: shader.m_Dependencies,
+    customEditorForRenderPipelines: shader.m_CustomEditorForRenderPipelines,
+    disableNoSubshadersMessage: shader.m_DisableNoSubshadersMessage,
+  });
+}
+
+function serializedProperty(prop: SerializedProperty): SerializedPropertyFields {
+  return {
+    name: prop.m_Name,
+    description: prop.m_Description,
+    attributes: prop.m_Attributes,
+    type: prop.m_Type,
+    flags: prop.m_Flags,
+    "defValue[0]": prop["m_DefValue[0]"],
+    "defValue[1]": prop["m_DefValue[1]"],
+    "defValue[2]": prop["m_DefValue[2]"],
+    "defValue[3]": prop["m_DefValue[3]"],
+    defTexture: {
+      defaultName: prop.m_DefTexture.m_DefaultName,
+      texDim: prop.m_DefTexture.m_TexDim,
+    },
+  };
+}
+
+function serializedPass(pass: SerializedPass): SerializedPassFields {
+  return defined({
+    editorDataHash: pass.m_EditorDataHash,
+    platforms: pass.m_Platforms,
+    localKeywordMask: pass.m_LocalKeywordMask,
+    globalKeywordMask: pass.m_GlobalKeywordMask,
+    nameIndices: pass.m_NameIndices,
+    type: pass.m_Type,
+    state: shaderState(pass.m_State),
+    programMask: pass.m_ProgramMask,
+    progVertex: serializedProgram(pass.progVertex),
+    progFragment: serializedProgram(pass.progFragment),
+    progGeometry: serializedProgram(pass.progGeometry),
+    progHull: serializedProgram(pass.progHull),
+    progDomain: serializedProgram(pass.progDomain),
+    progRayTracing: pass.progRayTracing && serializedProgram(pass.progRayTracing),
+    hasInstancingVariant: pass.m_HasInstancingVariant,
+    hasProceduralInstancingVariant: pass.m_HasProceduralInstancingVariant,
+    useName: pass.m_UseName,
+    name: pass.m_Name,
+    textureName: pass.m_TextureName,
+    tags: pass.m_Tags,
+    serializedKeywordStateMask: pass.m_SerializedKeywordStateMask,
+  });
+}
+
+/** The render state, its three `m_` fields renamed in place, so the keys keep Unity's order. */
+function shaderState(state: SerializedShaderState): SerializedShaderStateFields {
+  const renames: Record<string, string> = { m_Name: "name", m_Tags: "tags", m_LOD: "lod" };
+  return Object.fromEntries(
+    Object.entries(state).map(([key, value]) => [renames[key] ?? key, value]),
+  ) as unknown as SerializedShaderStateFields;
+}
+
+function serializedProgram(program: SerializedProgram): SerializedProgramFields {
+  return defined({
+    subPrograms: program.m_SubPrograms.map(subProgram),
+    playerSubPrograms: program.m_PlayerSubPrograms?.map((variants) =>
+      variants.map((p) => ({
+        blobIndex: p.m_BlobIndex,
+        keywordIndices: p.m_KeywordIndices,
+        shaderRequirements: p.m_ShaderRequirements,
+        gpuProgramType: p.m_GpuProgramType,
+      })),
+    ),
+    parameterBlobIndices: program.m_ParameterBlobIndices,
+    commonParameters: program.m_CommonParameters && programParameters(program.m_CommonParameters),
+    serializedKeywordStateMask: program.m_SerializedKeywordStateMask,
+  });
+}
+
+function subProgram(sub: SerializedSubProgram): SerializedSubProgramFields {
+  // Before 2020.3.2 / 2021.1.1 the parameter lists are the sub-program's own
+  // fields, between `m_GpuProgramType` and `m_ShaderRequirements`.
+  const inline = sub.m_VectorParams ? programParameters(sub as ProgramParameters) : {};
+  return defined({
+    blobIndex: sub.m_BlobIndex,
+    channels: { channels: sub.m_Channels.m_Channels, sourceMap: sub.m_Channels.m_SourceMap },
+    globalKeywordIndices: sub.m_GlobalKeywordIndices,
+    localKeywordIndices: sub.m_LocalKeywordIndices,
+    keywordIndices: sub.m_KeywordIndices,
+    shaderHardwareTier: sub.m_ShaderHardwareTier,
+    gpuProgramType: sub.m_GpuProgramType,
+    ...inline,
+    parameters: sub.m_Parameters && programParameters(sub.m_Parameters),
+    shaderRequirements: sub.m_ShaderRequirements,
+  });
+}
+
+function programParameters(params: ProgramParameters): ProgramParametersFields {
+  return defined({
+    vectorParams: params.m_VectorParams.map(vectorParameter),
+    matrixParams: params.m_MatrixParams.map(matrixParameter),
+    textureParams: params.m_TextureParams.map((t) =>
+      defined({
+        nameIndex: t.m_NameIndex,
+        index: t.m_Index,
+        samplerIndex: t.m_SamplerIndex,
+        binding: t.m_Binding && binding(t.m_Binding),
+        samplerBinding: t.m_SamplerBinding && binding(t.m_SamplerBinding),
+        multiSampled: t.m_MultiSampled,
+        dim: t.m_Dim,
+      }),
+    ),
+    bufferParams: params.m_BufferParams.map(bufferBinding),
+    constantBuffers: params.m_ConstantBuffers.map((cb) =>
+      defined({
+        nameIndex: cb.m_NameIndex,
+        matrixParams: cb.m_MatrixParams.map(matrixParameter),
+        vectorParams: cb.m_VectorParams.map(vectorParameter),
+        structParams: cb.m_StructParams.map((sp) =>
+          defined({
+            nameIndex: sp.m_NameIndex,
+            index: sp.m_Index,
+            offsetInConstantBuffer: sp.m_OffsetInConstantBuffer,
+            arraySize: sp.m_ArraySize,
+            structSize: sp.m_StructSize,
+            vectorMembers: sp.m_VectorMembers.map(vectorParameter),
+            matrixMembers: sp.m_MatrixMembers.map(matrixParameter),
+          }),
+        ),
+        size: cb.m_Size,
+        isPartialCB: cb.m_IsPartialCB,
+      }),
+    ),
+    constantBufferBindings: params.m_ConstantBufferBindings.map(bufferBinding),
+    uavParams: params.m_UAVParams.map((u) =>
+      defined({
+        nameIndex: u.m_NameIndex,
+        index: u.m_Index,
+        originalIndex: u.m_OriginalIndex,
+        binding: u.m_Binding && binding(u.m_Binding),
+        originalBinding: u.m_OriginalBinding && binding(u.m_OriginalBinding),
+      }),
+    ),
+    samplers: params.m_Samplers.map((s) =>
+      defined({
+        sampler: s.sampler,
+        bindPoint: s.bindPoint,
+        binding: s.m_Binding && binding(s.m_Binding),
+      }),
+    ),
+  });
+}
+
+function vectorParameter(v: VectorParameter): VectorParameterFields {
+  return defined({
+    nameIndex: v.m_NameIndex,
+    index: v.m_Index,
+    offsetInConstantBuffer: v.m_OffsetInConstantBuffer,
+    arraySize: v.m_ArraySize,
+    type: v.m_Type,
+    dim: v.m_Dim,
+  });
+}
+
+function matrixParameter(m: MatrixParameter): MatrixParameterFields {
+  return defined({
+    nameIndex: m.m_NameIndex,
+    index: m.m_Index,
+    offsetInConstantBuffer: m.m_OffsetInConstantBuffer,
+    arraySize: m.m_ArraySize,
+    type: m.m_Type,
+    rowCount: m.m_RowCount,
+  });
+}
+
+function bufferBinding(b: BufferBinding): BufferBindingFields {
+  return defined({
+    nameIndex: b.m_NameIndex,
+    index: b.m_Index,
+    binding: b.m_Binding && binding(b.m_Binding),
+    arraySize: b.m_ArraySize,
+    resourceType: b.m_ResourceType,
+  });
+}
+
+function binding(b: Binding): BindingFields {
+  return { encodedData: b.m_EncodedData, slot: b.m_Slot };
 }

@@ -31,6 +31,9 @@ const EDITOR = [
   ...["sprite", "variant", "sprite-v2", "sprite-v2-rect"].map(
     (folder) => `editor/6000.6.4f1/${folder}/sprites`,
   ),
+  // 6000.6's Shader layout (#237); these are in no golden set.
+  "editor/6000.6.4f1/shader/lz4/windows",
+  "editor/6000.6.4f1/shader/lz4/android",
 ];
 
 /** The renames beyond the rule, as the fields' JSDoc documents them; `null` drops the key. */
@@ -48,6 +51,9 @@ const RENAMES: Record<string, string | null> = {
   // these hold any.
   "image data": null,
   m_AudioData: null,
+  // A Shader's (#237): the rule would make these `lOD` and `uAVParams`.
+  m_LOD: "lod",
+  m_UAVParams: "uavParams",
 };
 
 /** The rule: `m_Width` -> `width`, `Width` -> `width`, `m_sRGB` -> `sRGB`. */
@@ -122,6 +128,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "Mesh",
       "MonoBehaviour",
       "MonoScript",
+      "Shader",
       "Sprite",
       "SpriteAtlas",
       "TextAsset",

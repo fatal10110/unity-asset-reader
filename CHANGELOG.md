@@ -6,8 +6,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 ## Versioning policy
 
 - **Every package versions on its own**: `unity-asset-reader`, `unity-asset-reader-texture`,
-  `unity-asset-reader-node` and `texture2ddecoder-wasm` each have their own version, and a package
-  is published only when its version changes. Changing the `version` in a package's
+  `unity-asset-reader-node`, `unity-asset-reader-mesh`, `unity-asset-reader-audio`,
+  `unity-asset-reader-spine` and `texture2ddecoder-wasm` each have their own version, and a
+  package is published only when its version changes. Changing the `version` in a package's
   `package.json` on `main` is the release.
 - Each follows [semver](https://semver.org/). For the reader packages the public API is what the
   package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
@@ -55,6 +56,30 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
     loaded, or read through a reader not built by `load()`.
 
   `obj.readTypeTree()` still reads every one of these, a mesh from before 2019.1 included.
+
+- A hand-written `Shader` reader, `readShader`, for Unity 2019.1 to 6000.6 (#237): the parsed
+  ShaderLab (`m_ParsedForm`: properties, sub-shaders, passes, render state, keywords, each
+  variant's parameters) and the compiled programs of every platform (`compressedBlob`, still
+  LZ4-compressed). Its fields equal `readTypeTree()` on the fixture shaders (2019.4.41f2,
+  2020.3.30f1, 6000.3.26f1 and 6000.6.4f1, built for DX11, GLES3 and Vulkan, and for Metal by
+  2020.3 and 6000.3) and UnityPy's read of a synthetic object of every
+  Shader layout of Unity's type trees from 2019.1 (`fixtures/shader-layouts.json`). Bundles built
+  without type trees read their shaders too. Unity 2023.1 and later, Unity 6 included, have no
+  `m_EditorDataHash` or `m_Platforms` in a pass (#52).
+
+  **Behavior change** for `Shader` (in 1.1.0 it was read through its type tree):
+  - `asset.type` is `"Shader"`, not `"Other"`, so `env.assets("Other")` no longer yields shaders.
+  - `asset.data` is a `ShaderFields` (camelCase names at every level), not the type tree.
+  - `obj.read()` gives `Shader`: the type tree's fields, keys and values as `readTypeTree()` gives
+    them.
+  - `obj.read()` and `asset.data` now throw where 1.1.0 returned the type tree:
+    `UnsupportedError` for a shader from Unity before 2019.1, the supported floor (plan revision
+    2026-10-16, §4 M2), a
+    version-stripped file outside format 21 (so every stripped file from Unity 2020.1 on), and an
+    editor file (`BuildTarget.NoTarget`); `CorruptError` for a layout the reader does not know
+    (bytes left over or missing, such as a pre-release build or a 6000.7 alpha).
+
+  `obj.readTypeTree()` still reads every one of these, a shader from before 2019.1 included.
 
 ### 1.1.0 - 2026-10-16
 
@@ -249,6 +274,21 @@ First release. Peer: `unity-asset-reader@^1`.
   browser-safe. The PCM clips of the 2019.4.41f2, 2020.3.30f1 and 6000.3.25f1 fixture bundles
   convert to AssetStudio's WAV byte for byte. Vorbis and the other codecs throw
   `UnsupportedError`.
+
+## unity-asset-reader-spine
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
+
+### 1.0.0 - Unreleased
+
+First release. Peer: `unity-asset-reader@^1`.
+
+- `spineSkeletons(env)`: every Spine skeleton spine-unity (3.8 to 4.2) stores in the env, with
+  its skeleton data TextAsset (`skeletonJSON`) and, per atlas (`atlasAssets`), the atlas text
+  TextAsset (`atlasFile`) and the page Texture2Ds (each material's `_MainTex`). Found by field
+  names through type trees; a skeleton in a file without type trees, an atlas that loads its
+  textures on demand (4.1+) and an atlas type without `atlasFile` throw `UnsupportedError` (#238).
 
 ## texture2ddecoder-wasm
 

@@ -11,6 +11,7 @@ that package's tarball:
   packages/node/NOTICE       unity-asset-reader-node
   packages/mesh/NOTICE       unity-asset-reader-mesh
   packages/audio/NOTICE      unity-asset-reader-audio
+  packages/spine/NOTICE      unity-asset-reader-spine
   packages/decoder/LICENSE   texture2ddecoder-wasm
 
 They say which package uses which upstream, and for what. Runtime npm

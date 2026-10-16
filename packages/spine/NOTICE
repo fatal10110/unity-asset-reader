@@ -1,0 +1,11 @@
+unity-asset-reader-spine
+Copyright (c) 2026 fatal10110
+
+This package groups the objects spine-unity stores in Unity files. It holds no
+code of the Spine Runtimes (Esoteric Software): it only looks objects up by the
+names of the fields spine-unity serializes (skeletonJSON, atlasAssets,
+atlasFile, materials, textureLoadingMode). Spine is a product and trademark of
+Esoteric Software; this package is not affiliated with it.
+
+The Unity format handling it relies on is in unity-asset-reader, a derivative
+of AssetStudio (MIT, Perfare / RazTools / Razviar); see that package's NOTICE.

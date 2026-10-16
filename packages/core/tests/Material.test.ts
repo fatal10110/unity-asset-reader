@@ -88,7 +88,8 @@ const refusedFor = (text: string, pathId: bigint) => (err: unknown) =>
 for (const name of FIXTURES) {
   test(`${name}: readMaterial equals the golden dump and readTypeTree()`, () => {
     const objects = objectsOf(name, ClassID.Material);
-    assert.equal(objects.length, 1);
+    // One in most bundles; the spine bundles' page Materials (#238) are several.
+    assert.ok(objects.length > 0);
     for (const { env, reader, dump, enableTypeTree, unityVersion } of objects) {
       assert.ok(dump, `no golden dump for Material ${reader.pathId}`);
       const obj = env.objects.find((o) => o.pathId === reader.pathId)!;

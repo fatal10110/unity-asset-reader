@@ -1642,7 +1642,7 @@ be used as a tight-mask oracle.
 
 ## 17. Export goldens: the AssetStudio harness (#233)
 
-Export output (PNG, OBJ, WAV, later shader text) has its own oracle: AssetStudio
+Export output (PNG, OBJ, WAV, TextAsset files, later shader text) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -1680,7 +1680,7 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh and AudioClip of `goldens.json` and
+3. Lists every Texture2D, Mesh, TextAsset and AudioClip of `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
    it loads).
@@ -1690,24 +1690,27 @@ What it does, all inside `<external-harness>`:
    then for each object: Texture2D `Exporter.ExportTexture2D(item, dir,
    ImageFormat.Png)` of `AssetStudio.CLI`, PNG decoded back to RGBA8; Mesh
    `Exporter.ExportMesh(item, dir)`, the `.obj` file; AudioClip
-   `AudioClipConverter.ConvertToWav()`. The exporters run on en-US, the culture
-   the GUI's export thread sets (the CLI would use the host's, which changes
-   the OBJ's numbers).
+   `AudioClipConverter.ConvertToWav()`; TextAsset
+   `Exporter.ExportTextAsset(item, dir)`, the file it writes (`m_Script` as
+   is). The exporters run on en-US, the culture the GUI's export thread sets
+   (the CLI would use the host's, which changes the OBJ's numbers).
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
-   the fixture), texture format, size and image data hash, audio data hash.
+   the fixture), texture format, size and image data hash, audio data hash,
+   TextAsset script size and hash (from the type tree dump, where there is one).
 
 Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
 pathId) and holds `input` (the metadata it was matched on) and one of `png`
 (`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
-**top row first**, plus the PNG file's own size and hash), `obj` or `wav`
-(`size`, `sha256` of the file), or `exportError`:
+**top row first**, plus the PNG file's own size and hash), `obj`, `wav` or
+`bytes` (`size`, `sha256` of the file), or `exportError`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 12 Mesh (`main` bundles) | 12 OBJ | |
 | 18 AudioClip (`audio` bundles) | 18 WAV | |
-| 129 Texture2D | 88 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
+| 28 TextAsset | 28 files | |
+| 138 Texture2D | 97 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
 which call the right `Decode*` method by name, stay the AssetStudio verdict.
@@ -1718,9 +1721,748 @@ changes between runs, get an `exportError` instead of a golden. On these
 fixtures that only ever hit the misnumbered ASTC_HDR_4x4 (decoded as `R16_Alt`).
 
 Checks that need no AssetStudio run, in `scripts/tests/export-goldens.test.ts`:
-every PCM clip exports to `tone.wav` of section 11 to the byte, and the RG16
+every PCM clip exports to `tone.wav` of section 11 to the byte, every `hello`
+TextAsset to `hello.txt` of section 1, and the RG16
 PNG equals section 15's executed `DecodeRG16`, turned top-down.
 
 Section 15's script stays as it is: it executes single pinned methods
 (`CutImage`'s rectangle path, the plain decoders by name) that the full
 exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
+
+## 18. The `shader` bundles (#237)
+
+Two shaders of our own, built by **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**, each target with and without type trees:
+`shader/lz4/<target>` and `shader/lz4-notypetree/<target>`, `<target>` being:
+
+| Target | Build target | Graphics APIs (`platforms`) | Editors |
+|---|---|---|---|
+| `windows` | `StandaloneWindows64` | Direct3D 11 (`D3D11`, 4) | all four |
+| `android` | `Android` | OpenGL ES 3 and Vulkan (`GLES3Plus`, 9; `Vulkan`, 18) | all four |
+| `ios` | `iOS` | Metal (`Metal`, 14) | 2020.3.30f1, 6000.3.26f1 |
+
+Each bundle holds `UAR/ShaderFixture`, `UAR/ShaderFixtureSecond` and the
+AssetBundle. The first shader declares every kind of property and attribute,
+two sub-shaders (the second a fallback for hardware without geometry
+shaders), render state of every kind, a `GrabPass`, a `UsePass`, keywords
+(`multi_compile`, `shader_feature_local`, instancing), a geometry stage,
+constant buffers, an instancing buffer (whose array of structs is the struct
+parameter), a structured buffer, a UAV, separate and inline samplers, a
+`Dependency`, a `CustomEditor` and a `Fallback`. The second is the first's
+fallback, dependency and `UsePass` target.
+
+Metal comes from the editors that have the iOS module, 2020.3.30f1 and
+6000.3.26f1; 2019.4.41f2 and 6000.6.4f1 have none and log `FIXTURE-SKIP` for
+`ios`. No editor here has the macOS module, so `osx` is skipped everywhere.
+The Unity 6000.3 build is **6000.3.26f1**, not the 6000.3.25f1 of the other
+fixtures: 6000.3.25f1 was no longer installed. Both write SerializedFile
+format 22 and the same Shader layout (TPK: 6000.3.0b6 to 6000.5.0a5).
+
+What a build holds differs by editor: 2019.4 and 2020.3 list every variant
+with its parameters in each stage's `m_SubPrograms`; 6000.3 and 6000.6 leave
+those empty and list the variants a player uses in `m_PlayerSubPrograms`,
+their parameters in the blob. 2020.3 is the one fixture editor whose passes
+carry `m_EditorDataHash`, `m_Platforms` and the two keyword masks (#52).
+
+Any project will do; the committed bundles came from a fresh one per editor
+holding only these files:
+
+```
+<project>/Assets/Fixtures/shader/uar-fixture.shader
+<project>/Assets/Fixtures/shader/uar-second.shader
+<project>/Assets/Editor/BuildShaders.cs
+```
+
+`uar-fixture.shader` is the template below with three lines filled in per
+editor. For 2019.4.41f2: `INT_TYPE` is `Int` (a float property; Unity 2021.1
+added `Integer`), and the `CONSERVATIVE` and `RP_EDITOR` lines are deleted.
+For 2020.3.30f1: `INT_TYPE` is `Int`, `CONSERVATIVE` is `Conservative True`
+(2020.1+), and the `RP_EDITOR` line is deleted. For 6000.3.26f1 and
+6000.6.4f1: `INT_TYPE` is `Integer`, `CONSERVATIVE` is
+`Conservative True` (2020.1+), and `RP_EDITOR` is
+`CustomEditorForRenderPipeline "UarUrpShaderGUI" "UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset"`
+(2021.1+; Unity leaves it out of the bundle, as the project has no such
+pipeline).
+
+```shaderlab
+// Shader reader fixture (#237): every kind of property, attributes, two
+// subshaders, render state, a GrabPass, a UsePass, keywords, instancing, a
+// geometry stage, constant buffers, an instancing buffer (a struct), buffers,
+// a UAV, separate and inline samplers, a dependency, a custom editor and a
+// fallback.
+// INT_TYPE, CONSERVATIVE and RP_EDITOR are filled in per editor.
+Shader "UAR/ShaderFixture"
+{
+    Properties
+    {
+        [MainTexture] _MainTex ("Main", 2D) = "white" {}
+        [NoScaleOffset] _Detail ("Detail", 2D) = "gray" {}
+        [Normal] _BumpMap ("Bump", 2D) = "bump" {}
+        _Volume ("Volume", 3D) = "" {}
+        _Cube ("Cube", Cube) = "" {}
+        _Layers ("Layers", 2DArray) = "" {}
+        [MainColor] _Color ("Color", Color) = (1, 0.5, 0.25, 1)
+        [HDR] _Emission ("Emission", Color) = (2, 1, 0, 1)
+        _Offsets ("Offsets", Vector) = (1, 2, 3, 4)
+        _Gloss ("Gloss", Range(0, 1)) = 0.5
+        [Header(Options)] [Toggle(UAR_FEATURE)] _Feature ("Feature", Float) = 0
+        [HideInInspector] _Hidden ("Hidden", Float) = -1.5
+        [PerRendererData] _PerRenderer ("PerRenderer", Float) = 2
+        [Gamma] _GammaVal ("Gamma", Float) = 0.25
+        _Count ("Count", INT_TYPE) = 3
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
+        _StencilRef ("Stencil Ref", Range(0, 255)) = 7
+    }
+    SubShader
+    {
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
+        LOD 300
+        Pass
+        {
+            Name "Forward"
+            Tags { "LightMode" = "ForwardBase" }
+            Blend SrcAlpha OneMinusSrcAlpha, One Zero
+            BlendOp Add, Max
+            ColorMask RGB
+            ZWrite Off
+            ZTest LEqual
+            Cull [_Cull]
+            Offset -1, -2
+            AlphaToMask On
+            Stencil
+            {
+                Ref [_StencilRef]
+                ReadMask 15
+                WriteMask 240
+                Comp Always
+                Pass Replace
+                Fail Keep
+                ZFail IncrSat
+            }
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma target 3.5
+            #pragma multi_compile __ UAR_MULTI_A
+            #pragma shader_feature_local UAR_FEATURE
+            #pragma multi_compile_instancing
+            #include "UnityCG.cginc"
+
+            UNITY_DECLARE_TEX2D(_MainTex);
+            float4 _MainTex_ST;
+            UNITY_DECLARE_TEX2D_NOSAMPLER(_Detail);
+            sampler3D _Volume;
+            samplerCUBE _Cube;
+            UNITY_DECLARE_TEX2DARRAY(_Layers);
+            fixed4 _Color;
+            half4 _Emission;
+            float4 _Offsets;
+            float _Gloss;
+            float4x4 _UarMatrix;
+            float4 _UarArray[3];
+            UNITY_INSTANCING_BUFFER_START(UarProps)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _UarInstColor)
+                UNITY_DEFINE_INSTANCED_PROP(float4x4, _UarInstXform)
+            UNITY_INSTANCING_BUFFER_END(UarProps)
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normal : NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct v2f
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normal : TEXCOORD1;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            v2f vert(appdata v)
+            {
+                UNITY_SETUP_INSTANCE_ID(v);
+                v2f o;
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                float4x4 m = mul(_UarMatrix, UNITY_ACCESS_INSTANCED_PROP(UarProps, _UarInstXform));
+                o.pos = UnityObjectToClipPos(mul(m, v.vertex));
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.normal = UnityObjectToWorldNormal(v.normal);
+                return o;
+            }
+
+            fixed4 frag(v2f i) : SV_Target
+            {
+                UNITY_SETUP_INSTANCE_ID(i);
+                fixed4 c = UNITY_SAMPLE_TEX2D(_MainTex, i.uv) * _Color;
+                c *= UNITY_ACCESS_INSTANCED_PROP(UarProps, _UarInstColor);
+                c += UNITY_SAMPLE_TEX2D_SAMPLER(_Detail, _MainTex, i.uv) * _Gloss;
+                c += tex3D(_Volume, i.normal) + texCUBE(_Cube, i.normal);
+                c += UNITY_SAMPLE_TEX2DARRAY(_Layers, float3(i.uv, _Offsets.w));
+            #if UAR_MULTI_A
+                c.rgb += _Emission.rgb;
+            #endif
+            #ifdef UAR_FEATURE
+                c *= _Offsets;
+            #endif
+                c += _UarArray[(int)_Offsets.x];
+                return c;
+            }
+            ENDCG
+        }
+        GrabPass { "_UarGrab" }
+        Pass
+        {
+            Name "Geometry"
+            Tags { "LightMode" = "Always" }
+            Blend 0 One One
+            Blend 1 Zero SrcColor
+            ZClip False
+            CONSERVATIVE
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma geometry geom
+            #pragma fragment frag
+            #pragma target 5.0
+            #include "UnityCG.cginc"
+
+            cbuffer UarLights
+            {
+                float4x4 _UarXform;
+                float4 _UarColors[2];
+                float4 _UarTint;
+            };
+            StructuredBuffer<float4> _UarPoints;
+            RWStructuredBuffer<float4> _UarOut : register(u1);
+            Texture2D _UarGrab;
+            SamplerState sampler_point_clamp;
+
+            struct v2g
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            v2g vert(appdata_base v)
+            {
+                v2g o;
+                o.pos = UnityObjectToClipPos(mul(_UarXform, v.vertex));
+                o.uv = v.texcoord.xy;
+                return o;
+            }
+
+            [maxvertexcount(3)]
+            void geom(triangle v2g input[3], inout TriangleStream<v2g> stream)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    v2g o = input[k];
+                    o.pos.xy += _UarPoints[k].xy;
+                    stream.Append(o);
+                }
+            }
+
+            float4 frag(v2g i) : SV_Target
+            {
+                float4 c = _UarGrab.Sample(sampler_point_clamp, i.uv) * _UarColors[1] * _UarTint;
+                _UarOut[0] = c;
+                return c;
+            }
+            ENDCG
+        }
+    }
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque" }
+        LOD 100
+        Pass
+        {
+            Tags { "LightMode" = "ForwardBase" }
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            fixed4 _Color;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return _Color; }
+            ENDCG
+        }
+        UsePass "UAR/ShaderFixtureSecond/UNLIT"
+    }
+    Dependency "UarDependency" = "UAR/ShaderFixtureSecond"
+    CustomEditor "UarShaderGUI"
+    RP_EDITOR
+    Fallback "UAR/ShaderFixtureSecond"
+}
+```
+
+`uar-second.shader`:
+
+```shaderlab
+// The second shader of the #237 fixture: the first one's fallback, dependency
+// and UsePass target.
+Shader "UAR/ShaderFixtureSecond"
+{
+    Properties
+    {
+        _Color ("Color", Color) = (0, 1, 0, 1)
+    }
+    SubShader
+    {
+        Pass
+        {
+            Name "Unlit"
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            fixed4 _Color;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return _Color; }
+            ENDCG
+        }
+    }
+    Fallback Off
+}
+```
+
+`Assets/Editor/BuildShaders.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// The two fixture shaders (#237), built once per target and graphics API set:
+// with type trees, and without for the targets the reader must handle alone.
+// A target whose build module is not installed is skipped and logged.
+public static class BuildShaders
+{
+    const string Dir = "Assets/Fixtures/shader";
+    static readonly string[] Shaders = { Dir + "/uar-fixture.shader", Dir + "/uar-second.shader" };
+
+    public static void Build()
+    {
+        // Keep the instancing variants, whose instancing buffer is the one place
+        // a struct parameter appears; no material asks for instancing here.
+        var graphics = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
+        graphics.FindProperty("m_InstancingStripping").intValue = 2; // Keep All
+        graphics.ApplyModifiedProperties();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        var noTree = lz4 | BuildAssetBundleOptions.DisableWriteTypeTree;
+        var dx11 = new[] { GraphicsDeviceType.Direct3D11 };
+        var mobile = new[] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan };
+        var metal = new[] { GraphicsDeviceType.Metal };
+        Emit("windows", BuildTarget.StandaloneWindows64, dx11, lz4);
+        Emit("windows-notypetree", BuildTarget.StandaloneWindows64, dx11, noTree);
+        Emit("android", BuildTarget.Android, mobile, lz4);
+        Emit("android-notypetree", BuildTarget.Android, mobile, noTree);
+        Emit("ios", BuildTarget.iOS, metal, lz4);
+        Emit("ios-notypetree", BuildTarget.iOS, metal, noTree);
+        Emit("osx", BuildTarget.StandaloneOSX, metal, lz4);
+        Emit("osx-notypetree", BuildTarget.StandaloneOSX, metal, noTree);
+    }
+
+    static void Emit(string name, BuildTarget target, GraphicsDeviceType[] apis, BuildAssetBundleOptions opts)
+    {
+        var group = BuildPipeline.GetBuildTargetGroup(target);
+        if (!BuildPipeline.IsBuildTargetSupported(group, target))
+        {
+            Debug.Log("FIXTURE-SKIP shader " + name + ": no " + target + " build module");
+            return;
+        }
+        PlayerSettings.SetUseDefaultGraphicsAPIs(target, false);
+        PlayerSettings.SetGraphicsAPIs(target, apis);
+        var dir = Path.Combine("Build", "shader-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "shaders", assetNames = Shaders } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, target);
+        if (m == null) throw new System.Exception("build failed: shader " + name);
+        Debug.Log("FIXTURE-OK shader " + name + " -> " + dir);
+    }
+}
+```
+
+Build with `-executeMethod BuildShaders.Build` (same command as section 2).
+The log must hold a `FIXTURE-OK shader` line for each target the editor
+can build (six with the iOS module, four without) and no `Shader error`;
+a target without its module logs `FIXTURE-SKIP`. Copy only the
+bundle named `shaders`:
+
+```
+Build/shader-<target>/shaders             ->  fixtures/bundles/editor/<editor version>/shader/lz4/<target>
+Build/shader-<target>-notypetree/shaders  ->  fixtures/bundles/editor/<editor version>/shader/lz4-notypetree/<target>
+```
+
+Then rerun the goldens. `make-goldens.py` (UnityPy 1.25.3) adds the format
+21 and 22 bundles to `goldens.json`: their metadata, names and container, no
+Shader dump. Format 23 (6000.6) is UnityPy 1.25.4's, as for the other 6000.6
+fixtures (section 13): `make-goldens.py` skips those bundles, and
+`make-modern-goldens.py` puts the typed ones in `modern-goldens.json`, with a
+`read_typetree()` dump of every object, Shaders included, which
+`packages/core/tests/modern-fixtures.test.ts` compares with `readTypeTree()`.
+The Shader reader's own check is `readTypeTree()` on every bundle
+(`packages/core/tests/Shader.test.ts`).
+
+### `shader-layouts.json`
+
+```bash
+.venv-oracle/bin/python scripts/make-shader-layouts.py
+```
+
+One synthetic Shader object per layout in UnityPy's TPK type tree data, from
+2019.1 (the oldest version the reader supports) to 6000.6, plus the
+2020.3.30f1 and 6000.3.25f1 fixture editors. The script fills every field of the TPK type
+tree with a distinct value, writes the object with UnityPy's
+`write_typetree`, reads it back with `read_typetree`, and records the bytes
+and the sha256 of the read-back value in the form the test hashes (see the
+script's docstring). The two fixture builds above have exactly the TPK layout
+of their editor (2019.3.0b1's and 6000.6.0a7's entries), node for node.
+
+## 19. The `spine` bundles (#238)
+
+Spine skeletons as spine-unity stores them, for `unity-asset-reader-spine`,
+built with **2019.4.41f2** only (format 21, which AssetStudio `c37af7d` reads,
+so the TextAssets and pages get export goldens, section 17). No spine-unity
+package is involved: the project holds stub scripts of our own that serialize
+the same fields as spine-unity's assets, and a skeleton JSON and atlas text
+written for it.
+
+What the stubs reproduce of spine-unity (EsotericSoftware/spine-runtimes,
+`spine-unity/Assets/Spine/Runtime/spine-unity/Asset Types/`, branches `3.8`,
+`4.0`, `4.1` and `4.2`, read outside the repository) is its serialized layout
+only: the field names, their kinds and their order, and the class names
+`SkeletonDataAsset` and `SpineAtlasAsset` in the namespace `Spine.Unity`, as a
+build records them in its MonoScripts (`Spine.Unity.OnDemand` is our own
+name). No code, default values or attributes; the types the fields need (a
+base class, a blend-modes record, a loader) are declared under our own names
+(`Uar*`), and an enum field is an `int`, which is what Unity writes for
+one. That code is under the Spine Runtimes License; none of it is in this
+repository.
+
+`SkeletonDataAsset.cs`, `SpineAtlasAsset.cs` and `BlendModeMaterials.cs`
+declare the same serialized fields on all four branches. `AtlasAssetBase.cs`
+adds two, `textureLoadingMode` (an enum: `Normal` = 0, `OnDemand` = 1) and
+`onDemandTextureLoader`, before the atlas' own fields, when
+`SPINE_OPTIONAL_ON_DEMAND_LOADING` is defined. 4.1 and 4.2 define it at the
+top of that file, so a stock 4.1+ project writes them; 3.8 and 4.0 have
+neither, nor does a 4.1+ project that removed the define. The project has both
+atlas layouts: `Spine.Unity.SpineAtlasAsset` (3.8 and 4.0) and
+`Spine.Unity.OnDemand.SpineAtlasAsset` (4.1+ as shipped).
+
+What `spineSkeletons(env)` must return for each bundle, one row per atlas, in
+order (`packages/spine/tests/spine.test.ts` reads this table):
+
+| Bundle | Skeleton | Skeleton data | Atlas | Pages |
+|---|---|---|---|---|
+| `spine/lz4/skeletons` | `hero_SkeletonData` | `hero` | `hero.atlas` | `hero`, `hero2` |
+| `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp.atlas` | `imp` |
+| `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp-fx.atlas` | `imp-fx` |
+
+- `hero_SkeletonData` (4.1+ atlas layout): one atlas, `hero_Atlas`, with two pages,
+  `textureLoadingMode` `Normal`.
+- `imp_SkeletonData` (3.8 and 4.0 atlas layout): `atlasAssets` is `imp_Atlas`, a null
+  entry, `imp-fx_Atlas`. spine-unity skips the null entry
+  (`SkeletonDataAsset.GetAtlasArray`), so the skeleton has two atlases.
+- `spine/lz4/ondemand`: `ghost_SkeletonData`, whose atlas `ghost_Atlas` has
+  `textureLoadingMode` `OnDemand`, which spine-unity builds with placeholder
+  textures in the materials: `spineSkeletons` refuses it.
+- `spine/lz4-notypetree/skeletons`: the `skeletons` bundle built with
+  `DisableWriteTypeTree`, which has no field names to go by: `spineSkeletons`
+  refuses it, naming the `SkeletonDataAsset` script.
+
+Names are `m_Name`s: Unity names a TextAsset after its file without the last
+extension (`hero.atlas.txt` is `hero.atlas`) and a texture after its file.
+A page is the `_MainTex` of each of the atlas asset's `materials`
+(`<page>_Material`), in that order; the shader those Materials use goes into a
+bundle of its own, `spinedeps`, which is not committed.
+
+### Source assets
+
+Under `<project>/Assets/Fixtures/spine/`. The JSON and atlas files are written
+byte-exact (LF, no BOM):
+
+```bash
+printf '{"skeleton":{"hash":"uarhero","spine":"4.2.00","x":-4,"y":0,"width":8,"height":16},"bones":[{"name":"root"}],"slots":[{"name":"head","bone":"root","attachment":"head"},{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"head":{"head":{"y":12,"width":8,"height":8}},"body":{"body":{"y":4,"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > hero.json
+printf 'hero.png\nsize:8,8\nfilter:Linear,Linear\nhead\nbounds:0,0,8,8\n\nhero2.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > hero.atlas.txt
+printf '{"skeleton":{"hash":"uarimp","spine":"3.8.99","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"},{"name":"spark","bone":"root","attachment":"spark"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}},"spark":{"spark":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > imp.json
+printf '\nimp.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nbody\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n' > imp.atlas.txt
+printf '\nimp-fx.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nspark\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n' > imp-fx.atlas.txt
+printf '{"skeleton":{"hash":"uarghost","spine":"4.2.00","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > ghost.json
+printf 'ghost.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > ghost.atlas.txt
+```
+
+The hero JSON and atlas text are Spine 4.x's export format, the imp ones 3.8's;
+nothing reads them as Spine data, they only have to come back byte for byte.
+The pages are 8x8 RGBA PNGs, every pixel distinct within and across pages
+(stored deflate, so the bytes do not depend on the zlib version):
+
+```python
+import struct, zlib
+def png(name, page):
+    px = [[((32 * x + 4 * page) % 256, (32 * y + 3) % 256, (40 * page + 4 * x + y) % 256, 255 - 8 * (x + y)) for x in range(8)] for y in range(8)]
+    raw = b"".join(b"\x00" + bytes(c for p in row for c in p) for row in px)
+    chunk = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
+    data = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 8, 8, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 0)) + chunk(b"IEND", b"")
+    open(name, "wb").write(data)
+for page, name in enumerate(["hero.png", "hero2.png", "imp.png", "imp-fx.png", "ghost.png"], 1):
+    png(name, page)
+```
+
+sha256 of each file:
+
+```
+77b9da52d4b22be22a18b32d668ce49086745af5562df63c36fe07573e970ff9  hero.json
+9ba4fae5677381ee0b1ed848183797a60c52848f36dd733557ee3afdad9c92af  hero.atlas.txt
+98767306c19f9306753272348ede1eb10ea6fe3b2007f1cb15b48f5a62d3b8ae  hero.png
+5d63131a81a671ab079f0a54ba201d5a358f0264d2173722f0d4e5aa33ebe030  hero2.png
+64ebbd5f211bb27b246f901626c22c5cac06add9cff06d5ca2f9925c5ed1ef24  imp.json
+25f4fffdeca789d74a8079272f885eda44965f55715465e9e1774fdadb13be4c  imp.atlas.txt
+330ce484fb0f86e29d836cfa7546389838ff2126906dfe261c0317346f5ee6ed  imp.png
+8cff25a19d77c886a6b35ffdb3baa26e98e6f2d33e60809a273ab6ddcd05ba08  imp-fx.atlas.txt
+408e078298da49777fec9d0522da5e33492ac341a61473e80159e58479c1b345  imp-fx.png
+8946f6c1e5e8a71196fb5c0e4ed4053ff881d2ca5f5e41cb844006ef038d286d  ghost.json
+1d804a8efa9ced3f9601ec44ccfc94626427ee1dcfd4df08afe0b061f2f297c8  ghost.atlas.txt
+8aafa8abaf30aa4912faca2c62285194457902e1ba9c870851d5c089c791faf1  ghost.png
+```
+
+`page.shader`, the smallest shader with a `_MainTex` slot:
+
+```shaderlab
+// The smallest shader with a _MainTex slot, for the page Materials (#238).
+Shader "UAR/SpinePage"
+{
+    Properties { _MainTex ("Page", 2D) = "white" {} }
+    SubShader
+    {
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            sampler2D _MainTex;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return tex2D(_MainTex, float2(0, 0)); }
+            ENDCG
+        }
+    }
+}
+```
+
+### Stub scripts
+
+Under `Assets/Scripts/Spine/` (`SkeletonDataAsset.cs`, `SpineAtlasAsset.cs`,
+`UarTypes.cs`) and `Assets/Scripts/SpineOnDemand/` (`SpineAtlasAsset.cs`).
+Unity takes two scripts of the same file name in different folders, as long
+as their namespaces differ. One `SkeletonDataAsset` serves both atlas
+layouts, through the common base `UarAtlasBase`:
+
+```csharp
+// Spine/SkeletonDataAsset.cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    // spine-unity's SkeletonDataAsset serialized fields (3.8 to 4.2): names, types, order.
+    public class SkeletonDataAsset : ScriptableObject
+    {
+        public UarAtlasBase[] atlasAssets;
+        public float scale;
+        public TextAsset skeletonJSON;
+        public bool isUpgradingBlendModeMaterials;
+        public UarBlendModes blendModeMaterials;
+        public List<UarModifier> skeletonDataModifiers;
+        public string[] fromAnimation;
+        public string[] toAnimation;
+        public float[] duration;
+        public float defaultMix;
+        public RuntimeAnimatorController controller;
+    }
+}
+
+// Spine/SpineAtlasAsset.cs
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    // SpineAtlasAsset of 3.8 and 4.0 (and 4.1+ without SPINE_OPTIONAL_ON_DEMAND_LOADING).
+    public class SpineAtlasAsset : UarAtlasBase
+    {
+        public TextAsset atlasFile;
+        public Material[] materials;
+    }
+}
+
+// Spine/UarTypes.cs
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Spine.Unity
+{
+    // Our own types for the fields above that need one; the names are ours.
+    public abstract class UarAtlasBase : ScriptableObject { }
+
+    public abstract class UarModifier : ScriptableObject { }
+
+    public abstract class UarTextureLoader : ScriptableObject { }
+
+    [System.Serializable]
+    public class UarPageMaterial
+    {
+        public string pageName;
+        public Material material;
+    }
+
+    [System.Serializable]
+    public class UarBlendModes
+    {
+        public bool requiresBlendModeMaterials;
+        public bool applyAdditiveMaterial;
+        public List<UarPageMaterial> additiveMaterials;
+        public List<UarPageMaterial> multiplyMaterials;
+        public List<UarPageMaterial> screenMaterials;
+    }
+}
+
+// SpineOnDemand/SpineAtlasAsset.cs
+using UnityEngine;
+
+namespace Spine.Unity.OnDemand
+{
+    // SpineAtlasAsset of 4.1+ as shipped (SPINE_OPTIONAL_ON_DEMAND_LOADING defined): the
+    // two base-class fields come first. textureLoadingMode is an enum there, an int here.
+    public class SpineAtlasAsset : Spine.Unity.UarAtlasBase
+    {
+        public int textureLoadingMode;
+        public Spine.Unity.UarTextureLoader onDemandTextureLoader;
+        public TextAsset atlasFile;
+        public Material[] materials;
+    }
+}
+```
+
+`Assets/Editor/BuildSpine.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using Spine.Unity;
+using OnDemand = Spine.Unity.OnDemand;
+
+// Spine skeletons laid out as spine-unity stores them (#238), with our stub
+// scripts: hero (4.1+ atlas layout, one atlas, two pages), imp (3.8/4.0 atlas
+// layout, two atlases and a null entry between them, one page each), and ghost
+// (4.1+ layout, texture loading mode OnDemand) in a bundle of its own.
+public static class BuildSpine
+{
+    const string Dir = "Assets/Fixtures/spine";
+
+    static T Load<T>(string file) where T : Object
+    {
+        var asset = AssetDatabase.LoadAssetAtPath<T>(Dir + "/" + file);
+        if (asset == null) throw new System.Exception("missing " + file);
+        return asset;
+    }
+
+    static string Save(Object asset, string name)
+    {
+        var path = Dir + "/" + name + ".asset";
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.CreateAsset(asset, path);
+        return path;
+    }
+
+    // A page: an uncompressed RGBA32 texture without mips, and its Material.
+    static Material Page(string page)
+    {
+        var tex = (TextureImporter)AssetImporter.GetAtPath(Dir + "/" + page + ".png");
+        tex.textureCompression = TextureImporterCompression.Uncompressed;
+        tex.mipmapEnabled = false;
+        tex.SaveAndReimport();
+        var path = Dir + "/" + page + "_Material.mat";
+        AssetDatabase.DeleteAsset(path);
+        var mat = new Material(Load<Shader>("page.shader"));
+        mat.SetTexture("_MainTex", Load<Texture2D>(page + ".png"));
+        AssetDatabase.CreateAsset(mat, path);
+        return mat;
+    }
+
+    static SpineAtlasAsset PlainAtlas(string name, params string[] pages)
+    {
+        var atlas = ScriptableObject.CreateInstance<SpineAtlasAsset>();
+        atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
+        atlas.materials = System.Array.ConvertAll(pages, Page);
+        Save(atlas, name + "_Atlas");
+        return atlas;
+    }
+
+    static OnDemand.SpineAtlasAsset OnDemandAtlas(string name, int loadingMode, params string[] pages)
+    {
+        var atlas = ScriptableObject.CreateInstance<OnDemand.SpineAtlasAsset>();
+        atlas.textureLoadingMode = loadingMode; // 0 Normal, 1 OnDemand
+        atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
+        atlas.materials = System.Array.ConvertAll(pages, Page);
+        Save(atlas, name + "_Atlas");
+        return atlas;
+    }
+
+    static string Skeleton(string name, UarAtlasBase[] atlases)
+    {
+        var data = ScriptableObject.CreateInstance<SkeletonDataAsset>();
+        data.atlasAssets = atlases;
+        data.scale = 0.01f;
+        data.skeletonJSON = Load<TextAsset>(name + ".json");
+        return Save(data, name + "_SkeletonData");
+    }
+
+    public static void Build()
+    {
+        var hero = Skeleton("hero", new UarAtlasBase[] { OnDemandAtlas("hero", 0, "hero", "hero2") });
+        // A null entry, which spine-unity skips.
+        var imp = Skeleton("imp", new UarAtlasBase[] { PlainAtlas("imp", "imp"), null, PlainAtlas("imp-fx", "imp-fx") });
+        var ghost = Skeleton("ghost", new UarAtlasBase[] { OnDemandAtlas("ghost", 1, "ghost") });
+        AssetDatabase.SaveAssets();
+
+        // The shader goes into a bundle of its own (not committed), so the page
+        // Materials point at another file for it and the bundles stay small.
+        var builds = new[] {
+            new AssetBundleBuild { assetBundleName = "skeletons", assetNames = new[] { hero, imp } },
+            new AssetBundleBuild { assetBundleName = "ondemand", assetNames = new[] { ghost } },
+            new AssetBundleBuild { assetBundleName = "spinedeps", assetNames = new[] { Dir + "/page.shader" } },
+        };
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4, builds);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree, builds);
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts, AssetBundleBuild[] builds)
+    {
+        var dir = Path.Combine("Build", "spine-" + name);
+        Directory.CreateDirectory(dir);
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: spine " + name);
+        Debug.Log("FIXTURE-OK spine " + name + " -> " + dir);
+    }
+}
+```
+
+### Build
+
+Same command as section 2, with `-executeMethod BuildSpine.Build`; the log
+must hold two `FIXTURE-OK spine` lines. Copy only these three files:
+
+```
+Build/spine-lz4/skeletons             -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/skeletons
+Build/spine-lz4/ondemand              -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/ondemand
+Build/spine-lz4-notypetree/skeletons  -> fixtures/bundles/editor/2019.4.41f2/spine/lz4-notypetree/skeletons
+```
+
+then rerun `make-goldens.py` (it dumps the MonoBehaviours', Materials',
+TextAssets' and Texture2Ds' type trees) and `make-export-goldens.py`
+(section 17: each TextAsset's file and each page's PNG).

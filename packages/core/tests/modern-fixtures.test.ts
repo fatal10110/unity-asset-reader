@@ -70,8 +70,16 @@ test("RGB48 records AssetStudio's verdict and labels the conflicting UnityPy has
   assert.deepEqual(rgb48.assetStudioCrossCheck?.firstPixel, [48, 122, 196, 255]);
 });
 
-for (const folder of ["more-plain", "sprite", "variant", "sprite-v2", "sprite-v2-rect"]) {
-  const name = `editor/6000.6.4f1/${folder}/${folder === "more-plain" ? "textures" : "sprites"}`;
+const MODERN = [
+  ...["more-plain", "sprite", "variant", "sprite-v2", "sprite-v2-rect"].map(
+    (folder) => `editor/6000.6.4f1/${folder}/${folder === "more-plain" ? "textures" : "sprites"}`,
+  ),
+  // The shader bundles (#237), their Shader objects dumped too.
+  "editor/6000.6.4f1/shader/lz4/windows",
+  "editor/6000.6.4f1/shader/lz4/android",
+];
+
+for (const name of MODERN) {
   test(`${name}: format-23 metadata and type-tree dumps match UnityPy`, () => {
     const path = new URL("../../../fixtures/modern-goldens.json", import.meta.url);
     assert.ok(existsSync(path), "candidate oracle goldens must be generated");

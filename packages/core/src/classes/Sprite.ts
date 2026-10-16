@@ -574,7 +574,10 @@ export function readVector4(reader: ObjectReader): Vector4 {
   };
 }
 
-/** A `GUID`: four `UInt32` words. Internal: shared with `SpriteAtlas.ts`. */
+/**
+ * A `GUID`: four `UInt32` words. Internal: shared with `SpriteAtlas.ts` and
+ * `Shader.ts`.
+ */
 export function readGUID(reader: ObjectReader): GUID {
   const out: GUID = {};
   for (let i = 0; i < 4; i++) out[`data[${i}]`] = reader.readUInt32();
@@ -583,7 +586,7 @@ export function readGUID(reader: ObjectReader): GUID {
 
 /**
  * An `Int32` count, then that many elements. Internal: shared with
- * `SpriteAtlas.ts` and `Mesh.ts`.
+ * `SpriteAtlas.ts`, `Mesh.ts` and `Shader.ts`.
  *
  * @throws {CorruptError} when the count is negative or larger than the bytes left
  */
@@ -710,7 +713,8 @@ function vector3(reader: ObjectReader, version: UnityVersion): Vector3 {
 }
 
 /**
- * The end-of-object check. Internal: shared with `SpriteAtlas.ts` and `Mesh.ts`.
+ * The end-of-object check. Internal: shared with `SpriteAtlas.ts`, `Mesh.ts`
+ * and `Shader.ts`.
  *
  * @throws {CorruptError} when bytes are left over after the last field
  */
