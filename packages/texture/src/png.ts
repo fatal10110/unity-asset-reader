@@ -27,9 +27,9 @@ let crcTable: Uint32Array | undefined;
  * image tool if size matters.
  *
  * The rows are written in the order `image.data` holds them, and a PNG starts
- * with its top row: pass a `decodeTexture2D`, `decodeSprite` or `decodeImage`
- * result (top row first) as is, and reverse the rows of a `convertPlain`
- * result (bottom row first) before.
+ * with its top row: pass a `decodeTexture2D` or `decodeSprite` result (top
+ * row first) as is, and reverse the rows of a `convertPlain` result (bottom
+ * row first) before.
  *
  * @param image the pixels, R G B A, `width * height * 4` bytes, top row first.
  *   A `decodeImage` result holds them in `rgba`:
