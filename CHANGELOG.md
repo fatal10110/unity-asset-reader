@@ -179,6 +179,8 @@ First release. Peer: `unity-asset-reader@^1`.
 
 - Update repository metadata and documentation links after the GitHub repository rename to
   `fatal10110/unity-asset-reader` (#199). The npm package name stays `texture2ddecoder-wasm`.
+- README: a table of the decode function per format, a live demo link, and acknowledgements
+  (#207, #208, #209).
 
 ### 1.2.5 - 2026-09-29
 
