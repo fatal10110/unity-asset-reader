@@ -104,9 +104,10 @@ and `shader/lz4-notypetree/<target>` (#237): two shaders of our own, built for
 ([`BUILDING.md`](BUILDING.md) section 17). Neither editor here has the iOS or
 macOS module, so there is no Metal shader, and 2020.3.30f1 and 6000.3.25f1
 were no longer installed. The 2019.4 bundles are in `goldens.json` without a
-Shader dump; the 6000.6 ones in no golden set, as UnityPy 1.25.3 cannot read
-format 23. The Shader reader is checked against `readTypeTree()` on them, and
-against `shader-layouts.json` for every Shader layout of Unity's type trees
+Shader dump. The typed 6000.6 ones are in `modern-goldens.json` (UnityPy
+1.25.4, format 23), with a dump of every object, their Shaders included. The
+Shader reader is checked against `readTypeTree()` on them, and against
+`shader-layouts.json` for every Shader layout of Unity's type trees from 2019.1
 (UnityPy's TPK data), 2020.3.30f1's and 6000.3.25f1's among them.
 
 2019.4.41f2 (format 21) and 6000.3.25f1 (format 22) also have `sprite/sprites`

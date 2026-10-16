@@ -13,7 +13,10 @@ to release is in [RELEASING.md](RELEASING.md).
   package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
   an exported type that narrows only for input earlier versions refused, such as a field made
   optional because a newly supported layout lacks it, ships as a minor, with a **Type change**
-  note in its entry.
+  note in its entry. A second, also a maintainer decision (core 1.2.0, #235, #237): registering a
+  hand-written reader for a class that was read through its type tree (`type: "Other"`) ships as
+  a minor, with a **Behavior change** note listing what changes for that class: its `type`, the
+  shape of its `data` and `obj.read()`, and every input that now throws.
 - Between packages of this repo, ranges say what goes together. A feature package's
   `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`), so any core of that
   major works with it; a breaking core release moves the feature packages' peer range with it.
@@ -26,13 +29,27 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.2.0 - Unreleased
 
-- `readShader` reads `Shader` objects without a type tree (#237), and `obj.read()` and
-  `asset.data` (`ShaderFields`) use it: the parsed ShaderLab (`m_ParsedForm`: properties,
-  sub-shaders, passes, render state, keywords, each variant's parameters) and the compiled
-  programs of every platform (`compressedBlob`, still LZ4-compressed), from Unity 3.4 to
-  6000.6. Unity 2023.1 and later, Unity 6 included, have no `m_EditorDataHash` or `m_Platforms`
-  in a pass (#52). Tested on 2019.4.41f2 and 6000.6.4f1 shaders built for DX11, GLES3 and
-  Vulkan, and on UnityPy's synthetic object of every Shader layout of Unity's type trees.
+- A hand-written `Shader` reader, `readShader`, for Unity 2019.1 to 6000.6 (#237): the parsed
+  ShaderLab (`m_ParsedForm`: properties, sub-shaders, passes, render state, keywords, each
+  variant's parameters) and the compiled programs of every platform (`compressedBlob`, still
+  LZ4-compressed). Its fields equal `readTypeTree()` on the fixture shaders (2019.4.41f2 and
+  6000.6.4f1, built for DX11, GLES3 and Vulkan) and UnityPy's read of a synthetic object of every
+  Shader layout of Unity's type trees from 2019.1 (`fixtures/shader-layouts.json`). Bundles built
+  without type trees read their shaders too. Unity 2023.1 and later, Unity 6 included, have no
+  `m_EditorDataHash` or `m_Platforms` in a pass (#52).
+
+  **Behavior change** for `Shader` (in 1.1.0 it was read through its type tree):
+  - `asset.type` is `"Shader"`, not `"Other"`, so `env.assets("Other")` no longer yields shaders.
+  - `asset.data` is a `ShaderFields` (camelCase names at every level), not the type tree.
+  - `obj.read()` gives `Shader`: the type tree's fields, keys and values as `readTypeTree()` gives
+    them.
+  - `obj.read()` and `asset.data` now throw where 1.1.0 returned the type tree:
+    `UnsupportedError` for Unity before 2019.1 (unsupported, plan revision 2026-10-16, §4 M2), a
+    version-stripped file outside format 21 (so every stripped file from Unity 2020.1 on), and an
+    editor file (`BuildTarget.NoTarget`); `CorruptError` for a layout the reader does not know
+    (bytes left over or missing, such as a pre-release build or a 6000.7 alpha).
+
+  `obj.readTypeTree()` still reads every one of these.
 
 ### 1.1.0 - 2026-10-16
 

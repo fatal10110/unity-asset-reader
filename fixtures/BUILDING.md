@@ -1967,7 +1967,9 @@ public static class BuildShaders
         Emit("android", BuildTarget.Android, mobile, lz4);
         Emit("android-notypetree", BuildTarget.Android, mobile, noTree);
         Emit("ios", BuildTarget.iOS, metal, lz4);
+        Emit("ios-notypetree", BuildTarget.iOS, metal, noTree);
         Emit("osx", BuildTarget.StandaloneOSX, metal, lz4);
+        Emit("osx-notypetree", BuildTarget.StandaloneOSX, metal, noTree);
     }
 
     static void Emit(string name, BuildTarget target, GraphicsDeviceType[] apis, BuildAssetBundleOptions opts)
@@ -1992,7 +1994,7 @@ public static class BuildShaders
 
 Build with `-executeMethod BuildShaders.Build` (same command as section 2).
 The log must hold four `FIXTURE-OK shader` lines and no `Shader error`; the
-two Metal targets log `FIXTURE-SKIP` without their module. Copy only the
+four Metal builds log `FIXTURE-SKIP` without their module. Copy only the
 bundle named `shaders`:
 
 ```
@@ -2000,10 +2002,15 @@ Build/shader-<target>/shaders             ->  fixtures/bundles/editor/<editor ve
 Build/shader-<target>-notypetree/shaders  ->  fixtures/bundles/editor/<editor version>/shader/lz4-notypetree/<target>
 ```
 
-Then rerun `make-goldens.py`: it adds the 2019.4 bundles to `goldens.json`
-(their metadata, names and container; it dumps no Shader) and leaves the
-6000.6 ones out, which UnityPy 1.25.3 cannot read. The Shader reader's check
-on all of them is `readTypeTree()` (`packages/core/tests/Shader.test.ts`).
+Then rerun the goldens. `make-goldens.py` (UnityPy 1.25.3) adds the format
+21 and 22 bundles to `goldens.json`: their metadata, names and container, no
+Shader dump. Format 23 (6000.6) is UnityPy 1.25.4's, as for the other 6000.6
+fixtures (section 13): `make-goldens.py` skips those bundles, and
+`make-modern-goldens.py` puts the typed ones in `modern-goldens.json`, with a
+`read_typetree()` dump of every object, Shaders included, which
+`packages/core/tests/modern-fixtures.test.ts` compares with `readTypeTree()`.
+The Shader reader's own check is `readTypeTree()` on every bundle
+(`packages/core/tests/Shader.test.ts`).
 
 ### `shader-layouts.json`
 
@@ -2012,7 +2019,7 @@ on all of them is `readTypeTree()` (`packages/core/tests/Shader.test.ts`).
 ```
 
 One synthetic Shader object per layout in UnityPy's TPK type tree data, from
-3.4 to 6000.6, plus the two fixture editors without a shader bundle
+2019.1 (the oldest version the reader supports) to 6000.6, plus the two fixture editors without a shader bundle
 (2020.3.30f1, 6000.3.25f1). The script fills every field of the TPK type
 tree with a distinct value, writes the object with UnityPy's
 `write_typetree`, reads it back with `read_typetree`, and records the bytes
