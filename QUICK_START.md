@@ -50,7 +50,7 @@ for (const asset of env.assets()) {
   try {
     save(join("objects", `${name}.json`), JSON.stringify(asset.data, replacer, 2));
   } catch (error) {
-    console.warn(`${name}: ${error.message}`); // e.g. a Mesh in a bundle built without type trees
+    console.warn(`${name}: ${error.message}`); // e.g. a GameObject in a bundle without type trees
   }
 
   // 3. Textures and sprites as raw RGBA, top row first. The first call loads the WASM
@@ -76,9 +76,9 @@ What happens here:
   reader, which also works without type trees; `asset.type` is then the class name, checking it
   types `data`, and its fields have TypeScript-style names (`width`, `format`, `text`; each one's
   JSDoc names its Unity field, `m_Width`, ...). The low-level `asset.reader.read()` keeps Unity's
-  names. Any other class (`asset.type === "Other"`, `asset.typeName === "Mesh"`) is read through
-  its type tree, which includes your own scripts' fields when the bundle was built with type trees
-  (the Unity default).
+  names. Any other class (`asset.type === "Other"`, `asset.typeName === "GameObject"`) is read
+  through its type tree, which includes your own scripts' fields when the bundle was built with
+  type trees (the Unity default).
 - `isImage(asset)` is true for a Texture2D or a Sprite. `decodeImage(asset)` gives its pixels
   (a Sprite cut out of its texture or atlas) together with `imageInfo(asset)`: size, format,
   mip count, color space and the rest, which `imageInfo` also gives on its own, without decoding.

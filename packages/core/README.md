@@ -54,7 +54,7 @@ for (const asset of env.assets()) {
       console.log(asset.data.script, asset.data.fields); // the MonoScript pointer, the script's fields
       break;
     case "Other":
-      console.log(asset.typeName, asset.data); // "Mesh" { m_Name: "tri", ... } from the type tree
+      console.log(asset.typeName, asset.data); // "GameObject" { m_Component: [...], ... } from the type tree
   }
 }
 
@@ -257,7 +257,9 @@ hand-written reader for the classes below. Those readers also work on bundles bu
 trees (`BuildAssetBundleOptions.DisableWriteTypeTree`). The table lists the main fields of
 `asset.data` (the type in brackets); the JSDoc of each type has every field, with its Unity name.
 "From" is the first Unity version whose layout the reader knows. The other readers refuse an older
-version; `Texture2D` has no floor: it reads any older version with its oldest layout.
+version; `Texture2D` has no floor: it reads any older version with its oldest layout. Unity 2019.1
+is the supported floor: a reader added since that decision (`Mesh`) starts there, and the older
+readers keep the older layouts they already had.
 
 | Class | Main fields of `asset.data` | From | Fixture |
 |---|---|---|---|
@@ -273,9 +275,10 @@ version; `Texture2D` has no floor: it reads any older version with its oldest la
 | `VideoClip` (`VideoClipFields`) | `width`, `height`, `frameRate`, `frameCount` and `videoData`: the video file as imported (e.g. WebM, MP4), not decoded | 5.6 | Yes |
 | `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
 | `MovieTexture` (`MovieTextureFields`) | `movieData` (the Ogg Theora file), `loop`, `audioClip` | 3.4 | No, unit tests only |
+| `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
 
-"Yes" is all three fixture editors. Every other class (`GameObject`, `Transform`, `Mesh`,
-`AnimationClip`, ...) comes from its type tree. In a bundle without type trees, `obj.read()`
+"Yes" is all three fixture editors. Every other class (`GameObject`, `Transform`, `AnimationClip`,
+...) comes from its type tree. In a bundle without type trees, `obj.read()`
 throws `UnsupportedError` for them. The class readers are for player builds; see
 [Not supported](#not-supported) for the editor files they refuse.
 
@@ -328,6 +331,7 @@ and throws `UnsupportedError` (kind `"Unity version"`) otherwise:
 | `VideoClip` | Read, format 21 and later |
 | `Font` | Read, format 16 and later |
 | `MovieTexture` | Refused |
+| `Mesh` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 
 The version-stripped fixtures, in formats 21 and 22, hold a `TextAsset`, a `Material`,
 `AudioClip`s, a `VideoClip`, a `Font`, the font's `Texture2D` and the bundle's `AssetBundle`.
@@ -347,10 +351,13 @@ Each of these throws `UnsupportedError` naming what it found:
   version-stripped file where the bytes do not decide the layout
   ([Version-stripped files](#version-stripped-files)). `readTypeTree()` still works on such files.
 - An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
-  `MonoScript`, `MonoBehaviour`, `Sprite`, `SpriteAtlas` or `AudioClip`, or by `Material`'s from
-  Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
+  `MonoScript`, `MonoBehaviour`, `Sprite`, `SpriteAtlas`, `AudioClip` or `Mesh`, or by `Material`'s
+  from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
+- A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
+  format Unity does not define, bone weights in an integer format or more than four per vertex
+  (AssetStudio throws for each). `readMesh()` still reads its fields.
 
-Out of scope for this package: decoding audio, video or meshes; writing or repacking bundles;
+Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
 image encoding (PNG, JPEG). Texture and sprite pixels are in
 [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md).
 
@@ -420,6 +427,7 @@ Call one yourself only to read an object as a specific class.
 | `readVideoClip` | `VideoClip`, `StreamedResource`; `VideoClipData` is what `obj.read()` returns |
 | `readFont` | `Font`, `CharacterInfo`, `Rectf` |
 | `readMovieTexture` | `MovieTexture` |
+| `readMesh`, `GfxPrimitiveType` | `Mesh`, `CompressedMesh`, `PackedFloatVector`, `PackedIntVector`, `MinMaxAABB`, `VariableBoneCountWeights`, `MeshLodInfo`, `MeshLodRange`, `LodSelectionCurve`; `MeshData` (with `VertexBoneWeights`) is what `obj.read()` returns |
 
 ### `asset.data` shapes
 
@@ -428,7 +436,7 @@ it; `env.assets()` calls them for you.
 
 | Export | Result types |
 |---|---|
-| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields` |
+| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
 | `toMonoBehaviourFields(data, obj)` | `MonoBehaviourFields`; it takes the object too, whose type tree tells whether `data` holds the script's fields |
 | `EditorExtensionFields`, `NamedObjectFields`, `TextureFields` | The fields every class, every named class and every texture starts with |
 

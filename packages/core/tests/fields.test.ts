@@ -40,6 +40,8 @@ const RENAMES: Record<string, string | null> = {
   m_RD: "renderData",
   m_DataSize: "data",
   "*spriteInstanceData": "spriteInstanceData",
+  m_UV: "uv",
+  m_UVInfo: "uvInfo",
   m_PixelAspecRatioNum: "pixelAspectRatioNum",
   m_PixelAspecRatioDen: "pixelAspectRatioDen",
   // Folded into `imageData` / `audioData`, which hold the same bytes whenever
@@ -55,10 +57,10 @@ function camel(key: string): string | null {
   return bare.charAt(0).toLowerCase() + bare.slice(1);
 }
 
-/** `value` with every key renamed by {@link camel}, a PPtr and bytes left as they are. */
+/** `value` with every key renamed by {@link camel}, a PPtr and typed arrays left as they are. */
 function renamed(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(renamed);
-  if (!value || typeof value !== "object" || value instanceof Uint8Array) return value;
+  if (!value || typeof value !== "object" || ArrayBuffer.isView(value)) return value;
   if ("m_FileID" in value) return value; // a PPtr stays a PPtr
   const out: Record<string, unknown> = {};
   for (const [key, v] of Object.entries(value)) {
@@ -117,6 +119,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "AudioClip",
       "Font",
       "Material",
+      "Mesh",
       "MonoBehaviour",
       "MonoScript",
       "Sprite",

@@ -59,6 +59,7 @@ export {
   toAudioClipFields,
   toFontFields,
   toMaterialFields,
+  toMeshFields,
   toMonoBehaviourFields,
   toMonoScriptFields,
   toMovieTextureFields,
@@ -76,6 +77,12 @@ export type {
   FontFields,
   GLTextureSettingsFields,
   MaterialFields,
+  MeshFields,
+  MeshLodInfoFields,
+  MinMaxAABBFields,
+  CompressedMeshFields,
+  PackedFloatVectorFields,
+  PackedIntVectorFields,
   MonoBehaviourFields,
   MonoScriptFields,
   MovieTextureFields,
@@ -141,5 +148,19 @@ export type {
   Vector4,
   VertexData,
 } from "./classes/Sprite.js";
+export { GfxPrimitiveType, readMesh } from "./classes/Mesh.js";
+export type {
+  CompressedMesh,
+  LodSelectionCurve,
+  Mesh,
+  MeshData,
+  MeshLodInfo,
+  MeshLodRange,
+  MinMaxAABB,
+  PackedFloatVector,
+  PackedIntVector,
+  VariableBoneCountWeights,
+  VertexBoneWeights,
+} from "./classes/Mesh.js";
 export { readSpriteAtlas } from "./classes/SpriteAtlas.js";
 export type { SpriteAtlas, SpriteAtlasData, SpriteInstanceData } from "./classes/SpriteAtlas.js";

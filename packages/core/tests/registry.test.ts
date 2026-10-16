@@ -51,10 +51,20 @@ const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.MovieTexture,
   ClassID.Sprite,
   ClassID.SpriteAtlas,
+  ClassID.Mesh,
 ]);
 /** Whether a fixture holds an object of a class without a hardcoded reader. */
 const hasOthers = (name: string): boolean =>
   Object.values(golden(name).objects).some((objs) => objs.some((o) => !HARDCODED.has(o.classId)));
+/**
+ * Whether it holds one that, without a type tree, `read()` refuses: a class
+ * without a hardcoded reader other than MonoBehaviour, whose header reader
+ * reads one.
+ */
+const hasUnreadable = (name: string): boolean =>
+  Object.values(golden(name).objects).some((objs) =>
+    objs.some((o) => !HARDCODED.has(o.classId) && o.classId !== ClassID.MonoBehaviour),
+  );
 
 const loadName = (name: string): Env => load([{ name, data: loadFixture(name) }]);
 
@@ -194,7 +204,7 @@ test("read() of a TextAsset equals the oracle's dump", () => {
 
 // --- refusals ---------------------------------------------------------------------
 
-for (const name of NO_TYPE_TREE.filter(hasOthers)) {
+for (const name of NO_TYPE_TREE.filter(hasUnreadable)) {
   test(`${name}: read() of a class without a reader or type tree throws UnsupportedError`, () => {
     const others = loadName(name).objects.filter(
       (o) => !HARDCODED.has(o.type) && o.type !== ClassID.MonoBehaviour,
@@ -441,6 +451,8 @@ const NAMED: { classId: number; name: string }[] = [
   // #34.
   { classId: ClassID.Sprite, name: "editor/6000.3.25f1/sprite/sprites" },
   { classId: ClassID.SpriteAtlas, name: "editor/6000.3.25f1/sprite/sprites" },
+  // #235.
+  { classId: ClassID.Mesh, name: "editor/6000.3.25f1/uncompressed/main" },
 ];
 
 for (const { classId, name } of NAMED) {
