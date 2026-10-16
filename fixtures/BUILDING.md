@@ -1742,10 +1742,11 @@ What the stubs reproduce of spine-unity (EsotericSoftware/spine-runtimes,
 `spine-unity/Assets/Spine/Runtime/spine-unity/Asset Types/`, branches `3.8`,
 `4.0`, `4.1` and `4.2`, read outside the repository) is its serialized layout
 only: the field names, their kinds and their order, and the class names
-`SkeletonDataAsset` and `SpineAtlasAsset` that a build records in its
-MonoScripts. No code, default values or attributes; the types the fields need
-(a base class, a blend-modes record, a loader) are declared under our own
-names (`Uar*`), and an enum field is an `int`, which is what Unity writes for
+`SkeletonDataAsset` and `SpineAtlasAsset` in the namespace `Spine.Unity`, as a
+build records them in its MonoScripts (`Spine.Unity.OnDemand` is our own
+name). No code, default values or attributes; the types the fields need (a
+base class, a blend-modes record, a loader) are declared under our own names
+(`Uar*`), and an enum field is an `int`, which is what Unity writes for
 one. That code is under the Spine Runtimes License; none of it is in this
 repository.
 
