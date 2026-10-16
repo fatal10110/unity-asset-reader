@@ -42,6 +42,7 @@ const RENAMES: Record<string, string | null> = {
   "*spriteInstanceData": "spriteInstanceData",
   m_UV: "uv",
   m_UVInfo: "uvInfo",
+  m_UV1: "uv1",
   m_PixelAspecRatioNum: "pixelAspectRatioNum",
   m_PixelAspecRatioDen: "pixelAspectRatioDen",
   // Folded into `imageData` / `audioData`, which hold the same bytes whenever

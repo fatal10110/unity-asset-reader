@@ -131,7 +131,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 - **Handled in code:** SerializedFile formats 2 to 23 (Unity 2020.1 to 6000.3 write 22, 6000.6
   writes 23). Type tree reads work on every one of them, whatever the Unity version. The class
   readers know the layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6,
-  `SpriteAtlas` from 2017.1, `Mesh` from 2019.1) up to 6000.6, and read a newer version with the newest layout they
+  `SpriteAtlas` from 2017.1) up to 6000.6, and read a newer version with the newest layout they
   know. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
   texture package's cuts of the sprites such an atlas holds ([#229](https://github.com/fatal10110/unity-asset-reader/issues/229)).
   A class reader refuses a version older than its first layout;
@@ -157,7 +157,7 @@ Each of these throws `UnsupportedError`, naming what it found:
   Textures built for PS4 or PS5. Sprites whose alpha texture (ETC1 split
   alpha) is not the size of their texture. A `Sprite` object that points at a Unity 6000.6
   `SpriteAtlas` (the atlas' own packed sprites are supported).
-- Meshes: a submesh of lines or points, a vertex format Unity does not define.
+- Meshes: a submesh of lines or points (from Unity 4.0), a vertex format Unity does not define.
 
 Not provided at all: decoding audio or video; exporting meshes (OBJ, glTF); mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or
