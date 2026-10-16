@@ -16,6 +16,7 @@ You do not need Unity, .NET, or a native application installed.
 | Read bundles and their assets | `unity-asset-reader` |
 | Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
 | Load files or folders from disk | Add `unity-asset-reader-node` |
+| Convert audio clips to WAV | Add `unity-asset-reader-audio` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
 
 The texture package installs `texture2ddecoder-wasm` automatically.
@@ -26,6 +27,8 @@ The texture package installs `texture2ddecoder-wasm` automatically.
   RGBA pixels with `await decodeImage(asset)`.
 - **[Node.js](packages/node/README.md):** load a file or folder with `loadPath()`, including
   split bundles and resource sidecars.
+- **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
+  `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound (not Vorbis).
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -95,6 +98,7 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-texture`](packages/texture/README.md): texture formats, sprites,
     platforms.
   - [`unity-asset-reader-node`](packages/node/README.md): `loadPath()`.
+  - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 
@@ -113,6 +117,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 | Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture` and `Mesh` (its vertices and triangles decoded) |
 | Texture formats | 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
 | Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
+| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
 | Platforms | Xbox 360 textures are byte-swapped back and Switch textures deswizzled. Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)) |
 | Runtimes | Browsers and Web Workers (ES2020, WebAssembly for textures); Node.js `^20.19.0 \|\| >=22.12.0`, `import` and `require` |
 
@@ -159,8 +164,11 @@ Each of these throws `UnsupportedError`, naming what it found:
   alpha) is not the size of their texture. A `Sprite` object that points at a Unity 6000.6
   `SpriteAtlas` (the atlas' own packed sprites are supported).
 - Meshes: a submesh of lines or points, a vertex format Unity does not define.
+- Audio: Vorbis and the other FSB5 codecs that are not PCM or ADPCM (MPEG, ATRAC9, XMA, ...);
+  IMA ADPCM of more than two channels and GCADPCM of more than one; sound that is not an FSB5
+  bank (`AudioClip`s from before Unity 5.0).
 
-Not provided at all: decoding audio or video; exporting meshes (OBJ, glTF); mip levels other than the first; the
+Not provided at all: decoding video; exporting meshes (OBJ, glTF); mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or
 repacking bundles.
 
@@ -191,12 +199,14 @@ copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` 
 
 | Project | License | What it is used for |
 |---|---|---|
-| [AssetStudio](https://github.com/Razviar/assetstudio), Razviar's fork of [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio) (© Perfare, RazTools, Razviar) | MIT | The source of truth for behaviour. The bundle, SerializedFile and type tree readers, the class readers, the plain texture conversion, the Xbox 360 byte swap, sprite cropping and the tight-mesh mask, and `loadPath()`'s file handling are hand-ported from it. Also the oracle for the export goldens: `scripts/make-export-goldens.py` runs its exporters, outside the repo. |
+| [AssetStudio](https://github.com/Razviar/assetstudio), Razviar's fork of [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio) (© Perfare, RazTools, Razviar) | MIT | The source of truth for behaviour. The bundle, SerializedFile and type tree readers, the class readers, the plain texture conversion, the Xbox 360 byte swap, sprite cropping and the tight-mesh mask, `loadPath()`'s file handling and the WAV header are hand-ported from it. Also the oracle for the export goldens: `scripts/make-export-goldens.py` runs its exporters, outside the repo. |
 | [UnityPy](https://github.com/K0lb3/UnityPy) (© K0lb3) | MIT | The oracle that generates the parsing goldens (`scripts/make-goldens.py`). Also ported where AssetStudio lacks something or disagrees: the UnityFS header version gates, the `[SerializeReference]` registry, the common-string table and the Switch texture deswizzle. |
 | [AssetRipper TypeTreeDumps](https://github.com/AssetRipper/TypeTreeDumps) and [Tpk](https://github.com/AssetRipper/Tpk) (ds5678) | TypeTreeDumps: no license stated; Tpk: MIT | Indirectly: the type tree data in UnityPy's TPK table, which the common-string table and several class readers' version gates were taken from. |
 | [AssetsTools.NET](https://github.com/nesrak1/AssetsTools.NET) (© nesrak1) | MIT | UnityPy's Switch deswizzle, ported into `unity-asset-reader-texture`, is based on its `SwitchSwizzle.cs`. |
 | [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) (© Six Labors) | Apache-2.0 | The sprite tight-mesh triangle fill in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v1.0.0-beta15, the version AssetStudio uses, so the masks match to the pixel. |
 | [ImageSharp](https://github.com/SixLabors/ImageSharp) (© Six Labors) | Apache-2.0 | The sprite variant-atlas resize in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v2.1.3, the version AssetStudio uses, so the resized sprites match to the byte. |
+| [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (© 2021 Sam Byass) | MIT | The FSB5 parser and the ADPCM decoders of `unity-asset-reader-audio` are hand-ported from it. |
+| [python-fsb5](https://github.com/HearthSim/python-fsb5) (© 2016 Simon Pinfold) | MIT | Second reference for the FSB5 parser of `unity-asset-reader-audio`. |
 | [texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (© K0lb3) | MIT | The C++ block and Crunch decoders that `texture2ddecoder-wasm` compiles to WASM (a git submodule). |
 | Codecs inside texture2ddecoder: [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative) (ATC, BCn), [mikunyan](https://github.com/Ishotihadus/mikunyan) (ASTC, ETC, PVRTC), [FP16](https://github.com/Maratyszcza/FP16), [BinomialLLC/crunch](https://github.com/BinomialLLC/crunch), [Unity-Technologies/crunch](https://github.com/Unity-Technologies/crunch) | MIT; MIT; MIT; public domain; zlib | The block decoders, half floats, and Crunch and Unity Crunch unpacking. |
 | [fflate](https://github.com/101arrowz/fflate) | MIT | Runtime dependency of `unity-asset-reader`: gzip and zlib, synchronously. |

@@ -204,6 +204,17 @@ First release. Peer: `unity-asset-reader@^1`.
 - `loadPath(fileOrDir)`: loads a file or a directory tree from disk, merges `.split0..n` parts and
   picks up `.resS`/`.resource` sidecars.
 
+## unity-asset-reader-audio
+
+### 1.0.0 - Unreleased
+
+- New package (#236): `fsb5ToWav()` converts an `AudioClip`'s FSB5 sound bank to WAV, as
+  AssetStudio's `AudioClipConverter.ConvertToWav()` does, for PCM8, PCM16, PCM32, IMAADPCM (mono,
+  stereo), FADPCM and GCADPCM (mono); `readFsb5()` parses the bank. Pure TypeScript, sync,
+  browser-safe; `unity-asset-reader` is a peer dependency. The PCM clips of the 2019.4.41f2,
+  2020.3.30f1 and 6000.3.25f1 fixture bundles convert to AssetStudio's WAV byte for byte. Vorbis
+  and the other codecs throw `UnsupportedError`.
+
 ## texture2ddecoder-wasm
 
 ### 1.2.6 - 2026-10-16

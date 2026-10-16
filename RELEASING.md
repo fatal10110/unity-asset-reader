@@ -13,6 +13,11 @@ will publish), merge, and the [Release workflow](.github/workflows/release.yml) 
 | `unity-asset-reader` | `packages/core` | 2 |
 | `unity-asset-reader-texture` | `packages/texture` | 3 |
 | `unity-asset-reader-node` | `packages/node` | 4 |
+| `unity-asset-reader-audio` | `packages/audio` | 5, from its first release |
+
+`unity-asset-reader-audio` is not on npm yet and not in `PACKAGE_DIRS` of
+`scripts/check-release.mjs`, so no merge publishes it. Its first release adds it there, after
+`node`, with a dated `CHANGELOG.md` entry, and is a first publish of a new name (below).
 
 Releases are published by the workflow, never from a laptop. It publishes with
 [trusted publishing](https://docs.npmjs.com/trusted-publishers): npm authenticates the job by its
