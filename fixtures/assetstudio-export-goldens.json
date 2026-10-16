@@ -9,7 +9,8 @@
     "Texture2D": "AssetStudio.CLI.Exporter.ExportTexture2D(item, dir, ImageFormat.Png)",
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
-    "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)"
+    "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()"
   },
   "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
   "culture": "en-US",
@@ -901,6 +902,122 @@
             "pngSize": 717,
             "pngSha256": "c58c7039e014d34b9051673b880a68c968fc5165e866f9b3d63061dddcf90bee"
           }
+        }
+      }
+    },
+    "editor/2019.4.41f2/shader/lz4-notypetree/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-4544161526987522634": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 38912,
+            "objectSha256": "2e6b7e9b2d09465e2f35b9770f0f3ad2a817f61e1691f9879b504a2be6b06a00",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 887250,
+            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c"
+          }
+        },
+        "-7198395739723353546": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 5016,
+            "objectSha256": "52f12f2d34746359d45ad34125995c158ad0539ae693f9e0c5bc74c35e1a7c4b",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 33919,
+            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/shader/lz4-notypetree/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-4544161526987522634": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18908,
+            "objectSha256": "38ad45a50131515122861484b746ad0cd13239bcfeb601b94421273778157cfb",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        },
+        "-7198395739723353546": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 2996,
+            "objectSha256": "ae02cf18a282e4bc5eb150c49bcd326c35f2bede19f95698ff77cfb38510bf57",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        }
+      }
+    },
+    "editor/2019.4.41f2/shader/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-4544161526987522634": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 38912,
+            "objectSha256": "2e6b7e9b2d09465e2f35b9770f0f3ad2a817f61e1691f9879b504a2be6b06a00",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 887250,
+            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c"
+          }
+        },
+        "-7198395739723353546": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 5016,
+            "objectSha256": "52f12f2d34746359d45ad34125995c158ad0539ae693f9e0c5bc74c35e1a7c4b",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 33919,
+            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/shader/lz4/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-4544161526987522634": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18908,
+            "objectSha256": "38ad45a50131515122861484b746ad0cd13239bcfeb601b94421273778157cfb",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        },
+        "-7198395739723353546": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 2996,
+            "objectSha256": "ae02cf18a282e4bc5eb150c49bcd326c35f2bede19f95698ff77cfb38510bf57",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         }
       }
     },
@@ -2031,6 +2148,186 @@
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
           }
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4-notypetree/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 26008,
+            "objectSha256": "614fcbefeb77dfa9ef69fd4dc11f5a591c9c7d0437eab055b1af9f26819bbfa7",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 105551,
+            "sha256": "3a838bdd987825dd13be0a16baab18c5a739b1bba0c600d22fbd11bb78869d7c"
+          }
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4264,
+            "objectSha256": "c96b45eaca47dbde9c43b781f45a1358f222cd400a5d7de8f2a75e4bb83f40fa",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 6239,
+            "sha256": "77bb3e1918eec0f4a2601b00f9401891eb04a356cd312027ebd9d25f7d301b63"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4-notypetree/ios": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18184,
+            "objectSha256": "16343cba2a99864370b16dbe2dc274beaab10e8a572e29ebeb7b6ff0a1f31ced",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 104692,
+            "sha256": "2c133743f06a94a61ccd59852146e576b206ef622fdd6b0b4553094c725f1da9"
+          }
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3740,
+            "objectSha256": "143ce1784313afea90b37d816c940ec8c110a72359a2286044376e0e047ffbf3",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 6259,
+            "sha256": "1c8ae80da80f414b78363b96f5dc067f291aac8b441606a6c3d8cef00acc7829"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4-notypetree/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 17680,
+            "objectSha256": "39a3dafb6a1a606da6f72a979b17e252a783467dd313a8fd202290a15e692f17",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3184,
+            "objectSha256": "69aaf5910b4d33f988914fcb5b5464bc5c3f94d9d40d30d0a8263ab83990fddb",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 26008,
+            "objectSha256": "614fcbefeb77dfa9ef69fd4dc11f5a591c9c7d0437eab055b1af9f26819bbfa7",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 105551,
+            "sha256": "3a838bdd987825dd13be0a16baab18c5a739b1bba0c600d22fbd11bb78869d7c"
+          }
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4264,
+            "objectSha256": "c96b45eaca47dbde9c43b781f45a1358f222cd400a5d7de8f2a75e4bb83f40fa",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 6239,
+            "sha256": "77bb3e1918eec0f4a2601b00f9401891eb04a356cd312027ebd9d25f7d301b63"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4/ios": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18184,
+            "objectSha256": "16343cba2a99864370b16dbe2dc274beaab10e8a572e29ebeb7b6ff0a1f31ced",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 104692,
+            "sha256": "2c133743f06a94a61ccd59852146e576b206ef622fdd6b0b4553094c725f1da9"
+          }
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3740,
+            "objectSha256": "143ce1784313afea90b37d816c940ec8c110a72359a2286044376e0e047ffbf3",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "shader": {
+            "size": 6259,
+            "sha256": "1c8ae80da80f414b78363b96f5dc067f291aac8b441606a6c3d8cef00acc7829"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/shader/lz4/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "7231929552649350263": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 17680,
+            "objectSha256": "39a3dafb6a1a606da6f72a979b17e252a783467dd313a8fd202290a15e692f17",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        },
+        "8824481709471347674": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3184,
+            "objectSha256": "69aaf5910b4d33f988914fcb5b5464bc5c3f94d9d40d30d0a8263ab83990fddb",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         }
       }
     },
@@ -3706,6 +4003,162 @@
         }
       }
     },
+    "editor/6000.3.26f1/shader/lz4-notypetree/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 25372,
+            "objectSha256": "684f3964329c5dab425f446e5086bc2dac2287e17e49a0e29dd147b52eb0678a",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4316,
+            "objectSha256": "64e8307c27a3761b9a983bbf6598feb7e77f72ebafa62a4228b8d0b04444b299",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader/lz4-notypetree/ios": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18144,
+            "objectSha256": "465689f5393999f51f43017d96acea6ce21344eb386ebd777ee5c94564b0b00e",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4072,
+            "objectSha256": "34d8f800dea6d7348df8dd2bf0a18f424238a67b84a13eab8ddc77c837c702ac",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader/lz4-notypetree/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 17912,
+            "objectSha256": "3e430466ff097307e0684a5fff254412a9c51a8368d0ad30082ea4ae641b09f4",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3392,
+            "objectSha256": "5581931c970c3ffd2a13ec8d074fe56dac89ae4f6eda244f0258eb2195d9dc0a",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 25372,
+            "objectSha256": "684f3964329c5dab425f446e5086bc2dac2287e17e49a0e29dd147b52eb0678a",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4316,
+            "objectSha256": "64e8307c27a3761b9a983bbf6598feb7e77f72ebafa62a4228b8d0b04444b299",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader/lz4/ios": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18144,
+            "objectSha256": "465689f5393999f51f43017d96acea6ce21344eb386ebd777ee5c94564b0b00e",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4072,
+            "objectSha256": "34d8f800dea6d7348df8dd2bf0a18f424238a67b84a13eab8ddc77c837c702ac",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader/lz4/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "1852339557892238971": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 17912,
+            "objectSha256": "3e430466ff097307e0684a5fff254412a9c51a8368d0ad30082ea4ae641b09f4",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        },
+        "8472761294463186102": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3392,
+            "objectSha256": "5581931c970c3ffd2a13ec8d074fe56dac89ae4f6eda244f0258eb2195d9dc0a",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
     "editor/6000.6.4f1/more-plain/textures": {
       "CAB-b6ec7271e16d6169fe23b363bfe34b24": {
         "-160635946379749497": {
@@ -3912,6 +4365,54 @@
             "imageSize": 40,
             "imageSha256": "76def75856e5d73ece011b058b02d205991a48f0fcf8b7ddcc24005d57759b23",
             "formatName": "R8"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/shader/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-2723973249389538942": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 25460,
+            "name": ""
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "8856072133837691360": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4300,
+            "name": ""
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/shader/lz4/windows": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-2723973249389538942": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18116,
+            "name": ""
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "8856072133837691360": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 3420,
+            "name": ""
           },
           "inputOracle": "modern-goldens.json",
           "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."

@@ -10,13 +10,14 @@ import { test } from "node:test";
 import { reverseRows, sha256 } from "../../fixtures/helpers.js";
 
 interface Entry {
-  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset";
+  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader";
   input: Record<string, string | number>;
   inputOracle: string;
   png?: { width: number; height: number; rgbaSha256: string };
   obj?: { size: number; sha256: string };
   wav?: { size: number; sha256: string };
   bytes?: { size: number; sha256: string };
+  shader?: { size: number; sha256: string };
   exportError?: string;
 }
 
@@ -52,12 +53,19 @@ const sources = {
 const CLASSES: Record<number, Entry["class"]> = {
   28: "Texture2D",
   43: "Mesh",
+  48: "Shader",
   49: "TextAsset",
   83: "AudioClip",
 };
-const OUTPUT = { Texture2D: "png", Mesh: "obj", AudioClip: "wav", TextAsset: "bytes" } as const;
+const OUTPUT = {
+  Texture2D: "png",
+  Mesh: "obj",
+  AudioClip: "wav",
+  TextAsset: "bytes",
+  Shader: "shader",
+} as const;
 
-/** Every Texture2D, Mesh, TextAsset and AudioClip the UnityPy goldens list, with its export entry. */
+/** Every Texture2D, Mesh, Shader, TextAsset and AudioClip the UnityPy goldens list, with its export entry. */
 function objects() {
   const out = [];
   for (const [source, golden] of Object.entries(sources)) {
@@ -84,7 +92,7 @@ test("the export goldens come from AssetStudio c37af7d through the export harnes
   assert.equal(exports._generator, "scripts/make-export-goldens.py");
 });
 
-test("every Texture2D, Mesh, TextAsset and AudioClip of the fixtures has an entry, and nothing else", () => {
+test("every Texture2D, Mesh, Shader, TextAsset and AudioClip of the fixtures has an entry, and nothing else", () => {
   assert.ok(all.length > 0);
   for (const o of all) {
     assert.ok(o.entry, `${at(o)}: no export golden entry`);
@@ -129,7 +137,7 @@ test("each entry carries the UnityPy input it was matched on", () => {
 test("each entry holds its class's export or an exportError, never both", () => {
   for (const o of all) {
     const e = o.entry!;
-    const outputs = (["png", "obj", "wav", "bytes"] as const).filter((k) => e[k]);
+    const outputs = (["png", "obj", "wav", "bytes", "shader"] as const).filter((k) => e[k]);
     if (e.exportError) assert.deepEqual(outputs, [], at(o));
     else assert.deepEqual(outputs, [OUTPUT[o.cls]], at(o));
   }
@@ -144,6 +152,17 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     if (o.source === "modern-goldens.json") {
       // c37af7d cannot read SerializedFile format 23 (6000.6) at all.
       assert.match(exportError!, /^AssetStudio did not load the object: /, where);
+    } else if (o.cls === "Shader") {
+      // Not run for Direct3D programs (host-dependent text); c37af7d skips
+      // parsing every 6000+ Shader, so ShaderConverter has no blob or script.
+      assert.match(
+        exportError!,
+        o.fixture.includes("/6000.")
+          ? /^ArgumentNullException: Value cannot be null\. \(Parameter 'bytes'\)$/
+          : /^not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler/,
+        where,
+      );
+      assert.ok(o.fixture.includes("/6000.") || o.fixture.endsWith("/windows"), where);
     } else if (o.cls === "Texture2D" && !o.serialized.textures?.[o.row.pathId]) {
       // A dynamic font's 0x0 "Font Texture": no image data to export.
       assert.equal(exportError, "ExportTexture2D returned false", where);
@@ -160,6 +179,7 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("Mesh"), 12, "the one-triangle Mesh of every main bundle");
   assert.equal(exported("AudioClip"), 18, "both clips of every audio bundle");
   assert.equal(exported("TextAsset"), 28);
+  assert.equal(exported("Shader"), 12, "both shaders of the 2019.4 and 2020.3 Android and iOS bundles");
   assert.equal(exported("Texture2D"), 97);
 });
 

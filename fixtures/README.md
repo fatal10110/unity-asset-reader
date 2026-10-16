@@ -8,7 +8,7 @@ bundles/          M1 container fixtures (generated, see below)
 bundles/editor/   editor-built bundles, one folder per Unity version and build variant
 BUILDING.md       how the editor-built bundles were made, and how to rebuild them
 goldens.json      what the oracle says each fixture unpacks to and contains
-assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip, TextAsset
+assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip, TextAsset, Shader
 tpk-trees.json    Unity's player type trees of a class from 2019.1, from UnityPy's TPK
 shader-layouts.json  UnityPy's synthetic Shader objects, one per type tree layout (#237)
 helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shapes
@@ -441,7 +441,7 @@ layouts are checked against Unity's own trees rather than a hand-written list.
 Adding an M1 fixture: add an entry to `FIXTURES` in `make-fixtures.py`, then
 rerun both scripts. Adding an editor fixture: follow [`BUILDING.md`](BUILDING.md),
 then rerun `make-goldens.py`, and `make-export-goldens.py` if it holds a
-Texture2D, Mesh or AudioClip (`scripts/tests/export-goldens.test.ts` fails until
+Texture2D, Mesh, AudioClip, TextAsset or Shader (`scripts/tests/export-goldens.test.ts` fails until
 it is rerun). Goldens are committed; never hand-edit `goldens.json`, and never
 regenerate it from this library's own output (R12).
 
@@ -466,10 +466,12 @@ rotation value 4; #160 remains open with the same acceptance requirement.
 
 `assetstudio-export-goldens.json` is the oracle for export output: AssetStudio
 `c37af7d` built and run outside the repo by `scripts/make-export-goldens.py`
-([`BUILDING.md`](BUILDING.md) section 17). Per Texture2D, Mesh and AudioClip it
-holds the input it was matched on (the UnityPy goldens' metadata) and the PNG's
-RGBA hash (top row first), the OBJ's or the WAV's hash and size, or an
-`exportError` where AssetStudio cannot load, read or export the object.
+([`BUILDING.md`](BUILDING.md) section 17). Per Texture2D, Mesh, AudioClip,
+TextAsset and Shader it holds the input it was matched on (the UnityPy goldens'
+metadata) and the PNG's RGBA hash (top row first), or the hash and size of the
+OBJ, the WAV, the TextAsset file or the `.shader` text, or an `exportError`
+where AssetStudio cannot load, read or export the object (or, for a Shader with
+Direct3D programs, is not asked to).
 
 ### Plain-format and half-scale variant AssetStudio references
 

@@ -1642,7 +1642,7 @@ be used as a tight-mask oracle.
 
 ## 17. Export goldens: the AssetStudio harness (#233)
 
-Export output (PNG, OBJ, WAV, TextAsset files, later shader text) has its own oracle: AssetStudio
+Export output (PNG, OBJ, WAV, TextAsset files, shader text) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -1680,7 +1680,7 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh, TextAsset and AudioClip of `goldens.json` and
+3. Lists every Texture2D, Mesh, Shader, TextAsset and AudioClip of `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
    it loads).
@@ -1692,7 +1692,12 @@ What it does, all inside `<external-harness>`:
    `Exporter.ExportMesh(item, dir)`, the `.obj` file; AudioClip
    `AudioClipConverter.ConvertToWav()`; TextAsset
    `Exporter.ExportTextAsset(item, dir)`, the file it writes (`m_Script` as
-   is). The exporters run on en-US, the culture the GUI's export thread sets
+   is); Shader `Exporter.ExportShader(item, dir)`, the `.shader` file
+   `ShaderConverter.Convert()` writes (#242), except for a shader with Direct3D
+   programs (D3D9, D3D11, D3D11_9x): ShaderConverter turns those into text
+   with Windows' D3DCompiler or the GUI's native HLSLDecompiler, which the
+   harness does not ship, so the text would depend on the host, and
+   unity-asset-reader-shader refuses them. The exporters run on en-US, the culture the GUI's export thread sets
    (the CLI would use the host's, which changes the OBJ's numbers).
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
@@ -1702,14 +1707,15 @@ What it does, all inside `<external-harness>`:
 Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
 pathId) and holds `input` (the metadata it was matched on) and one of `png`
 (`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
-**top row first**, plus the PNG file's own size and hash), `obj`, `wav` or
-`bytes` (`size`, `sha256` of the file), or `exportError`:
+**top row first**, plus the PNG file's own size and hash), `obj`, `wav`,
+`bytes` or `shader` (`size`, `sha256` of the file), or `exportError`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 12 Mesh (`main` bundles) | 12 OBJ | |
 | 18 AudioClip (`audio` bundles) | 18 WAV | |
 | 28 TextAsset | 28 files | |
+| 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
 | 138 Texture2D | 97 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
@@ -1727,7 +1733,7 @@ PNG equals section 15's executed `DecodeRG16`, turned top-down.
 
 Section 15's script stays as it is: it executes single pinned methods
 (`CutImage`'s rectangle path, the plain decoders by name) that the full
-exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
+exporter cannot reach or misnumbers.
 
 ## 18. The `shader` bundles (#237)
 
