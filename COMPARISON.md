@@ -68,7 +68,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Merge separate sprite alpha textures | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Extract sprites of a variant (scaled) SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Extract sprites packed in a Unity 6000.6 SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| Encode PNG images | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Encode PNG images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Decode audio to WAV / OGG / MP3 | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✗ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
