@@ -8,8 +8,8 @@ to RGBA8 pixels. It runs in browsers, Web Workers and Node.js.
 - **Block-compressed and Crunch formats** (BC1–BC7, ETC, EAC, PVRTC, ASTC, ATC) are decoded by
   [`texture2ddecoder-wasm`](https://www.npmjs.com/package/texture2ddecoder-wasm), a
   small single-threaded WASM module (about 150 KB). It needs no special headers (COOP/COEP).
-- **Output is always RGBA, top row first:** `{ data, width, height }`, ready for `ImageData` or an
-  image encoder. Unity stores rows bottom first and the WASM decoders produce BGRA; both are
+- **Output is always RGBA, top row first:** `{ data, width, height }`, ready for `ImageData` or
+  `encodePng`. Unity stores rows bottom first and the WASM decoders produce BGRA; both are
   undone for you.
 
 ## Install
@@ -77,10 +77,20 @@ const imageData = new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffs
 canvas.getContext("2d").putImageData(imageData, 0, 0);
 ```
 
-In Node.js, hand the raw RGBA to the image library of your choice. For example, with
+To save a PNG, `encodePng` turns the pixels into a PNG file, in browsers and Node.js alike:
+
+```js
+import { writeFileSync } from "node:fs";
+
+const { rgba, width, height } = await decodeImage(asset);
+writeFileSync("out.png", encodePng({ data: rgba, width, height }));
+```
+
+It is synchronous and has no dependency, so it does not compress: the deflate stream holds
+stored blocks, and the file is about as large as the pixels (`width * height * 4` bytes). For
+smaller files, or other formats, hand the RGBA to an image library instead, for example
 [`sharp`](https://www.npmjs.com/package/sharp):
-`sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`. This package does
-not encode images itself.
+`sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
 ### Reuse an atlas across sprites
 
@@ -276,7 +286,8 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
   6000.6 bundle are not `Sprite` objects at all; `packedSprites` lists them.)
 
 Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
-`Texture3D` classes; image encoding (PNG, JPEG).
+`Texture3D` classes; JPEG encoding, and compressed PNG (`encodePng` stores the pixels
+uncompressed).
 
 `Rotate90`-packed sprites are turned the way AssetStudio turns them, which no test bundle has
 confirmed against Unity's packer yet
@@ -316,6 +327,7 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `DecodeSpriteOptions` | `{ tightMesh?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
+| `encodePng(image)` | An `RgbaImage`, top row first, to a PNG file (8-bit RGBA, uncompressed deflate), sync |
 
 ## Acknowledgements
 
