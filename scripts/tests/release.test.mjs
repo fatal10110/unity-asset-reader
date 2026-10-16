@@ -83,8 +83,12 @@ test("CHANGELOG.md has a dated entry for each package's version", () => {
   for (const dir of PACKAGE_DIRS) {
     const { name, version } = manifest(dir);
     const headings = changelogHeadings(name);
-    // Not released yet: nothing on disk is published, so there is no entry to date.
-    if (version === UNRELEASED) continue;
+    // Not released yet: nothing on disk is published, so there is no entry to date, only the
+    // first release's (RELEASING.md).
+    if (version === UNRELEASED) {
+      assert.equal(headings.get("1.0.0"), "Unreleased", `## ${name}: no "### 1.0.0 - Unreleased"`);
+      continue;
+    }
     const date = headings.get(version);
     assert.ok(date !== undefined, `## ${name}: no "### ${version} - "`);
     // The version on disk is published on merge, so its entry is not "Unreleased" (RELEASING.md).
