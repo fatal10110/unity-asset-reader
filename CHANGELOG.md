@@ -18,8 +18,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   a minor, with a **Behavior change** note listing what changes for that class: its `type`, the
   shape of its `data` and `obj.read()`, and every input that now throws.
 - Between packages of this repo, ranges say what goes together. A feature package's
-  `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`), so any core of that
-  major works with it; a breaking core release moves the feature packages' peer range with it.
+  `peerDependency` on `unity-asset-reader` is `^<major>` (for 1.x: `^1`) when any core of that
+  major works with it, or `^<major>.<minor>.<patch>` naming the oldest core it works with (for
+  example `^1.2.0`); a breaking core release moves the feature packages' peer range with it.
   The texture package's `^` range on `texture2ddecoder-wasm` names the oldest decoder it works
   with. A package is never published before a version its ranges need is on npm.
 - Changes that are not on npm yet collect under a `### <next version> - Unreleased` heading in
@@ -221,8 +222,7 @@ Version 0.0.0 on disk until its first release, which the release workflow never 
 
 ### 1.0.0 - Unreleased
 
-First release. Peer: `unity-asset-reader@^1`; it reads the `MeshData` that `unity-asset-reader`
-1.2.0 decodes.
+First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `MeshData`.
 
 - `meshToObj(mesh)`: a decoded mesh as Wavefront OBJ text, byte for byte what AssetStudio's
   `ExportMesh` writes, floats written as .NET writes them under en-US. Equal to AssetStudio's OBJ

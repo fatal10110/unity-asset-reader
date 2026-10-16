@@ -34,7 +34,7 @@
     "browser"
   ],
   "peerDependencies": {
-    "unity-asset-reader": "^1"
+    "unity-asset-reader": "^1.2.0"
   },
   "devDependencies": {
     "unity-asset-reader": "*"

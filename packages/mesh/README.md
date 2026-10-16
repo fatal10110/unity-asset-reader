@@ -11,8 +11,8 @@ it runs anywhere `unity-asset-reader` does: browsers, Workers, Node.js.
 npm install unity-asset-reader unity-asset-reader-mesh
 ```
 
-`unity-asset-reader` is a peer dependency, so your app has exactly one copy of the parser. It
-needs `unity-asset-reader` 1.2.0 or later, the first to decode a mesh's vertices.
+`unity-asset-reader` is a peer dependency (`^1.2.0`, the first core to decode a mesh's vertices),
+so your app has exactly one copy of the parser.
 
 ## Usage
 

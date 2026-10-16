@@ -15,10 +15,12 @@ will publish), merge, and the [Release workflow](.github/workflows/release.yml) 
 | `unity-asset-reader-node` | `packages/node` | 4 |
 | `unity-asset-reader-mesh` | `packages/mesh` | 5 |
 
-A new package starts at version `0.0.0`, which the workflow never publishes, and gets its
-`CHANGELOG.md` section with a `### 1.0.0 - Unreleased` heading. Its first release is a bump like
-any other, to `1.0.0`; npm has no package of that name yet, so it cannot have a trusted publisher
-and needs a token once, as in [Bootstrap](#bootstrap-the-first-publish-with-a-token).
+A new package is added to `PACKAGE_DIRS` in `scripts/check-release.mjs` (after what it depends
+on) and to this table, at version `0.0.0` (`UNRELEASED`), which the workflow never publishes:
+merging it publishes nothing. Its `CHANGELOG.md` section starts with a `### 1.0.0 - Unreleased`
+heading, which `scripts/tests/release.test.mjs` requires. Its first release is a bump like any
+other, to `1.0.0`; npm has no package of that name yet, so it cannot have a trusted publisher and
+needs a token once, as in [Bootstrap](#bootstrap-the-first-publish-with-a-token).
 
 Releases are published by the workflow, never from a laptop. It publishes with
 [trusted publishing](https://docs.npmjs.com/trusted-publishers): npm authenticates the job by its
@@ -38,8 +40,10 @@ by itself. The only exception is the first publish, authenticated by a token, be
      no dated heading for the version on disk.
    - When a package needs a new version of another package of this repo, raise its range too
      (the texture package's `texture2ddecoder-wasm` range, a feature package's peer range on
-     `unity-asset-reader` after a new core major). Bump both in the same PR; the workflow
-     publishes the dependency first. Or release the dependency in an earlier PR.
+     `unity-asset-reader` after a new core major, or its `^<major>.<minor>.0` minimum when it
+     needs something a newer core minor adds). Bump both in the same PR; the workflow publishes
+     the dependency first. Or release the dependency in an earlier PR. The plan refuses a package
+     whose peer minimum is neither on npm nor in the same run.
    - The docs for the release are in the PR or already on `main` (package READMEs, QUICK_START,
      bundler guide). A tarball without a README shows an empty page on npmjs.com.
 2. **Check the PR's Release run.** A PR that changes a `packages/*/package.json` runs the

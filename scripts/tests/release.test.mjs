@@ -43,11 +43,13 @@ test("the decoder keeps its npm name and its own version line", () => {
   assert.match(decoder.version, /^1\.\d+\.\d+$/);
 });
 
-test("feature packages peer on core's major", () => {
+test("feature packages peer on core's major, or on the oldest core of it they work with", () => {
   const major = manifest("core").version.split(".")[0];
   for (const dir of FEATURES) {
     const pkg = manifest(dir);
-    assert.equal(pkg.peerDependencies?.["unity-asset-reader"], `^${major}`, pkg.name);
+    const range = pkg.peerDependencies?.["unity-asset-reader"] ?? "";
+    // `^1` or `^1.2.0`: never a range that admits another major (a second core API).
+    assert.match(range, new RegExp(`^\\^${major}(\\.\\d+\\.\\d+)?$`), `${pkg.name}: ${range}`);
     // A regular dependency would install a second core next to the app's (plan §1).
     assert.equal(pkg.dependencies?.["unity-asset-reader"], undefined, pkg.name);
   }
@@ -119,7 +121,7 @@ function repo({
     {
       name: "unity-asset-reader-mesh",
       version: mesh,
-      peerDependencies: { "unity-asset-reader": "^1" },
+      peerDependencies: { "unity-asset-reader": "^1.2.0" },
       devDependencies: { "unity-asset-reader": "*" },
     },
   ];
@@ -249,10 +251,30 @@ test("release plan: a package at 0.0.0 is scaffolded, never published", () => {
   // New since the base commit, by push or by dispatch: still not a candidate.
   assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null], view), []);
   assert.deepEqual(planRelease(repo(), undefined, view), []);
-  // Its first release is a version change like any other.
-  assert.deepEqual(specs(planRelease(repo({ mesh: "1.0.0" }), repo(), view)), [
+  // Its first release is a version change like any other, once the core it peers on is out.
+  const withCore = registry(...RELEASED, "unity-asset-reader@1.2.0");
+  assert.deepEqual(specs(planRelease(repo({ mesh: "1.0.0" }), repo(), withCore)), [
     "unity-asset-reader-mesh@1.0.0",
   ]);
+});
+
+test("release plan: a feature package's peer minimum must be on npm or in the same run", () => {
+  // mesh peers on ^1.2.0; npm has core 1.0.0 only.
+  assert.throws(
+    () => planRelease(repo({ mesh: "1.0.0" }), repo(), registry(...RELEASED)),
+    /unity-asset-reader-mesh@1\.0\.0 needs unity-asset-reader@\^1\.2\.0 \(peerDependencies\), but npm has 1\.0\.0; release a matching unity-asset-reader first/,
+  );
+  // Core 1.2.0 in the same run, published before it: fine.
+  const both = repo({ core: "1.2.0", mesh: "1.0.0" });
+  assert.deepEqual(specs(planRelease(both, repo(), registry(...RELEASED))), [
+    "unity-asset-reader@1.2.0",
+    "unity-asset-reader-mesh@1.0.0",
+  ]);
+  // A core of the run that does not reach the minimum: refused, naming it.
+  assert.throws(
+    () => planRelease(repo({ core: "1.1.0", mesh: "1.0.0" }), repo(), registry(...RELEASED)),
+    /and this run releases unity-asset-reader@1\.1\.0; release a matching/,
+  );
 });
 
 test("release plan: ranges follow npm's caret rules", () => {
