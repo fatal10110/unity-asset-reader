@@ -1651,6 +1651,7 @@ a clean clone; no Unity, no fixture rebuild:
 
 ```text
 git clone https://github.com/Razviar/assetstudio.git <external-source>
+python3 -m venv .venv-oracle && .venv-oracle/bin/pip install UnityPy==1.25.3
 .venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --project <external-harness> --dotnet <dotnet-executable>
 npm run verify
 ```
@@ -1661,7 +1662,7 @@ script extracts the revision's tree with `git archive` and checks its tree id).
 refuses one inside it (R2). It takes about a minute, and needs network access
 for the first NuGet restore.
 
-Requirements: the `.venv-oracle` of section 4 (UnityPy 1.25.3) and a **Windows
+Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above) and a **Windows
 .NET 8 SDK**. AssetStudio's texture decoder package
 (`Kyaru.Texture2DDecoder.Windows`) and the FMOD library it ships are Windows
 builds. From WSL, pass the Windows `dotnet.exe`, for example
