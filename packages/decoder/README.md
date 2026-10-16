@@ -507,7 +507,7 @@ The texture compression codecs were derived from the following sources:
 - [texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) - the C++ decoders this package compiles, with Python bindings
 - [AssetStudio](https://github.com/Perfare/AssetStudio) - Original C++ texture decoders
 - [UnityPy](https://github.com/K0lb3/UnityPy) - Unity asset extraction tool
-- [unity-asset-reader-texture](https://www.npmjs.com/package/unity-asset-reader-texture) - decodes Unity `Texture2D` and `Sprite` assets with this package; the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#comparison-with-other-packages) compares it with similar npm packages
+- [unity-asset-reader-texture](https://www.npmjs.com/package/unity-asset-reader-texture) - decodes Unity `Texture2D` and `Sprite` assets with this package; [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md) compares it with similar npm packages
 
 ## Contributing
 

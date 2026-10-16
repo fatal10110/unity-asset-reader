@@ -463,8 +463,8 @@ For tools that work below `load()`:
 - [fflate](https://github.com/101arrowz/fflate) (MIT) for gzip and zlib, and
   [lzma1](https://github.com/xseman/lzma1) (MIT) for LZMA: the two runtime dependencies.
 
-The full list, and a comparison with similar npm packages, is in the
-[repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements).
+The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
+and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).
 
 ## License
 

@@ -334,8 +334,8 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
   and Crunch decoding, which is [K0lb3's texture2ddecoder](https://github.com/K0lb3/texture2ddecoder)
   compiled to WASM with [Emscripten](https://github.com/emscripten-core/emscripten).
 
-The full list, and a comparison with similar npm packages, is in the
-[repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements).
+The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
+and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).
 
 ## License
 

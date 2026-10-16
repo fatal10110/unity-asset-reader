@@ -107,8 +107,8 @@ Full JSDoc is in the bundled `index.d.ts`.
   `AssetsManager.cs`, `ImportHelper.cs` and `ResourceReader.cs`.
 - [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): generates the test goldens.
 
-The full list, and a comparison with similar npm packages, is in the
-[repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements).
+The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
+and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).
 
 ## License
 
