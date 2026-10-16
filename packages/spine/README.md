@@ -24,7 +24,7 @@ the page pixels, add
 ```js
 import { writeFileSync } from "node:fs";
 import { load } from "unity-asset-reader";
-import { decodeImage } from "unity-asset-reader-texture";
+import { decodeImage, encodePng } from "unity-asset-reader-texture";
 import { spineSkeletons } from "unity-asset-reader-spine";
 
 const env = load(bundleBytes);
@@ -35,7 +35,8 @@ for (const { name, skeleton, atlases } of spineSkeletons(env)) {
     writeFileSync(`${atlas.name}.txt`, atlas.data.bytes); // "hero.atlas" -> hero.atlas.txt
     for (const page of pages) {
       const { rgba, width, height } = await decodeImage(page); // RGBA8, top row first
-      // Encode as PNG, named page.name + ".png": the atlas text names its pages that way.
+      // The atlas text names its pages by file name: "hero.png".
+      writeFileSync(`${page.name}.png`, encodePng({ data: rgba, width, height }));
     }
   }
 }
