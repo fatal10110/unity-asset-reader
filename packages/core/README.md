@@ -284,7 +284,7 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | | Unity versions |
 |---|---|
 | **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
-| **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. Cutting sprites out of a 6000.6 atlas remains separate work |
+| **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
