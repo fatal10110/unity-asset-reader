@@ -70,9 +70,9 @@ interface Attribute {
  * and UV v becomes `1 - v`, since glTF's UV origin is the top left of the
  * image and Unity's (and OBJ's) the bottom left. Colours are copied as they
  * are, RGB or RGBA. Indices are unsigned 16-bit when the mesh's
- * `m_IndexFormat` is, unless one is 65535 (glTF's primitive restart value),
- * else 32-bit; as in `MeshData` and the OBJ, they are not offset by the
- * submesh's `baseVertex`.
+ * `m_IndexFormat` is, unless one is 65535 (glTF's primitive restart value)
+ * or above (a hand-built `MeshData`), else 32-bit; as in `MeshData` and the
+ * OBJ, they are not offset by the submesh's `baseVertex`.
  *
  * An attribute holding values glTF forbids is left out, for the whole mesh,
  * so the file stays valid (as the Khronos glTF validator checks it):
@@ -239,8 +239,11 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
   }
 
   // A 16-bit index of 65535 is the primitive restart value, which glTF
-  // forbids in indices (glTF 2.0 spec, Meshes), so such a mesh goes 32-bit.
-  const wide = mesh.m_IndexFormat !== 0 || mesh.indices.some((part) => part.includes(0xffff));
+  // forbids in indices (glTF 2.0 spec, Meshes), and one above would wrap, so
+  // such a mesh goes 32-bit.
+  const wide =
+    mesh.m_IndexFormat !== 0 ||
+    mesh.indices.some((part) => part.some((index) => index >= 0xffff));
   const size = wide ? 4 : 2;
   const primitives: { attributes: Record<string, number>; indices: number }[] = [];
   mesh.indices.forEach((triangles, i) => {

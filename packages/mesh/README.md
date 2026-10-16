@@ -72,8 +72,8 @@ is the OBJ's, and the tests check it against `meshToObj()` and the Khronos glTF 
   left out or missing (viewers must ignore tangents without normals); `COLOR_0` when a
   component is outside 0 to 1 (HDR colours). Normals are never renormalised.
 - Indices are 16-bit when the `Mesh`'s are, else 32-bit; a 16-bit mesh that uses index 65535
-  (glTF's primitive restart value) is written 32-bit. As in the OBJ, they are not offset by a
-  submesh's `baseVertex`.
+  (glTF's primitive restart value) or above is written 32-bit. As in the OBJ, they are not
+  offset by a submesh's `baseVertex`.
 
 No materials, other UV channels, bones or blend shapes.
 

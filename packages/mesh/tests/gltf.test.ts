@@ -354,26 +354,35 @@ test("32-bit indices stay 32-bit, and pass the validator", async () => {
   assertSameAsObj(mesh);
 });
 
-test("16-bit indices with 65535, glTF's primitive restart value, are written 32-bit", async () => {
-  const count = 65536;
+/** A 16-bit mesh of `count` distinct vertices and one triangle (0, 1, `last`). */
+function wideMesh(count: number, last: number): MeshData {
   const vertices = new Float32Array(count * 3);
   for (let v = 0; v < count; v++) vertices.set([v % 256, Math.floor(v / 256), v % 3], v * 3);
-  const mesh: MeshData = {
+  return {
     ...BASE,
     vertexCount: count,
     vertices,
     m_IndexFormat: 0,
     m_SubMeshes: [subMesh(GfxPrimitiveType.Triangles, 3)],
-    indices: [Uint32Array.of(0, 1, 65535)],
+    indices: [Uint32Array.of(0, 1, last)],
   };
-  const glb = meshToGltf(mesh);
-  await assertValid(glb);
-  const doc = readGlb(glb);
-  const indices = doc.json.meshes[0]!.primitives[0]!.indices;
-  assert.equal(doc.json.accessors[indices]!.componentType, 5125);
-  assert.deepEqual(accessor(doc, indices), [65535, 1, 0]);
-  assertSameAsObj(mesh);
-});
+}
+
+for (const [what, count, last] of [
+  ["65535, glTF's primitive restart value,", 65536, 65535],
+  ["70000, past 16 bits (a hand-built MeshData),", 70001, 70000],
+] as const) {
+  test(`16-bit indices with ${what} are written 32-bit`, async () => {
+    const mesh = wideMesh(count, last);
+    const glb = meshToGltf(mesh);
+    await assertValid(glb);
+    const doc = readGlb(glb);
+    const indices = doc.json.meshes[0]!.primitives[0]!.indices;
+    assert.equal(doc.json.accessors[indices]!.componentType, 5125);
+    assert.deepEqual(accessor(doc, indices), [last, 1, 0]);
+    assertSameAsObj(mesh);
+  });
+}
 
 test("4 floats per position and normal, 3 per UV and colour: glTF takes its part", async () => {
   const mesh: MeshData = {
