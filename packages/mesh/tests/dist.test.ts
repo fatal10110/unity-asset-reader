@@ -35,7 +35,8 @@ test("gltf-validator is for the tests only: not a dependency, not in dist", () =
   assert.ok(manifest.devDependencies["gltf-validator"]);
   for (const file of ["index.mjs", "index.cjs", "index.d.ts"]) {
     const text = readFileSync(dist(file), "utf8");
-    assert.doesNotMatch(text, /gltf[-_]validator|Khronos|dart/i, `dist/${file}`);
+    // Names only the validator's code holds (comments here mention the validator).
+    assert.doesNotMatch(text, /gltf[-_]validator|validateBytes|\bdart\b/i, `dist/${file}`);
   }
 });
 
