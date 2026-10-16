@@ -1639,3 +1639,383 @@ The separate [`codex/fixture-oracle-references` branch at `be60685`](https://git
 contains the prepared plain and half-scale variant pixel references. Those
 references do not settle Rotate90. Its rectangle-only variant harness must not
 be used as a tight-mask oracle.
+
+## 17. The `shader` bundles (#237)
+
+Two shaders of our own, built by **2019.4.41f2** and **6000.6.4f1** for two
+targets, each with and without type trees: `shader/lz4/<target>` and
+`shader/lz4-notypetree/<target>`, `<target>` being:
+
+| Target | Build target | Graphics APIs (`platforms`) |
+|---|---|---|
+| `windows` | `StandaloneWindows64` | Direct3D 11 (`D3D11`, 4) |
+| `android` | `Android` | OpenGL ES 3 and Vulkan (`GLES3Plus`, 9; `Vulkan`, 18) |
+
+Each bundle holds `UAR/ShaderFixture`, `UAR/ShaderFixtureSecond` and the
+AssetBundle. The first shader declares every kind of property and attribute,
+two sub-shaders (the second a fallback for hardware without geometry
+shaders), render state of every kind, a `GrabPass`, a `UsePass`, keywords
+(`multi_compile`, `shader_feature_local`, instancing), a geometry stage,
+constant buffers, an instancing buffer (whose array of structs is the struct
+parameter), a structured buffer, a UAV, separate and inline samplers, a
+`Dependency`, a `CustomEditor` and a `Fallback`. The second is the first's
+fallback, dependency and `UsePass` target.
+
+**Metal is not built:** neither editor on hand has the iOS or macOS build
+module (`FIXTURE-SKIP` in the log). **2020.3.30f1 and 6000.3.25f1 have no
+shader bundle**: they were no longer installed when these were built. The
+Shader layouts of every Unity version, those two editors' among them, are
+covered by `shader-layouts.json` instead (below).
+
+What a build holds differs by editor: 2019.4 lists every variant with its
+parameters in each stage's `m_SubPrograms`; 6000.6 leaves those empty and
+lists the variants a player uses in `m_PlayerSubPrograms`, their parameters
+in the blob.
+
+Any project will do; the committed bundles came from a fresh one per editor
+holding only these files:
+
+```
+<project>/Assets/Fixtures/shader/uar-fixture.shader
+<project>/Assets/Fixtures/shader/uar-second.shader
+<project>/Assets/Editor/BuildShaders.cs
+```
+
+`uar-fixture.shader` is the template below with three lines filled in per
+editor. For 2019.4.41f2: `INT_TYPE` is `Int` (a float property; Unity 2021.1
+added `Integer`), and the `CONSERVATIVE` and `RP_EDITOR` lines are deleted.
+For 6000.6.4f1: `INT_TYPE` is `Integer`, `CONSERVATIVE` is
+`Conservative True` (2020.1+), and `RP_EDITOR` is
+`CustomEditorForRenderPipeline "UarUrpShaderGUI" "UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset"`
+(2021.1+; Unity leaves it out of the bundle, as the project has no such
+pipeline).
+
+```shaderlab
+// Shader reader fixture (#237): every kind of property, attributes, two
+// subshaders, render state, a GrabPass, a UsePass, keywords, instancing, a
+// geometry stage, constant buffers, an instancing buffer (a struct), buffers,
+// a UAV, separate and inline samplers, a dependency, a custom editor and a
+// fallback.
+// INT_TYPE, CONSERVATIVE and RP_EDITOR are filled in per editor.
+Shader "UAR/ShaderFixture"
+{
+    Properties
+    {
+        [MainTexture] _MainTex ("Main", 2D) = "white" {}
+        [NoScaleOffset] _Detail ("Detail", 2D) = "gray" {}
+        [Normal] _BumpMap ("Bump", 2D) = "bump" {}
+        _Volume ("Volume", 3D) = "" {}
+        _Cube ("Cube", Cube) = "" {}
+        _Layers ("Layers", 2DArray) = "" {}
+        [MainColor] _Color ("Color", Color) = (1, 0.5, 0.25, 1)
+        [HDR] _Emission ("Emission", Color) = (2, 1, 0, 1)
+        _Offsets ("Offsets", Vector) = (1, 2, 3, 4)
+        _Gloss ("Gloss", Range(0, 1)) = 0.5
+        [Header(Options)] [Toggle(UAR_FEATURE)] _Feature ("Feature", Float) = 0
+        [HideInInspector] _Hidden ("Hidden", Float) = -1.5
+        [PerRendererData] _PerRenderer ("PerRenderer", Float) = 2
+        [Gamma] _GammaVal ("Gamma", Float) = 0.25
+        _Count ("Count", INT_TYPE) = 3
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
+        _StencilRef ("Stencil Ref", Range(0, 255)) = 7
+    }
+    SubShader
+    {
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" "IgnoreProjector" = "True" }
+        LOD 300
+        Pass
+        {
+            Name "Forward"
+            Tags { "LightMode" = "ForwardBase" }
+            Blend SrcAlpha OneMinusSrcAlpha, One Zero
+            BlendOp Add, Max
+            ColorMask RGB
+            ZWrite Off
+            ZTest LEqual
+            Cull [_Cull]
+            Offset -1, -2
+            AlphaToMask On
+            Stencil
+            {
+                Ref [_StencilRef]
+                ReadMask 15
+                WriteMask 240
+                Comp Always
+                Pass Replace
+                Fail Keep
+                ZFail IncrSat
+            }
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma target 3.5
+            #pragma multi_compile __ UAR_MULTI_A
+            #pragma shader_feature_local UAR_FEATURE
+            #pragma multi_compile_instancing
+            #include "UnityCG.cginc"
+
+            UNITY_DECLARE_TEX2D(_MainTex);
+            float4 _MainTex_ST;
+            UNITY_DECLARE_TEX2D_NOSAMPLER(_Detail);
+            sampler3D _Volume;
+            samplerCUBE _Cube;
+            UNITY_DECLARE_TEX2DARRAY(_Layers);
+            fixed4 _Color;
+            half4 _Emission;
+            float4 _Offsets;
+            float _Gloss;
+            float4x4 _UarMatrix;
+            float4 _UarArray[3];
+            UNITY_INSTANCING_BUFFER_START(UarProps)
+                UNITY_DEFINE_INSTANCED_PROP(float4, _UarInstColor)
+                UNITY_DEFINE_INSTANCED_PROP(float4x4, _UarInstXform)
+            UNITY_INSTANCING_BUFFER_END(UarProps)
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normal : NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            struct v2f
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float3 normal : TEXCOORD1;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
+            v2f vert(appdata v)
+            {
+                UNITY_SETUP_INSTANCE_ID(v);
+                v2f o;
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                float4x4 m = mul(_UarMatrix, UNITY_ACCESS_INSTANCED_PROP(UarProps, _UarInstXform));
+                o.pos = UnityObjectToClipPos(mul(m, v.vertex));
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.normal = UnityObjectToWorldNormal(v.normal);
+                return o;
+            }
+
+            fixed4 frag(v2f i) : SV_Target
+            {
+                UNITY_SETUP_INSTANCE_ID(i);
+                fixed4 c = UNITY_SAMPLE_TEX2D(_MainTex, i.uv) * _Color;
+                c *= UNITY_ACCESS_INSTANCED_PROP(UarProps, _UarInstColor);
+                c += UNITY_SAMPLE_TEX2D_SAMPLER(_Detail, _MainTex, i.uv) * _Gloss;
+                c += tex3D(_Volume, i.normal) + texCUBE(_Cube, i.normal);
+                c += UNITY_SAMPLE_TEX2DARRAY(_Layers, float3(i.uv, _Offsets.w));
+            #if UAR_MULTI_A
+                c.rgb += _Emission.rgb;
+            #endif
+            #ifdef UAR_FEATURE
+                c *= _Offsets;
+            #endif
+                c += _UarArray[(int)_Offsets.x];
+                return c;
+            }
+            ENDCG
+        }
+        GrabPass { "_UarGrab" }
+        Pass
+        {
+            Name "Geometry"
+            Tags { "LightMode" = "Always" }
+            Blend 0 One One
+            Blend 1 Zero SrcColor
+            ZClip False
+            CONSERVATIVE
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma geometry geom
+            #pragma fragment frag
+            #pragma target 5.0
+            #include "UnityCG.cginc"
+
+            cbuffer UarLights
+            {
+                float4x4 _UarXform;
+                float4 _UarColors[2];
+                float4 _UarTint;
+            };
+            StructuredBuffer<float4> _UarPoints;
+            RWStructuredBuffer<float4> _UarOut : register(u1);
+            Texture2D _UarGrab;
+            SamplerState sampler_point_clamp;
+
+            struct v2g
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            v2g vert(appdata_base v)
+            {
+                v2g o;
+                o.pos = UnityObjectToClipPos(mul(_UarXform, v.vertex));
+                o.uv = v.texcoord.xy;
+                return o;
+            }
+
+            [maxvertexcount(3)]
+            void geom(triangle v2g input[3], inout TriangleStream<v2g> stream)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    v2g o = input[k];
+                    o.pos.xy += _UarPoints[k].xy;
+                    stream.Append(o);
+                }
+            }
+
+            float4 frag(v2g i) : SV_Target
+            {
+                float4 c = _UarGrab.Sample(sampler_point_clamp, i.uv) * _UarColors[1] * _UarTint;
+                _UarOut[0] = c;
+                return c;
+            }
+            ENDCG
+        }
+    }
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque" }
+        LOD 100
+        Pass
+        {
+            Tags { "LightMode" = "ForwardBase" }
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            fixed4 _Color;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return _Color; }
+            ENDCG
+        }
+        UsePass "UAR/ShaderFixtureSecond/UNLIT"
+    }
+    Dependency "UarDependency" = "UAR/ShaderFixtureSecond"
+    CustomEditor "UarShaderGUI"
+    RP_EDITOR
+    Fallback "UAR/ShaderFixtureSecond"
+}
+```
+
+`uar-second.shader`:
+
+```shaderlab
+// The second shader of the #237 fixture: the first one's fallback, dependency
+// and UsePass target.
+Shader "UAR/ShaderFixtureSecond"
+{
+    Properties
+    {
+        _Color ("Color", Color) = (0, 1, 0, 1)
+    }
+    SubShader
+    {
+        Pass
+        {
+            Name "Unlit"
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            fixed4 _Color;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return _Color; }
+            ENDCG
+        }
+    }
+    Fallback Off
+}
+```
+
+`Assets/Editor/BuildShaders.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// The two fixture shaders (#237), built once per target and graphics API set:
+// with type trees, and without for the targets the reader must handle alone.
+// A target whose build module is not installed is skipped and logged.
+public static class BuildShaders
+{
+    const string Dir = "Assets/Fixtures/shader";
+    static readonly string[] Shaders = { Dir + "/uar-fixture.shader", Dir + "/uar-second.shader" };
+
+    public static void Build()
+    {
+        // Keep the instancing variants, whose instancing buffer is the one place
+        // a struct parameter appears; no material asks for instancing here.
+        var graphics = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
+        graphics.FindProperty("m_InstancingStripping").intValue = 2; // Keep All
+        graphics.ApplyModifiedProperties();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        var noTree = lz4 | BuildAssetBundleOptions.DisableWriteTypeTree;
+        var dx11 = new[] { GraphicsDeviceType.Direct3D11 };
+        var mobile = new[] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan };
+        var metal = new[] { GraphicsDeviceType.Metal };
+        Emit("windows", BuildTarget.StandaloneWindows64, dx11, lz4);
+        Emit("windows-notypetree", BuildTarget.StandaloneWindows64, dx11, noTree);
+        Emit("android", BuildTarget.Android, mobile, lz4);
+        Emit("android-notypetree", BuildTarget.Android, mobile, noTree);
+        Emit("ios", BuildTarget.iOS, metal, lz4);
+        Emit("osx", BuildTarget.StandaloneOSX, metal, lz4);
+    }
+
+    static void Emit(string name, BuildTarget target, GraphicsDeviceType[] apis, BuildAssetBundleOptions opts)
+    {
+        var group = BuildPipeline.GetBuildTargetGroup(target);
+        if (!BuildPipeline.IsBuildTargetSupported(group, target))
+        {
+            Debug.Log("FIXTURE-SKIP shader " + name + ": no " + target + " build module");
+            return;
+        }
+        PlayerSettings.SetUseDefaultGraphicsAPIs(target, false);
+        PlayerSettings.SetGraphicsAPIs(target, apis);
+        var dir = Path.Combine("Build", "shader-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "shaders", assetNames = Shaders } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, target);
+        if (m == null) throw new System.Exception("build failed: shader " + name);
+        Debug.Log("FIXTURE-OK shader " + name + " -> " + dir);
+    }
+}
+```
+
+Build with `-executeMethod BuildShaders.Build` (same command as section 2).
+The log must hold four `FIXTURE-OK shader` lines and no `Shader error`; the
+two Metal targets log `FIXTURE-SKIP` without their module. Copy only the
+bundle named `shaders`:
+
+```
+Build/shader-<target>/shaders             ->  fixtures/bundles/editor/<editor version>/shader/lz4/<target>
+Build/shader-<target>-notypetree/shaders  ->  fixtures/bundles/editor/<editor version>/shader/lz4-notypetree/<target>
+```
+
+Then rerun `make-goldens.py`: it adds the 2019.4 bundles to `goldens.json`
+(their metadata, names and container; it dumps no Shader) and leaves the
+6000.6 ones out, which UnityPy 1.25.3 cannot read. The Shader reader's check
+on all of them is `readTypeTree()` (`packages/core/tests/Shader.test.ts`).
+
+### `shader-layouts.json`
+
+```bash
+.venv-oracle/bin/python scripts/make-shader-layouts.py
+```
+
+One synthetic Shader object per layout in UnityPy's TPK type tree data, from
+3.4 to 6000.6, plus the two fixture editors without a shader bundle
+(2020.3.30f1, 6000.3.25f1). The script fills every field of the TPK type
+tree with a distinct value, writes the object with UnityPy's
+`write_typetree`, reads it back with `read_typetree`, and records the bytes
+and the sha256 of the read-back value in the form the test hashes (see the
+script's docstring). The two fixture builds above have exactly the TPK layout
+of their editor (2019.3.0b1's and 6000.6.0a7's entries), node for node.

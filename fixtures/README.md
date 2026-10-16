@@ -8,6 +8,7 @@ bundles/          M1 container fixtures (generated, see below)
 bundles/editor/   editor-built bundles, one folder per Unity version and build variant
 BUILDING.md       how the editor-built bundles were made, and how to rebuild them
 goldens.json      what the oracle says each fixture unpacks to and contains
+shader-layouts.json  UnityPy's synthetic Shader objects, one per type tree layout (#237)
 helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shapes
 ```
 
@@ -96,6 +97,17 @@ and `stripped` (#41), built from generated source files
 
 2019.4.41f2's `stripped` bundles are format 21, the others' format 22. No
 fixture holds a MovieTexture (no fixture editor makes one with a movie).
+
+2019.4.41f2 (format 21) and 6000.6.4f1 (format 23) have `shader/lz4/<target>`
+and `shader/lz4-notypetree/<target>` (#237): two shaders of our own, built for
+`windows` (DX11) and `android` (GLES3 and Vulkan)
+([`BUILDING.md`](BUILDING.md) section 17). Neither editor here has the iOS or
+macOS module, so there is no Metal shader, and 2020.3.30f1 and 6000.3.25f1
+were no longer installed. The 2019.4 bundles are in `goldens.json` without a
+Shader dump; the 6000.6 ones in no golden set, as UnityPy 1.25.3 cannot read
+format 23. The Shader reader is checked against `readTypeTree()` on them, and
+against `shader-layouts.json` for every Shader layout of Unity's type trees
+(UnityPy's TPK data), 2020.3.30f1's and 6000.3.25f1's among them.
 
 2019.4.41f2 (format 21) and 6000.3.25f1 (format 22) also have `sprite/sprites`
 (LZ4, #34): 22 Sprites and two Sprite Atlas V1 assets, with every source pixel
