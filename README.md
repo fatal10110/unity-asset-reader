@@ -133,7 +133,8 @@ The short answer. The full tables, with what each claim is tested on, are in the
   uncompressed blocks, with and without type trees, and version-stripped. PVRTC comes from
   2019.4 only (Unity 6 no longer writes it), sprites and atlases from 2019.4 and 6000.3.
   Also **6000.6.4f1**: SerializedFile format 23 metadata, type-tree dumps, `Sprite` and
-  `SpriteAtlas`. `Shader` comes from 2019.4 and 6000.6 (DX11, GLES3 and Vulkan; no Metal).
+  `SpriteAtlas`. `Shader` comes from 2019.4, 2020.3, 6000.3.26f1 and 6000.6 (DX11, GLES3 and
+  Vulkan; Metal from 2020.3 and 6000.3).
 - **Tested on generated or hand-written bytes only:** the class readers' version gates from
   Unity 3.4 to 6000.6; SerializedFile formats 6, 8 and 15; UnityFS format 6; UnityWeb and
   UnityRaw formats 2, 3, 4 and 6; `UnityWebData` and gzip. No real Unity build of those versions

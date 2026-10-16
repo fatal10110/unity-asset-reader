@@ -59,8 +59,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 - A hand-written `Shader` reader, `readShader`, for Unity 2019.1 to 6000.6 (#237): the parsed
   ShaderLab (`m_ParsedForm`: properties, sub-shaders, passes, render state, keywords, each
   variant's parameters) and the compiled programs of every platform (`compressedBlob`, still
-  LZ4-compressed). Its fields equal `readTypeTree()` on the fixture shaders (2019.4.41f2 and
-  6000.6.4f1, built for DX11, GLES3 and Vulkan) and UnityPy's read of a synthetic object of every
+  LZ4-compressed). Its fields equal `readTypeTree()` on the fixture shaders (2019.4.41f2,
+  2020.3.30f1, 6000.3.26f1 and 6000.6.4f1, built for DX11, GLES3 and Vulkan, and for Metal by
+  2020.3 and 6000.3) and UnityPy's read of a synthetic object of every
   Shader layout of Unity's type trees from 2019.1 (`fixtures/shader-layouts.json`). Bundles built
   without type trees read their shaders too. Unity 2023.1 and later, Unity 6 included, have no
   `m_EditorDataHash` or `m_Platforms` in a pass (#52).

@@ -1727,14 +1727,15 @@ exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
 
 ## 18. The `shader` bundles (#237)
 
-Two shaders of our own, built by **2019.4.41f2** and **6000.6.4f1** for two
-targets, each with and without type trees: `shader/lz4/<target>` and
-`shader/lz4-notypetree/<target>`, `<target>` being:
+Two shaders of our own, built by **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**, each target with and without type trees:
+`shader/lz4/<target>` and `shader/lz4-notypetree/<target>`, `<target>` being:
 
-| Target | Build target | Graphics APIs (`platforms`) |
-|---|---|---|
-| `windows` | `StandaloneWindows64` | Direct3D 11 (`D3D11`, 4) |
-| `android` | `Android` | OpenGL ES 3 and Vulkan (`GLES3Plus`, 9; `Vulkan`, 18) |
+| Target | Build target | Graphics APIs (`platforms`) | Editors |
+|---|---|---|---|
+| `windows` | `StandaloneWindows64` | Direct3D 11 (`D3D11`, 4) | all four |
+| `android` | `Android` | OpenGL ES 3 and Vulkan (`GLES3Plus`, 9; `Vulkan`, 18) | all four |
+| `ios` | `iOS` | Metal (`Metal`, 14) | 2020.3.30f1, 6000.3.26f1 |
 
 Each bundle holds `UAR/ShaderFixture`, `UAR/ShaderFixtureSecond` and the
 AssetBundle. The first shader declares every kind of property and attribute,
@@ -1746,16 +1747,18 @@ parameter), a structured buffer, a UAV, separate and inline samplers, a
 `Dependency`, a `CustomEditor` and a `Fallback`. The second is the first's
 fallback, dependency and `UsePass` target.
 
-**Metal is not built:** neither editor on hand has the iOS or macOS build
-module (`FIXTURE-SKIP` in the log). **2020.3.30f1 and 6000.3.25f1 have no
-shader bundle**: they were no longer installed when these were built. The
-Shader layouts of every Unity version, those two editors' among them, are
-covered by `shader-layouts.json` instead (below).
+Metal comes from the editors that have the iOS module, 2020.3.30f1 and
+6000.3.26f1; 2019.4.41f2 and 6000.6.4f1 have none and log `FIXTURE-SKIP` for
+`ios`. No editor here has the macOS module, so `osx` is skipped everywhere.
+The Unity 6000.3 build is **6000.3.26f1**, not the 6000.3.25f1 of the other
+fixtures: 6000.3.25f1 was no longer installed. Both write SerializedFile
+format 22 and the same Shader layout (TPK: 6000.3.0b6 to 6000.5.0a5).
 
-What a build holds differs by editor: 2019.4 lists every variant with its
-parameters in each stage's `m_SubPrograms`; 6000.6 leaves those empty and
-lists the variants a player uses in `m_PlayerSubPrograms`, their parameters
-in the blob.
+What a build holds differs by editor: 2019.4 and 2020.3 list every variant
+with its parameters in each stage's `m_SubPrograms`; 6000.3 and 6000.6 leave
+those empty and list the variants a player uses in `m_PlayerSubPrograms`,
+their parameters in the blob. 2020.3 is the one fixture editor whose passes
+carry `m_EditorDataHash`, `m_Platforms` and the two keyword masks (#52).
 
 Any project will do; the committed bundles came from a fresh one per editor
 holding only these files:
@@ -1769,7 +1772,9 @@ holding only these files:
 `uar-fixture.shader` is the template below with three lines filled in per
 editor. For 2019.4.41f2: `INT_TYPE` is `Int` (a float property; Unity 2021.1
 added `Integer`), and the `CONSERVATIVE` and `RP_EDITOR` lines are deleted.
-For 6000.6.4f1: `INT_TYPE` is `Integer`, `CONSERVATIVE` is
+For 2020.3.30f1: `INT_TYPE` is `Int`, `CONSERVATIVE` is `Conservative True`
+(2020.1+), and the `RP_EDITOR` line is deleted. For 6000.3.26f1 and
+6000.6.4f1: `INT_TYPE` is `Integer`, `CONSERVATIVE` is
 `Conservative True` (2020.1+), and `RP_EDITOR` is
 `CustomEditorForRenderPipeline "UarUrpShaderGUI" "UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset"`
 (2021.1+; Unity leaves it out of the bundle, as the project has no such
@@ -2078,8 +2083,9 @@ public static class BuildShaders
 ```
 
 Build with `-executeMethod BuildShaders.Build` (same command as section 2).
-The log must hold four `FIXTURE-OK shader` lines and no `Shader error`; the
-four Metal builds log `FIXTURE-SKIP` without their module. Copy only the
+The log must hold a `FIXTURE-OK shader` line for each target the editor
+can build (six with the iOS module, four without) and no `Shader error`;
+a target without its module logs `FIXTURE-SKIP`. Copy only the
 bundle named `shaders`:
 
 ```
@@ -2104,8 +2110,8 @@ The Shader reader's own check is `readTypeTree()` on every bundle
 ```
 
 One synthetic Shader object per layout in UnityPy's TPK type tree data, from
-2019.1 (the oldest version the reader supports) to 6000.6, plus the two fixture editors without a shader bundle
-(2020.3.30f1, 6000.3.25f1). The script fills every field of the TPK type
+2019.1 (the oldest version the reader supports) to 6000.6, plus the
+2020.3.30f1 and 6000.3.25f1 fixture editors. The script fills every field of the TPK type
 tree with a distinct value, writes the object with UnityPy's
 `write_typetree`, reads it back with `read_typetree`, and records the bytes
 and the sha256 of the read-back value in the form the test hashes (see the
