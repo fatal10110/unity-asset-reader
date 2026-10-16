@@ -29,30 +29,31 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.2.0 - Unreleased
 
-- A hand-written `Mesh` reader, `readMesh`, for Unity 3.4 to 6000.6 (#235): its fields equal
-  `readTypeTree()` on the 12 fixture meshes and, through UnityPy's TPK type trees
-  (`fixtures/tpk-trees.json`), on hand-built meshes at every layout change. Bundles built without
-  type trees read their meshes too. `obj.read()` also decodes the vertices and triangles as
-  AssetStudio does (`MeshData.geometry`: `vertices`, `normals`, `tangents`, `colors`, `uv`,
-  `skin`, `indices`), from the object's arrays (3.4), `m_VertexData`, the `.resS`
-  `m_StreamData` names, or `m_CompressedMesh`.
+- A hand-written `Mesh` reader, `readMesh`, for Unity 2019.1 to 6000.6 (#235), the supported
+  floor (plan revision 2026-10-16): its fields equal `readTypeTree()` on the 12 fixture meshes
+  and, through UnityPy's TPK type trees (`fixtures/tpk-trees.json`), on hand-built meshes at
+  every layout change from 2019.1. Bundles built without type trees read their meshes too.
+  `obj.read()` also decodes the vertices and triangles as AssetStudio does (`MeshData`:
+  `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv`, `skin`, `indices`), from
+  `m_VertexData`, the `.resS` `m_StreamData` names, or `m_CompressedMesh`.
 
   **Behavior change** for `Mesh` (in 1.1.0 it was read through its type tree):
   - `asset.type` is `"Mesh"`, not `"Other"`, so `env.assets("Other")` no longer yields meshes.
-  - `asset.data` is a `MeshFields` (camelCase names, the decoded `geometry`), not the type tree.
+  - `asset.data` is a `MeshFields` (camelCase names, plus the decoded vertices and triangles),
+    not the type tree.
   - `obj.read()` gives `MeshData`: the type tree's fields, with `m_StreamData.offset` a `number`
-    (the type tree gives a `bigint` from 2020.1), plus `geometry`.
+    (the type tree gives a `bigint` from 2020.1), plus the decoded vertices and triangles.
   - `obj.read()` and `asset.data` now throw where 1.1.0 returned the type tree:
-    `UnsupportedError` for Unity before 3.4, a version-stripped file outside formats 18 to 21
-    (so every stripped file from Unity 2020.1 on), an editor file (`BuildTarget.NoTarget`), a
-    submesh of lines or points (from 4.0), a vertex format Unity does not define, bone weights in
-    an integer format, bone indices in a float one, or more than four bones per vertex;
-    `CorruptError` for a layout the reader does not know (bytes left over or missing, such as
-    a pre-release build) and for vertex data, indices or packed vectors that run past their
-    bytes; `ResourceNotFoundError` for vertex data in a `.resS` that is not loaded, or read
-    through a reader not built by `load()`.
+    `UnsupportedError` for a mesh from Unity before 2019.1, a version-stripped file outside
+    formats 18 to 21 (so every stripped file from Unity 2020.1 on), an editor file
+    (`BuildTarget.NoTarget`), a submesh of lines or points, a vertex format Unity does not
+    define, bone weights in an integer format, bone indices in a float one, or more than four
+    bones per vertex; `CorruptError` for a layout the reader does not know (bytes left over or
+    missing, such as a pre-release build) and for vertex data, indices or packed vectors that
+    run past their bytes; `ResourceNotFoundError` for vertex data in a `.resS` that is not
+    loaded, or read through a reader not built by `load()`.
 
-  `obj.readTypeTree()` still reads every one of these.
+  `obj.readTypeTree()` still reads every one of these, a mesh from before 2019.1 included.
 
 ### 1.1.0 - 2026-10-16
 
