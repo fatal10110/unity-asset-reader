@@ -12,6 +12,7 @@ that package's tarball:
   packages/mesh/NOTICE       unity-asset-reader-mesh
   packages/audio/NOTICE      unity-asset-reader-audio
   packages/spine/NOTICE      unity-asset-reader-spine
+  packages/shader/NOTICE     unity-asset-reader-shader
   packages/decoder/LICENSE   texture2ddecoder-wasm
 
 They say which package uses which upstream, and for what. Runtime npm
@@ -26,7 +27,7 @@ to the file it was ported from.
 AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
   Copyright (c) Perfare, RazTools, Razviar
   Source of truth for the ported behaviour (core, texture, node, mesh,
-  audio).
+  audio, shader).
 
 UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
   Copyright (c) K0lb3
@@ -55,7 +56,8 @@ ImageSharp -- https://github.com/SixLabors/ImageSharp
 
 The code derived from ImageSharp.Drawing and ImageSharp, and only that code,
 is under the Apache License 2.0, which makes unity-asset-reader-texture
-"MIT AND Apache-2.0"; the rest of the repository is under the MIT License.
+"MIT AND Apache-2.0"; the rest of the repository is under the MIT License,
+except the CSspv port below (BSD 2-Clause).
 
 Fmod5Sharp -- https://github.com/SamboyCoding/Fmod5Sharp (MIT)
   Copyright (c) 2021 Sam Byass
@@ -65,6 +67,19 @@ Fmod5Sharp -- https://github.com/SamboyCoding/Fmod5Sharp (MIT)
 python-fsb5 -- https://github.com/HearthSim/python-fsb5 (MIT)
   Copyright (c) 2016 Simon Pinfold
   Second reference for the FSB5 parser of packages/audio.
+
+CSspv -- https://github.com/Anteru/csspv
+  (BSD 2-Clause License, full text in packages/shader/LICENSE-BSD)
+  Copyright (c) 2017, Matthäus G. Chajdas
+  The SPIR-V disassembler of packages/shader is hand-ported from it, as
+  AssetStudio vendors it (AssetStudio.Utility/CSspv/). That code, and only
+  that code, is under the BSD 2-Clause License, which makes
+  unity-asset-reader-shader "MIT AND BSD-2-Clause".
+
+smol-v -- https://github.com/aras-p/smol-v (MIT or public domain)
+  Copyright (c) 2016-2018 Aras Pranckevicius
+  The SMOL-V format; the decoder of packages/shader is ported from
+  AssetStudio's C# port of its decoder.
 
 texture2ddecoder -- https://github.com/K0lb3/texture2ddecoder (MIT)
   Copyright (c) K0lb3
