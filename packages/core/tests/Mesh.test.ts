@@ -1,14 +1,16 @@
 // Mesh (#235): the hardcoded reader against readTypeTree() on the 12 fixture
 // Mesh objects and on hand-built layouts at every version gate of Unity's
-// type trees (TPK), and the decoding of upstream's `ProcessData` on hand-built
+// type trees, read through those trees themselves (`fixtures/tpk-trees.json`,
+// UnityPy's TPK data), and the decoding of upstream's `ProcessData` on hand-built
 // meshes, whose expected values are worked out here from AssetStudio's
 // formulas. The decoded vertices and indices are checked against AssetStudio
 // itself through the OBJ goldens of #239.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { golden, loadFixture } from "../../../fixtures/helpers.js";
+import { golden, loadFixture, type GoldenNode } from "../../../fixtures/helpers.js";
 import { readMesh, type Mesh, type MeshData } from "../src/classes/Mesh.js";
 import { atLeast } from "../src/classes/version.js";
 import { load, type Env } from "../src/env.js";
@@ -17,6 +19,7 @@ import { BuildTarget } from "../src/serialized/BuildTarget.js";
 import { ClassID } from "../src/serialized/ClassID.js";
 import type { ObjectReader } from "../src/serialized/ObjectReader.js";
 import type { UnityVersion } from "../src/serialized/SerializedFile.js";
+import type { TypeTreeNode } from "../src/serialized/TypeTree.js";
 import { fixturesWith, objectBytes, typedTwin } from "./class-readers.js";
 import { build, readerOf, template, versionRefusal, withTail, type Writer } from "./media.js";
 
@@ -910,6 +913,57 @@ for (const { name, unity } of TYPE_TREES) {
       const { bytes } = build((w) => meshLayout(w, unity, input));
       const reader = readerOf(from, bytes, { unity });
       assert.ok(reader.serializedType?.nodes?.length, "no type tree");
+      const tree = withNumberOffset(reader.readTypeTree() as Record<string, unknown>);
+      const mesh = readMesh(reader);
+      assert.deepEqual(Object.keys(mesh), Object.keys(tree));
+      assert.deepStrictEqual(mesh, tree);
+    }
+  });
+}
+
+// --- the hand-built layouts through TPK's type trees -----------------------------------
+
+/**
+ * `fixtures/tpk-trees.json`: Unity's player Mesh trees from UnityPy's TPK data
+ * (R12), from the one that holds at 2019.1 on. They check the layouts no fixture
+ * has (2022.1's, 6000.6's) against Unity's own trees.
+ */
+const TPK = (
+  JSON.parse(
+    readFileSync(new URL("../../../fixtures/tpk-trees.json", import.meta.url), "utf8"),
+  ) as { classes: Record<string, Record<string, GoldenNode[]>> }
+).classes[String(ClassID.Mesh)]!;
+
+/** A TPK tree as the nodes a SerializedFile's type would hold. */
+const typeTreeNodes = (nodes: GoldenNode[]): TypeTreeNode[] =>
+  nodes.map(([level, type, name, byteSize, metaFlag], index) => ({
+    level,
+    type,
+    name,
+    byteSize,
+    metaFlag,
+    index,
+    typeFlags: 0,
+    version: 1,
+    typeStrOffset: 0,
+    nameStrOffset: 0,
+    refTypeHash: 0n,
+  }));
+
+test("TPK has a Mesh tree at every gate this reader knows, from 2019.1 to 6000.6", () => {
+  const versions = ["2019.1a10", "2020.1a19", "2022.1a15", "6000.2a8", "6000.6a5"];
+  assert.deepEqual(Object.keys(TPK), versions);
+});
+
+for (const [key, nodes] of Object.entries(TPK)) {
+  test(`TPK ${key}: a hand-built Mesh reads the same through Unity's type tree`, () => {
+    const [, major, minor] = /^(\d+)\.(\d+)/.exec(key)!;
+    const unity: UnityVersion = [+major!, +minor!, 0, 1];
+    const serializedType = { ...FROM_2020.info.serializedType!, nodes: typeTreeNodes(nodes) };
+    const from = { ...FROM_2020, info: { ...FROM_2020.info, serializedType } };
+    for (const input of [{ rich: true }, COMPRESSED, STREAMS]) {
+      const { bytes } = build((w) => meshLayout(w, unity, input));
+      const reader = readerOf(from, bytes, { unity });
       const tree = withNumberOffset(reader.readTypeTree() as Record<string, unknown>);
       const mesh = readMesh(reader);
       assert.deepEqual(Object.keys(mesh), Object.keys(tree));

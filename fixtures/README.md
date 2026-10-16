@@ -8,6 +8,7 @@ bundles/          M1 container fixtures (generated, see below)
 bundles/editor/   editor-built bundles, one folder per Unity version and build variant
 BUILDING.md       how the editor-built bundles were made, and how to rebuild them
 goldens.json      what the oracle says each fixture unpacks to and contains
+tpk-trees.json    Unity's player type trees of a class from 2019.1, from UnityPy's TPK
 helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shapes
 ```
 
@@ -401,8 +402,15 @@ fixtures change. Goldens were made with UnityPy 1.25.3.
 python3 -m venv .venv-oracle && .venv-oracle/bin/pip install UnityPy==1.25.3
 .venv-oracle/bin/python scripts/make-fixtures.py   # M1 container fixtures only
 .venv-oracle/bin/python scripts/make-goldens.py    # every fixture under bundles/
+.venv-oracle/bin/python scripts/make-tpk-trees.py 43   # tpk-trees.json: Mesh (#235)
 npm test
 ```
+
+`tpk-trees.json` holds no fixture data: it is Unity's type tree of a class
+(`Mesh`) at every version from 2019.1 (the supported floor) where TPK records a
+change. A class reader's tests build objects for versions no fixture covers and
+read them through the tree of their version with `readTypeTree()`, so those
+layouts are checked against Unity's own trees rather than a hand-written list.
 
 Adding an M1 fixture: add an entry to `FIXTURES` in `make-fixtures.py`, then
 rerun both scripts. Adding an editor fixture: follow [`BUILDING.md`](BUILDING.md),
