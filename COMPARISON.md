@@ -1,7 +1,9 @@
 # Unity library comparison
 
 Feature and format checklist based on the package documentation collected for the original
-README comparison on **2026-09-29**. This is a documentation snapshot, not a compatibility test.
+README comparison on **2026-09-29**; the rows for Unity 6000.6, variant atlases, 16-bit formats,
+the Unity version override and external dependencies were checked on **2026-10-16**. This is a
+documentation snapshot, not a compatibility test.
 
 **✓** = documented support. **✗** = unsupported or not documented in the cited sources.
 A ✗ does not prove that an undocumented feature is absent.
@@ -49,6 +51,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | LZ4 / LZ4HC bundles | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | LZMA bundles | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Gzip-wrapped input | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ |
+| SerializedFile format 23 (Unity 6000.6) | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 
 ## Asset features
 
@@ -56,11 +59,15 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Read objects through type trees | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Hand-written readers for objects without type trees | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ |
+| Unity version override for version-stripped files | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Load a loose file's external dependencies from disk | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Read TextAsset | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Read MonoBehaviour data through type trees | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Decode Texture2D | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Extract Sprite images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Merge separate sprite alpha textures | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Extract sprites of a variant (scaled) SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Extract sprites packed in a Unity 6000.6 SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Encode PNG images | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Decode audio to WAV / OGG / MP3 | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✗ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
@@ -72,6 +79,11 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 
 Our library exposes raw audio, video and font bytes; it does not decode audio or video.
 Reading a Mesh through its type tree does not mean exporting a model.
+AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
+external dependencies means a loose SerializedFile's `m_Externals`, through
+`unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row
+under containers. The Studio JS version override is documented in its `COMPATIBILITY.md`, the
+Studio CLI one in AssetStudioMod's CLI README (`--unity-version`).
 
 ## Texture formats
 
@@ -92,6 +104,7 @@ Studio JS inherits the formats documented by unityfs-js.
 | ASTC | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✓ |
 | ATC | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✓ |
 | Crunch | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✓ |
+| 16-bit unsigned (R16, RG32, RGB48, RGBA64) | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 
 For our library's exact formats, platform restrictions and tested Unity versions, see the
 [texture README](packages/texture/README.md) and [core README](packages/core/README.md).
