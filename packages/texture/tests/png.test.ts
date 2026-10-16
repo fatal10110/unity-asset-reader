@@ -229,7 +229,9 @@ const exportGoldens = fixtureJson("assetstudio-export-goldens.json") as {
   revision: string;
   fixtures: Record<string, Record<string, Record<string, ExportEntry>>>;
 };
-const modernGoldens = fixtureJson("modern-goldens.json") as { fixtures: Record<string, { serialized: Record<string, { formatVersion: number }> }> };
+const modernGoldens = fixtureJson("modern-goldens.json") as {
+  fixtures: Record<string, { serialized: Record<string, { formatVersion: number }> }>;
+};
 
 const textures = Object.entries(exportGoldens.fixtures).flatMap(([fixture, files]) =>
   Object.entries(files).flatMap(([file, objects]) =>
