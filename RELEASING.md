@@ -16,6 +16,7 @@ will publish), merge, and the [Release workflow](.github/workflows/release.yml) 
 | `unity-asset-reader-mesh` | `packages/mesh` | 5 |
 | `unity-asset-reader-audio` | `packages/audio` | 6 |
 | `unity-asset-reader-spine` | `packages/spine` | 7 |
+| `unity-asset-reader-shader` | `packages/shader` | 8 |
 
 A new package is added to `PACKAGE_DIRS` in `scripts/check-release.mjs` (after what it depends
 on) and to this table, at version `0.0.0` (`UNRELEASED`), which the workflow never publishes:

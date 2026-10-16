@@ -308,6 +308,7 @@ For feature requests, describe:
     ├── mesh/                     # unity-asset-reader-mesh
     ├── audio/                    # unity-asset-reader-audio
     ├── spine/                    # unity-asset-reader-spine
+    ├── shader/                   # unity-asset-reader-shader
     └── decoder/                  # texture2ddecoder-wasm
         ├── src/                  # TypeScript source (index.ts)
         ├── tests/                # index.test.ts, samples.test.ts

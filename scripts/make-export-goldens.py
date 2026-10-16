@@ -4,13 +4,16 @@
 AssetStudio (Razviar/assetstudio at REVISION) is the golden oracle for export
 output (plan section 5, R12). This script builds that revision, unmodified,
 from a local clone outside the repository, and runs on every fixture object
-of the four exported classes:
+of the five exported classes:
 
   Texture2D  AssetStudio.CLI  Exporter.ExportTexture2D(item, dir, ImageFormat.Png);
              the PNG it writes is decoded back to RGBA in the harness
   Mesh       AssetStudio.CLI  Exporter.ExportMesh(item, dir), the .obj file
   AudioClip  AssetStudio.Utility  new AudioClipConverter(clip).ConvertToWav()
   TextAsset  AssetStudio.CLI  Exporter.ExportTextAsset(item, dir), the file it writes
+  Shader     AssetStudio.CLI  Exporter.ExportShader(item, dir), the .shader file
+             ShaderConverter.Convert() writes; not run for a shader with
+             Direct3D programs (see below)
 
 UnityPy stays the oracle for what goes in. The objects come from the committed
 UnityPy goldens (goldens.json, modern-goldens.json), each with the input
@@ -23,7 +26,10 @@ An object gets no golden, but an `exportError` saying why, when AssetStudio
 cannot load or export it, names its TextureFormat differently from UnityPy
 (its enum has an extra R16_Alt at 66), leaves pixels of the decode buffer
 unwritten (checked by exporting over a buffer filled with 0x00, then 0xFF), or
-exports different bytes in two runs.
+exports different bytes in two runs. A Shader with Direct3D programs (D3D9,
+D3D11, D3D11_9x) gets one without being exported: ShaderConverter turns them
+into text with Windows' D3DCompiler or the GUI's native HLSLDecompiler, so the
+text depends on the host, and unity-asset-reader-shader refuses them anyway.
 
 Everything executable - the extracted AssetStudio tree, the C# harness, the
 NuGet packages and AssetStudio's bundled FMOD library - lives in --project,
@@ -58,10 +64,11 @@ OUTPUT = ROOT / "fixtures" / "assetstudio-export-goldens.json"
 REVISION = "c37af7dfcdafee93e33b5da9f0285c97998d6ae3"
 # git rev-parse c37af7d^{tree}: the extracted source is exactly this tree.
 TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
-TEXTURE2D, MESH, TEXTASSET, AUDIOCLIP = 28, 43, 49, 83
-CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", TEXTASSET: "TextAsset", AUDIOCLIP: "AudioClip"}
+TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP = 28, 43, 48, 49, 83
+CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", SHADER: "Shader", TEXTASSET: "TextAsset",
+           AUDIOCLIP: "AudioClip"}
 # The output each class's entry holds.
-OUTPUTS = ["png", "obj", "wav", "bytes"]
+OUTPUTS = ["png", "obj", "wav", "bytes", "shader"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
 # extracted tree. FMOD's own license, never committed.
 FMOD = "AssetStudio.GUI/Libraries/x64/fmod.dll"
@@ -99,6 +106,7 @@ METHODS = {
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()",
 }
 
 HARNESS = r'''using System;
@@ -155,6 +163,7 @@ public static class Program {
         var exportTexture2D = Method("ExportTexture2D");
         var exportMesh = Method("ExportMesh");
         var exportTextAsset = Method("ExportTextAsset");
+        var exportShader = Method("ExportShader");
         var game = GameManager.GetGame(GameType.Normal);
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
@@ -259,6 +268,26 @@ public static class Program {
                             }
                             var bytes = File.ReadAllBytes(Single(outDir));
                             result["bytes"] = new Dictionary<string, object> { ["size"] = bytes.Length, ["sha256"] = Sha(bytes) };
+                            break;
+                        }
+                        case Shader shader: {
+                            input["name"] = shader.m_Name;
+                            // ShaderConverter turns Direct3D programs into text with Windows'
+                            // D3DCompiler or the GUI's native HLSLDecompiler: host-dependent, no golden.
+                            var d3d = (shader.platforms ?? new ShaderCompilerPlatform[0])
+                                .Where(p => p == ShaderCompilerPlatform.D3D9 || p == ShaderCompilerPlatform.D3D11
+                                    || p == ShaderCompilerPlatform.D3D11_9x)
+                                .Select(p => p.ToString()).FirstOrDefault();
+                            if (d3d != null) {
+                                result["exportError"] = "not exported: its " + d3d + " programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host";
+                                break;
+                            }
+                            if (!(bool)exportShader.Invoke(null, new object[] { item, outDir })) {
+                                result["exportError"] = "ExportShader returned false";
+                                break;
+                            }
+                            var text = File.ReadAllBytes(Single(outDir));
+                            result["shader"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
                             break;
                         }
                         default:

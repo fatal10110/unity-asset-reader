@@ -1,6 +1,6 @@
 // Browser-safety and dependency-direction guard (R4, R14).
 //
-//   node scripts/check-browser.mjs [core|texture|audio|spine|decoder ...]
+//   node scripts/check-browser.mjs [core|texture|audio|spine|shader|decoder ...]
 //
 // With no arguments every guarded package is checked. Exits 1 and prints every
 // problem found, so a red run says what to fix.
@@ -24,11 +24,20 @@ export const PACKAGES = {
   mesh: { browser: true, noReader: false },
   audio: { browser: true, noReader: false },
   spine: { browser: true, noReader: false },
+  shader: { browser: true, noReader: false },
   decoder: { browser: false, noReader: true },
 };
 
-// Preceded by `.` or a word char means a property or a longer name (`ArrayBuffer`).
-const NODE_GLOBALS = [/(?<![.\w])Buffer\b/, /(?<![.\w])process\b/, /globalThis\.process\b/, /__dirname/];
+// Preceded by `.` or a word char means a property or a longer name (`ArrayBuffer`);
+// preceded by a quote, a string such as a SPIR-V enum name (#242), unless it is
+// an element access (`globalThis["Buffer"]`).
+const NODE_GLOBALS = [
+  /(?<![.\w"'`])Buffer\b/,
+  /\[\s*["'`]Buffer["'`]\s*\]/,
+  /(?<![.\w])process\b/,
+  /globalThis\.process\b/,
+  /__dirname/,
+];
 
 // Anchored at the start of a line, so import-shaped text inside a comment, a JSDoc
 // `@example` or a string literal is not mistaken for an import (core has several

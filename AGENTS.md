@@ -10,6 +10,7 @@ npm-workspaces monorepo (`unity-asset-reader`): a shared parser core, feature pa
 | `unity-asset-reader-mesh` | `packages/mesh/` | in development | Mesh export: `meshToObj()` (Wavefront OBJ, as AssetStudio writes it), `meshToGltf()` (glTF 2.0 `.glb`). Depends on core (peer). |
 | `unity-asset-reader-audio` | `packages/audio/` | in development | AudioClip (FSB5) → WAV, pure TS. Depends on core (peer). |
 | `unity-asset-reader-spine` | `packages/spine/` | in development | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
+| `unity-asset-reader-shader` | `packages/shader/` | in development | Shader inspection text as AssetStudio writes it: GL/Metal source, SPIR-V disassembly. Pure TS. Depends on core (peer). |
 | `texture2ddecoder-wasm` | `packages/decoder/` | published, stable | WASM bindings (emscripten, C++ submodule `texture2ddecoder/`) decoding BC/ETC/PVRTC/ASTC/ATC/Crunch textures to **BGRA**. Node + browser. |
 
 Dependencies point one way: feature packages → core. Core and `texture2ddecoder-wasm` import nothing from the repo. Do not change `packages/decoder/` unless the task says so; it must keep its npm name, public API and tarball file set, and keep building and passing.

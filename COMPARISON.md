@@ -10,14 +10,15 @@ A ✗ does not prove that an undocumented feature is absent.
 
 The **Our library** column covers this project as one library: `unity-asset-reader`,
 `unity-asset-reader-texture`, `unity-asset-reader-node`, `unity-asset-reader-mesh`,
-`unity-asset-reader-audio`, `unity-asset-reader-spine` and `texture2ddecoder-wasm`.
+`unity-asset-reader-audio`, `unity-asset-reader-spine`, `unity-asset-reader-shader` and
+`texture2ddecoder-wasm`.
 CLI features include those provided by its required AssetStudioMod application.
 
 ## Libraries and sources
 
 | Column | Library | Documentation |
 |---|---|---|
-| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [audio](packages/audio/README.md), [Spine](packages/spine/README.md), [decoder](packages/decoder/README.md) |
+| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [audio](packages/audio/README.md), [Spine](packages/spine/README.md), [shaders](packages/shader/README.md), [decoder](packages/decoder/README.md) |
 | unity-js | `@arkntools/unity-js` | [npm README](https://www.npmjs.com/package/@arkntools/unity-js), [tools README](https://www.npmjs.com/package/@arkntools/unity-js-tools) |
 | unityfs-js | `unityfs-js` | [npm README](https://www.npmjs.com/package/unityfs-js) |
 | Studio JS | `node-asset-studio-mod-js` | [npm README](https://www.npmjs.com/package/node-asset-studio-mod-js) |
@@ -74,7 +75,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Export meshes or models | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Export Spine | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
-| Export shader inspection text | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Export shader inspection text | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Edit assets and repack bundles | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
@@ -85,6 +86,11 @@ byte for byte AssetStudio's OBJ for every fixture mesh, and as binary glTF 2.0 (
 `meshToGltf()`; it writes no FBX.
 Exporting Spine means grouping each spine-unity skeleton's data, atlas text and page textures
 (`unity-asset-reader-spine`), from files built with type trees.
+Our library writes a Shader as AssetStudio's inspection text through `unity-asset-reader-shader`'s
+`shaderToText()`: OpenGL and Metal source and SPIR-V disassembly, byte for byte AssetStudio's
+`.shader` file for the fixture shaders. It refuses Direct3D programs, which need Windows'
+D3DCompiler, and the variant lists of Unity 2021.3.10+ / 2022.2+ / 6000 builds
+(`m_PlayerSubPrograms`), which AssetStudio's converter does not read.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
 `unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row

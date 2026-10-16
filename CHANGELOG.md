@@ -7,8 +7,8 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 - **Every package versions on its own**: `unity-asset-reader`, `unity-asset-reader-texture`,
   `unity-asset-reader-node`, `unity-asset-reader-mesh`, `unity-asset-reader-audio`,
-  `unity-asset-reader-spine` and `texture2ddecoder-wasm` each have their own version, and a
-  package is published only when its version changes. Changing the `version` in a package's
+  `unity-asset-reader-spine`, `unity-asset-reader-shader` and `texture2ddecoder-wasm` each have
+  their own version, and a package is published only when its version changes. Changing the `version` in a package's
   `package.json` on `main` is the release.
 - Each follows [semver](https://semver.org/). For the reader packages the public API is what the
   package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
@@ -289,6 +289,24 @@ First release. Peer: `unity-asset-reader@^1`.
   TextAsset (`atlasFile`) and the page Texture2Ds (each material's `_MainTex`). Found by field
   names through type trees; a skeleton in a file without type trees, an atlas that loads its
   textures on demand (4.1+) and an atlas type without `atlasFile` throw `UnsupportedError` (#238).
+
+## unity-asset-reader-shader
+
+Version 0.0.0 on disk until its first release, which the release workflow never publishes
+(`scripts/check-release.mjs`).
+
+### 1.0.0 - Unreleased
+
+First release. Peer: `unity-asset-reader@^1.2.0`, the first core with a `Shader` reader.
+License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
+
+- `shaderToText()` turns a `Shader` into the inspection text AssetStudio's
+  `ShaderConverter.Convert()` writes (#242): the ShaderLab with each pass's programs, OpenGL and
+  Metal programs as their stored source, Vulkan programs decoded from SMOL-V and disassembled to
+  SPIR-V as CSspv prints them. Pure TypeScript, sync, browser-safe. The OpenGL ES, Vulkan and
+  Metal shaders of the 2019.4.41f2 and 2020.3.30f1 fixture bundles convert to AssetStudio's
+  `.shader` file byte for byte. Direct3D programs, variants listed in `m_PlayerSubPrograms`
+  (2021.3.10+, 2022.2+, Unity 6), and `Int` properties throw `UnsupportedError`.
 
 ## texture2ddecoder-wasm
 
