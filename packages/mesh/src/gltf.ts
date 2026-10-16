@@ -74,6 +74,16 @@ interface Attribute {
  * else 32-bit; as in `MeshData` and the OBJ, they are not offset by the
  * submesh's `baseVertex`.
  *
+ * An attribute holding values glTF forbids is left out, for the whole mesh,
+ * so the file stays valid (as the Khronos glTF validator checks it):
+ * - `NORMAL` when a normal is not unit length, within 0.00674 (the
+ *   validator's tolerance), a zero normal included;
+ * - `TANGENT` when a tangent's xyz is not unit length within the same
+ *   tolerance, or its w is not exactly 1 or -1, and whenever `NORMAL` is not
+ *   written (a viewer must ignore tangents without normals);
+ * - `COLOR_0` when a component is outside 0 to 1 (HDR colours).
+ * Normals are never renormalised, so the ones written are the OBJ's.
+ *
  * No materials, other UV channels, bones or blend shapes.
  *
  * @param mesh a Mesh as `obj.read()` gives it (`MeshData`)
@@ -81,8 +91,8 @@ interface Attribute {
  * @throws {UnsupportedError} when the mesh has no vertices, no positions or
  *   no triangles; when an attribute does not hold a number of floats per
  *   vertex glTF can take (positions and normals 3 or 4, tangents 4, colours 3
- *   or 4, UVs 2 to 4); or when a value is NaN or infinite, which glTF does
- *   not allow
+ *   or 4, UVs 2 to 4); or when a value of any attribute is NaN or infinite,
+ *   which glTF does not allow
  * @throws {CorruptError} when a submesh's index count is not a whole number of
  *   triangles, or an index is past the vertex count
  * @example
@@ -161,7 +171,8 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
     },
   ];
 
-  const attributes: Record<string, number> = {};
+  // Every attribute converted first, so its values can be checked before any is written.
+  const converted = new Map<string, { width: number; data: Float32Array }>();
   for (const { key, what, values, strides, width: fixed, convert } of vertexAttributes) {
     if (!values || values.length === 0) continue;
     const stride = values.length / count;
@@ -173,13 +184,10 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
       );
     }
     const width = fixed || stride;
-    const bytes = new Uint8Array(count * width * 4);
-    const view = new DataView(bytes.buffer);
-    const min = new Array<number>(width).fill(Infinity);
-    const max = new Array<number>(width).fill(-Infinity);
+    const data = new Float32Array(count * width);
     for (let v = 0; v < count; v++) {
       for (let d = 0; d < width; d++) {
-        // Rounded to float32 here, so the bounds below are the stored values.
+        // Rounded to float32 as it will be stored.
         const value = Math.fround(convert(values, v * stride, d));
         if (!Number.isFinite(value)) {
           throw new UnsupportedError(
@@ -188,18 +196,44 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
             `Mesh "${name}" vertex ${v}: glTF holds finite floats only`,
           );
         }
-        view.setFloat32((v * width + d) * 4, value, true);
-        if (value < min[d]!) min[d] = value;
-        if (value > max[d]!) max[d] = value;
+        data[v * width + d] = value;
       }
     }
+    converted.set(key, { width, data });
+  }
+
+  // Values glTF forbids in an attribute that Unity meshes do hold (zero
+  // normals, tangents of w 0, HDR colours): the attribute is left out for the
+  // whole mesh rather than written into a file viewers may refuse. A TANGENT
+  // without a NORMAL must be ignored by viewers, so it goes with the normals.
+  const normal = converted.get("NORMAL");
+  if (normal && !everyVertex(normal.data, 3, isUnit)) {
+    converted.delete("NORMAL");
+  }
+  const tangent = converted.get("TANGENT");
+  // A unit xyz and a handedness (w) of exactly 1 or -1.
+  const valid = (data: Float32Array, at: number): boolean =>
+    isUnit(data, at) && Math.abs(data[at + 3]!) === 1;
+  if (tangent && (!converted.has("NORMAL") || !everyVertex(tangent.data, 4, valid))) {
+    converted.delete("TANGENT");
+  }
+  const color = converted.get("COLOR_0");
+  if (color && !color.data.every((value) => value >= 0 && value <= 1)) {
+    converted.delete("COLOR_0");
+  }
+
+  const attributes: Record<string, number> = {};
+  for (const [key, { width, data }] of converted) {
+    const bytes = new Uint8Array(data.length * 4);
+    const view = new DataView(bytes.buffer);
+    data.forEach((value, i) => view.setFloat32(i * 4, value, true));
     accessors.push({
       bufferView: addView(bytes, ARRAY_BUFFER),
       componentType: FLOAT,
       count,
       type: VECTOR[width - 1]!,
       // glTF requires the bounds of POSITION only.
-      ...(key === "POSITION" && { min, max }),
+      ...(key === "POSITION" && bounds(data, width)),
     });
     attributes[key] = accessors.length - 1;
   }
@@ -258,6 +292,40 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
     buffers: [{ byteLength }],
   };
   return glb(new TextEncoder().encode(JSON.stringify(json)), chunks, byteLength);
+}
+
+/**
+ * How far a normal or a tangent's xyz may be from unit length: the Khronos
+ * glTF validator's tolerance (`ACCESSOR_VECTOR3_NON_UNIT`), as the spec gives none.
+ */
+const UNIT_TOLERANCE = 0.00674;
+
+/** Whether the 3-vector at `at` is unit length, within {@link UNIT_TOLERANCE}. */
+function isUnit(data: Float32Array, at: number): boolean {
+  const [x, y, z] = [data[at]!, data[at + 1]!, data[at + 2]!];
+  return Math.abs(Math.sqrt(x * x + y * y + z * z) - 1) <= UNIT_TOLERANCE;
+}
+
+/** Whether `test` holds for every vertex, `at` its first component. */
+function everyVertex(
+  data: Float32Array,
+  width: number,
+  test: (data: Float32Array, at: number) => boolean,
+): boolean {
+  for (let at = 0; at < data.length; at += width) if (!test(data, at)) return false;
+  return true;
+}
+
+/** The per-component bounds of an attribute, as glTF's `min` and `max`. */
+function bounds(data: Float32Array, width: number): { min: number[]; max: number[] } {
+  const min = new Array<number>(width).fill(Infinity);
+  const max = new Array<number>(width).fill(-Infinity);
+  data.forEach((value, i) => {
+    const d = i % width;
+    if (value < min[d]!) min[d] = value;
+    if (value > max[d]!) max[d] = value;
+  });
+  return { min, max };
 }
 
 /**

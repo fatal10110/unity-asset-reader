@@ -157,13 +157,18 @@ function readObj(text: string): Obj {
  * The glTF holds what the OBJ holds: positions and normals bit for bit (both
  * negate x), UV u as is and v as `1 - v` (glTF's origin is top left), and per
  * submesh with faces, the OBJ's faces as the primitive's indices (both reverse
- * the winding).
+ * the winding). With `normals: false`, the OBJ has normals the glTF left out.
  */
-function assertSameAsObj(mesh: MeshData): void {
+function assertSameAsObj(mesh: MeshData, { normals = true } = {}): void {
   const doc = readGlb(meshToGltf(mesh));
   const obj = readObj(meshToObj(mesh));
   assert.deepEqual(bits(attribute(doc, "POSITION")!), bits(obj.v), "positions");
-  assert.deepEqual(bits(attribute(doc, "NORMAL") ?? []), bits(obj.vn), "normals");
+  if (normals) {
+    assert.deepEqual(bits(attribute(doc, "NORMAL") ?? []), bits(obj.vn), "normals");
+  } else {
+    assert.equal(attribute(doc, "NORMAL"), undefined, "NORMAL left out");
+    assert.ok(obj.vn.length > 0, "the OBJ has normals");
+  }
   const uv = attribute(doc, "TEXCOORD_0") ?? [];
   const objUv = obj.vt.map((value, i) => (i % 2 === 1 ? Math.fround(1 - value) : value));
   assert.deepEqual(bits(uv), bits(objUv), "UV0, v flipped");
@@ -397,6 +402,76 @@ test("the GLB: JSON chunk padded with spaces, a name in UTF-8", () => {
   assert.equal(json.nodes[0]!.name, "メッシュ \"1\"");
   const text = new TextDecoder().decode(jsonBytes);
   assert.equal(text, JSON.stringify(json) + " ".repeat(text.length - JSON.stringify(json).length));
+});
+
+// --- values glTF forbids: the attribute left out --------------------------------------
+
+/** FULL with vertex 1's value of one attribute replaced. */
+function withVertex(key: "normals" | "tangents" | "colors", values: number[]): MeshData {
+  const data = FULL[key]!.slice();
+  data.set(values, data.length / FULL.vertexCount); // vertex 1 starts one stride in
+  return { ...FULL, [key]: data };
+}
+
+/** The attribute semantics of the .glb's primitives, after validating it. */
+async function writtenAttributes(mesh: MeshData): Promise<string[]> {
+  const glb = meshToGltf(mesh);
+  await assertValid(glb);
+  const primitives = readGlb(glb).json.meshes[0]!.primitives;
+  for (const p of primitives) assert.deepEqual(p.attributes, primitives[0]!.attributes);
+  return Object.keys(primitives[0]!.attributes);
+}
+
+test("a zero or non-unit normal leaves NORMAL out, and TANGENT with it", async () => {
+  // The validator's tolerance is 0.00674 on the length.
+  for (const normal of [[0, 0, 0], [0, 0, 0.993], [0, 0, 1.007], [0.5, 0.5, 0]]) {
+    const mesh = withVertex("normals", normal);
+    const written = await writtenAttributes(mesh);
+    assert.deepEqual(written, ["POSITION", "TEXCOORD_0", "COLOR_0"], `${normal}`);
+    assertSameAsObj(mesh, { normals: false });
+  }
+});
+
+test("a normal within 0.00674 of unit length is kept as it is", async () => {
+  for (const normal of [[0, 0, 0.994], [0, 0, -1.006]]) {
+    const mesh = withVertex("normals", normal);
+    assert.deepEqual(
+      await writtenAttributes(mesh),
+      ["POSITION", "NORMAL", "TANGENT", "TEXCOORD_0", "COLOR_0"],
+      `${normal}`,
+    );
+    assertSameAsObj(mesh);
+  }
+});
+
+test("a tangent of w 0, of zero or non-unit xyz leaves TANGENT out", async () => {
+  for (const tangent of [[1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1], [0.5, 0, 0, 1], [1, 0, 0, 2]]) {
+    const mesh = withVertex("tangents", tangent);
+    assert.deepEqual(
+      await writtenAttributes(mesh),
+      ["POSITION", "NORMAL", "TEXCOORD_0", "COLOR_0"],
+      `${tangent}`,
+    );
+    assertSameAsObj(mesh);
+  }
+});
+
+test("tangents without normals are left out", async () => {
+  const mesh = { ...FULL, normals: undefined };
+  assert.deepEqual(await writtenAttributes(mesh), ["POSITION", "TEXCOORD_0", "COLOR_0"]);
+  assertSameAsObj(mesh);
+});
+
+test("a colour component outside 0 to 1 leaves COLOR_0 out", async () => {
+  for (const color of [[2, 0, 0, 1], [0, -0.5, 0, 1], [0, 0, 0, 1.001]]) {
+    const mesh = withVertex("colors", color);
+    assert.deepEqual(
+      await writtenAttributes(mesh),
+      ["POSITION", "NORMAL", "TANGENT", "TEXCOORD_0"],
+      `${color}`,
+    );
+    assertSameAsObj(mesh);
+  }
 });
 
 // --- refused meshes -------------------------------------------------------------------

@@ -65,6 +65,12 @@ is the OBJ's, and the tests check it against `meshToObj()` and the Khronos glTF 
 - Converted to glTF's right-handed space as the OBJ is: positions, normals and indices are the
   OBJ's (x negated, each triangle's winding reversed). The tangent's x and its handedness (w)
   are negated too, and UV v becomes `1 - v`, since a glTF texture's origin is its top left.
+- An attribute holding values glTF forbids is left out, for the whole mesh, so the file stays
+  valid and opens in any glTF viewer: `NORMAL` when a normal is not unit length (within
+  0.00674, the Khronos validator's tolerance; a zero normal included); `TANGENT` when a
+  tangent's xyz is not unit length or its w is not exactly 1 or -1, and whenever `NORMAL` is
+  left out or missing (viewers must ignore tangents without normals); `COLOR_0` when a
+  component is outside 0 to 1 (HDR colours). Normals are never renormalised.
 - Indices are 16-bit when the `Mesh`'s are, else 32-bit; a 16-bit mesh that uses index 65535
   (glTF's primitive restart value) is written 32-bit. As in the OBJ, they are not offset by a
   submesh's `baseVertex`.
@@ -83,8 +89,8 @@ No materials, other UV channels, bones or blend shapes.
 
 - `UnsupportedError` when the mesh has no vertices, positions or triangles; when an attribute
   holds a number of floats per vertex glTF cannot take (positions and normals 3 or 4, tangents
-  4, colours 3 or 4, UVs 2 to 4); or when a value is NaN or infinite, which glTF does not
-  allow.
+  4, colours 3 or 4, UVs 2 to 4); or when a value of any attribute is NaN or infinite, which
+  glTF does not allow.
 - `CorruptError` when a submesh's indices are not whole triangles, or one is past the vertex
   count.
 
