@@ -2,7 +2,7 @@
 """Generate fixtures/shader-layouts.json from UnityPy's type tree data (#237).
 
 The Shader reader has version gates no fixture editor covers: the shader
-fixtures (fixtures/BUILDING.md section 17) come from a few editors only. For
+fixtures (fixtures/BUILDING.md section 18) come from a few editors only. For
 every layout from Unity 2019.1 (the oldest the reader supports), this writes
 one synthetic Shader object per Unity version, laid out by the Shader type
 tree UnityPy's TPK data

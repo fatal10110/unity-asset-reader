@@ -1,5 +1,5 @@
 // Shader (#237): the hardcoded reader against readTypeTree() on the shader
-// fixtures (fixtures/BUILDING.md section 17: our own shaders, built by
+// fixtures (fixtures/BUILDING.md section 18: our own shaders, built by
 // 2019.4.41f2 and 6000.6.4f1 for DX11, GLES3 and Vulkan), and against
 // UnityPy's reading of a synthetic object for every Shader layout of Unity's
 // type trees from 2019.1, the oldest the reader supports

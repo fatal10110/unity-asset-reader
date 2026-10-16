@@ -1640,7 +1640,92 @@ contains the prepared plain and half-scale variant pixel references. Those
 references do not settle Rotate90. Its rectangle-only variant harness must not
 be used as a tight-mask oracle.
 
-## 17. The `shader` bundles (#237)
+## 17. Export goldens: the AssetStudio harness (#233)
+
+Export output (PNG, OBJ, WAV, later shader text) has its own oracle: AssetStudio
+itself, the behavior source of truth, at revision
+`c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
+(plan section 5, R12). UnityPy stays the oracle for parsing and names the
+inputs. One command regenerates `fixtures/assetstudio-export-goldens.json` from
+a clean clone; no Unity, no fixture rebuild:
+
+```text
+git clone https://github.com/Razviar/assetstudio.git <external-source>
+python3 -m venv .venv-oracle && .venv-oracle/bin/pip install UnityPy==1.25.3
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --project <external-harness> --dotnet <dotnet-executable>
+npm run verify
+```
+
+`<external-source>` needs only to hold the revision (any checkout state: the
+script extracts the revision's tree with `git archive` and checks its tree id).
+`<external-harness>` is a scratch directory outside this checkout; the script
+refuses one inside it (R2). It takes about a minute, and needs network access
+for the first NuGet restore.
+
+Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above) and a **Windows
+.NET 8 SDK**. AssetStudio's texture decoder package
+(`Kyaru.Texture2DDecoder.Windows`) and the FMOD library it ships are Windows
+builds. From WSL, pass the Windows `dotnet.exe`, for example
+`--dotnet "/mnt/c/Program Files/dotnet/dotnet.exe"`, and a `--project` under
+`/mnt/c/...`; paths are handed over with `wslpath`.
+
+What it does, all inside `<external-harness>`:
+
+1. Extracts the AssetStudio tree, writes a small C# console project that
+   references the unmodified `AssetStudio.CLI` project (and through it
+   `AssetStudio`, `AssetStudio.Utility`), restores it from nuget.org only into
+   its own package folder, checks every restored `.nupkg` against the SHA-512
+   pinned in the script, and builds the `net8.0-windows` side.
+2. Copies FMOD from the tree (`AssetStudio.GUI/Libraries/x64/fmod.dll`, sha256
+   pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
+   executable. FMOD is under FMOD's own license; it stays in the external
+   directory and is never committed. No FMOD account or download is involved.
+3. Lists every Texture2D, Mesh and AudioClip of `goldens.json` and
+   `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
+   copies each bundle into its own folder (AssetStudio scans the folder of what
+   it loads).
+4. Runs the harness twice. Per bundle it loads the file with AssetStudio's
+   `AssetsManager` (`SpecifyUnityVersion`, the CLI's `--unity_version`, set to
+   the editor in the fixture's path, which the version-stripped bundles need),
+   then for each object: Texture2D `Exporter.ExportTexture2D(item, dir,
+   ImageFormat.Png)` of `AssetStudio.CLI`, PNG decoded back to RGBA8; Mesh
+   `Exporter.ExportMesh(item, dir)`, the `.obj` file; AudioClip
+   `AudioClipConverter.ConvertToWav()`. The exporters run on en-US, the culture
+   the GUI's export thread sets (the CLI would use the host's, which changes
+   the OBJ's numbers).
+5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
+   name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
+   the fixture), texture format, size and image data hash, audio data hash.
+
+Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
+pathId) and holds `input` (the metadata it was matched on) and one of `png`
+(`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
+**top row first**, plus the PNG file's own size and hash), `obj` or `wav`
+(`size`, `sha256` of the file), or `exportError`:
+
+| Objects | Golden | Why not |
+| --- | --- | --- |
+| 12 Mesh (`main` bundles) | 12 OBJ | |
+| 18 AudioClip (`audio` bundles) | 18 WAV | |
+| 129 Texture2D | 88 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
+
+For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
+which call the right `Decode*` method by name, stay the AssetStudio verdict.
+The harness also exports every texture twice, over a decode buffer filled with
+0x00 and then with 0xFF (`ConvertToImage` decodes into a pooled buffer), and
+compares the two runs: pixels a decoder leaves unwritten, or output that
+changes between runs, get an `exportError` instead of a golden. On these
+fixtures that only ever hit the misnumbered ASTC_HDR_4x4 (decoded as `R16_Alt`).
+
+Checks that need no AssetStudio run, in `scripts/tests/export-goldens.test.ts`:
+every PCM clip exports to `tone.wav` of section 11 to the byte, and the RG16
+PNG equals section 15's executed `DecodeRG16`, turned top-down.
+
+Section 15's script stays as it is: it executes single pinned methods
+(`CutImage`'s rectangle path, the plain decoders by name) that the full
+exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
+
+## 18. The `shader` bundles (#237)
 
 Two shaders of our own, built by **2019.4.41f2** and **6000.6.4f1** for two
 targets, each with and without type trees: `shader/lz4/<target>` and

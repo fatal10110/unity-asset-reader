@@ -1,0 +1,3430 @@
+{
+  "_oracle": "AssetStudio c37af7d (Razviar/assetstudio), executed",
+  "_generator": "scripts/make-export-goldens.py",
+  "revision": "c37af7dfcdafee93e33b5da9f0285c97998d6ae3",
+  "tree": "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa",
+  "source": "https://github.com/Razviar/assetstudio/tree/c37af7dfcdafee93e33b5da9f0285c97998d6ae3",
+  "inputOracle": "UnityPy: goldens.json (1.25.3) and modern-goldens.json (1.25.4) name each object and its input metadata; UnityPy 1.25.3 hashes each object's bytes where it reads the fixture",
+  "methods": {
+    "Texture2D": "AssetStudio.CLI.Exporter.ExportTexture2D(item, dir, ImageFormat.Png)",
+    "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
+    "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()"
+  },
+  "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
+  "culture": "en-US",
+  "fmod": {
+    "path": "AssetStudio.GUI/Libraries/x64/fmod.dll",
+    "sha256": "cad8c684b8f45573ffda50bfdb92208cade53d2a7ec9eb2bb2b7d2d575f9aaba"
+  },
+  "nugetSource": "https://api.nuget.org/v3/index.json",
+  "packageSha512": {
+    "Kyaru.Texture2DDecoder/0.17.0": "oD1wY4XiooFmaAborMTrxleAsshRqqpmxr+pRYFqEy9vwGzt1rP4NXnTkxugjW62D+NzUOyiVB1FWXjpFfV7mw==",
+    "Kyaru.Texture2DDecoder.Windows/0.1.0": "aBzBXEKsDVavVL56ndzD2WzbMdJOz8CT2MpLIuu6ZqW/zdRATt1paMI7PbGszbJ1njPfOcpNdpnL+zMxRl7Y0w==",
+    "MessagePack/2.6.100-alpha": "hJa2kpbr6oFALeDvNsNHz0ECQM3lBp1eGAoUgtZdiC4DsgsiPyZN7stNGdTCp1thkHsEZUR53/2lz3ifwpRjpQ==",
+    "MessagePack.Annotations/2.6.100-alpha": "rc2k+Ee6QJ5qvV3giD+BrAbaTMsExpEK9af/b/vTrYodsLQumKk8LMNksNDO692i4BlXeaSYxi/j6Y6zshL2yA==",
+    "Microsoft.NET.StringTools/17.4.0": "wgMpr5DH01KB5xryHxP/N8nz+pPyBPgqB+JFXtfzakzIIV0hl+YpBDcN2rYbgv1r/XM6GY20dXTH7G1hyiuspQ==",
+    "Microsoft.NETCore.Platforms/5.0.0": "hJP+EWSMfswgtlMEkNMP1jdElhNFwFAaehCxEEZmHaCbeD3c64syCK5SpyqKlMr9zo3BvWBzwyCB4w0OdAfxdA==",
+    "Mono.Cecil/0.11.5": "oD8nPNv52nOxGak4FRml4SwvyWqonDnaiPwdav5tMm6Vniq3cD9maCFdsXCYm528rUA268X7dHDuWWTAc54Mqg==",
+    "Newtonsoft.Json/13.0.3": "mbJSvHfRxfX3tR/U6n1WU+mWHXswYc+SB/hkOpx8yZZe68hNZGfymJu0cjsaJEkVzCMqePiU6LdIyogqfIn7kg==",
+    "SharpGen.Runtime/2.1.2-beta": "yJbJMKS78s3dCC6AuajLvt07lH1cc5q57Ylp3BJ7XGkegRJDXHMABrjQyQzVwp85YNDeCS5vAtv3tNK+TZY5Eg==",
+    "SharpGen.Runtime.COM/2.1.2-beta": "eLyFyFZTrRQwWC5is4O1hViFU68OO0tYgtkwl7hRzn6E9Uc78+FcOj0hykd59RylEva2PwEa/2e3QM587L6aYw==",
+    "SixLabors.Fonts/1.0.0-beta18": "uBiPe21m3CCu0eNaDQyx3LJ0H9nP5O8PK2f3dSw1RGOfzdx+3sA316XkrByjecgkHxqYJ9/aR7g4A0p3KlSUIQ==",
+    "SixLabors.ImageSharp/2.1.3": "B4VO+wsXBdKEe0NpKa4sojWS+qYDE3W407jqFHCxQFFQPpiivXau/8zTrjUINpiIy5nEaiML/KPcmraJX0zOWQ==",
+    "SixLabors.ImageSharp.Drawing/1.0.0-beta15": "nr49GVBxF47lGY+CE3ZopAtflIHlRa8HDyM53pcrp1hDA+13xLAHpHDiaTScZ5bWZ/l2ycGIGvhSt96iY5KNAg==",
+    "System.CommandLine/2.0.0-beta4.22272.1": "l5p+Zrop4XvFvsQukm7RU2LiOuQD5JjJVeCd/8TTuqFHd6BvleJdWR/JdXoOqhjeueRmKhyhZj+jAPUJpKA4PA==",
+    "System.Configuration.ConfigurationManager/8.0.1": "0u0YuVgqd5msc/yJM5nzxsVG34V7FXNTY3EFmdIbCN0kkjX/aZvs5SFuqgE4e6YchsZzwyCBUT1QLWi+MdNkfA==",
+    "System.Diagnostics.EventLog/8.0.1": "LGNrQOycharaFuZOPPxAfnj/3zhiyGwVTIYaUM9Ufee8HPyYX60yr9MtxGWoDE4eAxbJODTXAKl0W2jKhWw22g==",
+    "System.Memory/4.5.5": "6MjlNsl7lKw0Q8lAsw2tQ89ul9x6jD2Yk3EEj+dOFoYGOE9eAUO9wNhvd4O/n97oQXlkyzqKXXUnE+kLElFy3A==",
+    "System.Runtime.CompilerServices.Unsafe/6.0.0": "1AVzAb5OxJNvJLnOADtexNmWgattm2XVOT3TjQTN7Dd4SqoSwai1CsN2fth42uQldJSQdz/sAec0+TzxBFgisw==",
+    "System.Security.Cryptography.ProtectedData/8.0.0": "hvcXZ/IR+KXxY9lC9S2izw5/fGYoODJR2r9kQSvs5v/HUAnBRuYYZPJrHzaT0CeDRJzIm8BHJb1ZrwHQ59j3uQ==",
+    "System.Text.Encoding.CodePages/5.0.0": "TzLIAbPciz0ofBcxDo6uy7fT0OMR454cQoQ5/qcnaGD+vDhCKmGryT08u82Xv1EYNbMWVT6THgT2MzqAYp3HRg==",
+    "Vortice.D3DCompiler/3.4.3-beta": "bLA0vqV2qGTXniJperOrVMFENoYfm4UzrOI6zjxkylb0SWxyrbg0DiKdB+fT0cUonKAASLRcXpM9YXFaA4OZEA==",
+    "Vortice.DirectX/3.4.3-beta": "f4FpyMpCq3hGhmBqnVecoeOp9n7Q5D3HejoaJyoGvt1BiKJ2tlYT1dv3Hu+IZZ7sl0i8AQsLL65pMAdQ3O7MIQ==",
+    "Vortice.Mathematics/1.7.6": "R2yq/lCV2jveczsY//gB+eCxvYLmv/9wdZQzrWUJQgX6BMZVrobctSbYR2rRyKC9H7+KHfPhGMoqsLUTLiuDKA==",
+    "ZstdSharp.Port/0.7.2": "P6bMQYwgczSwP+sNkIMeoi5/zpE9/zD+fLT9l7bovVs3H/HVkxErMTcxNL9axFTfa5sAIQ+i8xru3w3bVlqQUg=="
+  },
+  "fixtures": {
+    "editor/2019.4.41f2/block/ios": {
+      "CAB-cf6ce423c5ed600a7090d754f4181250": {
+        "-1058491516086694304": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 560,
+            "objectSha256": "d6197074f2c822055c780b8eaff252fe3b32cca601e5bfb1266e83cf452b8176",
+            "name": "31_PVRTC_RGBA2",
+            "format": 31,
+            "formatName": "PVRTC_RGBA2",
+            "width": 32,
+            "height": 32,
+            "imageSize": 448,
+            "imageSha256": "189ef1e0922fabac7ead9f186ca965349fc3a6eb4b3e8913334fc559fe49b5de"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "f427100c745735d6ba25f6022693208cfd12cdf6fb70a068bd1e270d9dd5c360",
+            "pngSize": 2983,
+            "pngSha256": "5f76d67b35e75b822ecbc358f8c1cd71bdea546a21cc1b5db1afb95a1012eaa2"
+          }
+        },
+        "-3655230868143389888": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 880,
+            "objectSha256": "c03caa1706d5e98c40ce0f344d93805da282202001928aea3ca0e372d09991ac",
+            "name": "33_PVRTC_RGBA4",
+            "format": 33,
+            "formatName": "PVRTC_RGBA4",
+            "width": 32,
+            "height": 32,
+            "imageSize": 768,
+            "imageSha256": "5dbd3887102f59defc0adf39c939ff90e41e9dc317eed555c392f8c280171cdf"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "6fac80ea5dbb499de027dc3e4aa61710d214487bda9cd014d870acd2b1dec439",
+            "pngSize": 2515,
+            "pngSha256": "f8b57934159f7fcfa08000b8ec8c3f30cf12497ca2b4c89eb7e0c84134eae52a"
+          }
+        },
+        "6197440607491571507": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 560,
+            "objectSha256": "f255b0ab3af08b8235763e998e9cd3c529fb0537198e67d18feddcdc31ff94d2",
+            "name": "30_PVRTC_RGB2",
+            "format": 30,
+            "formatName": "PVRTC_RGB2",
+            "width": 32,
+            "height": 32,
+            "imageSize": 448,
+            "imageSha256": "d1ab66638aaec47836b573573063323d5db969786a1740bc5828edb2ee2659b9"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "f4618e8309dfc68241af7bbdc08a0388fd44423a91d0d2778c59fa00e3c8c5b4",
+            "pngSize": 1634,
+            "pngSha256": "405b3b7801e5b8cdc38244096c6312af9d7cdc3773ec243a3e347998c73bdad8"
+          }
+        },
+        "7874140374693733573": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 880,
+            "objectSha256": "3ee8b182476c37525aa40a42e98600b5ddb8eef0ef1b3e5a8152c603f5183dc1",
+            "name": "32_PVRTC_RGB4",
+            "format": 32,
+            "formatName": "PVRTC_RGB4",
+            "width": 32,
+            "height": 32,
+            "imageSize": 768,
+            "imageSha256": "0f37ce7d98abda0872281943858e82d94e876bc4d02862a7093d923e6db7c825"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "4f22fd84c7cf7bf5188b0db08cd9f75165aa63de35be92c46f972976e8a20bf0",
+            "pngSize": 1355,
+            "pngSha256": "8e1136b6fe8a1f59a28db869cafd0e25c27008e85dea0bd0699db11e20a9ce5f"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/legacy-probe/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "2419199776941892027": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12392,
+            "objectSha256": "6966061fe8d37e5937f388bfac2bbc99e6e2c455f306df945bc95257b0836f92",
+            "name": "sheet",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 48,
+            "rgbaSha256": "a502efa98fc0be83b02b6312a61fbbbf2b8de3d0b48bb6f710a64bc2013c5368",
+            "pngSize": 402,
+            "pngSha256": "cdd0b5f450d94144e07a5f73f9fb1c59eccd907ce93ca60443aa4c3aee2eb68d"
+          }
+        },
+        "7688546892005434159": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 232,
+            "objectSha256": "fa611b99aefcf50d92a02d84f20c5aa342a484b01e8abec7162d296bcf06d9ed",
+            "name": "SpriteAtlasTexture-fixture-rotate-256x128-fmt4",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 256,
+            "height": 128,
+            "imageSize": 131072,
+            "imageSha256": "7c7a015f873a126c90e3f9c3ae45f9d06157cc5cc7812d9d03d35e6438152341"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 256,
+            "height": 128,
+            "rgbaSha256": "d1e4130f78fe1d32e9385606ee6fce7d255ef95930365c9a32944a155f999f87",
+            "pngSize": 4929,
+            "pngSha256": "9c2a1cf2cfb0dad0453bdc8208e52ca087b0d3029fb92cb5bdb863948132271c"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4-notypetree/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "8082097006500496530": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "8983485164505037740": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4-notypetree/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "8823724225441444264": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 108,
+            "objectSha256": "7de19e0284befe0922584c0f6aeaf2a3499f918f68e0be7439259b30e1a00527",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4-notypetree/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-1107784300911722889": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 440,
+            "objectSha256": "6f4bb80773d41e7f25e991fe8c1f88181c7a76b67e7fd01b5242e17ffa5936d2",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4-notypetree/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "2229888321255208862": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "c389ef013b4425e8b2aece7f4f983507dc128ad80ef7d40196147c6b30abcb33",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "8082097006500496530": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "8983485164505037740": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "8823724225441444264": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 108,
+            "objectSha256": "7de19e0284befe0922584c0f6aeaf2a3499f918f68e0be7439259b30e1a00527",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-1107784300911722889": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 440,
+            "objectSha256": "6f4bb80773d41e7f25e991fe8c1f88181c7a76b67e7fd01b5242e17ffa5936d2",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "2229888321255208862": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "c389ef013b4425e8b2aece7f4f983507dc128ad80ef7d40196147c6b30abcb33",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lzma/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-1107784300911722889": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 440,
+            "objectSha256": "6f4bb80773d41e7f25e991fe8c1f88181c7a76b67e7fd01b5242e17ffa5936d2",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lzma/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "2229888321255208862": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "c389ef013b4425e8b2aece7f4f983507dc128ad80ef7d40196147c6b30abcb33",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/more-plain/textures": {
+      "CAB-b6ec7271e16d6169fe23b363bfe34b24": {
+        "-1907343062372087922": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 180,
+            "objectSha256": "40caa60a847598bb896a18e1187ad7dd548c9efb6669411696fc62a38e7357ac",
+            "name": "RG16",
+            "format": 62,
+            "formatName": "RG16",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "a25096a8e011bc0492685278926d0f26a98a49fa9e890ffcdaa14801360aad0a",
+            "pngSize": 137,
+            "pngSha256": "e4e475a52482bbd67a570339ba6c2d47a48667640d44d9d9f4a665ccf7d0d9c6"
+          }
+        },
+        "-3222961271525609687": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 424,
+            "objectSha256": "643059ddb3fc525d32c8d08cade29dd8449a9f5430b0d0ed00f1827303b658d6",
+            "name": "RGBA64",
+            "format": 74,
+            "formatName": "RGB48",
+            "width": 8,
+            "height": 5,
+            "imageSize": 320,
+            "imageSha256": "6ba51bc5959d3c7ceda23edb9125400efffb37fa91637166e1bc56ba4c9083cd"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "input mismatch: AssetStudio reads TextureFormat 74 as RGB48, UnityPy as RGBA64 (AssetStudio's enum inserts R16_Alt at 66), so its export decodes another format"
+        },
+        "2206851000192931808": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 260,
+            "objectSha256": "7bafef2dfa66bd6f523b27ae44c39d3c0193958366620a1f5731669084c1f9ce",
+            "name": "RG32",
+            "format": 72,
+            "formatName": "ASTC_HDR_12x12",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "input mismatch: AssetStudio reads TextureFormat 72 as ASTC_HDR_12x12, UnityPy as RG32 (AssetStudio's enum inserts R16_Alt at 66), so its export decodes another format"
+        },
+        "5229859441797984649": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 344,
+            "objectSha256": "f5e5e89bc14ace3a48a47affdf00631d52399ac21e7ba59b901916ba8eb285a5",
+            "name": "RGB48",
+            "format": 73,
+            "formatName": "RG32",
+            "width": 8,
+            "height": 5,
+            "imageSize": 240,
+            "imageSha256": "b5146679edab862505197078c78fd7aefad702cb82a5841bbcc48a9b4f11425e"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "input mismatch: AssetStudio reads TextureFormat 73 as RG32, UnityPy as RGB48 (AssetStudio's enum inserts R16_Alt at 66), so its export decodes another format"
+        },
+        "9072186969027517199": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 140,
+            "objectSha256": "1bc8d5d750e09b63461f0ce088aac66e95e945b3d94109eb64a15f341543bd6d",
+            "name": "R8",
+            "format": 63,
+            "formatName": "R8",
+            "width": 8,
+            "height": 5,
+            "imageSize": 40,
+            "imageSha256": "76def75856e5d73ece011b058b02d205991a48f0fcf8b7ddcc24005d57759b23"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "bc56d313447744955eec080eeb8974ee32348154dc632b32922c78569fb48b6e",
+            "pngSize": 122,
+            "pngSha256": "e5812428a19d149d2a77ca576679374e3ab43153f7567b858d45ee08d4f15d11"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/rotation-probe/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-5244857357694794075": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "02831d1ae2c0b6fc6114f9cc3c1b0a938e2871dcb98c2b7f24027deb44870251",
+            "name": "sactx-64x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "b1c0df5a8437307b469910ef240b64030e44592a7a7940b84cc49cc79a639324"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "532fee0b557f018b12e162a1feab9218f3f0c26908da285d85660b5811fdeeb0",
+            "pngSize": 494,
+            "pngSha256": "470589b7b94eb19329b70b23114d004f65b62d909e9673cc950d543a4efbde9a"
+          }
+        },
+        "-6046790050904576251": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "49102cd172f360f6b006843b6aeb0d47ec12302ebc4d8a22e28458b079d6bf52",
+            "name": "sactx-64x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "b354e4c616659d9df4445b39aa5cbb0263fe3672fb4b80239d26745c2a5828e4"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "89e15d730e539ff287abcfc502b414b0d8477dba8bdf940b4d3972a7740dcfcb",
+            "pngSize": 387,
+            "pngSha256": "1efe99c15f79dcda0a5e0277483890321836b1a5b5cf1968643007d435315d1d"
+          }
+        },
+        "-6473860541659250810": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "08ff7a3232f9d9c9550823a1cd46e2c7b9a19c4d99105e0522260429ac698f60",
+            "name": "sactx-32x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 32,
+            "height": 64,
+            "imageSize": 8192,
+            "imageSha256": "7586359a0d4449611374424de0bfe18f90bc125398c6e61eebe250b1844dfd0c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 64,
+            "rgbaSha256": "488103bf5c3bd46dae0ad8f3541585f1512ab7957e373eb6dc81780e71752b21",
+            "pngSize": 167,
+            "pngSha256": "0aa7bae42299de00a354daa9a1d462ba22626d5d3bc26a4c3ff8023d8813b52a"
+          }
+        },
+        "-6975376329083569814": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "945736efd9cb9d6d94c63c2641a0dfed0b2c48de6142d1bed11c41863bc997ab",
+            "name": "sactx-32x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 32,
+            "height": 64,
+            "imageSize": 8192,
+            "imageSha256": "e70d4c4b7421597acc3d8752c68f5f9d040540b9b9e9afa2bc44e6870857b23e"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 64,
+            "rgbaSha256": "83d577d9af8162ed73ff5f60193005321632aa9a0da747b44e7e515aab84c4eb",
+            "pngSize": 293,
+            "pngSha256": "8e2380c5da48e42074e36607f592ed2b5b09329b57e987b6286fb1a80036f670"
+          }
+        },
+        "-8014137707190636211": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12392,
+            "objectSha256": "6966061fe8d37e5937f388bfac2bbc99e6e2c455f306df945bc95257b0836f92",
+            "name": "sheet",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 48,
+            "rgbaSha256": "a502efa98fc0be83b02b6312a61fbbbf2b8de3d0b48bb6f710a64bc2013c5368",
+            "pngSize": 402,
+            "pngSha256": "cdd0b5f450d94144e07a5f73f9fb1c59eccd907ce93ca60443aa4c3aee2eb68d"
+          }
+        },
+        "-9130282818039288351": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "50df6244a8b33ac3a1bc94428b9eaa2ee094b5209e92923befd549329fdeabe9",
+            "name": "tight",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 40,
+            "height": 36,
+            "rgbaSha256": "ce220ac774b358d0b68a0eb651d7d34300120c72f870486b70941b6417b0d0b4",
+            "pngSize": 366,
+            "pngSha256": "dc30e62c1654e6addc8247c5fa9b1fa3cbcfd4ab64450a5752f930852691f96b"
+          }
+        },
+        "2338923737171358870": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "972d68f6f6bddf63b6cee12afcc779ddaca407a75df934e358f8123dfdd47f9d",
+            "name": "sactx-64x32-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 32,
+            "imageSize": 8192,
+            "imageSha256": "1f7f5bfa7c5f8c49d62694936540a31a4c33f66cd0bde1cfec8820e3bb4f6863"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 32,
+            "rgbaSha256": "9be4ac6116aed32658a86de467c3d98f21f2c43b33a7a3b27bb8f77bf465db2c",
+            "pngSize": 289,
+            "pngSha256": "a5a2e9569029c3dfdba0c5310553aee8bf5d277742c3154b73c9d835bb65e26f"
+          }
+        },
+        "6323899307650207957": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "8e7e7d8b813fedf39188a276831ac8e051da82fe6d7eae8310e894633ee21465",
+            "name": "sactx-64x32-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 32,
+            "imageSize": 8192,
+            "imageSha256": "2f26e167ed67069362a0774876d9399297b8b3d6a43f09c316cb7e7d658e2b45"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 32,
+            "rgbaSha256": "90b86973cab2f110aa241238e96636cc43ce745a92f61f65f23f81246ef380ba",
+            "pngSize": 182,
+            "pngSha256": "3acc69cf6c8e4f67c1e66094d0c7b5f5351e67205c145a4028b8bf3c0bfa26cf"
+          }
+        },
+        "6544515774959396812": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "6759bd08b616b7d8509eae98b0e7e795589463ba81f31f0dabbe4854d66b712e",
+            "name": "sactx-64x64-Uncompressed-rect-efc930f1",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "3030fdd66cc64205396acaeecf4a3f210d14671d8ba97ee7fcb31316aca9844d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "81ab07ad64c7642b9510d6ca51a049d82e843c49beafd2e872cba1ab66575231",
+            "pngSize": 583,
+            "pngSha256": "ab95eefbfe4a2f89056010f36042bde479467a38fbb7f3acd55e3057eb78e615"
+          }
+        },
+        "655884448156836700": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "075c764b3cc215fabf56137fa24a58ff9ebd1cf6f8e13b481e89f28961c01645",
+            "name": "sactx-32x32-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 32,
+            "height": 32,
+            "imageSize": 4096,
+            "imageSha256": "0aac4416a46a78217d40019f5f2639b0baf69f8efba803e855ff53866e3a32cd"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "afa5e6a10b463707050ecbb2e3510a393f885687f37aaa138c50063be5ddc061",
+            "pngSize": 243,
+            "pngSha256": "5fc2c0ea35f62039fdab3e3527b0d89e6e0aa625172d0b29a9639184d0da2c66"
+          }
+        },
+        "6732459096345876500": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "d93228c1268599e8197b401e6358738cfd9268e9269875f41982720dfc246842",
+            "name": "sactx-64x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "08948ab2d340c36b27e7c9690fc448026f741f890e236637620a365956f4e053"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "02ff39e5b02df76ec189ed21de0d49176ec5b1cfeda8d0ab08cd2d19283e774c",
+            "pngSize": 438,
+            "pngSha256": "d56e6d6691916a6de3817b4bea7e9ac8d4cde6f382f4dd5fccbbe8e257265f10"
+          }
+        },
+        "710430524655727035": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "3382e6d00ddcad865d1314effebe4a1e4359b2f20c276f281f4c43528ee60677",
+            "name": "sactx-64x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "d506615c1ef173fc8de3b93e299741d3b474414f3af983c16b5147ffa087cb08"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "0d5de69079c44208cbd92d849381aa3e0b854a3d42f490abd25dc11adf8af7a6",
+            "pngSize": 388,
+            "pngSha256": "a2f62c42b73b379b40eaa095208c2d7fb9fbb9296b936c0c1e6ee0da91ce974a"
+          }
+        },
+        "7300725498065191849": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "8a8b7ea763c4797391c156393a9df59e536306d14172099b0f6941e358b1e581",
+            "name": "sactx-64x64-Uncompressed-packed-741cb2a0",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "37d890598a8f7afe832f5c2dc0d5599c876d04e6e29a12a4ce61ba67040b0d5b"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "8cb54d4a1ae6a34edf39ddd8abbbde6586ba3abf68462b2947288ef1ab39aa5e",
+            "pngSize": 717,
+            "pngSha256": "c58c7039e014d34b9051673b880a68c968fc5165e866f9b3d63061dddcf90bee"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/split-alpha/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-1592570001171265598": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12392,
+            "objectSha256": "6966061fe8d37e5937f388bfac2bbc99e6e2c455f306df945bc95257b0836f92",
+            "name": "sheet",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 48,
+            "rgbaSha256": "a502efa98fc0be83b02b6312a61fbbbf2b8de3d0b48bb6f710a64bc2013c5368",
+            "pngSize": 402,
+            "pngSha256": "cdd0b5f450d94144e07a5f73f9fb1c59eccd907ce93ca60443aa4c3aee2eb68d"
+          }
+        },
+        "-2436405732283893592": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 216,
+            "objectSha256": "1385fca63b65a082b75a8a700e543a15c2636bcc738fe6548deaeda5915f3233",
+            "name": "sactx-64x64-ETC1-rect-1753c82c",
+            "format": 34,
+            "formatName": "ETC_RGB4",
+            "width": 64,
+            "height": 64,
+            "imageSize": 2048,
+            "imageSha256": "1cc7cb2ee379fa0f49cf92c73a4b1b088fdf92f8b381c3172620a447c3bee5cd"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "80bf96abebbb054d8d5e9d2b2cc73568da135c7b36e0a3832953272d78f07b1e",
+            "pngSize": 1616,
+            "pngSha256": "9eabd577d61d2fe25abd92b9c3b86d11cbd93a2aaa9b7c0511db87512b16c183"
+          }
+        },
+        "-4527551573794266969": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 220,
+            "objectSha256": "ab1d6d35bbc167e49a96667fc0037c20c988eea477b112de9b6afc74c1fcedc0",
+            "name": "sactx-256x128-ETC1-packed-f4e21655",
+            "format": 34,
+            "formatName": "ETC_RGB4",
+            "width": 256,
+            "height": 128,
+            "imageSize": 16384,
+            "imageSha256": "999449894f225318ddc575b51918121b21b243f8e56e19159b972b56ebd5cee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 256,
+            "height": 128,
+            "rgbaSha256": "8faaa392a6550798be6dc20c9c76c75f2b904c473b124ce00e7cce4354a47503",
+            "pngSize": 15297,
+            "pngSha256": "1d789a3c4bfa3519efc3f478dd5b1d6c881ed771ee2dd2c7c86497ebe116d2a1"
+          }
+        },
+        "-4784893827244251619": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "7f941dfe76f37e7cbb04ef69d75c42c8059cb9f175019add97caf442130c90cf",
+            "name": "sactx-256x128-ETC1-packed-f4e21655_alpha",
+            "format": 34,
+            "formatName": "ETC_RGB4",
+            "width": 256,
+            "height": 128,
+            "imageSize": 16384,
+            "imageSha256": "59a0be82ad250f7f35ace6238ffd7705a46575dc67c97eb78a4e1320f28f62a6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 256,
+            "height": 128,
+            "rgbaSha256": "8be6f5cd82d7601456c5ca4938ca5a9e659dd764a80dddb8ee905188248105b5",
+            "pngSize": 2267,
+            "pngSha256": "323a0380e23df99e53db11ee2c93189c602679ad5bf7d3e3c3bcaf4e1c2579d3"
+          }
+        },
+        "5895805615253427943": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 220,
+            "objectSha256": "b0ff8cfac38a2b7011d3e1ffff503ed89ad9d1ce69061213078b4d1f6047ac44",
+            "name": "sactx-64x64-ETC1-rect-1753c82c_alpha",
+            "format": 34,
+            "formatName": "ETC_RGB4",
+            "width": 64,
+            "height": 64,
+            "imageSize": 2048,
+            "imageSha256": "c48431e8aad56d808870e927b9c3528775bc9dc926b40447e14314b2bd64fb9d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "b3a14ee2cd20ae587242286bf1b310a3f971703bbfbb351afc5664d5de1988bc",
+            "pngSize": 528,
+            "pngSha256": "0a5f38782b73946f17461571030fdb52442960bd87d7e93433ebb22dfc5be24b"
+          }
+        },
+        "6106373168558962893": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "98dd1cf32bafe686b44cfc248c673b682814b622e2e89fc31250311d365de894",
+            "name": "tight",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 40,
+            "height": 36,
+            "rgbaSha256": "ce220ac774b358d0b68a0eb651d7d34300120c72f870486b70941b6417b0d0b4",
+            "pngSize": 366,
+            "pngSha256": "dc30e62c1654e6addc8247c5fa9b1fa3cbcfd4ab64450a5752f930852691f96b"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/sprite/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-2366580110379310511": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 228,
+            "objectSha256": "9c3f3ed4f0ecd64e76e33487a3d7637c8815c8efb0a437c5ef9a4e61228cd885",
+            "name": "sactx-256x128-Uncompressed-packed-e5b25fb2",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 256,
+            "height": 128,
+            "imageSize": 131072,
+            "imageSha256": "ecbfc86723987d70fdc9c5b1a5e5c982ca7538dde5011b31dec7e7f0b22f83e1"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 256,
+            "height": 128,
+            "rgbaSha256": "e86ffd6b973484e031d807b84edba07f2277d20d633b44d5a47840714337e2bf",
+            "pngSize": 4523,
+            "pngSha256": "340d11f4a0a44efb85ad0297fe5007e53c20a729b2d085b58342bb93730d4a49"
+          }
+        },
+        "-592712541611632507": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "eb25ddf7453e3f99edd65ed6991a01da5ca77db734421bed735bc7cc90d1a9d9",
+            "name": "sactx-64x64-Uncompressed-rect-ccab47ad",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "3030fdd66cc64205396acaeecf4a3f210d14671d8ba97ee7fcb31316aca9844d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "81ab07ad64c7642b9510d6ca51a049d82e843c49beafd2e872cba1ab66575231",
+            "pngSize": 583,
+            "pngSha256": "ab95eefbfe4a2f89056010f36042bde479467a38fbb7f3acd55e3057eb78e615"
+          }
+        },
+        "3701123324801877664": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "fe272db0668a9c7b815a36de3a1de274f74f81b78056b7e13ac6591f801c9d24",
+            "name": "tight",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 40,
+            "height": 36,
+            "rgbaSha256": "ce220ac774b358d0b68a0eb651d7d34300120c72f870486b70941b6417b0d0b4",
+            "pngSize": 366,
+            "pngSha256": "dc30e62c1654e6addc8247c5fa9b1fa3cbcfd4ab64450a5752f930852691f96b"
+          }
+        },
+        "5745802606393256402": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12392,
+            "objectSha256": "6966061fe8d37e5937f388bfac2bbc99e6e2c455f306df945bc95257b0836f92",
+            "name": "sheet",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 48,
+            "rgbaSha256": "a502efa98fc0be83b02b6312a61fbbbf2b8de3d0b48bb6f710a64bc2013c5368",
+            "pngSize": 402,
+            "pngSha256": "cdd0b5f450d94144e07a5f73f9fb1c59eccd907ce93ca60443aa4c3aee2eb68d"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/stripped/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "8082097006500496530": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "8983485164505037740": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/stripped/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "8823724225441444264": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 108,
+            "objectSha256": "7de19e0284befe0922584c0f6aeaf2a3499f918f68e0be7439259b30e1a00527",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2019.4.41f2/uncompressed/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-1107784300911722889": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 440,
+            "objectSha256": "6f4bb80773d41e7f25e991fe8c1f88181c7a76b67e7fd01b5242e17ffa5936d2",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/uncompressed/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "2229888321255208862": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 192,
+            "objectSha256": "c389ef013b4425e8b2aece7f4f983507dc128ad80ef7d40196147c6b30abcb33",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/variant/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-2309571429364496736": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "7c8b2b66e324f601cf64fb855bf5769a7646934bc3c54d85c8e59af0d34ebf02",
+            "name": "sactx-64x64-Uncompressed-rect-32b31a0b",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "3030fdd66cc64205396acaeecf4a3f210d14671d8ba97ee7fcb31316aca9844d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "81ab07ad64c7642b9510d6ca51a049d82e843c49beafd2e872cba1ab66575231",
+            "pngSize": 583,
+            "pngSha256": "ab95eefbfe4a2f89056010f36042bde479467a38fbb7f3acd55e3057eb78e615"
+          }
+        },
+        "4625490415959452460": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 224,
+            "objectSha256": "513b0623fb7e3b60250d13073b919859d88982aa8043bdf97c3b2a9e0a8ba9f7",
+            "name": "sactx-32x32-Uncompressed-rect-24f6a862",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 32,
+            "height": 32,
+            "imageSize": 4096,
+            "imageSha256": "b6de58faeaf820c8c4aba97c11d33c083599079466e3653643e7728981d7a919"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 32,
+            "rgbaSha256": "1d8b555b1de748777278e1303caf01ab9d859fe72eed8796db7b8b49facac228",
+            "pngSize": 714,
+            "pngSha256": "2f2a4883c99b1da125c92017404f6fb090759e5adbe23b3405bdeed22245d1f7"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4-notypetree/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-5417295752519730674": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        },
+        "-7976733684623618220": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4-notypetree/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "-3688452361012742923": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 120,
+            "objectSha256": "cee4ee01807188f1a091c4c732e747d0c4dbebf026fd5f5a2013483a431eb7cb",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4-notypetree/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "761322607204554584": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 444,
+            "objectSha256": "515b99d2a9362295fb6fa787643c8d044aec6b67944994bd04ba7716aff15fe3",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4-notypetree/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2731902148048136883": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "objectSha256": "060fab8b2223c1b7e6f3a3857ca99a697a30f550461548a9b345e0e801e91a78",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-5417295752519730674": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        },
+        "-7976733684623618220": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "-3688452361012742923": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 120,
+            "objectSha256": "cee4ee01807188f1a091c4c732e747d0c4dbebf026fd5f5a2013483a431eb7cb",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "761322607204554584": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 444,
+            "objectSha256": "515b99d2a9362295fb6fa787643c8d044aec6b67944994bd04ba7716aff15fe3",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2731902148048136883": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "objectSha256": "060fab8b2223c1b7e6f3a3857ca99a697a30f550461548a9b345e0e801e91a78",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lzma/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "761322607204554584": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 444,
+            "objectSha256": "515b99d2a9362295fb6fa787643c8d044aec6b67944994bd04ba7716aff15fe3",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lzma/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2731902148048136883": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "objectSha256": "060fab8b2223c1b7e6f3a3857ca99a697a30f550461548a9b345e0e801e91a78",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/stripped/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-5417295752519730674": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "52379470c40a869c5020483e679a945e40e51804257abd641d91f8acb73c242c",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        },
+        "-7976733684623618220": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "9c0c860a0440ba3fdd657ee0963effacd42dc84dcf258f9352540754649f1bae",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/stripped/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "-3688452361012742923": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 120,
+            "objectSha256": "cee4ee01807188f1a091c4c732e747d0c4dbebf026fd5f5a2013483a431eb7cb",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2020.3.30f1/uncompressed/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "761322607204554584": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 444,
+            "objectSha256": "515b99d2a9362295fb6fa787643c8d044aec6b67944994bd04ba7716aff15fe3",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/uncompressed/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2731902148048136883": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "objectSha256": "060fab8b2223c1b7e6f3a3857ca99a697a30f550461548a9b345e0e801e91a78",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/block/android": {
+      "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+        "-1467412585407596009": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 320,
+            "objectSha256": "6eb82905639dbf05b15b2a4741a52c436244af567004b5be6b408ef1388525c0",
+            "name": "53_ASTC_12x12",
+            "format": 53,
+            "formatName": "ASTC_RGB_12x12",
+            "width": 32,
+            "height": 16,
+            "imageSize": 192,
+            "imageSha256": "f7e41dbcb6d8d4e50ebff69c688f84aeec7d8a85ee32c1780c76c5fac5c460ae"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "b5dfbcda01f8ceef70ffc2929eedbb14d639fc5c64c38211feb733e38c56ebd8",
+            "pngSize": 977,
+            "pngSha256": "1ea56e8e94bbb838ef526571696599bbc72bbfcde79179974de797ad1eb09186"
+          }
+        },
+        "-2520829393171527924": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 528,
+            "objectSha256": "bf516d50a134d53f128e31fe43a56f3341942ca702f9f39158da7ed876c2e033",
+            "name": "64_ETC_RGB4Crunched",
+            "format": 64,
+            "formatName": "ETC_RGB4Crunched",
+            "width": 32,
+            "height": 16,
+            "imageSize": 396,
+            "imageSha256": "cfc93aefab64a264a42d3740937388d6c9ecef0eab70290a98283843a8f3065c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "c4e0575326ae678f177ae5afe1646e40a2b361fa6c5f35457e32da1326a3beec",
+            "pngSize": 595,
+            "pngSha256": "97ad8c3c8e958211edf4d3283d0a9cad8e774f72362fc172755afb318c7f5994"
+          }
+        },
+        "-3480997141245973899": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 352,
+            "objectSha256": "0c839e5b582c2f2a15fc7028ec8112849183ec7b52c4466ac0ba9103c9deb6b6",
+            "name": "52_ASTC_10x10",
+            "format": 52,
+            "formatName": "ASTC_RGB_10x10",
+            "width": 32,
+            "height": 16,
+            "imageSize": 224,
+            "imageSha256": "9fe267c459927e5b6cb0e17017ff0a6540f45a914d0be8fdec416aeb5c1317a3"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "6bf41f260abb2272dd399e1988e8ec94b5c0cbde1c0ef2e90c2e1df56d8f545d",
+            "pngSize": 1083,
+            "pngSha256": "c7d579fe1f0bf2cb8b954496fce78bc08238bc3153c074ae6a20ad1d0a8c54e6"
+          }
+        },
+        "-3841896814306152457": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 488,
+            "objectSha256": "6b54bf7cff692b977837cf85952087a2f25a528442ea1497c1f9a41aca1ca988",
+            "name": "46_ETC2_RGBA1",
+            "format": 46,
+            "formatName": "ETC2_RGBA1",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "b664bf4a67456d181ec8c2df523d21eba387a7c125c45ea2ce8df41ff64fe0aa"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "08ef0cc9c0fb0e9358099d3b20ce2f5935ea7f46668c087e3eb1d695ad57b821",
+            "pngSize": 533,
+            "pngSha256": "2d83657e5edebec8569840f99e01004c66142f4a45a2c1841b29b27784c1aa14"
+          }
+        },
+        "-404742835940124455": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 848,
+            "objectSha256": "05e90ceacc3549c800d6a166fbae7a49b06f00b4df9cc36597a16b525b6aa650",
+            "name": "66_ASTC_HDR_4x4",
+            "format": 66,
+            "formatName": "R16_Alt",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "b8ebd297925fa6f728d09465f6858e810addd5f4c777e976cae484528f547c91"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "input mismatch: AssetStudio reads TextureFormat 66 as R16_Alt, UnityPy as ASTC_HDR_4x4 (AssetStudio's enum inserts R16_Alt at 66), so its export decodes another format"
+        },
+        "-7097911581415734707": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 348,
+            "objectSha256": "1c2290410e0aeff2dfc2b1ccb2f8df971649dc4b61f1c7e17f90213de61a21c0",
+            "name": "51_ASTC_8x8",
+            "format": 51,
+            "formatName": "ASTC_RGB_8x8",
+            "width": 32,
+            "height": 16,
+            "imageSize": 224,
+            "imageSha256": "7d501a1385bf652c4afb4996838197d2ef8c187ca441863491da5b7fbea8eef5"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "cbe50a65087693730af076e95b5e5152a582a00425d059590bf31b1d102340da",
+            "pngSize": 859,
+            "pngSha256": "606c6e91d67f277b72035600efe1f49c60a7a2fdd85ebd7fa331ebe881ede69a"
+          }
+        },
+        "-7855238351035352437": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 844,
+            "objectSha256": "b3a970be5c4ce287c48a3405bbc5bce670e934ac49bdbc3fca4304a3bb76cf79",
+            "name": "48_ASTC_4x4",
+            "format": 48,
+            "formatName": "ASTC_RGB_4x4",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "121eafab04a471c0383b00120b88f18ee404b7477b4d442fad81addc35b02a2a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "7ccd38585630681e977fe2ca27e35ab1a9d78bb7c93e8a343d9f0881760d78b0",
+            "pngSize": 986,
+            "pngSha256": "a603adc6ce4fb67fd4f569e00c441536c16105d0e5ea1c250809296840639e75"
+          }
+        },
+        "-787316328046847521": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 324,
+            "objectSha256": "85b22ecd1164bfb9ac517d53eb59feb4b4e3369c446b861bf16cb9ec1652970f",
+            "name": "71_ASTC_HDR_12x12",
+            "format": 71,
+            "formatName": "ASTC_HDR_10x10",
+            "width": 32,
+            "height": 16,
+            "imageSize": 192,
+            "imageSha256": "9ff79b8683f77567bde05a5d1530331ac4958ae3305cafd47be040e202e80ae4"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "input mismatch: AssetStudio reads TextureFormat 71 as ASTC_HDR_10x10, UnityPy as ASTC_HDR_12x12 (AssetStudio's enum inserts R16_Alt at 66), so its export decodes another format"
+        },
+        "145567969509761200": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 480,
+            "objectSha256": "e258e5482f679c5e1d13b9647d1385a5f490e1e36b913ccfe07bb4829fb27398",
+            "name": "41_EAC_R",
+            "format": 41,
+            "formatName": "EAC_R",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "cce9dc2d5bfe07a19bf52011651c51154c67c32cf5f84a54565589bf6423f617"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "2d0f032c78e33ad8f5a99c2b34e57453aeb71beead1040ed8d2c1ef8d3a9240f",
+            "pngSize": 134,
+            "pngSha256": "0df8ebf47519fd3e451a1e8d6f41a98064587f5e6e974e8fb4f6201c98bbaa1c"
+          }
+        },
+        "3101995342740521791": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 780,
+            "objectSha256": "1750d80991a9d557f92aedecfae91dac73d4f842ad2a15179752ec7180c0b9fe",
+            "name": "49_ASTC_5x5",
+            "format": 49,
+            "formatName": "ASTC_RGB_5x5",
+            "width": 32,
+            "height": 16,
+            "imageSize": 656,
+            "imageSha256": "811ead9aae9ea36cff1b83dc6cf008ebd72b02f46eeae1a922398393321fcf6a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "30f2a1eaaa28bcdff7e67edec31d837c060784c5c9f986df9eb16d2c4fe8f3f2",
+            "pngSize": 974,
+            "pngSha256": "ecf7024379ef5cdbbf00b77e69a30136e2b059d73c1b3079c82fe55814659e3b"
+          }
+        },
+        "6009358047425432354": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 792,
+            "objectSha256": "9e6a78709972033d52375f02d13f3444fb1274cb3411d4a362e4445df18f193e",
+            "name": "65_ETC2_RGBA8Crunched",
+            "format": 65,
+            "formatName": "ETC2_RGBA8Crunched",
+            "width": 32,
+            "height": 16,
+            "imageSize": 653,
+            "imageSha256": "980b0f56419fac005ce24671e13d1220ddf972710be4e09e60f62751cf026f99"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "32695518e56da8db7172b5adc516bccc0a24bc2526fc77283365907d6a005558",
+            "pngSize": 873,
+            "pngSha256": "b3f2aff4b710b1f4b8a6c9eaeef2decc24a54e2dfc286f41d40950051228efd2"
+          }
+        },
+        "6473298024545626514": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 484,
+            "objectSha256": "6286fb64744f0f3841bb977d6affc2ba4812b838c68ca3b4c04ff39fae6ac9c0",
+            "name": "45_ETC2_RGB",
+            "format": 45,
+            "formatName": "ETC2_RGB",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "7bafe92d1d0e13882073d0851c4a54adb5b3b3d0cca599365e35020693e14a79"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "60c6bf4d57006e098f0e1e6caf5329a7f5bd0b9d4bd6e08361d7e4b0c4f97674",
+            "pngSize": 385,
+            "pngSha256": "2bce1826b6058128fc8417bf83651a5953ec724002f5ae830199931876323811"
+          }
+        },
+        "726338578915715017": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 588,
+            "objectSha256": "87b52f712bfb6af5f17357d61ce0141a47fe618a838766dc146a9402e802c766",
+            "name": "50_ASTC_6x6",
+            "format": 50,
+            "formatName": "ASTC_RGB_6x6",
+            "width": 32,
+            "height": 16,
+            "imageSize": 464,
+            "imageSha256": "ba5035b55af434d05d74b0ece9e566c8236ada914200a924ee35cd26a3ccbc28"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "350986ce8ec5e771cd400b61070d5eccf347d98940a4230abacba438ecb98c74",
+            "pngSize": 1069,
+            "pngSha256": "6e6a5ffcce1f4f0c429bcdc6a9fb73b786bf67e9da47d92502bed01b8804bf02"
+          }
+        },
+        "7843455910421604857": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 844,
+            "objectSha256": "127bf5891d6c9f057e672b50b8abc209e475f030fd95d2285c338ea7e689978e",
+            "name": "43_EAC_RG",
+            "format": 43,
+            "formatName": "EAC_RG",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "5b686e81dc23e75ec2beb6d04506c4e4657d5535c9be4aff9d88bc484ed50a8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "e0d30bf0f85980fa0e78c07a3ef8ab6cbb363220b9063aebd1a81120fb786333",
+            "pngSize": 194,
+            "pngSha256": "6517f369aedac577f2637452163d6924eb6675b947eab3e78850ec3b93f8e429"
+          }
+        },
+        "7858577456546270001": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 848,
+            "objectSha256": "a5e5ac2609b14580d7c97b2c8c90b7a35f39fff01611bd68dd33d9de6dfd069e",
+            "name": "47_ETC2_RGBA8",
+            "format": 47,
+            "formatName": "ETC2_RGBA8",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "26df1ebb4772f7d1e2f438c86ef585022f34c7d8323f701cc093838e213f45c5"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "7f0ed86d4a91238e49480fde0de8d8fe8c4fcdcb845f6a5bdc9491c270140664",
+            "pngSize": 704,
+            "pngSha256": "06a9361b27ae3f22ceab2d79ff5f10b9e8837e34b84d94e285f63316d46c421e"
+          }
+        },
+        "8470382485787409961": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 484,
+            "objectSha256": "785ddd55205a82646b792882cc28134d69eba658693ca623e40b6513fa141b41",
+            "name": "34_ETC_RGB4",
+            "format": 34,
+            "formatName": "ETC_RGB4",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "00006eee53667330bf3d086edeae240cd8ad5e91d2759cd2b3ab716a3b1f8e05"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "878214efe621dca5e74a3a22445fbd3c84cbc38f25a5bf1f7e380826420fd058",
+            "pngSize": 489,
+            "pngSha256": "a33c572d76543c3febbee259dbd3717558da5b6e51b83fdf6537da47e5b6e4d3"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/block/windows": {
+      "CAB-591a9771352deb056ec1e4e650bb0860": {
+        "-7608639151530802833": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 484,
+            "objectSha256": "d4929b322af01682ee6633add686d703882d52a4215bd512ec906e0022a862a0",
+            "name": "28_DXT1Crunched",
+            "format": 28,
+            "formatName": "DXT1Crunched",
+            "width": 32,
+            "height": 16,
+            "imageSize": 356,
+            "imageSha256": "871319187ba14df4d4625b06b9edf0ffa8d72d6aa5ebd4905a62ddcbe4e6ca6c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "454bdd47520a58b5c9f86b5c820c4d62bf41a48acba7d9cdec03c28063fc046a",
+            "pngSize": 349,
+            "pngSha256": "b9517a315b6fe286f33179b382a195018e0a2f49aa5846ab8e844db10449ec77"
+          }
+        },
+        "1593602975251878251": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 480,
+            "objectSha256": "cc5a2d4d15bb84e8aed7cbb0468b8aa5bd186ead569f325ead6217cfa2aa430e",
+            "name": "10_DXT1",
+            "format": 10,
+            "formatName": "DXT1",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "d06d22104e3af5b9e84d42b8649949d012f8774cf42f921cc82e378a7ed004a4"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "a70f177d51f34692345b3b4b5d4a42ad519b54a71e3bd3cba1e7aaceade4e0c3",
+            "pngSize": 260,
+            "pngSha256": "7feaf221cf65a469d55fc4b60e3876cbbfda0f980601c650ff934496b9270027"
+          }
+        },
+        "2382523547647860234": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 840,
+            "objectSha256": "ddc181eb4226819d8d19b24818a05ba0fed5544e6d038c261649fee8b00a0592",
+            "name": "12_DXT5",
+            "format": 12,
+            "formatName": "DXT5",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "a7b2706f88d5ef0b2135880cb7ddfde9d70fb043af2887aaebf350863791066b"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "544374f79666909b02f1c811a90787620c338b81ebf428c93c54802c967d0aec",
+            "pngSize": 453,
+            "pngSha256": "818497b53a12096f85c396ef39c25fd4f2fabad064199743d984ad291a124dbe"
+          }
+        },
+        "2475789864911729534": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 840,
+            "objectSha256": "767c71e219310d1f20bf38ba58197aaadc5ab01ff8638d46bb8a7b6c643b7f8b",
+            "name": "25_BC7",
+            "format": 25,
+            "formatName": "BC7",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "c1bec51ea3d3efc3bba8f1abbbfd49fe31b728e3acb39577a8bd11a0228aa50d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "ea64a10209764778153cf1cd415f903e2e8c05acea74ee0398ed9e528d0bbf48",
+            "pngSize": 774,
+            "pngSha256": "5ce555758afc57f72c76d640d6175e23fd6af2bfdd766ac6ed710752e1b2a4f9"
+          }
+        },
+        "4034067649381072084": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 480,
+            "objectSha256": "c10d3c707126f309ca89352cad7c2bd629acf2a9f864ae232f8ecb60fb9f25e5",
+            "name": "26_BC4",
+            "format": 26,
+            "formatName": "BC4",
+            "width": 32,
+            "height": 16,
+            "imageSize": 360,
+            "imageSha256": "f7537325e7f1b5ac2d9bdd7e8cbe58d34d7fcf6d888d6b827cf358683f49e2ec"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "214087943b21df6caa26a08372a698aeffbd78d2c805c2d2d8f9900211a5952a",
+            "pngSize": 145,
+            "pngSha256": "651433ac6f4a035c92f0202a9ce65e8130444101c74e1d0ebc49647db7dff503"
+          }
+        },
+        "6460823294010242195": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 840,
+            "objectSha256": "a791e8205648b54f06a400fae726a85dfed96a8c98784d4f5407322d1388465f",
+            "name": "27_BC5",
+            "format": 27,
+            "formatName": "BC5",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "5f921d5ae081a1847d01ada9c250cc0d39f69dd9006d6b6d35bcaad50ede307c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "9a9c9f723c7e000e1c07046a2b9ef83ac5703ce1026bef195eb94a11e1c48f60",
+            "pngSize": 159,
+            "pngSha256": "475b84196602883c53ac31f6b7655d93e44547f8aea99bb4b2d8bca379b90590"
+          }
+        },
+        "6558190817624518578": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 840,
+            "objectSha256": "509c3a27db30b4b01ed048bdf231f42eb46d99ba484a6ee2104c909b0db9a5cf",
+            "name": "24_BC6H",
+            "format": 24,
+            "formatName": "BC6H",
+            "width": 32,
+            "height": 16,
+            "imageSize": 720,
+            "imageSha256": "b1e382b5e78672d4127df5231e2c9a1999c8393232cef8d24dbf94274c8bd0ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "067a80cff2e78680572ef324115127271ea473b20dcd0ee16576e236d7d46b91",
+            "pngSize": 490,
+            "pngSha256": "dc422e34aed03544f66d4d071144dcfcce73839183dc9394042ecb0aaf44673b"
+          }
+        },
+        "6762633878724376406": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 740,
+            "objectSha256": "24ad4b4e0eb7b298d209c69bfaca4688c790e609659367edf626951d0abaabc4",
+            "name": "29_DXT5Crunched",
+            "format": 29,
+            "formatName": "DXT5Crunched",
+            "width": 32,
+            "height": 16,
+            "imageSize": 612,
+            "imageSha256": "a737991686b39d6856d1854ded1455e75fc5ac6ae2874f13d262d2ad36b46f52"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "27dd0e21bb75f3f34b5ada8c2f16570ef00dcb1ccf499106eedc805406637b43",
+            "pngSize": 666,
+            "pngSha256": "eef4be57b5ea131703e4619f172f022363c36ed2fdbe5832439ec97d2e1cb3ed"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4-notypetree/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-8697092545929151112": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "d8fb9bc505bde4da7ade1be158d78dcdee95313537050e2a9bdbdaf701d23ce3",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "5926064380314684418": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "007b96b74f48127155340f9b377188aabd66505822b34a96d4c90f87d33d86cd",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4-notypetree/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "6576359394872337110": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 124,
+            "objectSha256": "bc355d8d9cc50b26bfa96ca02ee5386ac26c067f4fadc72783c32ae31933bc4c",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4-notypetree/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-5437611257301171512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 476,
+            "objectSha256": "0936d973fa5277c8672d5976afcf02bbb40a5995dd1733ce577fe9da3ef7f56b",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4-notypetree/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2966962111441417370": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "objectSha256": "706aa5dd453d529e608980fdf02f1aeba8052fdfc00df7442b9bf71bdedf7dd7",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-8697092545929151112": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "d8fb9bc505bde4da7ade1be158d78dcdee95313537050e2a9bdbdaf701d23ce3",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "5926064380314684418": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "007b96b74f48127155340f9b377188aabd66505822b34a96d4c90f87d33d86cd",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "6576359394872337110": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 124,
+            "objectSha256": "bc355d8d9cc50b26bfa96ca02ee5386ac26c067f4fadc72783c32ae31933bc4c",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-5437611257301171512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 476,
+            "objectSha256": "0936d973fa5277c8672d5976afcf02bbb40a5995dd1733ce577fe9da3ef7f56b",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2966962111441417370": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "objectSha256": "706aa5dd453d529e608980fdf02f1aeba8052fdfc00df7442b9bf71bdedf7dd7",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lzma/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-5437611257301171512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 476,
+            "objectSha256": "0936d973fa5277c8672d5976afcf02bbb40a5995dd1733ce577fe9da3ef7f56b",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lzma/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2966962111441417370": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "objectSha256": "706aa5dd453d529e608980fdf02f1aeba8052fdfc00df7442b9bf71bdedf7dd7",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/plain/textures": {
+      "CAB-b6ec7271e16d6169fe23b363bfe34b24": {
+        "-2832168986171073264": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 160,
+            "objectSha256": "469d2fb913895861fc1a3a89141b81159ede58348b0bf6fe9d0a0f3e050ee8c5",
+            "name": "Alpha8",
+            "format": 1,
+            "formatName": "Alpha8",
+            "width": 8,
+            "height": 5,
+            "imageSize": 40,
+            "imageSha256": "76def75856e5d73ece011b058b02d205991a48f0fcf8b7ddcc24005d57759b23"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "fe690fe65fd3cc9961142e5bd61099349bb77c6af5fb50e56e9166fd2a7245d8",
+            "pngSize": 124,
+            "pngSha256": "46d90bd477c70fa5fe4930da172f475bade5119c75770a1189d873d2534029c8"
+          }
+        },
+        "-3159872654653822976": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 276,
+            "objectSha256": "7531bde066b5a4fca3125f6f361fee0010064d04f9b4bd0aa633640130b7196e",
+            "name": "YUY2",
+            "format": 21,
+            "formatName": "YUY2",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "d74c27cdc1e2b50a7be20873095a8b69d0f303822eb13e912475dcfe49ba539e",
+            "pngSize": 243,
+            "pngSha256": "24e5821dca06e5a30107cf1d46cb2ff01ea9f004419f96e567002835d2b7f5d7"
+          }
+        },
+        "-5239806702089811666": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 196,
+            "objectSha256": "b54da8b70f08aa28056276f86835117573fa71c4740aa46e1e9080f181d9103b",
+            "name": "R16",
+            "format": 9,
+            "formatName": "R16",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "ab84fa9507f2ff87555d11bb8ed63226308078e8fd2f350dd06d9656f76ef08c",
+            "pngSize": 137,
+            "pngSha256": "562f6ab76d527ad86cba6b6c765aaae27dc11a0eb54fe8380038df08d6760e9b"
+          }
+        },
+        "-6763931696315438614": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 440,
+            "objectSha256": "6bffc4e30384d306eb17997993cf742b2bfb02134c01726d38a954fa60116d8d",
+            "name": "RGFloat",
+            "format": 19,
+            "formatName": "RGFloat",
+            "width": 8,
+            "height": 5,
+            "imageSize": 320,
+            "imageSha256": "955119532bcd9d5cbebcd10b6452cbd0aa41e165c3b173be446de3f3ce340c40"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "cb1abfa04130cb3391991ed8a79a163a974737141b699d8dd1e7397cae92d0b1",
+            "pngSize": 145,
+            "pngSha256": "cd403b7c02a7f891b9ddc893d4b1895f37b0fc281cb4b5dec1cda68d43793aeb"
+          }
+        },
+        "-8310544479731363474": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 764,
+            "objectSha256": "2cf4dfb013a0d7f53a8bd2f494b5a49e479972e5740d139ce81c45ff7cffe6c6",
+            "name": "RGBAFloat",
+            "format": 20,
+            "formatName": "RGBAFloat",
+            "width": 8,
+            "height": 5,
+            "imageSize": 640,
+            "imageSha256": "d9073bb1e8ae6bf437820617036b52ef9ae2792f70398c13239f5c98c78d27ca"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "21d450f5e6a561034d173ebcbf99f688baded334e1b06cefe837c912c0349918",
+            "pngSize": 141,
+            "pngSha256": "692ab60b3f02c9440682db184b0360e08a9d474e47e14df38cb992ebc87a6994"
+          }
+        },
+        "1088965797505479705": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 280,
+            "objectSha256": "139c8959027a12a241abd687169605a1fa6015fd3fa4b9f78d6511e42ca348b4",
+            "name": "ARGB32",
+            "format": 5,
+            "formatName": "ARGB32",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "b204028bfc0636012fd77e3bd708f2d537fc1ef43eb2f122f7f41e404ea57266",
+            "pngSize": 149,
+            "pngSha256": "56c7b5e606f309fd57dc49d351131229a7894c9194dfbed9ff5f12cfa8106192"
+          }
+        },
+        "4085711617783598899": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 200,
+            "objectSha256": "3584f8f778ac776af8d846d99b5566b848f8dffdde506e6526cde148203fab45",
+            "name": "RHalf",
+            "format": 15,
+            "formatName": "RHalf",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "086b5aad4604def62e7c0c023583b5013600126cd1495727e6ccdd2f38ce6796"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "2de1cd979a8342cd5c8c92d946aec5117e33c4dd2f4ec1bd24a6d8703e1ea6f9",
+            "pngSize": 120,
+            "pngSha256": "8d2787c328c799189376186b0ea825264b6a9365865a2956e3c338c5530743e9"
+          }
+        },
+        "4269294957971473202": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 280,
+            "objectSha256": "29d398eb8323e9df5d1e15d236bea8ed548e1c69023f303f77121b9bf8e26019",
+            "name": "RGHalf",
+            "format": 16,
+            "formatName": "RGHalf",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "00234e2f088b0ed815c8483bbb1ea93031324a9cceee95b4ff50a45e00e57ddd"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "cb1abfa04130cb3391991ed8a79a163a974737141b699d8dd1e7397cae92d0b1",
+            "pngSize": 145,
+            "pngSha256": "cd403b7c02a7f891b9ddc893d4b1895f37b0fc281cb4b5dec1cda68d43793aeb"
+          }
+        },
+        "4438933582419933439": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "objectSha256": "d38e3ad7979380112e2d52d270df573f0593de3bb55778683f221aab539e4e8b",
+            "name": "RGB24",
+            "format": 3,
+            "formatName": "RGB24",
+            "width": 8,
+            "height": 5,
+            "imageSize": 120,
+            "imageSha256": "5df24dd802ac26132ce608dcb5f09841eef039ee0f152acf98d26d17fe4e88e6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "03da851524f411d7639a6a5de50e9344de8bc53abef3d512cb7cee2b396e4126",
+            "pngSize": 144,
+            "pngSha256": "dfab674da9246ed94e48913cd10afbbf4fc848055bf496c0b0cea4088af47a4c"
+          }
+        },
+        "4622825323507962714": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 284,
+            "objectSha256": "5f10816a2900d74b839996e4e5aa1f40b35e314f0d8111c3d829a20f609afe03",
+            "name": "RGB9e5Float",
+            "format": 22,
+            "formatName": "RGB9e5Float",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "65068e670bbfcaf2dc6cd8e198cdd1c31415297c917a6850ef4e4887b7314ccc"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "26ddea27abdbd849d0f450b7426aedfaf60323c96db05263bbf24ae93de71ce1",
+            "pngSize": 223,
+            "pngSha256": "a24beec84b8cbc1b62fc42f1c289b2514799f1a3a449c3f6fdb97d0769bebcef"
+          }
+        },
+        "6907235663158918918": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 200,
+            "objectSha256": "682e5788ed72f2ee93015ef045e9bfe1f00c3674eab79be5051c235335029093",
+            "name": "RGB565",
+            "format": 7,
+            "formatName": "RGB565",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "e640739d78cf79604e30f10a687deb0fdff7baf1c1e2b9195c42549a0ebfcb02",
+            "pngSize": 203,
+            "pngSha256": "db178f2f02236a3e809e0bdf330ee4b4ce3eb3a8147273753625a667090b865a"
+          }
+        },
+        "7168832519306753378": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 280,
+            "objectSha256": "10fa8a0bb4d01fd01d6255e31f8a9024e00d88b7acb8b341981234240ad838d4",
+            "name": "RGBA32",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "ef5f3f5a9fe6ebd70252ffc6c63eeb3cd8bd48e5da10f21352414c3e1173bc0e",
+            "pngSize": 128,
+            "pngSha256": "718efc6303bff6c2104080dab2b3139893379324d40e90a65a1a2ad85e549c24"
+          }
+        },
+        "7691121976916583098": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 440,
+            "objectSha256": "66555c97f010f77505a83709e6f88f7c065012cad4ce7ad0fbec8d17305e317b",
+            "name": "RGBAHalf",
+            "format": 17,
+            "formatName": "RGBAHalf",
+            "width": 8,
+            "height": 5,
+            "imageSize": 320,
+            "imageSha256": "2517e4adbc616dfbf547d0bc44b4d9c04269b3905c738e26ee5a4af770249a54"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "21d450f5e6a561034d173ebcbf99f688baded334e1b06cefe837c912c0349918",
+            "pngSize": 141,
+            "pngSha256": "692ab60b3f02c9440682db184b0360e08a9d474e47e14df38cb992ebc87a6994"
+          }
+        },
+        "8246691180915658923": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 200,
+            "objectSha256": "a0be59f1ee6b0240145d56d6929551304742c8a66895329fadb5639dfdaa18c2",
+            "name": "ARGB4444",
+            "format": 2,
+            "formatName": "ARGB4444",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "1a56b1ee229e54a80230473cf7303770ed6d7c0bbcc7b8f5107742d06771dea2",
+            "pngSize": 164,
+            "pngSha256": "efa185a637c83b2abcdba8a990af410675cea50637abad05c0b98d0190b15db7"
+          }
+        },
+        "8270416328734266514": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 280,
+            "objectSha256": "e870f4f4fd381eba90d2745414a009f2243d4e2cf9b0860646d93ddffab3745f",
+            "name": "BGRA32",
+            "format": 14,
+            "formatName": "BGRA32",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "3e183bdef86e7f4e548752e9b360058c71070371c12b369e912a980d3d79e501",
+            "pngSize": 151,
+            "pngSha256": "84a33fa2a151a08ad37baf6f3839f81c191de07912fdde7d6e323b32069fd360"
+          }
+        },
+        "8495813683791342181": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 200,
+            "objectSha256": "cdcf5899ba795b9e678651293de4b0595d27d6de43f50155fdf450410500b6b6",
+            "name": "RGBA4444",
+            "format": 13,
+            "formatName": "RGBA4444",
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "21e909a841af3402a4e98eb5dd6c0e07ada7103c83034a637bf3eee8139a8bfc",
+            "pngSize": 165,
+            "pngSha256": "1133aa217980c09098ee760e05d47e3ca12b09bccabd5aa645185c437a710c0a"
+          }
+        },
+        "8771068923228943863": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 280,
+            "objectSha256": "3191504ae62611f0cd163535b361b912e27cd67af2eff34d17b0fb5842f65e57",
+            "name": "RFloat",
+            "format": 18,
+            "formatName": "RFloat",
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "5734da10248caa7c12f5a2e88a87a834263afbf4b68e59eff29a91655b254e31"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 5,
+            "rgbaSha256": "2de1cd979a8342cd5c8c92d946aec5117e33c4dd2f4ec1bd24a6d8703e1ea6f9",
+            "pngSize": 120,
+            "pngSha256": "8d2787c328c799189376186b0ea825264b6a9365865a2956e3c338c5530743e9"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/sprite/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "476356339375776789": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 244,
+            "objectSha256": "800951a97faefb234b54c30e7218069215bebfe930e2966277c6547f9d038b31",
+            "name": "sactx-0-128x128-Uncompressed-packed-4ecdcd87",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 128,
+            "height": 128,
+            "imageSize": 65536,
+            "imageSha256": "68a962358a742609e7fe1dc3117d837cb9b6abf99321dca136993e594626aad8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 128,
+            "height": 128,
+            "rgbaSha256": "924fd56ea67a113de6dfc017b80c732c7276bbb7003c7c90f6112e4ddf9842ca",
+            "pngSize": 3575,
+            "pngSha256": "857279b46393449ff64394e0f9742f8a46923369fd78196939261c6e7b14f217"
+          }
+        },
+        "4844007499873594028": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "objectSha256": "1ca54c38be716cd5256a52b07a77f9a313e9e62c6a6ff9efffd15420951a7414",
+            "name": "tight",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 40,
+            "height": 36,
+            "rgbaSha256": "ce220ac774b358d0b68a0eb651d7d34300120c72f870486b70941b6417b0d0b4",
+            "pngSize": 366,
+            "pngSha256": "dc30e62c1654e6addc8247c5fa9b1fa3cbcfd4ab64450a5752f930852691f96b"
+          }
+        },
+        "704835478652708463": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "objectSha256": "49bcff5d73ca37ca2338240821e159a8c777460197566f973450b5db7bea3219",
+            "name": "sactx-0-64x64-Uncompressed-rect-59967a26",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "c148d50ba12949dcc0c1ef57997fac5a89a8088373d90f6804e8701f4d4308d7"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 64,
+            "rgbaSha256": "1751bff3e4a8655537e87369b377edd420089b89d4db2b4cd7b36625b41ad301",
+            "pngSize": 488,
+            "pngSha256": "cdde94f7d86994ed1c19f1384e8652c01fe1ba4d6b62e10335f93de78bc297b1"
+          }
+        },
+        "9032369681395423768": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12408,
+            "objectSha256": "ac4b21fc29865539179dea070edfb69358788e00cf1b49d20d104d45e54a090f",
+            "name": "sheet",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 64,
+            "height": 48,
+            "rgbaSha256": "a502efa98fc0be83b02b6312a61fbbbf2b8de3d0b48bb6f710a64bc2013c5368",
+            "pngSize": 402,
+            "pngSha256": "cdd0b5f450d94144e07a5f73f9fb1c59eccd907ce93ca60443aa4c3aee2eb68d"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/stripped/audio": {
+      "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
+        "-8697092545929151112": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "d8fb9bc505bde4da7ade1be158d78dcdee95313537050e2a9bdbdaf701d23ce3",
+            "name": "tone-vorbis",
+            "dataSize": 576,
+            "dataSha256": "fc0c0332db4628ed1fedfa4428fc4e265648111a1c12098a422847c3a7fe95fe"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "6942dbb8cee3227c96342e359b955707f278c1d7e54f6c7f375a9860a1614f5a"
+          }
+        },
+        "5926064380314684418": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "007b96b74f48127155340f9b377188aabd66505822b34a96d4c90f87d33d86cd",
+            "name": "tone-pcm",
+            "dataSize": 11136,
+            "dataSha256": "48d3b892de968018f7a93cae8e4de6f961f4022becc01ec7b8f988930e50dde8"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11068,
+            "sha256": "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/stripped/font": {
+      "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "6576359394872337110": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 124,
+            "objectSha256": "bc355d8d9cc50b26bfa96ca02ee5386ac26c067f4fadc72783c32ae31933bc4c",
+            "name": "Font Texture",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 0,
+            "height": 0,
+            "imageSize": 0,
+            "imageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/6000.3.25f1/uncompressed/main": {
+      "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
+        "-5437611257301171512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 476,
+            "objectSha256": "0936d973fa5277c8672d5976afcf02bbb40a5995dd1733ce577fe9da3ef7f56b",
+            "name": "tri"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 67,
+            "sha256": "97bb865e8120801b2d4b2ab58766b407fb9d3f4752e4eca3730753ca6891dae8"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/uncompressed/texture": {
+      "CAB-f04fab77212e693fb63bdad7458f66fe": {
+        "-2966962111441417370": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "objectSha256": "706aa5dd453d529e608980fdf02f1aeba8052fdfc00df7442b9bf71bdedf7dd7",
+            "name": "checker",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 4,
+            "height": 4,
+            "imageSize": 64,
+            "imageSha256": "8999a27916987ca925355c5571a0c30364078a762f4bd2df3a64955f64c55d8a"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 4,
+            "height": 4,
+            "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
+            "pngSize": 109,
+            "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.6.4f1/more-plain/textures": {
+      "CAB-b6ec7271e16d6169fe23b363bfe34b24": {
+        "-160635946379749497": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 276,
+            "name": "RG32",
+            "format": 72,
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6",
+            "formatName": "RG32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-359215574879732508": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 164,
+            "name": "R8_SIGNED",
+            "format": 75,
+            "width": 8,
+            "height": 5,
+            "imageSize": 40,
+            "imageSha256": "76def75856e5d73ece011b058b02d205991a48f0fcf8b7ddcc24005d57759b23",
+            "formatName": "R8_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-5701912157211419031": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 364,
+            "name": "RGB48_SIGNED",
+            "format": 81,
+            "width": 8,
+            "height": 5,
+            "imageSize": 240,
+            "imageSha256": "b5146679edab862505197078c78fd7aefad702cb82a5841bbcc48a9b4f11425e",
+            "formatName": "RGB48_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-5729150462875960667": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 196,
+            "name": "RG16",
+            "format": 62,
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779",
+            "formatName": "RG16"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-677264149156131896": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 448,
+            "name": "RGBA64_SIGNED",
+            "format": 82,
+            "width": 8,
+            "height": 5,
+            "imageSize": 320,
+            "imageSha256": "6ba51bc5959d3c7ceda23edb9125400efffb37fa91637166e1bc56ba4c9083cd",
+            "formatName": "RGBA64_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-7430627774860868518": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "name": "RG16_SIGNED",
+            "format": 76,
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779",
+            "formatName": "RG16_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-8400881742883744764": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 204,
+            "name": "R16_SIGNED",
+            "format": 79,
+            "width": 8,
+            "height": 5,
+            "imageSize": 80,
+            "imageSha256": "8afeccf31bf9f73cd8af1a4c0288ad4f0bb8e1d0774d48632c4ef1b5df82e779",
+            "formatName": "R16_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-9018059833140867136": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 360,
+            "name": "RGB48",
+            "format": 73,
+            "width": 8,
+            "height": 5,
+            "imageSize": 240,
+            "imageSha256": "b5146679edab862505197078c78fd7aefad702cb82a5841bbcc48a9b4f11425e",
+            "formatName": "RGB48"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "1937484101367226322": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 288,
+            "name": "RGBA32_SIGNED",
+            "format": 78,
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6",
+            "formatName": "RGBA32_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "6579378380450747756": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 284,
+            "name": "RG32_SIGNED",
+            "format": 80,
+            "width": 8,
+            "height": 5,
+            "imageSize": 160,
+            "imageSha256": "b0b6f680d8d42d963e83942468ec6de7c2fb194463df9be9e9bf7e702cd3eee6",
+            "formatName": "RG32_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "6602669041808129237": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 440,
+            "name": "RGBA64",
+            "format": 74,
+            "width": 8,
+            "height": 5,
+            "imageSize": 320,
+            "imageSha256": "6ba51bc5959d3c7ceda23edb9125400efffb37fa91637166e1bc56ba4c9083cd",
+            "formatName": "RGBA64"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "668033029112530731": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 244,
+            "name": "RGB24_SIGNED",
+            "format": 77,
+            "width": 8,
+            "height": 5,
+            "imageSize": 120,
+            "imageSha256": "5df24dd802ac26132ce608dcb5f09841eef039ee0f152acf98d26d17fe4e88e6",
+            "formatName": "RGB24_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "8096968441555461938": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 156,
+            "name": "R8",
+            "format": 63,
+            "width": 8,
+            "height": 5,
+            "imageSize": 40,
+            "imageSha256": "76def75856e5d73ece011b058b02d205991a48f0fcf8b7ddcc24005d57759b23",
+            "formatName": "R8"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/sprite-v2-rect/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-3856385411972515619": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 236,
+            "name": "sactx-0-64x64-DXT5|BC3-rect-2fb08a19",
+            "format": 12,
+            "width": 64,
+            "height": 64,
+            "imageSize": 4096,
+            "imageSha256": "ed7a6aedbba23db67dc23857a74f4329407fff83f2b8b3187096a34da37debd2",
+            "formatName": "DXT5"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-8143679814128994015": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "name": "sactx-0-128x256-DXT5|BC3-packed-7f15816d",
+            "format": 12,
+            "width": 128,
+            "height": 256,
+            "imageSize": 32768,
+            "imageSha256": "24cfbda42e9af34f0bf9c3a73d66c2f3f1994d60db1ed61db1db28be5add1a3d",
+            "formatName": "DXT5"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-9052770759386762400": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "name": "tight",
+            "format": 4,
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "1508859333908473304": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12408,
+            "name": "sheet",
+            "format": 4,
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/sprite-v2/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-5772556689649575297": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12408,
+            "name": "sheet",
+            "format": 4,
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-6954689418010433580": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "name": "sactx-0-256x128-DXT5|BC3-packed-7f15816d",
+            "format": 12,
+            "width": 256,
+            "height": 128,
+            "imageSize": 32768,
+            "imageSha256": "0d1e9e5b38c165c44403b353f253df267cd9b7d0ac4fe63feb86098f939e9870",
+            "formatName": "DXT5"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-8593035166264652437": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 236,
+            "name": "sactx-0-64x64-DXT5|BC3-rect-2fb08a19",
+            "format": 12,
+            "width": 64,
+            "height": 64,
+            "imageSize": 4096,
+            "imageSha256": "ed7a6aedbba23db67dc23857a74f4329407fff83f2b8b3187096a34da37debd2",
+            "formatName": "DXT5"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "8307097695711798972": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "name": "tight",
+            "format": 4,
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/sprite/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-4703476098539429759": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 208,
+            "name": "tight",
+            "format": 4,
+            "width": 40,
+            "height": 36,
+            "imageSize": 5760,
+            "imageSha256": "1110c80620f2c4c6d43abd37ecef96689298a70b1102fa0556cf8319a0400e7a",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-6869242124113047234": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "name": "sactx-0-64x64-Uncompressed-rect-c3f6b119",
+            "format": 4,
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "c148d50ba12949dcc0c1ef57997fac5a89a8088373d90f6804e8701f4d4308d7",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "2323025680640657194": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 12408,
+            "name": "sheet",
+            "format": 4,
+            "width": 64,
+            "height": 48,
+            "imageSize": 12288,
+            "imageSha256": "bf2f9ac62345878ec85201fc043e03964fe5895a3c3dd663634768d0c61f4d38",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "4077857263357536529": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 244,
+            "name": "sactx-0-256x128-Uncompressed-packed-b7987b30",
+            "format": 4,
+            "width": 256,
+            "height": 128,
+            "imageSize": 131072,
+            "imageSha256": "c8f48e3556e6303c921bc068ba5a23ad813a1aef9434b5388f54ff1124f5ca86",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/variant/sprites": {
+      "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
+        "-5751097996633328109": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 240,
+            "name": "sactx-0-64x64-Uncompressed-rect-0dbe683b",
+            "format": 4,
+            "width": 64,
+            "height": 64,
+            "imageSize": 16384,
+            "imageSha256": "c148d50ba12949dcc0c1ef57997fac5a89a8088373d90f6804e8701f4d4308d7",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-7608643710608006978": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 252,
+            "name": "sactx-0-64x64-Uncompressed-rect-0dbe683b-var-0.50-#1",
+            "format": 4,
+            "width": 32,
+            "height": 32,
+            "imageSize": 4096,
+            "imageSha256": "2c24801450f23cda37c1d03041655de08f1ce7eb0b06882a0e97dfb509c935fd",
+            "formatName": "RGBA32"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    }
+  }
+}

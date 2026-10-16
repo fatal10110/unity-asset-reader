@@ -31,7 +31,7 @@ Full list with reasons is in the rules doc; these are the ones that cannot be un
 2. **No C# in the repo, no C# compiled to WASM.** AssetStudio C# is read-only reference, cloned *outside* the repo and hand-ported to TS. WASM is built from C/C++ only. `git ls-files '*.cs' '*.csproj' '*.sln'` must print nothing.
 3. **Ported files keep attribution:** first line `// Ported from AssetStudio/<path>.cs (MIT, © Perfare / RazTools / Razviar)`.
 4. **Reader core is isomorphic and sync:** no `node:*`/`fs`/`Buffer`/`process`/DOM in `packages/core` or `packages/texture`, input is `Uint8Array`, no `async` in the parse path. Node-only code goes in `packages/node`.
-5. **No third-party game data committed.** Fixtures come from our own Unity projects; goldens come from the UnityPy oracle script, never from this library's own output.
+5. **No third-party game data committed.** Fixtures come from our own Unity projects; goldens come from the oracle scripts (UnityPy `scripts/make-goldens.py` / `make-modern-goldens.py` for parsing, AssetStudio `c37af7d` via `scripts/make-export-goldens.py`, run outside the repo, for export output), never from this library's own output.
 6. **No new runtime dependency** beyond plan §1 without asking.
 7. **Scope = the issue.** Smallest code that meets its Tasks and Acceptance. No speculative abstractions. Extra ideas become follow-up issues.
 
