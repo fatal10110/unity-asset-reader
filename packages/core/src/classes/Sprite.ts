@@ -395,7 +395,7 @@ function readSpriteVertex(reader: ObjectReader, version: UnityVersion): SpriteVe
 
 /**
  * Upstream `SubMesh(ObjectReader)`, for the versions a sprite has one (5.6+).
- * Internal: shared with `SpriteAtlas.ts`.
+ * Internal: shared with `SpriteAtlas.ts` and `Mesh.ts`.
  */
 export function readSubMesh(reader: ObjectReader, version: UnityVersion): SubMesh {
   const out: Partial<SubMesh> = {
@@ -413,7 +413,7 @@ export function readSubMesh(reader: ObjectReader, version: UnityVersion): SubMes
 
 /**
  * Upstream `VertexData(ObjectReader)`, for the versions a sprite has one (5.6+).
- * Internal: shared with `SpriteAtlas.ts`.
+ * Internal: shared with `SpriteAtlas.ts` and `Mesh.ts`.
  *
  * @param owner the class, for error messages
  */
@@ -437,7 +437,7 @@ export function readVertexData(
   return out as VertexData;
 }
 
-/** A `Matrix4x4f`, `e00` to `e33`. Internal: shared with `SpriteAtlas.ts`. */
+/** A `Matrix4x4f`, `e00` to `e33`. Internal: shared with `SpriteAtlas.ts` and `Mesh.ts`. */
 export function readMatrix(reader: ObjectReader): Matrix4x4 {
   const out: Partial<Matrix4x4> = {};
   for (let row = 0; row < 4; row++) {
@@ -463,24 +463,27 @@ function readBoneWeights(reader: ObjectReader): BoneWeights4 {
 }
 
 /**
- * Upstream `BlendShapeData(ObjectReader)`, as Unity 6000.5 writes it into a
- * sprite. Internal: shared with `SpriteAtlas.ts`.
+ * Upstream `BlendShapeData(ObjectReader)`, as Unity 4.3 and later write it: a
+ * sprite's from 6000.5, a mesh's `m_Shapes`. Internal: shared with
+ * `SpriteAtlas.ts` and `Mesh.ts`.
  *
  * @param owner the class, for error messages
+ * @param field the field it is, for error messages
  */
 export function readBlendShapeData(
   reader: ObjectReader,
   version: UnityVersion,
   owner: string,
+  field = "m_BlendShapes",
 ): BlendShapeData {
   const out: BlendShapeData = {
-    vertices: readArray(reader, owner, "m_BlendShapes vertices", (r) => ({
+    vertices: readArray(reader, owner, `${field} vertices`, (r) => ({
       vertex: vector3(r, version),
       normal: vector3(r, version),
       tangent: vector3(r, version),
       index: r.readUInt32(),
     })),
-    shapes: readArray(reader, owner, "m_BlendShapes shapes", (r) => {
+    shapes: readArray(reader, owner, `${field} shapes`, (r) => {
       const shape = {
         firstVertex: r.readUInt32(),
         vertexCount: r.readUInt32(),
@@ -490,13 +493,13 @@ export function readBlendShapeData(
       r.align();
       return shape;
     }),
-    channels: readArray(reader, owner, "m_BlendShapes channels", (r) => ({
-      name: readStringField(r, owner, "m_BlendShapes channel name"),
+    channels: readArray(reader, owner, `${field} channels`, (r) => ({
+      name: readStringField(r, owner, `${field} channel name`),
       nameHash: r.readUInt32(),
       frameIndex: r.readInt32(),
       frameCount: r.readInt32(),
     })),
-    fullWeights: readArray(reader, owner, "m_BlendShapes fullWeights", (r) => r.readFloat32()),
+    fullWeights: readArray(reader, owner, `${field} fullWeights`, (r) => r.readFloat32()),
   };
   reader.align();
   return out;
@@ -580,7 +583,7 @@ export function readGUID(reader: ObjectReader): GUID {
 
 /**
  * An `Int32` count, then that many elements. Internal: shared with
- * `SpriteAtlas.ts`.
+ * `SpriteAtlas.ts` and `Mesh.ts`.
  *
  * @throws {CorruptError} when the count is negative or larger than the bytes left
  */
@@ -615,8 +618,9 @@ export function isPatchFrom(
 /**
  * What a file of unknown version and format 18 to 21 is read as: those formats
  * are Unity 2019.1 to 2019.4 (`SerializedFileFormatVersion`), and Unity's type
- * trees give one Sprite layout from 2019.1.0a10 to 2021.1.0a2 and one
- * SpriteAtlas layout from 2017.2.0b9 to 2020.2.0a7.
+ * trees give one Sprite layout from 2019.1.0a10 to 2021.1.0a2, one
+ * SpriteAtlas layout from 2017.2.0b9 to 2020.2.0a7 and one Mesh layout from
+ * 2019.1.0a10 to 2020.1.0a19.
  */
 const UNITY_2019: UnityVersion = [2019, 4, 0, 0];
 
@@ -624,7 +628,8 @@ const UNITY_2019: UnityVersion = [2019, 4, 0, 0];
  * The version whose layout the object has, after the refusals every sprite
  * class reader shares: the file's own, or 2019's for an unknown version in a
  * format only 2019 writes (rule for version-stripped files, #36, as amended;
- * the same choice as `readMaterial`'s). Internal: shared with `SpriteAtlas.ts`.
+ * the same choice as `readMaterial`'s). Internal: shared with `SpriteAtlas.ts`
+ * and `Mesh.ts`.
  *
  * @param major the first Unity version that has the class, with `minor`
  * @throws {UnsupportedError} of kind `"Unity version"` for an unknown version
@@ -671,7 +676,7 @@ export function layoutVersion(
  * unknown the layout is only assumed (see {@link layoutVersion}), so a misfit
  * there means "not 2019's layout", which the file cannot tell apart from
  * corruption: it is refused, as `readMaterial` does. Internal: shared with
- * `SpriteAtlas.ts`.
+ * `SpriteAtlas.ts` and `Mesh.ts`.
  *
  * @throws {UnsupportedError} of kind `"Unity version"` for such a misfit
  * @throws {CorruptError} what `read` throws, with the version known
@@ -705,7 +710,7 @@ function vector3(reader: ObjectReader, version: UnityVersion): Vector3 {
 }
 
 /**
- * The end-of-object check. Internal: shared with `SpriteAtlas.ts`.
+ * The end-of-object check. Internal: shared with `SpriteAtlas.ts` and `Mesh.ts`.
  *
  * @throws {CorruptError} when bytes are left over after the last field
  */
