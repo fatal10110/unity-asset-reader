@@ -1,17 +1,14 @@
 // Mesh (#235): the hardcoded reader against readTypeTree() on the 12 fixture
 // Mesh objects and on hand-built layouts at every version gate of Unity's
-// type trees, read through those trees themselves (`fixtures/tpk-trees.json`,
-// UnityPy's TPK data), and the decoding of upstream's `ProcessData` on
-// hand-built meshes, whose expected values are worked out here from
-// AssetStudio's formulas. The decoded vertices and indices are checked against
-// AssetStudio itself through the OBJ goldens of #239.
+// type trees (TPK), and the decoding of upstream's `ProcessData` on hand-built
+// meshes, whose expected values are worked out here from AssetStudio's
+// formulas. The decoded vertices and indices are checked against AssetStudio
+// itself through the OBJ goldens of #239.
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
-import { golden, loadFixture, type GoldenNode } from "../../../fixtures/helpers.js";
-import { toMeshFields } from "../src/classes/fields.js";
+import { golden, loadFixture } from "../../../fixtures/helpers.js";
 import { readMesh, type Mesh, type MeshData } from "../src/classes/Mesh.js";
 import { atLeast } from "../src/classes/version.js";
 import { load, type Env } from "../src/env.js";
@@ -20,7 +17,6 @@ import { BuildTarget } from "../src/serialized/BuildTarget.js";
 import { ClassID } from "../src/serialized/ClassID.js";
 import type { ObjectReader } from "../src/serialized/ObjectReader.js";
 import type { UnityVersion } from "../src/serialized/SerializedFile.js";
-import type { TypeTreeNode } from "../src/serialized/TypeTree.js";
 import { fixturesWith, objectBytes, typedTwin } from "./class-readers.js";
 import { build, readerOf, template, versionRefusal, withTail, type Writer } from "./media.js";
 
@@ -31,8 +27,7 @@ const meshOf = (env: Env): ObjectReader => env.objects.find((o) => o.type === Cl
 
 /** The type tree's value with `m_StreamData.offset` a number, as the reader gives it. */
 function withNumberOffset(tree: Record<string, unknown>): Record<string, unknown> {
-  const stream = tree.m_StreamData as { offset: bigint | number } | undefined;
-  if (!stream) return tree;
+  const stream = tree.m_StreamData as { offset: bigint | number };
   return { ...tree, m_StreamData: { ...stream, offset: Number(stream.offset) } };
 }
 
@@ -77,14 +72,21 @@ for (const name of FIXTURES) {
 
   test(`${name}: read() decodes the one triangle the fixture project builds`, () => {
     for (const reader of loadName(name).objects.filter((o) => o.type === ClassID.Mesh)) {
-      const { geometry: data, ...rest } = reader.read<MeshData>();
-      // The hardcoded reader's fields, then the decoded ones.
+      const data = reader.read<MeshData>();
       const fields = readMesh(reader);
-      assert.deepEqual(Object.keys(rest), Object.keys(fields));
-      assert.deepStrictEqual(rest, fields);
-      assert.deepEqual(Object.keys(data), ["vertexCount", "vertices", "uv", "indices"]);
+      // The hardcoded reader's fields, then the decoded ones.
+      assert.deepEqual(Object.keys(data), [
+        ...Object.keys(fields),
+        "vertexCount",
+        "vertices",
+        "uv",
+        "indices",
+      ]);
+      for (const key of Object.keys(fields) as (keyof Mesh)[]) {
+        assert.deepStrictEqual(data[key], fields[key], key);
+      }
       // fixtures/BUILDING.md: vertices zero, up, right; triangles 0, 1, 2.
-      assert.equal(fields.m_Name, "tri");
+      assert.equal(data.m_Name, "tri");
       assert.equal(data.vertexCount, 3);
       assert.deepStrictEqual(data.vertices, Float32Array.of(0, 0, 0, 0, 1, 0, 1, 0, 0));
       assert.deepStrictEqual(data.indices, [Uint32Array.of(0, 1, 2)]);
@@ -97,8 +99,6 @@ for (const name of FIXTURES) {
 
 /** One vertex channel of the input: `[stream, offset, format, dimension]`. */
 type Channel = [number, number, number, number];
-/** A vertex stream of the input before 5.0: `[channelMask, offset, stride]`. */
-type Stream = [number, number, number];
 /** A packed vector of the input: its items, or the bytes as they are. */
 interface Packed {
   bits: number;
@@ -115,32 +115,19 @@ interface Packed {
 interface MeshInput {
   /** Fill the fields the decoding ignores (blend shapes, bones, LOD), to test the layout. */
   rich?: boolean;
-  /** Before 3.5: `m_Use16BitIndices`, 1 by default. */
-  use16?: number;
-  /** `[firstByte, indexCount, topology]`; before 4.0 the topology is `isTriStrip`. */
   subMeshes?: { firstByte: number; indexCount: number; topology: number }[];
-  /** Before 2018.2: `m_Skin`, `[weights, bone indices]` per vertex. */
-  skin?: [number[], number[]][];
-  /** Unity 3.4's vertex arrays; `colors` are `RGBA32` words. */
-  legacy?: {
-    vertices?: number[][];
-    uv?: number[][];
-    uv1?: number[][];
-    tangents?: number[][];
-    normals?: number[][];
-    colors?: number[];
-  };
   indexFormat?: number;
   indexBuffer?: Uint8Array;
   vertexCount?: number;
   channels?: Channel[];
-  /** Before 5.0: the streams (3.5: four of them). */
-  streams?: Stream[];
   vertexData?: Uint8Array;
   compressed?: { [field: string]: Packed | undefined };
   uvInfo?: number;
   streamData?: { offset: number; size: number; path: string };
 }
+
+const FLOAT_VECTORS = ["m_Vertices", "m_UV", "m_Normals", "m_Tangents"];
+const INT_VECTORS = ["m_Weights", "m_NormalSigns", "m_TangentSigns"];
 
 /** `items` packed `bits` wide, least significant bit first, as Unity packs them. */
 function pack(items: number[], bits: number): Uint8Array {
@@ -155,173 +142,83 @@ function pack(items: number[], bits: number): Uint8Array {
 }
 
 /**
- * A Mesh as Unity's player type tree for `unity` lays it out (TPK: 3.4.0,
- * 3.5.0, 4.0.0, 4.1.0, 4.3.0, 5.0.0, 5.6.0, 2017.3.0b1, 2018.1.0b2,
- * 2018.2.0b1, 2018.3.0b1, 2019.1.0a10, 2020.1.0a19, 2022.1.0a15, 6000.2.0a8
- * and 6000.6.0a5 change it), and the object `readMesh` must return for it.
- * `buildType` decides 2017.3's `m_IndexFormat` (see `readMesh`).
+ * A Mesh as Unity's player type tree for `unity` lays it out (TPK: 2019.1.0a10,
+ * 2020.1.0a19, 2022.1.0a15, 6000.2.0a8 and 6000.6.0a5 change it), and the
+ * object `readMesh` must return for it.
  */
-function meshLayout(w: Writer, unity: UnityVersion, input: MeshInput = {}, buildType = "f"): Mesh {
-  const v = (major: number, minor: number) => atLeast(unity, major, minor);
+function meshLayout(w: Writer, unity: UnityVersion, input: MeshInput = {}): Mesh {
   let n = 0;
   const float = () => w.f32(0.5 + n++);
-  const v2 = () => ({ x: float(), y: float() });
   const v3 = () => ({ x: float(), y: float(), z: float() });
-  const v4 = () => ({ x: float(), y: float(), z: float(), w: float() });
   const aabb = () => ({ m_Center: v3(), m_Extent: v3() });
-  const matrix = () =>
-    Object.fromEntries(
-      [0, 1, 2, 3].flatMap((r) => [0, 1, 2, 3].map((c) => [`e${r}${c}`, float()])),
-    );
   const byteVector = (data: Uint8Array) => w.pad(w.bytes(data));
   const rich = input.rich ?? false;
   const some = <T>(...items: T[]): T[] => (rich ? items : []);
-  const xyz = (keys: string, values: number[]) =>
-    Object.fromEntries([...keys].map((k, i) => [k, w.f32(values[i]!)]));
-  const shapeVertex = (signed: boolean) => ({
-    vertex: v3(),
-    normal: v3(),
-    tangent: v3(),
-    index: signed ? w.i32(-n++) : w.u32(n++),
-  });
-  const skin = () =>
-    w.array(input.skin ?? (rich ? [[[0.25, 0.75, 0, 0], [1, 2, 0, 0]]] : []), ([wt, bones]) => ({
-      ...Object.fromEntries(wt.map((x, i) => [`weight[${i}]`, w.f32(x)])),
-      ...Object.fromEntries(bones.map((x, i) => [`boneIndex[${i}]`, w.i32(x)])),
-    }));
 
   const out: Record<string, unknown> = {};
   out.m_Name = w.str("mesh");
-  if (!v(3, 5)) out.m_Use16BitIndices = w.i32(input.use16 ?? 1);
   const subMeshes = input.subMeshes ?? some({ firstByte: 0, indexCount: 0, topology: 0 });
-  out.m_SubMeshes = w.array(subMeshes, (s) => {
-    const sub: Record<string, unknown> = {
-      firstByte: w.u32(s.firstByte),
-      indexCount: w.u32(s.indexCount),
-    };
-    if (!v(4, 0)) {
-      sub.isTriStrip = w.u32(s.topology);
-      sub.triangleCount = w.u32(n++);
-    } else {
-      sub.topology = w.i32(s.topology);
-    }
-    if (v(2017, 3)) sub.baseVertex = w.u32(n++);
-    sub.firstVertex = w.u32(n++);
-    sub.vertexCount = w.u32(n++);
-    sub.localAABB = aabb();
-    return sub;
-  });
-  if (v(4, 3)) {
-    out.m_Shapes = {
-      vertices: w.array(some(1, 2), () => shapeVertex(false)),
-      shapes: w.array(some(true, false), (normals) =>
-        w.pad({
-          firstVertex: w.u32(n++),
-          vertexCount: w.u32(n++),
-          hasNormals: w.bool(normals),
-          hasTangents: w.bool(!normals),
-        }),
-      ),
-      channels: w.array(some("smile", "blink"), (name) => ({
-        name: w.str(name),
-        nameHash: w.u32(n++),
-        frameIndex: w.i32(-n++),
-        frameCount: w.i32(n++),
-      })),
-      fullWeights: w.array(some(0.25, 0.75), (x) => w.f32(x)),
-    };
-  } else if (v(4, 1)) {
-    out.m_Shapes = w.pad(
-      w.array(some("smile", "blink"), (name) => ({
-        name: w.str(name),
+  out.m_SubMeshes = w.array(subMeshes, (s) => ({
+    firstByte: w.u32(s.firstByte),
+    indexCount: w.u32(s.indexCount),
+    topology: w.i32(s.topology),
+    baseVertex: w.u32(n++),
+    firstVertex: w.u32(n++),
+    vertexCount: w.u32(n++),
+    localAABB: aabb(),
+  }));
+  out.m_Shapes = {
+    vertices: w.array(some(1, 2), () => ({
+      vertex: v3(),
+      normal: v3(),
+      tangent: v3(),
+      index: w.u32(n++),
+    })),
+    shapes: w.array(some(true, false), (normals) =>
+      w.pad({
         firstVertex: w.u32(n++),
         vertexCount: w.u32(n++),
-        aabbMinDelta: v3(),
-        aabbMaxDelta: v3(),
-        hasNormals: w.bool(true),
-        hasTangents: w.bool(false),
-      })),
-    );
-    out.m_ShapeVertices = w.array(some(1), () => shapeVertex(true));
-  }
-  if (v(4, 3)) {
-    out.m_BindPose = w.array(some(1), matrix);
-    out.m_BoneNameHashes = w.array(some(0xdeadbeef, 7), (x) => w.u32(x));
-    out.m_RootBoneNameHash = w.u32(rich ? 0x8000_0001 : 0);
-  }
-  if (v(2019, 1)) {
-    out.m_BonesAABB = w.array(some(1), () => ({ m_Min: v3(), m_Max: v3() }));
-    out.m_VariableBoneCountWeights = { m_Data: w.array(some(1, 2, 3), (x) => w.u32(x)) };
-  }
-  const compression = input.compressed ? 2 : 0;
-  out.m_MeshCompression = w.u8(compression);
-  if (v(4, 0)) {
-    if (!v(5, 0)) out.m_StreamCompression = w.u8(1);
-    out.m_IsReadable = w.bool(true);
-    out.m_KeepVertices = w.bool(false);
-    out.m_KeepIndices = w.bool(true);
-  }
-  w.align();
-  const [major, minor, patch] = unity;
-  if (
-    v(2017, 4) ||
-    (major === 2017 && minor === 3 && (compression === 0 || (patch === 1 && buildType === "p")))
-  ) {
-    out.m_IndexFormat = w.i32(input.indexFormat ?? 0);
-  }
+        hasNormals: w.bool(normals),
+        hasTangents: w.bool(!normals),
+      }),
+    ),
+    channels: w.array(some("smile", "blink"), (name) => ({
+      name: w.str(name),
+      nameHash: w.u32(n++),
+      frameIndex: w.i32(-n++),
+      frameCount: w.i32(n++),
+    })),
+    fullWeights: w.array(some(0.25, 0.75), (x) => w.f32(x)),
+  };
+  out.m_BindPose = w.array(some(1), () =>
+    Object.fromEntries(
+      [0, 1, 2, 3].flatMap((r) => [0, 1, 2, 3].map((c) => [`e${r}${c}`, float()])),
+    ),
+  );
+  out.m_BoneNameHashes = w.array(some(0xdeadbeef, 7), (x) => w.u32(x));
+  out.m_RootBoneNameHash = w.u32(rich ? 0x8000_0001 : 0);
+  out.m_BonesAABB = w.array(some(1), () => ({ m_Min: v3(), m_Max: v3() }));
+  out.m_VariableBoneCountWeights = { m_Data: w.array(some(1, 2, 3), (x) => w.u32(x)) };
+  out.m_MeshCompression = w.u8(input.compressed ? 2 : 0);
+  out.m_IsReadable = w.bool(true);
+  out.m_KeepVertices = w.bool(false);
+  out.m_KeepIndices = w.pad(w.bool(true));
+  out.m_IndexFormat = w.i32(input.indexFormat ?? 0);
   // Odd lengths, so a missing align shows.
   out.m_IndexBuffer = byteVector(
     input.indexBuffer ?? (rich ? Uint8Array.of(1, 0, 2) : new Uint8Array()),
   );
-  const legacy = input.legacy ?? (rich ? { vertices: [[1, 2, 3]], uv: [[0.5, 0.25]] } : {});
-  if (!v(3, 5)) {
-    out.m_Vertices = w.array(legacy.vertices ?? [], (x) => xyz("xyz", x));
-    out.m_Skin = skin();
-    out.m_BindPose = w.array(some(1), matrix);
-    out.m_UV = w.array(legacy.uv ?? [], (x) => xyz("xy", x));
-    out.m_UV1 = w.array(legacy.uv1 ?? [], (x) => xyz("xy", x));
-    out.m_Tangents = w.array(legacy.tangents ?? [], (x) => xyz("xyzw", x));
-    out.m_Normals = w.pad(w.array(legacy.normals ?? [], (x) => xyz("xyz", x)));
-  } else {
-    if (!v(2018, 2)) out.m_Skin = skin();
-    if (!v(4, 3)) out.m_BindPose = w.array(some(1), matrix);
-    const data: Record<string, unknown> = {};
-    if (!v(2018, 1)) data.m_CurrentChannels = v(5, 6) ? w.i32(-1) : w.u32(0x8000_0003);
-    data.m_VertexCount = w.u32(input.vertexCount ?? 0);
-    const channels = input.channels ?? (rich ? [[0, 0, 0, 3] as Channel] : []);
-    if (v(4, 0)) {
-      data.m_Channels = w.array(channels, ([stream, offset, format, dimension]) => ({
-        stream: w.u8(stream),
-        offset: w.u8(offset),
-        format: w.u8(format),
-        dimension: w.u8(dimension),
-      }));
-    }
-    const streams = input.streams ?? (rich ? [[1, 0, 12] as Stream] : []);
-    if (!v(4, 0)) {
-      for (let i = 0; i < 4; i++) {
-        const [channelMask, offset, stride] = streams[i] ?? [0, 0, 0];
-        data[`m_Streams[${i}]`] = {
-          channelMask: w.u32(channelMask),
-          offset: w.u32(offset),
-          stride: w.u32(stride),
-          align: w.u32(0),
-        };
-      }
-    } else if (!v(5, 0)) {
-      data.m_Streams = w.array(streams, ([channelMask, offset, stride]) => ({
-        channelMask: w.u32(channelMask),
-        offset: w.u32(offset),
-        stride: w.u8(stride),
-        dividerOp: w.u8(0),
-        frequency: w.u16(0),
-      }));
-    }
-    data.m_DataSize = byteVector(
-      input.vertexData ?? (rich ? Uint8Array.of(9, 8, 7) : new Uint8Array()),
-    );
-    out.m_VertexData = data;
-  }
+  const channels = input.channels ?? (rich ? [[0, 0, 0, 3] as Channel] : []);
+  out.m_VertexData = w.pad({
+    m_VertexCount: w.u32(input.vertexCount ?? 0),
+    m_Channels: w.array(channels, ([stream, offset, format, dimension]) => ({
+      stream: w.u8(stream),
+      offset: w.u8(offset),
+      format: w.u8(format),
+      dimension: w.u8(dimension),
+    })),
+    m_DataSize: byteVector(input.vertexData ?? (rich ? Uint8Array.of(9, 8, 7) : new Uint8Array())),
+  });
   const compressed = input.compressed ?? {};
   const packed = (field: string, withRange: boolean) => {
     const vector: Packed = compressed[field] ?? { bits: 0, items: [] };
@@ -336,52 +233,33 @@ function meshLayout(w: Writer, unity: UnityVersion, input: MeshInput = {}, build
     out.m_BitSize = w.pad(w.u8(vector.bits));
     return out;
   };
-  const cm: Record<string, unknown> = {
-    m_Vertices: packed("m_Vertices", true),
-    m_UV: packed("m_UV", true),
+  out.m_CompressedMesh = {
+    ...Object.fromEntries(FLOAT_VECTORS.map((field) => [field, packed(field, true)])),
+    ...Object.fromEntries(INT_VECTORS.map((field) => [field, packed(field, false)])),
+    m_FloatColors: packed("m_FloatColors", true),
+    m_BoneIndices: packed("m_BoneIndices", false),
+    m_Triangles: packed("m_Triangles", false),
+    m_UVInfo: w.u32(input.uvInfo ?? 0),
   };
-  if (!v(5, 0)) cm.m_BindPoses = packed("m_BindPoses", true);
-  cm.m_Normals = packed("m_Normals", true);
-  cm.m_Tangents = packed("m_Tangents", true);
-  cm.m_Weights = packed("m_Weights", false);
-  cm.m_NormalSigns = packed("m_NormalSigns", false);
-  cm.m_TangentSigns = packed("m_TangentSigns", false);
-  if (v(5, 0)) cm.m_FloatColors = packed("m_FloatColors", true);
-  cm.m_BoneIndices = packed("m_BoneIndices", false);
-  cm.m_Triangles = packed("m_Triangles", false);
-  if (v(5, 0)) cm.m_UVInfo = w.u32(input.uvInfo ?? 0);
-  else if (v(3, 5)) cm.m_Colors = packed("m_Colors", false);
-  out.m_CompressedMesh = cm;
   out.m_LocalAABB = aabb();
-  if (!v(3, 5)) {
-    out.m_Colors = w.array(legacy.colors ?? [], (rgba) => ({ rgba: w.u32(rgba) }));
-    out.m_CollisionTriangles = w.array(some(0, 1, 2), (x) => w.u32(x));
-    out.m_CollisionVertexCount = w.i32(rich ? 3 : 0);
-  }
-  if (!v(6000, 6)) out.m_MeshUsageFlags = w.i32(-n++);
-  if (v(2022, 1)) out.m_CookingOptions = w.i32(30);
-  if (v(6000, 6)) {
+  const v6000_6 = atLeast(unity, 6000, 6);
+  if (!v6000_6) out.m_MeshUsageFlags = w.i32(-n++);
+  if (atLeast(unity, 2022, 1)) out.m_CookingOptions = w.i32(30);
+  if (v6000_6) {
     out.m_PreBakeConvexCollisionMesh = w.bool(true);
     out.m_PreBakeTriangleCollisionMesh = w.pad(w.bool(false));
   }
-  if (v(5, 0)) {
-    out.m_BakedConvexCollisionMesh = byteVector(rich ? Uint8Array.of(1, 2, 3) : new Uint8Array());
-    out.m_BakedTriangleCollisionMesh = byteVector(rich ? Uint8Array.of(4) : new Uint8Array());
-  }
-  if (v(2018, 2)) {
-    out["m_MeshMetrics[0]"] = float();
-    out["m_MeshMetrics[1]"] = float();
-  }
-  if (v(2018, 3)) {
-    w.align();
-    const stream = input.streamData ?? { offset: 0, size: 0, path: "" };
-    out.m_StreamData = {
-      offset: v(2020, 1) ? w.u64n(stream.offset) : w.u32(stream.offset),
-      size: w.u32(stream.size),
-      path: w.str(stream.path),
-    };
-  }
-  if (v(6000, 2)) {
+  out.m_BakedConvexCollisionMesh = byteVector(rich ? Uint8Array.of(1, 2, 3) : new Uint8Array());
+  out.m_BakedTriangleCollisionMesh = byteVector(rich ? Uint8Array.of(4) : new Uint8Array());
+  out["m_MeshMetrics[0]"] = float();
+  out["m_MeshMetrics[1]"] = w.pad(float());
+  const stream = input.streamData ?? { offset: 0, size: 0, path: "" };
+  out.m_StreamData = {
+    offset: atLeast(unity, 2020, 1) ? w.u64n(stream.offset) : w.u32(stream.offset),
+    size: w.u32(stream.size),
+    path: w.str(stream.path),
+  };
+  if (atLeast(unity, 6000, 2)) {
     out.m_MeshLodInfo = {
       m_LodSelectionCurve: { m_LodSlope: float(), m_LodBias: float() },
       m_NumLevels: w.i32(2),
@@ -400,40 +278,16 @@ function meshLayout(w: Writer, unity: UnityVersion, input: MeshInput = {}, build
 const FROM_2020 = template("editor/2020.3.30f1/lz4/main", ClassID.Mesh);
 const U2020: UnityVersion = [2020, 3, 30, 1];
 
-/**
- * A hand-built Mesh, its reader as Unity `unity` (build type `buildType`) wrote
- * it, and what `readMesh` must return.
- */
+/** A hand-built Mesh, its reader as Unity `unity` wrote it, and what `readMesh` must return. */
 function handBuilt(
   input: MeshInput,
   unity: UnityVersion = U2020,
-  buildType = "f",
 ): { bytes: Uint8Array; expected: Mesh; reader: ObjectReader } {
-  const { bytes, expected } = build((w) => meshLayout(w, unity, input, buildType));
-  const from = { ...FROM_2020, sf: { ...FROM_2020.sf, buildType } };
-  return { bytes, expected, reader: readerOf(from, bytes, { unity }) };
+  const { bytes, expected } = build((w) => meshLayout(w, unity, input));
+  return { bytes, expected, reader: readerOf(FROM_2020, bytes, { unity }) };
 }
 
 const LAYOUTS: UnityVersion[] = [
-  [3, 4, 0, 1],
-  [3, 5, 7, 1],
-  [4, 0, 0, 1],
-  [4, 1, 0, 1],
-  [4, 2, 2, 1],
-  [4, 3, 0, 1],
-  [4, 7, 2, 1],
-  [5, 0, 0, 1],
-  [5, 3, 5, 1],
-  [5, 5, 0, 1],
-  [5, 6, 7, 1],
-  [2017, 1, 0, 1],
-  [2017, 2, 0, 1],
-  [2017, 3, 0, 1],
-  [2017, 4, 40, 1],
-  [2018, 1, 0, 1],
-  [2018, 2, 0, 1],
-  [2018, 3, 0, 1],
-  [2018, 4, 36, 1],
   [2019, 1, 0, 1],
   [2019, 4, 41, 2],
   [2020, 1, 0, 1],
@@ -464,23 +318,12 @@ const TYPE_TREES: { name: string; unity: UnityVersion }[] = [
 
 test("each version gate: a layout read as its neighbour's is refused", () => {
   const pairs: [UnityVersion, UnityVersion][] = [
-    [[3, 4, 0, 1], [3, 5, 0, 1]],
-    [[3, 5, 7, 1], [4, 0, 0, 1]],
-    [[4, 0, 0, 1], [4, 1, 0, 1]],
-    [[4, 2, 2, 1], [4, 3, 0, 1]],
-    [[4, 7, 2, 1], [5, 0, 0, 1]],
-    [[2017, 2, 0, 1], [2017, 3, 0, 1]],
-    [[2017, 4, 40, 1], [2018, 1, 0, 1]],
-    [[2018, 1, 0, 1], [2018, 2, 0, 1]],
-    [[2018, 2, 0, 1], [2018, 3, 0, 1]],
-    [[2018, 4, 36, 1], [2019, 1, 0, 1]],
     [[2019, 4, 41, 2], [2020, 1, 0, 1]],
     [[2020, 3, 30, 1], [2022, 1, 0, 1]],
     [[2022, 1, 0, 1], [6000, 2, 0, 1]],
   ];
-  // Some gates change no byte count, so only the version tells them apart:
-  // 5.6 signs m_CurrentChannels, 6000.6 swaps m_MeshUsageFlags for two bools
-  // and their padding.
+  // 6000.6 swaps m_MeshUsageFlags for two bools and their padding, the same
+  // size: the bytes cannot tell those two apart, only the version can.
   for (const [before, after] of pairs) {
     for (const [wrote, read] of [
       [before, after],
@@ -498,11 +341,11 @@ test("each version gate: a layout read as its neighbour's is refused", () => {
 
 // --- refusals ---------------------------------------------------------------------------
 
-test("before Unity 3.4, which has no type tree data: UnsupportedError(Unity version)", () => {
-  const { bytes } = build((w) => meshLayout(w, [3, 4, 0, 1], { rich: true }));
+test("before Unity 2019.1: UnsupportedError(Unity version), the supported floor", () => {
+  const { bytes } = build((w) => meshLayout(w, [2019, 1, 0, 1], { rich: true }));
   for (const unity of [
-    [3, 3, 0, 1],
-    [2, 6, 1, 1],
+    [2018, 4, 36, 1],
+    [5, 6, 7, 1],
   ] as UnityVersion[]) {
     const text = unity.slice(0, 3).join(".");
     const reader = readerOf(FROM_2020, bytes, { unity });
@@ -511,7 +354,7 @@ test("before Unity 3.4, which has no type tree data: UnsupportedError(Unity vers
       (err: unknown) =>
         versionRefusal(text)(err) &&
         (err as Error).message.includes(`object ${reader.pathId}`) &&
-        (err as Error).message.includes("before Unity 3.4"),
+        (err as Error).message.includes("2019.1 and later"),
     );
   }
 });
@@ -683,7 +526,7 @@ const STREAMS: MeshInput = {
 test("vertex streams: every format converted as upstream's MeshHelper does", () => {
   const { reader } = handBuilt(STREAMS);
   assert.equal(STREAMS.vertexData!.length, 120);
-  const data = reader.read<MeshData>().geometry;
+  const data = reader.read<MeshData>();
   assert.equal(data.vertexCount, 2);
   assert.deepStrictEqual(data.vertices, Float32Array.of(1.5, -2, 3.25, 4, 5, 6));
   // Float16: exact, subnormals, signed zero and infinity included.
@@ -709,7 +552,7 @@ test("vertex streams: every format converted as upstream's MeshHelper does", () 
   ]);
   assert.deepStrictEqual(data.indices, [Uint32Array.of(0, 1, 1)]);
   // The type tree's dimension byte is kept as the file holds it.
-  assert.equal(readMesh(reader).m_VertexData!.m_Channels![0]!.dimension, 0x23);
+  assert.equal(data.m_VertexData.m_Channels[0]!.dimension, 0x23);
 });
 
 /** STREAMS with channel `chn` replaced. */
@@ -738,7 +581,7 @@ test("vertex streams: a format Unity does not define throws UnsupportedError", (
       err instanceof UnsupportedError && err.kind === "vertex format" && err.found === 12,
   );
   // A channel of dimension 0 is not read, whatever its format.
-  const unused = handBuilt(streamsWith(6, [1, 0, 99, 0])).reader.read<MeshData>().geometry;
+  const unused = handBuilt(streamsWith(6, [1, 0, 99, 0])).reader.read<MeshData>();
   assert.equal(unused.uv[2], undefined);
 });
 
@@ -768,7 +611,7 @@ function trianglesOf(
 ): Uint32Array {
   const indexBuffer = bytesOf(...indices.map((i): [string, number] => [wide ? "u32" : "u16", i]));
   const { reader } = handBuilt({ indexFormat: wide ? 1 : 0, indexBuffer, subMeshes: [subMesh] });
-  const [triangles, ...more] = reader.read<MeshData>().geometry.indices;
+  const [triangles, ...more] = reader.read<MeshData>().indices;
   assert.equal(more.length, 0);
   return triangles!;
 }
@@ -791,7 +634,7 @@ test("indices: 16 and 32 bits, from the submesh's first byte", () => {
       { firstByte: 6, indexCount: 3, topology: 0 },
     ],
   });
-  assert.deepStrictEqual(reader.read<MeshData>().geometry.indices, [
+  assert.deepStrictEqual(reader.read<MeshData>().indices, [
     Uint32Array.of(0, 1, 2),
     Uint32Array.of(2, 1, 3),
   ]);
@@ -871,7 +714,7 @@ const COMPRESSED: MeshInput = {
 };
 
 test("compressed mesh: every packed vector unpacked as upstream's DecompressCompressedMesh", () => {
-  const data = handBuilt(COMPRESSED).reader.read<MeshData>().geometry;
+  const data = handBuilt(COMPRESSED).reader.read<MeshData>();
   assert.equal(data.vertexCount, 2);
   assert.deepStrictEqual(data.vertices, Float32Array.of(-1, 6, 4, 0, 2, 5));
   assert.deepStrictEqual(data.uv[0], Float32Array.of(0, 1, 2, 3));
@@ -896,7 +739,7 @@ test("compressed mesh: m_UVInfo lays out the UV channels and their dimensions", 
     },
     uvInfo: 0x604,
   };
-  const data = handBuilt(input).reader.read<MeshData>().geometry;
+  const data = handBuilt(input).reader.read<MeshData>();
   assert.deepStrictEqual(data.uv[0], Float32Array.of(1, 2));
   assert.deepStrictEqual(data.uv[2], Float32Array.of(3, 4, 5, 6, 7, 0));
   for (const uv of [1, 3, 4, 5, 6, 7]) assert.equal(data.uv[uv], undefined, `uv ${uv}`);
@@ -904,7 +747,7 @@ test("compressed mesh: m_UVInfo lays out the UV channels and their dimensions", 
   const short = {
     compressed: { ...input.compressed, m_UV: { bits: 2, range: 3, items: [1, 2, 3, 0, 1] } },
   };
-  const plain = handBuilt(short).reader.read<MeshData>().geometry;
+  const plain = handBuilt(short).reader.read<MeshData>();
   assert.deepStrictEqual(plain.uv[0], Float32Array.of(1, 2, 3, 0));
   assert.equal(plain.uv[1], undefined);
 });
@@ -917,7 +760,7 @@ test("compressed mesh: a general range, in float32 as upstream's float arithmeti
   const scale = f(1 / f(range));
   const divisor = f(scale * 1023);
   const expected = Float32Array.from(items, (x) => f(f(x / divisor) + f(start)));
-  assert.deepStrictEqual(handBuilt(input).reader.read<MeshData>().geometry.vertices, expected);
+  assert.deepStrictEqual(handBuilt(input).reader.read<MeshData>().vertices, expected);
 });
 
 test("compressed mesh: normals and tangents in float32, as upstream's float arithmetic", () => {
@@ -932,7 +775,7 @@ test("compressed mesh: normals and tangents in float32, as upstream's float arit
       m_TangentSigns: { bits: 1, items: [1, 1, 0, 0, 1, 0, 0, 1] },
     },
   };
-  const data = handBuilt(input).reader.read<MeshData>().geometry;
+  const data = handBuilt(input).reader.read<MeshData>();
   const divisor = f(f(1 / 2) * 1023);
   const unpacked = items.map((x) => f(f(x / divisor) + -1));
   const normal = (i: number, sign: number): number[] => {
@@ -1033,8 +876,8 @@ test("m_StreamData: the vertex data is read from the .resS it names", () => {
     { name: cab.path, data: cab.data },
     { name: "CAB-mesh.resS", data: resS },
   ]);
-  const { geometry: mesh, m_VertexData } = meshOf(env).read<MeshData>();
-  assert.equal(m_VertexData!.m_DataSize.length, 0);
+  const mesh = env.objects.find((o) => o.type === ClassID.Mesh)!.read<MeshData>();
+  assert.equal(mesh.m_VertexData.m_DataSize.length, 0);
   assert.deepStrictEqual(mesh.vertices, Float32Array.of(0, 0, 0, 0, 1, 0, 1, 0, 0));
   assert.deepStrictEqual(mesh.indices, [Uint32Array.of(0, 1, 2)]);
 });
@@ -1055,7 +898,7 @@ test("m_StreamData: a .resS not loaded throws ResourceNotFoundError, unless no v
   // Upstream reads the resource only for a mesh with vertices.
   const empty = streamedFixture(0).cab;
   const none = meshOf(load([{ name: empty.path, data: empty.data }]));
-  assert.equal(none.read<MeshData>().geometry.vertexCount, 0);
+  assert.equal(none.read<MeshData>().vertexCount, 0);
 });
 
 // --- the hand-built layouts through Unity's own type trees ----------------------------
@@ -1074,318 +917,3 @@ for (const { name, unity } of TYPE_TREES) {
     }
   });
 }
-
-/** `fixtures/tpk-trees.json`: Unity's player type trees from UnityPy's TPK data (R12). */
-const TPK = (
-  JSON.parse(
-    readFileSync(new URL("../../../fixtures/tpk-trees.json", import.meta.url), "utf8"),
-  ) as { classes: Record<string, Record<string, GoldenNode[]>> }
-).classes[String(ClassID.Mesh)]!;
-
-/** A TPK tree as the nodes a SerializedFile's type would hold. */
-const typeTreeNodes = (nodes: GoldenNode[]): TypeTreeNode[] =>
-  nodes.map(([level, type, name, byteSize, metaFlag], index) => ({
-    level,
-    type,
-    name,
-    byteSize,
-    metaFlag,
-    index,
-    typeFlags: 0,
-    version: 1,
-    typeStrOffset: 0,
-    nameStrOffset: 0,
-    refTypeHash: 0n,
-  }));
-
-/** Packed vectors in every slot a version may have, including 3.5 to 4.x's colours. */
-const PACKED_ALL: MeshInput = {
-  rich: true,
-  compressed: {
-    m_Vertices: { bits: 3, range: 7, items: [1, 2, 3] },
-    m_UV: { bits: 2, range: 3, items: [1, 2] },
-    m_BindPoses: { bits: 1, items: new Array(16).fill(1) },
-    m_Normals: { bits: 1, items: [1, 0] },
-    m_NormalSigns: { bits: 1, items: [1] },
-    m_FloatColors: { bits: 2, range: 3, items: [3, 2, 1, 0] },
-    m_Colors: { bits: 32, items: [0x01020304] },
-    m_Triangles: { bits: 2, items: [0, 0, 0] },
-  },
-};
-
-test("TPK has a Mesh tree at every gate this reader knows, from 3.4 to 6000.6", () => {
-  assert.deepEqual(Object.keys(TPK), [
-    "3.4.0",
-    "3.5.0",
-    "3.5.1",
-    "4.0.0",
-    "4.1.0",
-    "4.3.0",
-    "5.0.0",
-    "5.3.5",
-    "5.5.0",
-    "5.6.0",
-    "2017.1b1",
-    "2017.3b1",
-    "2018.1b2",
-    "2018.2b1",
-    "2018.3b1",
-    "2019.1a10",
-    "2020.1a19",
-    "2022.1a15",
-    "6000.2a8",
-    "6000.6a5",
-  ]);
-});
-
-for (const [key, nodes] of Object.entries(TPK)) {
-  test(`TPK ${key}: a hand-built Mesh reads the same through Unity's type tree`, () => {
-    const [, major, minor, patch = "0"] = /^(\d+)\.(\d+)(?:\.(\d+))?/.exec(key)!;
-    // 2017.3: a compressed mesh has m_IndexFormat from 2017.3.1p1 (see readMesh).
-    const is2017_3 = key.startsWith("2017.3");
-    const unity: UnityVersion = [+major!, +minor!, is2017_3 ? 1 : +patch, 1];
-    const buildType = is2017_3 ? "p" : "f";
-    const serializedType = { ...FROM_2020.info.serializedType!, nodes: typeTreeNodes(nodes) };
-    const from = {
-      sf: { ...FROM_2020.sf, buildType },
-      info: { ...FROM_2020.info, serializedType },
-    };
-    for (const input of [{ rich: true }, PACKED_ALL]) {
-      const { bytes } = build((w) => meshLayout(w, unity, input, buildType));
-      const reader = readerOf(from, bytes, { unity });
-      const tree = withNumberOffset(reader.readTypeTree() as Record<string, unknown>);
-      const mesh = readMesh(reader);
-      assert.deepEqual(Object.keys(mesh), Object.keys(tree));
-      assert.deepStrictEqual(mesh, tree);
-    }
-  });
-}
-
-test("2017.3: m_IndexFormat as upstream gates it, by mesh compression and patch release", () => {
-  const compressed = { compressed: { m_Vertices: { bits: 1, items: [0, 0, 0] } } };
-  const has = (input: MeshInput, unity: UnityVersion, buildType: string) =>
-    "m_IndexFormat" in readMesh(handBuilt(input, unity, buildType).reader);
-  assert.equal(has({}, [2017, 3, 0, 3], "f"), true);
-  assert.equal(has(compressed, [2017, 3, 0, 3], "f"), false);
-  assert.equal(has(compressed, [2017, 3, 1, 1], "f"), false);
-  assert.equal(has(compressed, [2017, 3, 1, 2], "p"), true);
-  assert.equal(has(compressed, [2017, 4, 0, 1], "f"), true);
-  assert.equal(has(compressed, [2017, 2, 0, 1], "f"), false);
-});
-
-// --- decoding before 2019 ---------------------------------------------------------------
-
-/** An `UnsupportedError("vertex format")` naming `format`. */
-const formatRefusal = (err: unknown, format: number): boolean =>
-  err instanceof UnsupportedError && err.kind === "vertex format" && err.found === format;
-
-test("3.4: the vertex arrays, colours by byte, m_Use16BitIndices 0, an isTriStrip submesh", () => {
-  const input: MeshInput = {
-    use16: 0,
-    legacy: {
-      vertices: [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-      ],
-      uv: [[0.5, 0.25]],
-      uv1: [[0.75, 1]],
-      tangents: [[1, 0, 0, -1]],
-      normals: [[0, 0, 1]],
-      colors: [0x80ff0040],
-    },
-    skin: [[[0.5, 0.5, 0, 0], [1, 2, 0, 0]]],
-    indexBuffer: bytesOf(["u32", 70000], ["u32", 1], ["u32", 2], ["u32", 0]),
-    subMeshes: [{ firstByte: 0, indexCount: 4, topology: 1 }],
-  };
-  const geometry = handBuilt(input, [3, 4, 0, 1]).reader.read<MeshData>().geometry;
-  assert.equal(geometry.vertexCount, 3);
-  assert.deepStrictEqual(geometry.vertices, Float32Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
-  assert.deepStrictEqual(geometry.uv[0], Float32Array.of(0.5, 0.25));
-  assert.deepStrictEqual(geometry.uv[1], Float32Array.of(0.75, 1));
-  assert.deepStrictEqual(geometry.tangents, Float32Array.of(1, 0, 0, -1));
-  assert.deepStrictEqual(geometry.normals, Float32Array.of(0, 0, 1));
-  // The word's bytes in file order (little-endian): 0x40, 0x00, 0xff, 0x80.
-  assert.deepStrictEqual(geometry.colors, Float32Array.of(f(64 / 255), 0, 1, f(128 / 255)));
-  assert.deepStrictEqual(geometry.skin, [{ weight: [0.5, 0.5, 0, 0], boneIndex: [1, 2, 0, 0] }]);
-  // 32-bit indices; before 4.0 isTriStrip makes a strip: (70000, 1, 2), then (2, 1, 0) flipped.
-  assert.deepStrictEqual(geometry.indices, [Uint32Array.of(70000, 1, 2, 2, 1, 0)]);
-  // Any value but 0 is a strip before 4.0, where 4.0 would read 2 as quads.
-  const two = { ...input, subMeshes: [{ firstByte: 0, indexCount: 4, topology: 2 }] };
-  assert.deepStrictEqual(
-    handBuilt(two, [3, 4, 0, 1]).reader.read<MeshData>().geometry.indices,
-    geometry.indices,
-  );
-});
-
-test("3.5: four streams whose masks place the channels; packed colours and bind poses", () => {
-  const input: MeshInput = {
-    vertexCount: 2,
-    // Stream 0: position, normal, UV0 (mask 0b1011), stride 32; stream 1: colour.
-    streams: [
-      [0b1011, 0, 32],
-      [0b0100, 64, 4],
-    ],
-    vertexData: bytesOf(
-      ...[1, 2, 3, 0, 0, 1, 0.5, 0.25, 4, 5, 6, 0, 1, 0, 0.75, 1].map(
-        (x): [string, number] => ["f32", x],
-      ),
-      ["u8", 255], ["u8", 0], ["u8", 51], ["u8", 102],
-      ["u8", 0], ["u8", 255], ["u8", 0], ["u8", 255],
-    ),
-    skin: [
-      [[1, 0, 0, 0], [3, 0, 0, 0]],
-      [[0.25, 0.75, 0, 0], [1, 2, 0, 0]],
-    ],
-    compressed: {
-      // 16 floats a pose, each 0 or 1.
-      m_BindPoses: { bits: 1, items: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1] },
-    },
-  };
-  const geometry = handBuilt(input, [3, 5, 7, 1]).reader.read<MeshData>().geometry;
-  assert.equal(geometry.vertexCount, 2);
-  assert.deepStrictEqual(geometry.vertices, Float32Array.of(1, 2, 3, 4, 5, 6));
-  assert.deepStrictEqual(geometry.normals, Float32Array.of(0, 0, 1, 0, 1, 0));
-  assert.deepStrictEqual(geometry.uv[0], Float32Array.of(0.5, 0.25, 0.75, 1));
-  assert.deepStrictEqual(
-    geometry.colors,
-    Float32Array.from([255, 0, 51, 102, 0, 255, 0, 255], (x) => f(x / 255)),
-  );
-  assert.deepStrictEqual(geometry.skin, [
-    { weight: [1, 0, 0, 0], boneIndex: [3, 0, 0, 0] },
-    { weight: [0.25, 0.75, 0, 0], boneIndex: [1, 2, 0, 0] },
-  ]);
-  const identity = Object.fromEntries(
-    [0, 1, 2, 3].flatMap((r) => [0, 1, 2, 3].map((c) => [`e${r}${c}`, r === c ? 1 : 0])),
-  );
-  assert.deepStrictEqual(geometry.bindPoses, [identity]);
-
-  // Packed colours replace the streams': a quarter of m_BitSize per channel.
-  const packed = {
-    ...input,
-    compressed: {
-      m_Colors: {
-        bits: 32,
-        items: [],
-        numItems: 2,
-        data: Uint8Array.of(255, 0, 51, 102, 1, 2, 3, 4),
-      },
-    },
-  };
-  assert.deepStrictEqual(
-    handBuilt(packed, [3, 5, 7, 1]).reader.read<MeshData>().geometry.colors,
-    Float32Array.from([255, 0, 51, 102, 1, 2, 3, 4], (x) => f(x / 255)),
-  );
-});
-
-test("4.x: the stream table, pre-2017 formats and channel numbering, a 3-wide Color", () => {
-  const input: MeshInput = {
-    vertexCount: 1,
-    // 0 position (Float), 2 colour (Color, dimension 3 read as 4), 3 UV0 (Byte:
-    // an integer format, so absent), 5 tangent (Float16, before 5.0).
-    channels: [
-      [0, 0, 0, 3],
-      [0, 0, 0, 0],
-      [0, 12, 2, 3],
-      [0, 16, 3, 2],
-      [0, 0, 0, 0],
-      [0, 18, 1, 4],
-    ],
-    streams: [[0b101101, 0, 26]],
-    vertexData: bytesOf(
-      ["f32", 1], ["f32", 2], ["f32", 3],
-      ["u8", 255], ["u8", 0], ["u8", 0], ["u8", 255],
-      ["u8", 7], ["u8", 8],
-      ["f16", 0x3c00], ["f16", 0], ["f16", 0], ["f16", 0xbc00],
-    ),
-  };
-  const geometry = handBuilt(input, [4, 7, 2, 1]).reader.read<MeshData>().geometry;
-  assert.deepStrictEqual(geometry.vertices, Float32Array.of(1, 2, 3));
-  assert.deepStrictEqual(geometry.colors, Float32Array.of(1, 0, 0, 1));
-  assert.equal(geometry.uv[0], undefined);
-  assert.deepStrictEqual(geometry.tangents, Float32Array.of(1, 0, 0, -1));
-  // A format VertexChannelFormat does not have.
-  const channels = input.channels!.map((c, i): Channel => (i === 3 ? [0, 16, 5, 2] : c));
-  assert.throws(
-    () => handBuilt({ ...input, channels }, [4, 7, 2, 1]).reader.read(),
-    (err: unknown) => formatRefusal(err, 5),
-  );
-});
-
-test("2017 to 2018.1: VertexFormat2017 and channel 5 as UV2, 7 as the tangent", () => {
-  const input: MeshInput = {
-    vertexCount: 1,
-    // 0 position (Float), 5 UV2 (SNorm8: 4 in 2017's numbering), 7 tangent (Float).
-    channels: [
-      [0, 0, 0, 3],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 0, 0, 0],
-      [0, 12, 4, 2],
-      [0, 0, 0, 0],
-      [0, 14, 0, 4],
-    ],
-    vertexData: bytesOf(
-      ["f32", 1], ["f32", 2], ["f32", 3],
-      ["i8", 127], ["i8", -127],
-      ["f32", 0], ["f32", 1], ["f32", 0], ["f32", -1],
-    ),
-  };
-  const geometry = handBuilt(input, [2017, 4, 40, 1]).reader.read<MeshData>().geometry;
-  assert.deepStrictEqual(geometry.vertices, Float32Array.of(1, 2, 3));
-  assert.deepStrictEqual(geometry.uv[2], Float32Array.of(1, -1));
-  assert.deepStrictEqual(geometry.tangents, Float32Array.of(0, 1, 0, -1));
-  // 13 is past VertexFormat2017.
-  const channels = input.channels!.map((c, i): Channel => (i === 5 ? [0, 12, 13, 2] : c));
-  assert.throws(
-    () => handBuilt({ ...input, channels }, [2017, 4, 40, 1]).reader.read(),
-    (err: unknown) => formatRefusal(err, 13),
-  );
-});
-
-test("2018.1: bone channels write into m_Skin, or a new skin when it is empty", () => {
-  const channels: Channel[] = [
-    ...new Array<Channel>(12).fill([0, 0, 0, 0]),
-    [0, 0, 0, 1],
-    [0, 4, 10, 1],
-  ];
-  const vertexData = bytesOf(["f32", 0.5], ["u32", 9]);
-  const skin: MeshInput["skin"] = [[[0, 0.25, 0, 0], [0, 4, 0, 0]]];
-  const input: MeshInput = { vertexCount: 1, channels, vertexData, skin };
-  const read = (skin?: MeshInput["skin"]) =>
-    handBuilt({ ...input, skin }, [2018, 1, 0, 1]).reader.read<MeshData>().geometry.skin;
-  // The channels' first weight and index over m_Skin's.
-  assert.deepStrictEqual(read(skin), [{ weight: [0.5, 0.25, 0, 0], boneIndex: [9, 4, 0, 0] }]);
-  assert.deepStrictEqual(read([]), [{ weight: [0.5, 0, 0, 0], boneIndex: [9, 0, 0, 0] }]);
-});
-
-test("asset.data before 2019: Unity's arrays by their names, the decoded ones in geometry", () => {
-  const v3_4 = handBuilt({ rich: true }, [3, 4, 0, 1]).reader.read<MeshData>();
-  const fields3_4 = toMeshFields(v3_4);
-  assert.equal(fields3_4.geometry, v3_4.geometry);
-  assert.equal(fields3_4.use16BitIndices, 1);
-  assert.equal(fields3_4.vertices, v3_4.m_Vertices);
-  assert.equal(fields3_4.uv1, v3_4.m_UV1);
-  assert.equal(fields3_4.colors, v3_4.m_Colors);
-  assert.deepStrictEqual(fields3_4.geometry.vertices, Float32Array.of(1, 2, 3));
-
-  const v3_5 = handBuilt({ rich: true }, [3, 5, 7, 1]).reader.read<MeshData>();
-  const vertexData = toMeshFields(v3_5).vertexData!;
-  assert.deepEqual(Object.keys(vertexData), [
-    "currentChannels",
-    "vertexCount",
-    "streams[0]",
-    "streams[1]",
-    "streams[2]",
-    "streams[3]",
-    "data",
-  ]);
-  assert.equal(vertexData["streams[0]"], v3_5.m_VertexData!["m_Streams[0]"]);
-
-  const v4_1 = handBuilt({ rich: true }, [4, 1, 0, 1]).reader.read<MeshData>();
-  const fields4_1 = toMeshFields(v4_1);
-  assert.equal(fields4_1.shapes, v4_1.m_Shapes);
-  assert.equal(fields4_1.shapeVertices, v4_1.m_ShapeVertices);
-  assert.equal(fields4_1.streamCompression, 1);
-});

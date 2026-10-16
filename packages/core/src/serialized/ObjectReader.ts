@@ -257,10 +257,10 @@ export class ObjectReader extends BinaryReader {
    *   `read()` reaches it only when the file has no type tree, and Unity
    *   always writes one into an editor file.
    * @throws {UnsupportedError} for a `Mesh` whose vertices or triangles cannot
-   *   be decoded: a submesh of lines or points from Unity 4.0 (kind
-   *   `"mesh topology"`), a vertex format Unity does not define or bone data
-   *   in the wrong kind of format (`"vertex format"`), more than four bones
-   *   per vertex (`"bones per vertex"`)
+   *   be decoded: a submesh of lines or points (kind `"mesh topology"`), a
+   *   vertex format Unity does not define or bone data in the wrong kind of
+   *   format (`"vertex format"`), more than four bones per vertex
+   *   (`"bones per vertex"`)
    * @throws {UnsupportedError} of kind `"object without a type tree"`, naming
    *   the class id and path id, for a class without a hardcoded reader in a
    *   file built without type trees; and whatever else {@link readTypeTree}
