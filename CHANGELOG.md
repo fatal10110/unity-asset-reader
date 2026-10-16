@@ -24,6 +24,16 @@ to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
+### 1.2.0 - Unreleased
+
+- `readShader` reads `Shader` objects without a type tree (#237), and `obj.read()` and
+  `asset.data` (`ShaderFields`) use it: the parsed ShaderLab (`m_ParsedForm`: properties,
+  sub-shaders, passes, render state, keywords, each variant's parameters) and the compiled
+  programs of every platform (`compressedBlob`, still LZ4-compressed), from Unity 3.4 to
+  6000.6. Unity 2023.1 and later, Unity 6 included, have no `m_EditorDataHash` or `m_Platforms`
+  in a pass (#52). Tested on 2019.4.41f2 and 6000.6.4f1 shaders built for DX11, GLES3 and
+  Vulkan, and on UnityPy's synthetic object of every Shader layout of Unity's type trees.
+
 ### 1.1.0 - 2026-10-16
 
 - `readSpriteAtlas` reads Unity 6000.6's layout instead of refusing it: no `m_PackedSprites` or
