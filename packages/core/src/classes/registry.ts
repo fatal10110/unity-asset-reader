@@ -11,6 +11,7 @@ import { baseName } from "../serialized/SerializedFile.js";
 import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
 import { readAssetBundle, type AssetBundle } from "./AssetBundle.js";
 import { readMaterial, type Material } from "./Material.js";
+import { readMeshData, type MeshData } from "./Mesh.js";
 import { readShader, type Shader } from "./Shader.js";
 import { readTexture2D, type Texture2D } from "./Texture2D.js";
 import { readMonoBehaviour, type MonoBehaviour } from "./MonoBehaviour.js";
@@ -27,6 +28,7 @@ import {
   toAudioClipFields,
   toFontFields,
   toMaterialFields,
+  toMeshFields,
   toMonoBehaviourFields,
   toMonoScriptFields,
   toMovieTextureFields,
@@ -40,6 +42,7 @@ import {
   type AudioClipFields,
   type FontFields,
   type MaterialFields,
+  type MeshFields,
   type MonoBehaviourFields,
   type MonoScriptFields,
   type MovieTextureFields,
@@ -109,6 +112,7 @@ export interface ObjectDataMap {
   MovieTexture: MovieTexture;
   Sprite: Sprite;
   SpriteAtlas: SpriteAtlas;
+  Mesh: MeshData;
 }
 
 /**
@@ -131,6 +135,7 @@ export interface AssetDataMap {
   MovieTexture: MovieTextureFields;
   Sprite: SpriteFields;
   SpriteAtlas: SpriteAtlasFields;
+  Mesh: MeshFields;
 }
 
 /**
@@ -174,6 +179,7 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   MovieTexture: readMovieTexture,
   Sprite: readSprite,
   SpriteAtlas: readSpriteAtlas,
+  Mesh: readMeshData,
 };
 
 /** {@link CLASS_READERS} by class id, and the class name each id has there. */
@@ -247,6 +253,7 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   MovieTexture: toMovieTextureFields,
   Sprite: toSpriteFields,
   SpriteAtlas: toSpriteAtlasFields,
+  Mesh: toMeshFields,
 };
 
 /**

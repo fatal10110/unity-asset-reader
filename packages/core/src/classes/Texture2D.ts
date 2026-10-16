@@ -219,20 +219,26 @@ function readTextureSettings(reader: ObjectReader): GLTextureSettings {
 }
 
 /**
- * Upstream `StreamingInfo(ObjectReader)`.
+ * Upstream `StreamingInfo(ObjectReader)`. Internal: shared with `Mesh.ts`.
  *
+ * @param owner the class, for error messages
+ * @param version the Unity version whose layout the object has
  * @throws {CorruptError} when the offset is 2^53 or above (R6), or the path's
  *   byte count is negative or runs past the object's end: upstream reads
  *   either as an empty path, and so calls garbled or truncated data inline
  */
-function readStreamingInfo(reader: ObjectReader): StreamingInfo {
+export function readStreamingInfo(
+  reader: ObjectReader,
+  owner = "Texture2D",
+  version = reader.version,
+): StreamingInfo {
   // 2020.1+: the offset is 64-bit.
   let offset: number;
-  if (atLeast(reader.version, 2020, 1)) {
+  if (atLeast(version, 2020, 1)) {
     const value = reader.readUInt64();
     if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
       throw new CorruptError(
-        `Texture2D ${reader.pathId} m_StreamData offset ${value} is not a byte offset below 2^53`,
+        `${owner} ${reader.pathId} m_StreamData offset ${value} is not a byte offset below 2^53`,
       );
     }
     offset = Number(value);
@@ -240,7 +246,7 @@ function readStreamingInfo(reader: ObjectReader): StreamingInfo {
     offset = reader.readUInt32();
   }
   const size = reader.readUInt32();
-  return { offset, size, path: readStringField(reader, "Texture2D", "m_StreamData path") };
+  return { offset, size, path: readStringField(reader, owner, "m_StreamData path") };
 }
 
 /** A one-byte bool, as Unity writes it. */

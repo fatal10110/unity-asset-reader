@@ -78,7 +78,7 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 Our library exposes raw audio, video and font bytes; it does not decode audio or video.
-Reading a Mesh through its type tree does not mean exporting a model.
+Reading a Mesh, its vertices and triangles decoded, does not mean exporting a model.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
 `unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row

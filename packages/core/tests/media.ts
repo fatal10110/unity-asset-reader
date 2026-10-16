@@ -1,4 +1,4 @@
-// Shared by the AudioClip, Font, VideoClip and MovieTexture tests (#41): the
+// Shared by the AudioClip, Font, VideoClip, MovieTexture (#41) and Mesh (#235) tests: the
 // oracle's raw-data goldens, the golden's normalization driven by its own type
 // tree, and a writer for hand-built layouts from Unity's type trees (TPK).
 
@@ -173,6 +173,11 @@ export class Writer {
   u16(v: number): number {
     this.view.setUint16(0, v, true);
     this.push(2);
+    return v;
+  }
+
+  u8(v: number): number {
+    this.out.push(v & 0xff);
     return v;
   }
 
