@@ -9,14 +9,15 @@ documentation snapshot, not a compatibility test.
 A ✗ does not prove that an undocumented feature is absent.
 
 The **Our library** column covers this project as one library: `unity-asset-reader`,
-`unity-asset-reader-texture`, `unity-asset-reader-node` and `texture2ddecoder-wasm`.
+`unity-asset-reader-texture`, `unity-asset-reader-node`, `unity-asset-reader-spine` and
+`texture2ddecoder-wasm`.
 CLI features include those provided by its required AssetStudioMod application.
 
 ## Libraries and sources
 
 | Column | Library | Documentation |
 |---|---|---|
-| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [decoder](packages/decoder/README.md) |
+| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [Spine](packages/spine/README.md), [decoder](packages/decoder/README.md) |
 | unity-js | `@arkntools/unity-js` | [npm README](https://www.npmjs.com/package/@arkntools/unity-js), [tools README](https://www.npmjs.com/package/@arkntools/unity-js-tools) |
 | unityfs-js | `unityfs-js` | [npm README](https://www.npmjs.com/package/unityfs-js) |
 | Studio JS | `node-asset-studio-mod-js` | [npm README](https://www.npmjs.com/package/node-asset-studio-mod-js) |
@@ -72,13 +73,15 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Decode audio to WAV / OGG / MP3 | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✗ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
-| Export Spine | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Export Spine | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Export shader inspection text | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Edit assets and repack bundles | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 Our library exposes raw audio, video and font bytes; it does not decode audio or video.
 Reading a Mesh, its vertices and triangles decoded, does not mean exporting a model.
+Exporting Spine means grouping each spine-unity skeleton's data, atlas text and page textures
+(`unity-asset-reader-spine`), from files built with type trees.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
 `unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row

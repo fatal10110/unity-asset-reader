@@ -16,6 +16,7 @@ You do not need Unity, .NET, or a native application installed.
 | Read bundles and their assets | `unity-asset-reader` |
 | Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
 | Load files or folders from disk | Add `unity-asset-reader-node` |
+| Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
 
 The texture package installs `texture2ddecoder-wasm` automatically.
@@ -26,6 +27,8 @@ The texture package installs `texture2ddecoder-wasm` automatically.
   RGBA pixels with `await decodeImage(asset)`.
 - **[Node.js](packages/node/README.md):** load a file or folder with `loadPath()`, including
   split bundles and resource sidecars.
+- **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
+  page textures with `spineSkeletons(env)`.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -95,6 +98,7 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-texture`](packages/texture/README.md): texture formats, sprites,
     platforms.
   - [`unity-asset-reader-node`](packages/node/README.md): `loadPath()`.
+  - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 
