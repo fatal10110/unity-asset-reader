@@ -435,7 +435,7 @@ provenance for RG16, RG32, RGBA64 and the 2019 variant's `r_a` and `r_b`.
 The same unsigned plain inputs in `modern-goldens.json` receive these references;
 Format-23 metadata and generic dumps are tested against the sidecar (#223),
 and all five unsigned plain conversions are tested against it by #108.
-The new Sprite/SpriteAtlas class layouts remain separate work.
+The 6000.6 Sprite/SpriteAtlas class layouts are read since #228.
 
 The external .NET harness executes unmodified methods from the same pinned
 AssetStudio revision as RGB48, including `SpriteHelper.CutImage`. Its pinned
@@ -447,4 +447,4 @@ UnityPy hashes and errors remain, but are not variant-resize acceptance values.
 
 See BUILDING section 15 for source/package pins, isolated reproduction, license
 and dependency-security notes. #108 tests use these plain-format references;
-the variant resize in #153 remains separate work.
+#153 (#227) tests the variant resize against them.
