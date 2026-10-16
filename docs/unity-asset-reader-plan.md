@@ -63,6 +63,9 @@ packages/
   node/                 npm: unity-asset-reader-node     Node only; deps: core (peer)
     src/         index.ts   fs + dir scan + sidecar resolution
     tests/
+  mesh/                 npm: unity-asset-reader-mesh     isomorphic; deps: core (peer)   (M6, #239)
+    src/         obj.ts (OBJ writer) float.ts (.NET float text) index.ts
+    tests/
   decoder/              npm: texture2ddecoder-wasm       standalone WASM texture decoder, own version line
     src/ tests/ scripts/ examples/ texture2ddecoder/ (submodule) wasm_bindings.cpp
 examples/               cdn.html, vite/   (reader examples; use core + texture together)

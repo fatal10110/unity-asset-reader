@@ -305,6 +305,7 @@ For feature requests, describe:
     ├── core/                     # unity-asset-reader
     ├── texture/                  # unity-asset-reader-texture
     ├── node/                     # unity-asset-reader-node
+    ├── mesh/                     # unity-asset-reader-mesh
     └── decoder/                  # texture2ddecoder-wasm
         ├── src/                  # TypeScript source (index.ts)
         ├── tests/                # index.test.ts, samples.test.ts
