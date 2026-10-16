@@ -23,11 +23,7 @@ import { atLeast } from "./version.js";
  */
 export interface SerializedShaderFloatValue {
   val: number;
-  /**
-   * The property the value comes from (`Cull [_Cull]`), or `"<noninit>"`.
-   * Before Unity 5.6 Unity's `FastPropertyName` struct, which `readTypeTree()`
-   * gives as `{ name }`; here the name itself, as from 5.6 on (same bytes).
-   */
+  /** The property the value comes from (`Cull [_Cull]`), or `"<noninit>"`. */
   name: string;
 }
 
@@ -78,8 +74,7 @@ export interface SerializedShaderState {
   rtBlend6: SerializedShaderRTBlendState;
   rtBlend7: SerializedShaderRTBlendState;
   rtSeparateBlend: boolean;
-  /** Unity 2017.2 and later. */
-  zClip?: SerializedShaderFloatValue;
+  zClip: SerializedShaderFloatValue;
   zTest: SerializedShaderFloatValue;
   zWrite: SerializedShaderFloatValue;
   culling: SerializedShaderFloatValue;
@@ -151,7 +146,7 @@ export interface MatrixParameter {
   m_RowCount: number;
 }
 
-/** A struct parameter of a constant buffer, Unity 2017.3 and later (Unity's `StructParameter`). */
+/** A struct parameter of a constant buffer (Unity's `StructParameter`). */
 export interface StructParameter {
   m_NameIndex: number;
   /** Before Unity 6000.6. */
@@ -175,8 +170,7 @@ export interface TextureParameter {
   m_Binding?: Binding;
   /** Unity 6000.6 and later. */
   m_SamplerBinding?: Binding;
-  /** Unity 2017.3 and later. */
-  m_MultiSampled?: boolean;
+  m_MultiSampled: boolean;
   m_Dim: number;
 }
 
@@ -201,8 +195,7 @@ export interface ConstantBuffer {
   m_NameIndex: number;
   m_MatrixParams: MatrixParameter[];
   m_VectorParams: VectorParameter[];
-  /** Unity 2017.3 and later. */
-  m_StructParams?: StructParameter[];
+  m_StructParams: StructParameter[];
   m_Size: number;
   /** Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
   m_IsPartialCB?: boolean;
@@ -221,7 +214,7 @@ export interface UAVParameter {
   m_OriginalBinding?: Binding;
 }
 
-/** A sampler, Unity 2017.1 and later (Unity's `SamplerParameter`). */
+/** A sampler (Unity's `SamplerParameter`). */
 export interface SamplerParameter {
   sampler: number;
   /** Before Unity 6000.6. */
@@ -243,8 +236,7 @@ export interface ProgramParameters {
   m_ConstantBuffers: ConstantBuffer[];
   m_ConstantBufferBindings: BufferBinding[];
   m_UAVParams: UAVParameter[];
-  /** Always there in this struct; as a sub-program's own field, Unity 2017.1 and later. */
-  m_Samplers?: SamplerParameter[];
+  m_Samplers: SamplerParameter[];
 }
 
 /**
@@ -255,11 +247,11 @@ export interface SerializedSubProgram extends Partial<ProgramParameters> {
   /** The index of its code in the platform's part of `compressedBlob`, once decompressed. */
   m_BlobIndex: number;
   m_Channels: ParserBindChannels;
-  /** Unity 2019.1 to 2021.1. */
+  /** Before Unity 2021.2. */
   m_GlobalKeywordIndices?: number[];
-  /** Unity 2019.1 to 2021.1. */
+  /** Before Unity 2021.2. */
   m_LocalKeywordIndices?: number[];
-  /** Before Unity 2019.1, and 2021.2 and later. */
+  /** Unity 2021.2 and later. */
   m_KeywordIndices?: number[];
   m_ShaderHardwareTier: number;
   /** Unity's `ShaderGpuProgramType` (upstream's enum). */
@@ -269,8 +261,8 @@ export interface SerializedSubProgram extends Partial<ProgramParameters> {
    * parameter lists are fields of the sub-program itself.
    */
   m_Parameters?: ProgramParameters;
-  /** Unity 2017.2 and later: an `Int32`, from 2021.1 an `Int64`. */
-  m_ShaderRequirements?: number | bigint;
+  /** An `Int32`, from Unity 2021.1 an `Int64`. */
+  m_ShaderRequirements: number | bigint;
 }
 
 /** A variant as a player uses it (Unity's `SerializedPlayerSubProgram`). */
@@ -326,8 +318,7 @@ export interface SerializedPass {
   /** Unity 2019.3 and later. */
   progRayTracing?: SerializedProgram;
   m_HasInstancingVariant: boolean;
-  /** Unity 2018.1 and later. */
-  m_HasProceduralInstancingVariant?: boolean;
+  m_HasProceduralInstancingVariant: boolean;
   /** For a `UsePass`, the pass it names (`"Shader/PASS"`). */
   m_UseName: string;
   m_Name: string;
@@ -392,45 +383,34 @@ export interface SerializedShader {
 /**
  * The fields of a `Shader`, as a player build stores them, under Unity's
  * names: the keys, their order and their values agree with `readTypeTree()`
- * on the same object, except that a float value's name is a string before 5.6
- * too (see {@link SerializedShaderFloatValue}).
+ * on the same object.
  *
- * From Unity 5.5 a shader is its parsed form plus, in `compressedBlob`, the
- * compiled code of every variant for each platform in `platforms`: platform
- * `i`'s code starts at `offsets[i]`, `compressedLengths[i]` bytes of LZ4 that
- * decompress to `decompressedLengths[i]`. From 2019.3 each of the three is a
- * list per platform, the code split in parts. Before 5.5 a shader is
- * ShaderLab text in `m_Script`.
+ * A shader is its parsed form plus, in `compressedBlob`, the compiled code of
+ * every variant for each platform in `platforms`: platform `i`'s code starts
+ * at `offsets[i]`, `compressedLengths[i]` bytes of LZ4 that decompress to
+ * `decompressedLengths[i]`. From 2019.3 each of the three is a list per
+ * platform, the code split in parts.
  */
 export interface Shader extends NamedObject {
-  /** Before Unity 5.5: the shader, as ShaderLab text. */
-  m_Script?: string;
-  /** Before Unity 5.5. */
-  m_PathName?: string;
-  /** Unity 5.3 and 5.4: the size of `m_SubProgramBlob` once decompressed. */
-  decompressedSize?: number;
-  /** Unity 5.3 and 5.4: the compiled programs, compressed. */
-  m_SubProgramBlob?: Uint8Array;
-  /** Unity 5.5 and later. */
-  m_ParsedForm?: SerializedShader;
-  /** Unity 5.5 and later: the `ShaderCompilerPlatform` of each part of `compressedBlob`. */
-  platforms?: number[];
-  /** Unity 5.5 and later: one offset per platform, a list of them from 2019.3. */
-  offsets?: number[] | number[][];
+  /** The parsed ShaderLab; its `m_Name` is the shader's name (`m_Name` is empty). */
+  m_ParsedForm: SerializedShader;
+  /** The `ShaderCompilerPlatform` of each part of `compressedBlob`. */
+  platforms: number[];
+  /** One offset per platform; from Unity 2019.3 a list of them per platform. */
+  offsets: number[] | number[][];
   /** As `offsets`. */
-  compressedLengths?: number[] | number[][];
+  compressedLengths: number[] | number[][];
   /** As `offsets`. */
-  decompressedLengths?: number[] | number[][];
-  /** Unity 5.5 and later: every platform's compiled programs. */
-  compressedBlob?: Uint8Array;
+  decompressedLengths: number[] | number[][];
+  /** Every platform's compiled programs. */
+  compressedBlob: Uint8Array;
   /** Unity 2021.3.12 to 2021.3.x, 2022.1.21 to 2022.1.x, and 2022.2 and later. */
   stageCounts?: number[];
-  /** Unity 4.0 and later: the shaders it falls back to or uses passes of. */
-  m_Dependencies?: PPtr[];
-  /** Unity 2018.1 and later: property name to texture. */
-  m_NonModifiableTextures?: [string, PPtr][];
-  /** Unity 4.0 and later. */
-  m_ShaderIsBaked?: boolean;
+  /** The shaders it falls back to or uses passes of. */
+  m_Dependencies: PPtr[];
+  /** Property name to texture. */
+  m_NonModifiableTextures: [string, PPtr][];
+  m_ShaderIsBaked: boolean;
   /** Unity 6000.0 and later. */
   m_AssetGUID?: GUID;
   /** Unity 6000.3 and later. */
@@ -441,7 +421,8 @@ export interface Shader extends NamedObject {
  * Read a `Shader` from the object's first byte: every field Unity's own
  * player type trees give for its version (as UnityPy's TPK data records
  * them), in their order, so the object is consumed to its last byte; it must
- * end exactly there.
+ * end exactly there. Unity 2019.1 to 6000.6: older versions are not supported
+ * (plan revision 2026-10-16, §4 M2), and `readTypeTree()` still reads them.
  *
  * Upstream (Razviar/assetstudio c37af7d) reads the layouts up to 2022.x and
  * skips the object from Unity 6000 on; its `UNITY_6000_FIXES.md` describes a
@@ -475,11 +456,10 @@ export interface Shader extends NamedObject {
  *
  * @param reader the object's reader, rewound first and left at its end
  * @throws {UnsupportedError} of kind `"Unity version"`, with the file's own
- *   `unityVersion` as `found`: below 3.4, for which no type tree data says what
- *   it holds; for an unknown version unless the format is 21, and in that
- *   format when the fields after `m_Name` do not fit 2019's layout. Of kind
- *   `"build target"` for an editor file (`BuildTarget.NoTarget`), whose Shader
- *   layout differs
+ *   `unityVersion` as `found`: below 2019.1 (unsupported, see above); for an
+ *   unknown version unless the format is 21, and in that format when the
+ *   fields after `m_Name` do not fit 2019's layout. Of kind `"build target"`
+ *   for an editor file (`BuildTarget.NoTarget`), whose Shader layout differs
  * @throws {CorruptError} when the object ends early, a count or string length
  *   is negative or runs past its end, or bytes are left over after the last
  *   field, with the version known; with it unknown, only inside `m_Name`
@@ -510,36 +490,25 @@ export function readShader(reader: ObjectReader): Shader {
 
 /** The fields after `m_Name`, and the end-of-object check. */
 function readFields(reader: ObjectReader, v: UnityVersion, out: Partial<Shader>): void {
-  if (atLeast(v, 5, 5)) {
-    out.m_ParsedForm = readSerializedShader(reader, v);
-    out.platforms = readUInt32s(reader, "platforms");
-    // 2019.3+: a list per platform (the blob of each platform in parts).
-    const lengths = atLeast(v, 2019, 3)
-      ? (what: string) => readList(reader, what, (r) => readUInt32s(r, `${what} entry`))
-      : (what: string) => readUInt32s(reader, what);
-    out.offsets = lengths("offsets");
-    out.compressedLengths = lengths("compressedLengths");
-    out.decompressedLengths = lengths("decompressedLengths");
-    out.compressedBlob = readByteArray(reader, "compressedBlob");
-    if (since(v, [2022, 2, 0], [2021, 3, 12], [2022, 1, 21])) {
-      out.stageCounts = readUInt32s(reader, "stageCounts");
-    }
-  } else {
-    out.m_Script = readString(reader, "m_Script");
-    out.m_PathName = readString(reader, "m_PathName");
-    if (atLeast(v, 5, 3)) {
-      out.decompressedSize = reader.readUInt32();
-      out.m_SubProgramBlob = readByteArray(reader, "m_SubProgramBlob");
-    }
+  out.m_ParsedForm = readSerializedShader(reader, v);
+  out.platforms = readUInt32s(reader, "platforms");
+  // 2019.3+: a list per platform (the blob of each platform in parts).
+  const lengths = atLeast(v, 2019, 3)
+    ? (what: string) => readList(reader, what, (r) => readUInt32s(r, `${what} entry`))
+    : (what: string) => readUInt32s(reader, what);
+  out.offsets = lengths("offsets");
+  out.compressedLengths = lengths("compressedLengths");
+  out.decompressedLengths = lengths("decompressedLengths");
+  out.compressedBlob = readByteArray(reader, "compressedBlob");
+  if (since(v, [2022, 2, 0], [2021, 3, 12], [2022, 1, 21])) {
+    out.stageCounts = readUInt32s(reader, "stageCounts");
   }
-  if (atLeast(v, 4, 0)) out.m_Dependencies = readList(reader, "m_Dependencies", readPPtr);
-  if (atLeast(v, 2018, 1)) {
-    out.m_NonModifiableTextures = readList(reader, "m_NonModifiableTextures", (r) => [
-      readString(r, "m_NonModifiableTextures name"),
-      readPPtr(r),
-    ]);
-  }
-  if (atLeast(v, 4, 0)) out.m_ShaderIsBaked = readBool(reader, true);
+  out.m_Dependencies = readList(reader, "m_Dependencies", readPPtr);
+  out.m_NonModifiableTextures = readList(reader, "m_NonModifiableTextures", (r) => [
+    readString(r, "m_NonModifiableTextures name"),
+    readPPtr(r),
+  ]);
+  out.m_ShaderIsBaked = readBool(reader, true);
   if (atLeast(v, 6000, 0)) out.m_AssetGUID = readGUID(reader);
   if (atLeast(v, 6000, 3)) out.m_AssetLocalIdentifierInFile = reader.readInt64();
   endOfObject(reader, "Shader");
@@ -563,8 +532,9 @@ function layoutVersion(reader: ObjectReader): UnityVersion {
       );
     }
     layout = [2019, 4, 0, 0];
-  } else if (!atLeast(version, 3, 4)) {
-    throw refuse(reader, "no known Shader layout before Unity 3.4");
+  } else if (!atLeast(version, 2019, 1)) {
+    // Plan revision 2026-10-16 (§4 M2): nothing older than Unity 2019 is supported.
+    throw refuse(reader, "Shaders before Unity 2019.1 are not supported");
   }
   if (reader.platform === BuildTarget.NoTarget) {
     throw new UnsupportedError(
@@ -678,7 +648,7 @@ function readPass(reader: ObjectReader, v: UnityVersion): SerializedPass {
   out.progDomain = readProgram(reader, v);
   if (atLeast(v, 2019, 3)) out.progRayTracing = readProgram(reader, v);
   out.m_HasInstancingVariant = readBool(reader, false);
-  if (atLeast(v, 2018, 1)) out.m_HasProceduralInstancingVariant = readBool(reader, false);
+  out.m_HasProceduralInstancingVariant = readBool(reader, false);
   reader.align();
   out.m_UseName = readString(reader, "m_UseName");
   out.m_Name = readString(reader, "m_Name");
@@ -720,7 +690,7 @@ function readState(reader: ObjectReader, v: UnityVersion): SerializedShaderState
     rtBlend7: blend(),
   };
   out.rtSeparateBlend = readBool(reader, true);
-  if (atLeast(v, 2017, 2)) out.zClip = value();
+  out.zClip = value();
   out.zTest = value();
   out.zWrite = value();
   out.culling = value();
@@ -752,7 +722,7 @@ function readState(reader: ObjectReader, v: UnityVersion): SerializedShaderState
   return out as SerializedShaderState;
 }
 
-/** A `SerializedShaderFloatValue`; before 5.6 its name is a `FastPropertyName`, the same bytes. */
+/** A `SerializedShaderFloatValue`. */
 function readFloatValue(reader: ObjectReader): SerializedShaderFloatValue {
   return { val: reader.readFloat32(), name: readString(reader, "float value name") };
 }
@@ -788,15 +758,14 @@ function readSubProgram(reader: ObjectReader, v: UnityVersion): SerializedSubPro
     target: r.readInt8(),
   }));
   reader.align();
-  // 5.6: m_SourceMap went from UInt32 to Int32.
-  const m_SourceMap = atLeast(v, 5, 6) ? reader.readInt32() : reader.readUInt32();
+  const m_SourceMap = reader.readInt32();
   const out = { m_BlobIndex, m_Channels: { m_Channels, m_SourceMap } } as SerializedSubProgram;
-  if (atLeast(v, 2019, 1) && !atLeast(v, 2021, 2)) {
+  // 2019.1 to 2021.1: global and local keywords apart.
+  if (!atLeast(v, 2021, 2)) {
     out.m_GlobalKeywordIndices = readUInt16s(reader, "m_GlobalKeywordIndices");
     out.m_LocalKeywordIndices = readUInt16s(reader, "m_LocalKeywordIndices");
   } else {
-    // Aligned from 2017.1.
-    out.m_KeywordIndices = readUInt16s(reader, "m_KeywordIndices", atLeast(v, 2017, 1));
+    out.m_KeywordIndices = readUInt16s(reader, "m_KeywordIndices");
   }
   out.m_ShaderHardwareTier = reader.readInt8();
   out.m_GpuProgramType = readInt8Aligned(reader);
@@ -805,10 +774,8 @@ function readSubProgram(reader: ObjectReader, v: UnityVersion): SerializedSubPro
   } else {
     Object.assign(out, readParameters(reader, v));
   }
-  if (atLeast(v, 2017, 2)) {
-    // 2021.1: Int64.
-    out.m_ShaderRequirements = atLeast(v, 2021, 1) ? reader.readInt64() : reader.readInt32();
-  }
+  // 2021.1: Int64.
+  out.m_ShaderRequirements = atLeast(v, 2021, 1) ? reader.readInt64() : reader.readInt32();
   return out;
 }
 
@@ -825,14 +792,12 @@ function readParameters(reader: ObjectReader, v: UnityVersion): ProgramParameter
     ),
     m_UAVParams: readList(reader, "m_UAVParams", (r) => readUAV(r, v)),
   };
-  if (atLeast(v, 2017, 1)) {
-    out.m_Samplers = readList(reader, "m_Samplers", (r) => {
-      const sampler = r.readUInt32();
-      return atLeast(v, 6000, 6)
-        ? { sampler, m_Binding: readBinding(r) }
-        : { sampler, bindPoint: r.readInt32() };
-    });
-  }
+  out.m_Samplers = readList(reader, "m_Samplers", (r) => {
+    const sampler = r.readUInt32();
+    return atLeast(v, 6000, 6)
+      ? { sampler, m_Binding: readBinding(r) }
+      : { sampler, bindPoint: r.readInt32() };
+  });
   return out as ProgramParameters;
 }
 
@@ -872,7 +837,7 @@ function readTexture(reader: ObjectReader, v: UnityVersion): TextureParameter {
     out.m_Index = reader.readInt32();
     out.m_SamplerIndex = reader.readInt32();
   }
-  if (atLeast(v, 2017, 3)) out.m_MultiSampled = readBool(reader, false);
+  out.m_MultiSampled = readBool(reader, false);
   out.m_Dim = readInt8Aligned(reader);
   return out as TextureParameter;
 }
@@ -892,16 +857,14 @@ function readConstantBuffer(reader: ObjectReader, v: UnityVersion): ConstantBuff
     m_MatrixParams: readList(reader, "m_MatrixParams", (r) => readMatrix(r, v)),
     m_VectorParams: readList(reader, "m_VectorParams", (r) => readVector(r, v)),
   };
-  if (atLeast(v, 2017, 3)) {
-    out.m_StructParams = readList(reader, "m_StructParams", (r) => ({
-      m_NameIndex: r.readInt32(),
-      ...readIndex(r, v),
-      m_ArraySize: r.readInt32(),
-      m_StructSize: r.readInt32(),
-      m_VectorMembers: readList(r, "m_VectorMembers", (m) => readVector(m, v)),
-      m_MatrixMembers: readList(r, "m_MatrixMembers", (m) => readMatrix(m, v)),
-    }) as StructParameter);
-  }
+  out.m_StructParams = readList(reader, "m_StructParams", (r) => ({
+    m_NameIndex: r.readInt32(),
+    ...readIndex(r, v),
+    m_ArraySize: r.readInt32(),
+    m_StructSize: r.readInt32(),
+    m_VectorMembers: readList(r, "m_VectorMembers", (m) => readVector(m, v)),
+    m_MatrixMembers: readList(r, "m_MatrixMembers", (m) => readMatrix(m, v)),
+  }) as StructParameter);
   out.m_Size = reader.readInt32();
   if (hasProgramParameters(v)) out.m_IsPartialCB = readBool(reader, true);
   return out as ConstantBuffer;
@@ -950,10 +913,10 @@ function readByteArray(reader: ObjectReader, what: string): Uint8Array {
   return bytes;
 }
 
-/** A `vector<UInt16>`, aligned after unless `aligned` is false (before 2017.1). */
-function readUInt16s(reader: ObjectReader, what: string, aligned = true): number[] {
+/** A `vector<UInt16>`, aligned after. */
+function readUInt16s(reader: ObjectReader, what: string): number[] {
   const out = readList(reader, what, (r) => r.readUInt16());
-  if (aligned) reader.align();
+  reader.align();
   return out;
 }
 

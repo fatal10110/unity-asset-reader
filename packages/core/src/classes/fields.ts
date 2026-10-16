@@ -484,8 +484,8 @@ export interface TextureParameterFields {
   binding?: BindingFields;
   /** Unity: `m_SamplerBinding`. Unity 6000.6 and later. */
   samplerBinding?: BindingFields;
-  /** Unity: `m_MultiSampled`. Unity 2017.3 and later. */
-  multiSampled?: boolean;
+  /** Unity: `m_MultiSampled`. */
+  multiSampled: boolean;
   /** Unity: `m_Dim`. */
   dim: number;
 }
@@ -512,8 +512,8 @@ export interface ConstantBufferFields {
   matrixParams: MatrixParameterFields[];
   /** Unity: `m_VectorParams`. */
   vectorParams: VectorParameterFields[];
-  /** Unity: `m_StructParams`. Unity 2017.3 and later. */
-  structParams?: StructParameterFields[];
+  /** Unity: `m_StructParams`. */
+  structParams: StructParameterFields[];
   /** Unity: `m_Size`. */
   size: number;
   /** Unity: `m_IsPartialCB`. Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
@@ -559,8 +559,8 @@ export interface ProgramParametersFields {
   constantBufferBindings: BufferBindingFields[];
   /** Unity: `m_UAVParams`. */
   uavParams: UAVParameterFields[];
-  /** Unity: `m_Samplers`. As a sub-program's own field, Unity 2017.1 and later. */
-  samplers?: SamplerParameterFields[];
+  /** Unity: `m_Samplers`. */
+  samplers: SamplerParameterFields[];
 }
 
 /** The friendly form of {@link SerializedSubProgram}: one compiled variant of a stage. */
@@ -569,11 +569,11 @@ export interface SerializedSubProgramFields extends Partial<ProgramParametersFie
   blobIndex: number;
   /** Unity: `m_Channels`, with its `m_Channels` and `m_SourceMap`. */
   channels: { channels: ShaderBindChannel[]; sourceMap: number };
-  /** Unity: `m_GlobalKeywordIndices`. Unity 2019.1 to 2021.1. */
+  /** Unity: `m_GlobalKeywordIndices`. Before Unity 2021.2. */
   globalKeywordIndices?: number[];
-  /** Unity: `m_LocalKeywordIndices`. Unity 2019.1 to 2021.1. */
+  /** Unity: `m_LocalKeywordIndices`. Before Unity 2021.2. */
   localKeywordIndices?: number[];
-  /** Unity: `m_KeywordIndices`. Before Unity 2019.1, and 2021.2 and later. */
+  /** Unity: `m_KeywordIndices`. Unity 2021.2 and later. */
   keywordIndices?: number[];
   /** Unity: `m_ShaderHardwareTier`. */
   shaderHardwareTier: number;
@@ -581,8 +581,8 @@ export interface SerializedSubProgramFields extends Partial<ProgramParametersFie
   gpuProgramType: number;
   /** Unity: `m_Parameters`. Unity 2020.3.2 to 2020.3.x, and 2021.1.1 and later. */
   parameters?: ProgramParametersFields;
-  /** Unity: `m_ShaderRequirements`. Unity 2017.2 and later; a `bigint` from 2021.1. */
-  shaderRequirements?: number | bigint;
+  /** Unity: `m_ShaderRequirements`. A `bigint` from Unity 2021.1. */
+  shaderRequirements: number | bigint;
 }
 
 /** The friendly form of {@link SerializedPlayerSubProgram}. */
@@ -638,8 +638,8 @@ export interface SerializedPassFields {
   progRayTracing?: SerializedProgramFields;
   /** Unity: `m_HasInstancingVariant`. */
   hasInstancingVariant: boolean;
-  /** Unity: `m_HasProceduralInstancingVariant`. Unity 2018.1 and later. */
-  hasProceduralInstancingVariant?: boolean;
+  /** Unity: `m_HasProceduralInstancingVariant`. */
+  hasProceduralInstancingVariant: boolean;
   /** Unity: `m_UseName`. For a `UsePass`, the pass it names. */
   useName: string;
   /** Unity: `m_Name`. */
@@ -712,37 +712,29 @@ export interface SerializedShaderFields {
 
 /** The friendly form of {@link Shader}. */
 export interface ShaderFields extends NamedObjectFields {
-  /** Unity: `m_Script`. Before Unity 5.5: the shader, as ShaderLab text. */
-  script?: string;
-  /** Unity: `m_PathName`. Before Unity 5.5. */
-  pathName?: string;
-  /** Unity 5.3 and 5.4: the size of `subProgramBlob` once decompressed. */
-  decompressedSize?: number;
-  /** Unity: `m_SubProgramBlob`. Unity 5.3 and 5.4: the compiled programs, compressed. */
-  subProgramBlob?: Uint8Array;
   /**
-   * Unity: `m_ParsedForm`. Unity 5.5 and later: the parsed ShaderLab, whose
-   * `name` is the shader's (`name`, `m_Name`, is empty from 5.5).
+   * Unity: `m_ParsedForm`. The parsed ShaderLab, whose `name` is the
+   * shader's (`name`, `m_Name`, is empty).
    */
-  parsedForm?: SerializedShaderFields;
-  /** Unity 5.5 and later: the `ShaderCompilerPlatform` of each part of `compressedBlob`. */
-  platforms?: number[];
-  /** Unity 5.5 and later: one offset per platform, a list of them from 2019.3. */
-  offsets?: number[] | number[][];
-  /** Unity 5.5 and later: as `offsets`. */
-  compressedLengths?: number[] | number[][];
-  /** Unity 5.5 and later: as `offsets`. */
-  decompressedLengths?: number[] | number[][];
-  /** Unity 5.5 and later: every platform's compiled programs. */
-  compressedBlob?: Uint8Array;
+  parsedForm: SerializedShaderFields;
+  /** The `ShaderCompilerPlatform` of each part of `compressedBlob`. */
+  platforms: number[];
+  /** One offset per platform; from Unity 2019.3 a list of them per platform. */
+  offsets: number[] | number[][];
+  /** As `offsets`. */
+  compressedLengths: number[] | number[][];
+  /** As `offsets`. */
+  decompressedLengths: number[] | number[][];
+  /** Every platform's compiled programs. */
+  compressedBlob: Uint8Array;
   /** Unity 2021.3.12 to 2021.3.x, 2022.1.21 to 2022.1.x, and 2022.2 and later. */
   stageCounts?: number[];
-  /** Unity: `m_Dependencies`. Unity 4.0 and later. */
-  dependencies?: PPtr[];
-  /** Unity: `m_NonModifiableTextures`. Unity 2018.1 and later: property name to texture. */
-  nonModifiableTextures?: [string, PPtr][];
-  /** Unity: `m_ShaderIsBaked`. Unity 4.0 and later. */
-  shaderIsBaked?: boolean;
+  /** Unity: `m_Dependencies`. */
+  dependencies: PPtr[];
+  /** Unity: `m_NonModifiableTextures`. Property name to texture. */
+  nonModifiableTextures: [string, PPtr][];
+  /** Unity: `m_ShaderIsBaked`. */
+  shaderIsBaked: boolean;
   /** Unity: `m_AssetGUID`. Unity 6000.0 and later. */
   assetGUID?: GUID;
   /** Unity: `m_AssetLocalIdentifierInFile`. Unity 6000.3 and later. */
@@ -757,11 +749,7 @@ export interface ShaderFields extends NamedObjectFields {
 export function toShaderFields(data: Shader): ShaderFields {
   return defined({
     ...namedObject(data),
-    script: data.m_Script,
-    pathName: data.m_PathName,
-    decompressedSize: data.decompressedSize,
-    subProgramBlob: data.m_SubProgramBlob,
-    parsedForm: data.m_ParsedForm && serializedShader(data.m_ParsedForm),
+    parsedForm: serializedShader(data.m_ParsedForm),
     platforms: data.platforms,
     offsets: data.offsets,
     compressedLengths: data.compressedLengths,
@@ -1651,7 +1639,7 @@ function programParameters(params: ProgramParameters): ProgramParametersFields {
         nameIndex: cb.m_NameIndex,
         matrixParams: cb.m_MatrixParams.map(matrixParameter),
         vectorParams: cb.m_VectorParams.map(vectorParameter),
-        structParams: cb.m_StructParams?.map((sp) =>
+        structParams: cb.m_StructParams.map((sp) =>
           defined({
             nameIndex: sp.m_NameIndex,
             index: sp.m_Index,
@@ -1676,7 +1664,7 @@ function programParameters(params: ProgramParameters): ProgramParametersFields {
         originalBinding: u.m_OriginalBinding && binding(u.m_OriginalBinding),
       }),
     ),
-    samplers: params.m_Samplers?.map((s) =>
+    samplers: params.m_Samplers.map((s) =>
       defined({
         sampler: s.sampler,
         bindPoint: s.bindPoint,

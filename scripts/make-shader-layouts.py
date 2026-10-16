@@ -2,9 +2,10 @@
 """Generate fixtures/shader-layouts.json from UnityPy's type tree data (#237).
 
 The Shader reader has version gates no fixture editor covers: the shader
-fixtures (fixtures/BUILDING.md section 17) come from 2019.4.41f2 and
-6000.6.4f1 only. For every other layout, this writes one synthetic Shader
-object per Unity version, laid out by the Shader type tree UnityPy's TPK data
+fixtures (fixtures/BUILDING.md section 17) come from a few editors only. For
+every layout from Unity 2019.1 (the oldest the reader supports), this writes
+one synthetic Shader object per Unity version, laid out by the Shader type
+tree UnityPy's TPK data
 records for that version (the type trees UnityPy reads a file without type
 trees by), with a distinct generated value in every field and one element in
 every array (two in the byte and UInt16 arrays, so their padding shows).
@@ -14,13 +15,10 @@ Goldens come from the oracle (R12): the object is written with UnityPy's own
 byte), and the read-back value, normalized, is hashed. The tests hand the
 bytes to `readShader` and compare the hash of its result.
 
-Normalization: int64 fields and every PPtr's m_PathID (a bigint in this
-library, D9, whatever its width) as decimal strings, byte arrays as "hex:<hex>",
+Normalization: int64 fields as decimal strings, byte arrays as "hex:<hex>",
 pairs and map entries as two-element lists, and keys in type tree order.
 Floats stay numbers: every generated float is k + 0.25, which Python and
-JavaScript print alike. Before Unity 5.6 a float value's name is a
-`FastPropertyName` struct; the reader gives the name itself, as from 5.6 on,
-so it is flattened here too.
+JavaScript print alike.
 
 Usage:  .venv-oracle/bin/python scripts/make-shader-layouts.py
 """
@@ -42,20 +40,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "fixtures" / "shader-layouts.json"
 SHADER = 48
 
-# One release per Shader layout in the TPK data from 3.4 on, at or after the
-# version that introduced it, plus the two fixture editors with no fixture
-# (2020.3.30f1, 6000.3.25f1). Alphas and betas with interim layouts are left
-# out, as the reader's gates compare release numbers only.
+# One release per Shader layout in the TPK data from 2019.1 on, at or after
+# the version that introduced it, plus the 2020.3.30f1 and 6000.3.25f1 fixture
+# editors. Alphas and betas with interim layouts are left out, as the
+# reader's gates compare release numbers only.
 VERSIONS = [
-    "3.4.0f1",
-    "4.0.0f1",
-    "5.3.0f1",
-    "5.5.0f3",
-    "5.6.0f1",
-    "2017.1.0f1",
-    "2017.2.0f1",
-    "2017.3.0f1",
-    "2018.1.0f1",
     "2019.1.0f1",
     "2019.3.0f1",
     "2020.1.0f1",
@@ -126,7 +115,7 @@ def generate(node, counter):
 def normalize(node, value):
     """`value` in the hashed form, walking the type tree next to it."""
     t = node.m_Type
-    if t in INT64_TYPES or node.m_Name == "m_PathID":
+    if t in INT64_TYPES:
         return str(value)
     if t in ARRAY_TYPES:
         element = node.m_Children[0].m_Children[1]
@@ -135,8 +124,6 @@ def normalize(node, value):
         return [normalize(element, v) for v in value]
     if t == "pair":
         return [normalize(node.m_Children[0], value[0]), normalize(node.m_Children[1], value[1])]
-    if t == "FastPropertyName":
-        return value["name"]
     if node.m_Children and t != "string":
         return {c.m_Name: normalize(c, value[c.m_Name]) for c in node.m_Children}
     return value
@@ -152,12 +139,8 @@ def layout(version: str) -> dict:
     expected = normalize(root, back)
     assert expected == normalize(root, value), f"{version}: UnityPy did not read back its own write"
     text = json.dumps(expected, separators=(",", ":"), ensure_ascii=False)
-    # TPK gives some old layouts a 32-bit PPtr path id, which a reader reads
-    # in a file of format < 14 only.
-    narrow = any(n.m_Name == "m_PathID" and n.m_Type in ("int", "SInt32") for n in root.traverse())
     return {
         "version": version,
-        "format": 9 if narrow else 22,
         "fields": list(expected),
         "bytes": base64.b64encode(data).decode(),
         "sha256": hashlib.sha256(text.encode()).hexdigest(),

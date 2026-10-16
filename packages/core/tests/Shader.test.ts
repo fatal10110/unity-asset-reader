@@ -1,9 +1,10 @@
 // Shader (#237): the hardcoded reader against readTypeTree() on the shader
 // fixtures (fixtures/BUILDING.md section 17: our own shaders, built by
 // 2019.4.41f2 and 6000.6.4f1 for DX11, GLES3 and Vulkan), and against
-// UnityPy's reading of a synthetic object for every other Shader layout of
-// Unity's type trees (fixtures/shader-layouts.json, R12), the 2020.3.30f1 and
-// 6000.3.25f1 fixture editors among them.
+// UnityPy's reading of a synthetic object for every Shader layout of Unity's
+// type trees from 2019.1, the oldest the reader supports
+// (fixtures/shader-layouts.json, R12), the 2020.3.30f1 and 6000.3.25f1 fixture
+// editors among them.
 
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -171,7 +172,6 @@ test("asset.data of a Shader: parsedForm under the friendly names", () => {
 
 interface Layout {
   version: string;
-  format: number;
   fields: string[];
   bytes: string;
   sha256: string;
@@ -226,7 +226,7 @@ function synthetic(
 for (const layout of LAYOUTS) {
   test(`${layout.version}: readShader equals UnityPy's read of its TPK layout`, () => {
     const bytes = new Uint8Array(Buffer.from(layout.bytes, "base64"));
-    const shader = readAll(synthetic(bytes, layout.version, layout.format));
+    const shader = readAll(synthetic(bytes, layout.version, 22));
     assert.deepEqual(Object.keys(shader), layout.fields);
     const text = canonical(shader);
     assert.equal(createHash("sha256").update(text).digest("hex"), layout.sha256, text);
@@ -260,9 +260,20 @@ test("the synthetic layouts cover every gate, the missing fixture editors among 
 const refused = (kind: string, found: string) => (err: unknown) =>
   err instanceof UnsupportedError && err.kind === kind && err.found === found;
 
-test("versions without a known layout, and editor files, are refused", () => {
-  assert.throws(() => readShader(synthetic(frame.bytes, "3.3.0f1", 9)),
-    refused("Unity version", "3.3.0f1"));
+test("Unity before 2019.1 is refused, whatever the bytes (plan revision 2026-10-16)", () => {
+  for (const text of ["2018.4.36f1", "2017.4.40f1", "5.6.7f1", "5.4.6f3", "4.7.2f1", "3.4.0f1"]) {
+    const format = text.startsWith("201") ? 17 : text.startsWith("5.") ? 15 : 9;
+    assert.throws(() => readShader(synthetic(frame.bytes, text, format)),
+      (err: unknown) => refused("Unity version", text)(err) &&
+        (err as Error).message.includes("before Unity 2019.1"), text);
+  }
+  // 2019.1.0 itself is read (the oldest layout in shader-layouts.json).
+  const oldest = LAYOUTS[0]!;
+  assert.equal(oldest.version, "2019.1.0f1");
+  readAll(synthetic(new Uint8Array(Buffer.from(oldest.bytes, "base64")), "2019.1.0f1", 19));
+});
+
+test("editor files are refused", () => {
   assert.throws(
     () => readShader(synthetic(frame.bytes, "2019.4.41f2", 21, BuildTarget.NoTarget)),
     refused("build target", "NoTarget"),
