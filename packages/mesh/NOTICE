@@ -1,7 +1,7 @@
 unity-asset-reader-mesh
 Copyright (c) 2026 fatal10110
 
-This product is a derivative work: its mesh export is hand-ported from the
+This product is a derivative work: its OBJ export is hand-ported from the
 project below. Its copyright notice is kept per the MIT License, and every
 ported source file carries a one-line attribution to the file it was ported
 from.
