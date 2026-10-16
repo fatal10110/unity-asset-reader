@@ -252,12 +252,12 @@ test("a script's data, text and a texture: table, env.get, image, TextAsset, Mon
     );
   });
 
-  await test.step("a Mesh shows its fields and decoded geometry", async () => {
+  await test.step("a Mesh shows its fields and decoded vertices", async () => {
     await choose(page, "Mesh", "tri");
     const field = (path: string) => page.locator(`#data li[data-path="${path}"] > span:last-child`);
     await expect(field("name")).toHaveText('"tri"');
     // fixtures/BUILDING.md: three vertices, one triangle.
-    await expect(field("geometry.vertexCount")).toHaveText("3");
+    await expect(field("vertexCount")).toHaveText("3");
   });
 
   await expect(page.locator("#status")).toHaveAttribute("data-state", "ready");
