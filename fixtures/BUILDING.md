@@ -1734,21 +1734,30 @@ exporter cannot reach or misnumbers. Shader text has no fixture yet (#52).
 Spine skeletons as spine-unity stores them, for `unity-asset-reader-spine`,
 built with **2019.4.41f2** only (format 21, which AssetStudio `c37af7d` reads,
 so the TextAssets and pages get export goldens, section 17). No spine-unity
-package is involved: the project holds stub scripts with spine-unity's
-serialized fields, the same names, types and order, and a skeleton JSON and
-atlas text written for it.
+package is involved: the project holds stub scripts of our own that serialize
+the same fields as spine-unity's assets, and a skeleton JSON and atlas text
+written for it.
 
-The field names come from spine-unity's sources (EsotericSoftware/spine-runtimes,
+What the stubs reproduce of spine-unity (EsotericSoftware/spine-runtimes,
 `spine-unity/Assets/Spine/Runtime/spine-unity/Asset Types/`, branches `3.8`,
-`4.0`, `4.1` and `4.2`), read outside the repository for the names only; the
-Spine Runtimes License covers that code, and none of it is copied here.
+`4.0`, `4.1` and `4.2`, read outside the repository) is its serialized layout
+only: the field names, their kinds and their order, and the class names
+`SkeletonDataAsset` and `SpineAtlasAsset` that a build records in its
+MonoScripts. No code, default values or attributes; the types the fields need
+(a base class, a blend-modes record, a loader) are declared under our own
+names (`Uar*`), and an enum field is an `int`, which is what Unity writes for
+one. That code is under the Spine Runtimes License; none of it is in this
+repository.
+
 `SkeletonDataAsset.cs`, `SpineAtlasAsset.cs` and `BlendModeMaterials.cs`
 declare the same serialized fields on all four branches. `AtlasAssetBase.cs`
-has none, except on 4.1 and 4.2 built with `SPINE_OPTIONAL_ON_DEMAND_LOADING`,
-where it adds `textureLoadingMode` (`LoadingMode`: `Normal` = 0, `OnDemand`)
-and `onDemandTextureLoader` before the atlas' own fields. The project has
-both layouts: `Spine.Unity` (3.8 to 4.2) and `Spine.Unity.OnDemand` (4.1+ with
-the define).
+adds two, `textureLoadingMode` (an enum: `Normal` = 0, `OnDemand` = 1) and
+`onDemandTextureLoader`, before the atlas' own fields, when
+`SPINE_OPTIONAL_ON_DEMAND_LOADING` is defined. 4.1 and 4.2 define it at the
+top of that file, so a stock 4.1+ project writes them; 3.8 and 4.0 have
+neither, nor does a 4.1+ project that removed the define. The project has both
+atlas layouts: `Spine.Unity.SpineAtlasAsset` (3.8 and 4.0) and
+`Spine.Unity.OnDemand.SpineAtlasAsset` (4.1+ as shipped).
 
 What `spineSkeletons(env)` must return for each bundle, one row per atlas, in
 order (`packages/spine/tests/spine.test.ts` reads this table):
@@ -1759,9 +1768,9 @@ order (`packages/spine/tests/spine.test.ts` reads this table):
 | `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp.atlas` | `imp` |
 | `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp-fx.atlas` | `imp-fx` |
 
-- `hero_SkeletonData` (4.1+ layout): one atlas, `hero_Atlas`, with two pages,
+- `hero_SkeletonData` (4.1+ atlas layout): one atlas, `hero_Atlas`, with two pages,
   `textureLoadingMode` `Normal`.
-- `imp_SkeletonData` (3.8 to 4.2 layout): `atlasAssets` is `imp_Atlas`, a null
+- `imp_SkeletonData` (3.8 and 4.0 atlas layout): `atlasAssets` is `imp_Atlas`, a null
   entry, `imp-fx_Atlas`. spine-unity skips the null entry
   (`SkeletonDataAsset.GetAtlasArray`), so the skeleton has two atlases.
 - `spine/lz4/ondemand`: `ghost_SkeletonData`, whose atlas `ghost_Atlas` has
@@ -1852,151 +1861,91 @@ Shader "UAR/SpinePage"
 
 ### Stub scripts
 
-The 3.8 to 4.2 layout, under `Assets/Scripts/Spine/`, one file per class named
-after it (`AtlasAssetBase.cs`, `BlendModeMaterials.cs`,
-`SkeletonDataAsset.cs`, `SkeletonDataModifierAsset.cs`,
-`SpineAtlasAsset.cs`):
+Under `Assets/Scripts/Spine/` (`SkeletonDataAsset.cs`, `SpineAtlasAsset.cs`,
+`UarTypes.cs`) and `Assets/Scripts/SpineOnDemand/` (`SpineAtlasAsset.cs`).
+Unity takes two scripts of the same file name in different folders, as long
+as their namespaces differ. One `SkeletonDataAsset` serves both atlas
+layouts, through the common base `UarAtlasBase`:
 
 ```csharp
-// AtlasAssetBase.cs
-using UnityEngine;
-
-namespace Spine.Unity
-{
-    // 3.8 to 4.2 without SPINE_OPTIONAL_ON_DEMAND_LOADING: no serialized fields.
-    public abstract class AtlasAssetBase : ScriptableObject { }
-}
-
-// BlendModeMaterials.cs
+// Spine/SkeletonDataAsset.cs
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Spine.Unity
 {
-    [System.Serializable]
-    public class BlendModeMaterials
-    {
-        [System.Serializable]
-        public class ReplacementMaterial
-        {
-            public string pageName;
-            public Material material;
-        }
-
-        [SerializeField, HideInInspector] protected bool requiresBlendModeMaterials = false;
-        public bool applyAdditiveMaterial = false;
-        public List<ReplacementMaterial> additiveMaterials = new List<ReplacementMaterial>();
-        public List<ReplacementMaterial> multiplyMaterials = new List<ReplacementMaterial>();
-        public List<ReplacementMaterial> screenMaterials = new List<ReplacementMaterial>();
-    }
-}
-
-// SkeletonDataAsset.cs
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Spine.Unity
-{
-    // Stub of spine-unity's SkeletonDataAsset (3.8 to 4.2): the serialized fields
-    // only, same names, types and order (#238). No spine-unity code.
+    // spine-unity's SkeletonDataAsset serialized fields (3.8 to 4.2): names, types, order.
     public class SkeletonDataAsset : ScriptableObject
     {
-        public AtlasAssetBase[] atlasAssets = new AtlasAssetBase[0];
-        public float scale = 0.01f;
+        public UarAtlasBase[] atlasAssets;
+        public float scale;
         public TextAsset skeletonJSON;
-        public bool isUpgradingBlendModeMaterials = false;
-        public BlendModeMaterials blendModeMaterials = new BlendModeMaterials();
-        public List<SkeletonDataModifierAsset> skeletonDataModifiers = new List<SkeletonDataModifierAsset>();
-        public string[] fromAnimation = new string[0];
-        public string[] toAnimation = new string[0];
-        public float[] duration = new float[0];
+        public bool isUpgradingBlendModeMaterials;
+        public UarBlendModes blendModeMaterials;
+        public List<UarModifier> skeletonDataModifiers;
+        public string[] fromAnimation;
+        public string[] toAnimation;
+        public float[] duration;
         public float defaultMix;
         public RuntimeAnimatorController controller;
     }
 }
 
-// SkeletonDataModifierAsset.cs
+// Spine/SpineAtlasAsset.cs
 using UnityEngine;
 
 namespace Spine.Unity
 {
-    public abstract class SkeletonDataModifierAsset : ScriptableObject { }
-}
-
-// SpineAtlasAsset.cs
-using UnityEngine;
-
-namespace Spine.Unity
-{
-    public class SpineAtlasAsset : AtlasAssetBase
+    // SpineAtlasAsset of 3.8 and 4.0 (and 4.1+ without SPINE_OPTIONAL_ON_DEMAND_LOADING).
+    public class SpineAtlasAsset : UarAtlasBase
     {
         public TextAsset atlasFile;
         public Material[] materials;
     }
 }
-```
 
-The 4.1+ layout with `SPINE_OPTIONAL_ON_DEMAND_LOADING`, under
-`Assets/Scripts/SpineOnDemand/` (`AtlasAssetBase.cs`,
-`OnDemandTextureLoader.cs`, `SkeletonDataAsset.cs`, `SpineAtlasAsset.cs`).
-Unity takes two scripts of the same file name in different folders, as long
-as their namespaces differ:
-
-```csharp
-// AtlasAssetBase.cs
-using UnityEngine;
-
-namespace Spine.Unity.OnDemand
-{
-    // 4.1 and 4.2 with SPINE_OPTIONAL_ON_DEMAND_LOADING: two serialized fields.
-    public abstract class AtlasAssetBase : ScriptableObject
-    {
-        public enum LoadingMode { Normal = 0, OnDemand }
-
-        [SerializeField] protected LoadingMode textureLoadingMode = LoadingMode.Normal;
-        [SerializeField] protected OnDemandTextureLoader onDemandTextureLoader = null;
-    }
-}
-
-// OnDemandTextureLoader.cs
-using UnityEngine;
-
-namespace Spine.Unity.OnDemand
-{
-    public abstract class OnDemandTextureLoader : ScriptableObject { }
-}
-
-// SkeletonDataAsset.cs
+// Spine/UarTypes.cs
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Spine.Unity.OnDemand
+namespace Spine.Unity
 {
-    // The same SkeletonDataAsset fields; its own copy only so that atlasAssets can
-    // hold this namespace's AtlasAssetBase (the 4.1+ layout).
-    public class SkeletonDataAsset : ScriptableObject
+    // Our own types for the fields above that need one; the names are ours.
+    public abstract class UarAtlasBase : ScriptableObject { }
+
+    public abstract class UarModifier : ScriptableObject { }
+
+    public abstract class UarTextureLoader : ScriptableObject { }
+
+    [System.Serializable]
+    public class UarPageMaterial
     {
-        public AtlasAssetBase[] atlasAssets = new AtlasAssetBase[0];
-        public float scale = 0.01f;
-        public TextAsset skeletonJSON;
-        public bool isUpgradingBlendModeMaterials = false;
-        public Spine.Unity.BlendModeMaterials blendModeMaterials = new Spine.Unity.BlendModeMaterials();
-        public List<Spine.Unity.SkeletonDataModifierAsset> skeletonDataModifiers = new List<Spine.Unity.SkeletonDataModifierAsset>();
-        public string[] fromAnimation = new string[0];
-        public string[] toAnimation = new string[0];
-        public float[] duration = new float[0];
-        public float defaultMix;
-        public RuntimeAnimatorController controller;
+        public string pageName;
+        public Material material;
+    }
+
+    [System.Serializable]
+    public class UarBlendModes
+    {
+        public bool requiresBlendModeMaterials;
+        public bool applyAdditiveMaterial;
+        public List<UarPageMaterial> additiveMaterials;
+        public List<UarPageMaterial> multiplyMaterials;
+        public List<UarPageMaterial> screenMaterials;
     }
 }
 
-// SpineAtlasAsset.cs
+// SpineOnDemand/SpineAtlasAsset.cs
 using UnityEngine;
 
 namespace Spine.Unity.OnDemand
 {
-    public class SpineAtlasAsset : AtlasAssetBase
+    // SpineAtlasAsset of 4.1+ as shipped (SPINE_OPTIONAL_ON_DEMAND_LOADING defined): the
+    // two base-class fields come first. textureLoadingMode is an enum there, an int here.
+    public class SpineAtlasAsset : Spine.Unity.UarAtlasBase
     {
+        public int textureLoadingMode;
+        public Spine.Unity.UarTextureLoader onDemandTextureLoader;
         public TextAsset atlasFile;
         public Material[] materials;
     }
@@ -2009,13 +1958,13 @@ namespace Spine.Unity.OnDemand
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using Plain = Spine.Unity;
+using Spine.Unity;
 using OnDemand = Spine.Unity.OnDemand;
 
-// Spine skeletons as spine-unity stores them (#238), with stub scripts of the
-// same field names: hero (4.1+ atlas layout, one atlas, two pages), imp (3.8 to
-// 4.2 layout, two atlases and a null entry between them, one page each), and
-// ghost (4.1+ layout, texture loading mode OnDemand) in a bundle of its own.
+// Spine skeletons laid out as spine-unity stores them (#238), with our stub
+// scripts: hero (4.1+ atlas layout, one atlas, two pages), imp (3.8/4.0 atlas
+// layout, two atlases and a null entry between them, one page each), and ghost
+// (4.1+ layout, texture loading mode OnDemand) in a bundle of its own.
 public static class BuildSpine
 {
     const string Dir = "Assets/Fixtures/spine";
@@ -2050,9 +1999,9 @@ public static class BuildSpine
         return mat;
     }
 
-    static Plain.SpineAtlasAsset PlainAtlas(string name, params string[] pages)
+    static SpineAtlasAsset PlainAtlas(string name, params string[] pages)
     {
-        var atlas = ScriptableObject.CreateInstance<Plain.SpineAtlasAsset>();
+        var atlas = ScriptableObject.CreateInstance<SpineAtlasAsset>();
         atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
         atlas.materials = System.Array.ConvertAll(pages, Page);
         Save(atlas, name + "_Atlas");
@@ -2062,45 +2011,35 @@ public static class BuildSpine
     static OnDemand.SpineAtlasAsset OnDemandAtlas(string name, int loadingMode, params string[] pages)
     {
         var atlas = ScriptableObject.CreateInstance<OnDemand.SpineAtlasAsset>();
+        atlas.textureLoadingMode = loadingMode; // 0 Normal, 1 OnDemand
         atlas.atlasFile = Load<TextAsset>(name + ".atlas.txt");
         atlas.materials = System.Array.ConvertAll(pages, Page);
         Save(atlas, name + "_Atlas");
-        var so = new SerializedObject(atlas);
-        so.FindProperty("textureLoadingMode").intValue = loadingMode;
-        so.ApplyModifiedPropertiesWithoutUndo();
         return atlas;
+    }
+
+    static string Skeleton(string name, UarAtlasBase[] atlases)
+    {
+        var data = ScriptableObject.CreateInstance<SkeletonDataAsset>();
+        data.atlasAssets = atlases;
+        data.scale = 0.01f;
+        data.skeletonJSON = Load<TextAsset>(name + ".json");
+        return Save(data, name + "_SkeletonData");
     }
 
     public static void Build()
     {
-        var hero = ScriptableObject.CreateInstance<OnDemand.SkeletonDataAsset>();
-        hero.atlasAssets = new OnDemand.AtlasAssetBase[] { OnDemandAtlas("hero", 0, "hero", "hero2") };
-        hero.skeletonJSON = Load<TextAsset>("hero.json");
-        hero.fromAnimation = new[] { "idle" };
-        hero.toAnimation = new[] { "idle" };
-        hero.duration = new[] { 0.2f };
-        hero.defaultMix = 0.1f;
-        var heroPath = Save(hero, "hero_SkeletonData");
-
-        var imp = ScriptableObject.CreateInstance<Plain.SkeletonDataAsset>();
-        // A null entry, which spine-unity skips (SkeletonDataAsset.GetAtlasArray).
-        imp.atlasAssets = new Plain.AtlasAssetBase[] { PlainAtlas("imp", "imp"), null, PlainAtlas("imp-fx", "imp-fx") };
-        imp.skeletonJSON = Load<TextAsset>("imp.json");
-        var impPath = Save(imp, "imp_SkeletonData");
-
-        var ghost = ScriptableObject.CreateInstance<OnDemand.SkeletonDataAsset>();
-        ghost.atlasAssets = new OnDemand.AtlasAssetBase[] { OnDemandAtlas("ghost", 1, "ghost") };
-        ghost.skeletonJSON = Load<TextAsset>("ghost.json");
-        var ghostPath = Save(ghost, "ghost_SkeletonData");
-
-        foreach (var asset in new Object[] { hero, imp, ghost }) EditorUtility.SetDirty(asset);
+        var hero = Skeleton("hero", new UarAtlasBase[] { OnDemandAtlas("hero", 0, "hero", "hero2") });
+        // A null entry, which spine-unity skips.
+        var imp = Skeleton("imp", new UarAtlasBase[] { PlainAtlas("imp", "imp"), null, PlainAtlas("imp-fx", "imp-fx") });
+        var ghost = Skeleton("ghost", new UarAtlasBase[] { OnDemandAtlas("ghost", 1, "ghost") });
         AssetDatabase.SaveAssets();
 
         // The shader goes into a bundle of its own (not committed), so the page
         // Materials point at another file for it and the bundles stay small.
         var builds = new[] {
-            new AssetBundleBuild { assetBundleName = "skeletons", assetNames = new[] { heroPath, impPath } },
-            new AssetBundleBuild { assetBundleName = "ondemand", assetNames = new[] { ghostPath } },
+            new AssetBundleBuild { assetBundleName = "skeletons", assetNames = new[] { hero, imp } },
+            new AssetBundleBuild { assetBundleName = "ondemand", assetNames = new[] { ghost } },
             new AssetBundleBuild { assetBundleName = "spinedeps", assetNames = new[] { Dir + "/page.shader" } },
         };
         var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;

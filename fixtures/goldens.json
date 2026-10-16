@@ -20611,65 +20611,55 @@
       "unityRevision": "2019.4.41f2",
       "files": {
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1": {
-          "sha256": "f923d830bec801f43ffe93e306fe7ac82bea63f7e0ee330ee838327be15a7c0a",
-          "size": 8124
+          "sha256": "9b5217184c057a2cd96371948617a03497e2a72d6bbe595282bd9ea590f274f6",
+          "size": 7988
         },
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS": {
-          "sha256": "bb8c1bab9d3b20a520130cb6cf55c9acbc56fbdb212ba9d58847e8590a8cf349",
+          "sha256": "884a0eb0ad1cdc913b0413c99423e47562dbec1ba7b8fd36c67b9bc5ad42c8b8",
           "size": 1024
         }
       },
       "objects": {
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1": [
           {
-            "pathId": "-1852063690586228334",
-            "classId": 28,
-            "byteSize": 192
-          },
-          {
-            "pathId": "-1932877445234084228",
+            "pathId": "-1333509663344946893",
             "classId": 21,
             "byteSize": 108
           },
           {
-            "pathId": "-3989560092750537133",
-            "classId": 114,
-            "byteSize": 160
-          },
-          {
-            "pathId": "-4723002142684471360",
-            "classId": 49,
-            "byteSize": 180
-          },
-          {
-            "pathId": "-5682223559032101155",
-            "classId": 28,
-            "byteSize": 192
-          },
-          {
-            "pathId": "-584234500017827719",
-            "classId": 49,
-            "byteSize": 372
-          },
-          {
-            "pathId": "-6611884490849265734",
+            "pathId": "-2008323714379738163",
             "classId": 28,
             "byteSize": 188
           },
           {
-            "pathId": "-7131139798766944344",
-            "classId": 115,
-            "byteSize": 116
+            "pathId": "-2436819112266214100",
+            "classId": 28,
+            "byteSize": 192
           },
           {
-            "pathId": "-855389525845908331",
-            "classId": 21,
-            "byteSize": 108
-          },
-          {
-            "pathId": "-8711871650810432397",
+            "pathId": "-3066402172361777486",
             "classId": 21,
             "byteSize": 104
+          },
+          {
+            "pathId": "-503895001522658334",
+            "classId": 28,
+            "byteSize": 192
+          },
+          {
+            "pathId": "-7158473088829069515",
+            "classId": 114,
+            "byteSize": 72
+          },
+          {
+            "pathId": "-7229480144051004739",
+            "classId": 49,
+            "byteSize": 396
+          },
+          {
+            "pathId": "-8290818795905785043",
+            "classId": 114,
+            "byteSize": 140
           },
           {
             "pathId": "1",
@@ -20677,64 +20667,69 @@
             "byteSize": 528
           },
           {
-            "pathId": "2697378233571512730",
-            "classId": 114,
-            "byteSize": 72
-          },
-          {
-            "pathId": "2752546391946657863",
+            "pathId": "3371567080494119148",
             "classId": 115,
-            "byteSize": 108
+            "byteSize": 100
           },
           {
-            "pathId": "277509492962494178",
-            "classId": 49,
-            "byteSize": 176
-          },
-          {
-            "pathId": "5390939337407389809",
-            "classId": 115,
-            "byteSize": 108
-          },
-          {
-            "pathId": "542120497857268794",
-            "classId": 49,
-            "byteSize": 396
-          },
-          {
-            "pathId": "6123937668407992546",
+            "pathId": "4324604237648494512",
             "classId": 49,
             "byteSize": 140
           },
           {
-            "pathId": "6156046526923319559",
-            "classId": 114,
-            "byteSize": 160
-          },
-          {
-            "pathId": "6515719544610970542",
+            "pathId": "5315214187593576875",
             "classId": 114,
             "byteSize": 72
           },
           {
-            "pathId": "6953372967143582602",
-            "classId": 28,
-            "byteSize": 188
-          },
-          {
-            "pathId": "7158710180139092467",
+            "pathId": "5513626262038564703",
             "classId": 21,
             "byteSize": 108
           },
           {
-            "pathId": "7386864850103129242",
+            "pathId": "5543756143234216266",
+            "classId": 49,
+            "byteSize": 180
+          },
+          {
+            "pathId": "5549542331632818947",
+            "classId": 49,
+            "byteSize": 176
+          },
+          {
+            "pathId": "5854444970959251173",
+            "classId": 49,
+            "byteSize": 372
+          },
+          {
+            "pathId": "5942635288720385282",
             "classId": 114,
             "byteSize": 100
           },
           {
-            "pathId": "7785771249082132946",
+            "pathId": "725241628798199336",
             "classId": 115,
-            "byteSize": 100
+            "byteSize": 108
+          },
+          {
+            "pathId": "7439797197168301120",
+            "classId": 21,
+            "byteSize": 108
+          },
+          {
+            "pathId": "7662959341084025174",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "7750899617410324551",
+            "classId": 114,
+            "byteSize": 160
+          },
+          {
+            "pathId": "8525246341372757875",
+            "classId": 28,
+            "byteSize": 188
           }
         ]
       },
@@ -20763,6 +20758,33 @@
               "nodes": null
             },
             {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 2,
+              "scriptId": "15f441d01838cd812fdb2c200c404b22",
+              "oldTypeHash": "a2cee442eff0fa015c9fea439701e866",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 1,
+              "scriptId": "78cc7a1839a913af9480187fea543f19",
+              "oldTypeHash": "5638704286073716143cc2ca580b50fc",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
               "classId": 21,
               "isStrippedType": false,
               "scriptTypeIndex": -1,
@@ -20781,24 +20803,6 @@
               "nodes": null
             },
             {
-              "classId": 49,
-              "isStrippedType": false,
-              "scriptTypeIndex": -1,
-              "scriptId": null,
-              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
-              "typeDependencies": null,
-              "nodes": null
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
-              "scriptTypeIndex": 2,
-              "scriptId": "15f441d01838cd812fdb2c200c404b22",
-              "oldTypeHash": "cee303f40714c1ee79a3f36875e8a656",
-              "typeDependencies": null,
-              "nodes": null
-            },
-            {
               "classId": 142,
               "isStrippedType": false,
               "scriptTypeIndex": -1,
@@ -20810,27 +20814,9 @@
             {
               "classId": 114,
               "isStrippedType": false,
-              "scriptTypeIndex": 3,
-              "scriptId": "78cc7a1839a913af9480187fea543f19",
-              "oldTypeHash": "5638704286073716143cc2ca580b50fc",
-              "typeDependencies": null,
-              "nodes": null
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
               "scriptTypeIndex": 0,
-              "scriptId": "2911a5c668ee38ad03affb22b3cb8701",
-              "oldTypeHash": "cee303f40714c1ee79a3f36875e8a656",
-              "typeDependencies": null,
-              "nodes": null
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
-              "scriptTypeIndex": 1,
               "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
-              "oldTypeHash": "1f7f1a53634a521a7ee2d5634433e62c",
+              "oldTypeHash": "9fe439383b274c36028461064b1a7d12",
               "typeDependencies": null,
               "nodes": null
             }
@@ -20838,29 +20824,28 @@
           "refTypes": [],
           "typetrees": {},
           "names": {
-            "-1852063690586228334": "hero2",
-            "-1932877445234084228": "imp-fx_Material",
-            "-3989560092750537133": "imp_SkeletonData",
-            "-4723002142684471360": "imp-fx.atlas",
-            "-5682223559032101155": "imp-fx",
-            "-584234500017827719": "imp",
-            "-6611884490849265734": "hero",
-            "-7131139798766944344": "SkeletonDataAsset",
-            "-855389525845908331": "hero_Material",
-            "-8711871650810432397": "imp_Material",
+            "-1333509663344946893": "imp-fx_Material",
+            "-2008323714379738163": "hero",
+            "-2436819112266214100": "imp-fx",
+            "-3066402172361777486": "imp_Material",
+            "-503895001522658334": "hero2",
+            "-7158473088829069515": "imp-fx_Atlas",
+            "-7229480144051004739": "hero",
+            "-8290818795905785043": "hero_SkeletonData",
             "1": "skeletons",
-            "2697378233571512730": "imp_Atlas",
-            "2752546391946657863": "SpineAtlasAsset",
-            "277509492962494178": "imp.atlas",
-            "5390939337407389809": "SkeletonDataAsset",
-            "542120497857268794": "hero",
-            "6123937668407992546": "hero.atlas",
-            "6156046526923319559": "hero_SkeletonData",
-            "6515719544610970542": "imp-fx_Atlas",
-            "6953372967143582602": "imp",
-            "7158710180139092467": "hero2_Material",
-            "7386864850103129242": "hero_Atlas",
-            "7785771249082132946": "SpineAtlasAsset"
+            "3371567080494119148": "SpineAtlasAsset",
+            "4324604237648494512": "hero.atlas",
+            "5315214187593576875": "imp_Atlas",
+            "5513626262038564703": "hero2_Material",
+            "5543756143234216266": "imp-fx.atlas",
+            "5549542331632818947": "imp.atlas",
+            "5854444970959251173": "imp",
+            "5942635288720385282": "hero_Atlas",
+            "725241628798199336": "SpineAtlasAsset",
+            "7439797197168301120": "hero_Material",
+            "7662959341084025174": "SkeletonDataAsset",
+            "7750899617410324551": "imp_SkeletonData",
+            "8525246341372757875": "imp"
           }
         }
       },
@@ -20868,12 +20853,12 @@
         {
           "path": "assets/fixtures/spine/hero_skeletondata.asset",
           "file": "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1",
-          "pathId": "6156046526923319559"
+          "pathId": "-8290818795905785043"
         },
         {
           "path": "assets/fixtures/spine/imp_skeletondata.asset",
           "file": "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1",
-          "pathId": "-3989560092750537133"
+          "pathId": "7750899617410324551"
         }
       ]
     },
@@ -20884,8 +20869,8 @@
       "unityRevision": "2019.4.41f2",
       "files": {
         "CAB-6c6b18262b728fc3abb85cbcbc091194": {
-          "sha256": "53b510f99f7f6d635cbd6fa96dcaa9a4e48f035299c1061105bcbb87844962e4",
-          "size": 14336
+          "sha256": "a5bc8807e5ef96ea1c33ba20c6b5865231116eb0fc144232f6e2a27db06a9bd8",
+          "size": 14292
         },
         "CAB-6c6b18262b728fc3abb85cbcbc091194.resS": {
           "sha256": "f459b54d43ead5e00f82cf367b7d5bc341de32591a78537415e610ccedffbdcb",
@@ -20895,14 +20880,9 @@
       "objects": {
         "CAB-6c6b18262b728fc3abb85cbcbc091194": [
           {
-            "pathId": "-7131139798766944344",
-            "classId": 115,
-            "byteSize": 116
-          },
-          {
-            "pathId": "-8491410292226470174",
-            "classId": 49,
-            "byteSize": 284
+            "pathId": "-8402711687071780638",
+            "classId": 21,
+            "byteSize": 108
           },
           {
             "pathId": "1",
@@ -20910,34 +20890,39 @@
             "byteSize": 272
           },
           {
-            "pathId": "1020703355699444684",
-            "classId": 114,
-            "byteSize": 88
-          },
-          {
-            "pathId": "2752546391946657863",
-            "classId": 115,
-            "byteSize": 108
-          },
-          {
-            "pathId": "5367296593006510304",
+            "pathId": "3010351642244952297",
             "classId": 28,
             "byteSize": 192
           },
           {
-            "pathId": "6675505880037327135",
+            "pathId": "4577517009204848813",
+            "classId": 114,
+            "byteSize": 88
+          },
+          {
+            "pathId": "493183218889417177",
+            "classId": 49,
+            "byteSize": 80
+          },
+          {
+            "pathId": "725241628798199336",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "7662959341084025174",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "8806234226266990683",
             "classId": 114,
             "byteSize": 140
           },
           {
-            "pathId": "748288795471632206",
-            "classId": 21,
-            "byteSize": 108
-          },
-          {
-            "pathId": "7967643229524923140",
+            "pathId": "8904307095135801470",
             "classId": 49,
-            "byteSize": 80
+            "byteSize": 284
           }
         ]
       },
@@ -20999,93 +20984,6 @@
                 [2, "Array", "Array", -1, 16401],
                 [3, "int", "size", 4, 17],
                 [3, "char", "data", 1, 17]
-              ]
-            },
-            {
-              "classId": 49,
-              "isStrippedType": false,
-              "scriptTypeIndex": -1,
-              "scriptId": null,
-              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "TextAsset", "Base", -1, 32768],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "string", "m_Script", -1, 67141633],
-                [2, "Array", "Array", -1, 67125249],
-                [3, "int", "size", 4, 67108865],
-                [3, "char", "data", 1, 67108865]
-              ]
-            },
-            {
-              "classId": 142,
-              "isStrippedType": false,
-              "scriptTypeIndex": -1,
-              "scriptId": null,
-              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "AssetBundle", "Base", -1, 32768],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "vector", "m_PreloadTable", -1, 32768],
-                [2, "Array", "Array", -1, 16384],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<Object>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609],
-                [1, "map", "m_Container", -1, 32768],
-                [2, "Array", "Array", -1, 32768],
-                [3, "int", "size", 4, 0],
-                [3, "pair", "data", -1, 32768],
-                [4, "string", "first", -1, 32768],
-                [5, "Array", "Array", -1, 16385],
-                [6, "int", "size", 4, 1],
-                [6, "char", "data", 1, 1],
-                [4, "AssetInfo", "second", 20, 0],
-                [5, "int", "preloadIndex", 4, 0],
-                [5, "int", "preloadSize", 4, 0],
-                [5, "PPtr<Object>", "asset", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [1, "AssetInfo", "m_MainAsset", 20, 0],
-                [2, "int", "preloadIndex", 4, 0],
-                [2, "int", "preloadSize", 4, 0],
-                [2, "PPtr<Object>", "asset", 12, 0],
-                [3, "int", "m_FileID", 4, 8388609],
-                [3, "SInt64", "m_PathID", 8, 8388609],
-                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
-                [1, "string", "m_AssetBundleName", -1, 32768],
-                [2, "Array", "Array", -1, 16385],
-                [3, "int", "size", 4, 1],
-                [3, "char", "data", 1, 1],
-                [1, "vector", "m_Dependencies", -1, 32768],
-                [2, "Array", "Array", -1, 49152],
-                [3, "int", "size", 4, 0],
-                [3, "string", "data", -1, 32768],
-                [4, "Array", "Array", -1, 16385],
-                [5, "int", "size", 4, 1],
-                [5, "char", "data", 1, 1],
-                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
-                [1, "int", "m_ExplicitDataLayout", 4, 0],
-                [1, "int", "m_PathFlags", 4, 0],
-                [1, "map", "m_SceneHashes", -1, 32768],
-                [2, "Array", "Array", -1, 32768],
-                [3, "int", "size", 4, 0],
-                [3, "pair", "data", -1, 32768],
-                [4, "string", "first", -1, 32768],
-                [5, "Array", "Array", -1, 16385],
-                [6, "int", "size", 4, 1],
-                [6, "char", "data", 1, 1],
-                [4, "string", "second", -1, 32768],
-                [5, "Array", "Array", -1, 16385],
-                [6, "int", "size", 4, 1],
-                [6, "char", "data", 1, 1]
               ]
             },
             {
@@ -21175,38 +21073,90 @@
               ]
             },
             {
-              "classId": 114,
+              "classId": 142,
               "isStrippedType": false,
-              "scriptTypeIndex": 1,
-              "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
-              "oldTypeHash": "1f7f1a53634a521a7ee2d5634433e62c",
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
               "typeDependencies": [],
               "nodes": [
-                [0, "MonoBehaviour", "Base", -1, 32768],
-                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
-                [2, "int", "m_FileID", 4, 65],
-                [2, "SInt64", "m_PathID", 8, 65],
-                [1, "UInt8", "m_Enabled", 1, 16641],
-                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
+                [0, "AssetBundle", "Base", -1, 32768],
                 [1, "string", "m_Name", -1, 557057],
                 [2, "Array", "Array", -1, 540673],
                 [3, "int", "size", 4, 524289],
                 [3, "char", "data", 1, 524289],
-                [1, "int", "textureLoadingMode", 4, 0],
-                [1, "PPtr<$OnDemandTextureLoader>", "onDemandTextureLoader", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "materials", -1, 0],
-                [2, "Array", "Array", -1, 0],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
                 [3, "int", "size", 4, 0],
-                [3, "PPtr<$Material>", "data", 12, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
                 [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609]
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "TextAsset", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "string", "m_Script", -1, 67141633],
+                [2, "Array", "Array", -1, 67125249],
+                [3, "int", "size", 4, 67108865],
+                [3, "char", "data", 1, 67108865]
               ]
             },
             {
@@ -21261,8 +21211,43 @@
               "classId": 114,
               "isStrippedType": false,
               "scriptTypeIndex": 0,
-              "scriptId": "2911a5c668ee38ad03affb22b3cb8701",
-              "oldTypeHash": "cee303f40714c1ee79a3f36875e8a656",
+              "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
+              "oldTypeHash": "9fe439383b274c36028461064b1a7d12",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "textureLoadingMode", 4, 0],
+                [1, "PPtr<$UarTextureLoader>", "onDemandTextureLoader", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "materials", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$Material>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 1,
+              "scriptId": "15f441d01838cd812fdb2c200c404b22",
+              "oldTypeHash": "a2cee442eff0fa015c9fea439701e866",
               "typeDependencies": [],
               "nodes": [
                 [0, "MonoBehaviour", "Base", -1, 32768],
@@ -21280,7 +21265,7 @@
                 [1, "vector", "atlasAssets", -1, 0],
                 [2, "Array", "Array", -1, 0],
                 [3, "int", "size", 4, 0],
-                [3, "PPtr<$AtlasAssetBase>", "data", 12, 0],
+                [3, "PPtr<$UarAtlasBase>", "data", 12, 0],
                 [4, "int", "m_FileID", 4, 8388609],
                 [4, "SInt64", "m_PathID", 8, 8388609],
                 [1, "float", "scale", 4, 0],
@@ -21288,13 +21273,13 @@
                 [2, "int", "m_FileID", 4, 8388609],
                 [2, "SInt64", "m_PathID", 8, 8388609],
                 [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
-                [1, "BlendModeMaterials", "blendModeMaterials", -1, 32768],
-                [2, "UInt8", "requiresBlendModeMaterials", 1, 16641],
+                [1, "UarBlendModes", "blendModeMaterials", -1, 32768],
+                [2, "UInt8", "requiresBlendModeMaterials", 1, 16640],
                 [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
-                [2, "ReplacementMaterial", "additiveMaterials", -1, 32768],
+                [2, "UarPageMaterial", "additiveMaterials", -1, 32768],
                 [3, "Array", "Array", -1, 32768],
                 [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
+                [4, "UarPageMaterial", "data", -1, 32768],
                 [5, "string", "pageName", -1, 32768],
                 [6, "Array", "Array", -1, 16385],
                 [7, "int", "size", 4, 1],
@@ -21302,10 +21287,10 @@
                 [5, "PPtr<$Material>", "material", 12, 0],
                 [6, "int", "m_FileID", 4, 8388609],
                 [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "multiplyMaterials", -1, 32768],
+                [2, "UarPageMaterial", "multiplyMaterials", -1, 32768],
                 [3, "Array", "Array", -1, 32768],
                 [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
+                [4, "UarPageMaterial", "data", -1, 32768],
                 [5, "string", "pageName", -1, 32768],
                 [6, "Array", "Array", -1, 16385],
                 [7, "int", "size", 4, 1],
@@ -21313,10 +21298,10 @@
                 [5, "PPtr<$Material>", "material", 12, 0],
                 [6, "int", "m_FileID", 4, 8388609],
                 [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "screenMaterials", -1, 32768],
+                [2, "UarPageMaterial", "screenMaterials", -1, 32768],
                 [3, "Array", "Array", -1, 32768],
                 [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
+                [4, "UarPageMaterial", "data", -1, 32768],
                 [5, "string", "pageName", -1, 32768],
                 [6, "Array", "Array", -1, 16385],
                 [7, "int", "size", 4, 1],
@@ -21327,7 +21312,7 @@
                 [1, "vector", "skeletonDataModifiers", -1, 0],
                 [2, "Array", "Array", -1, 0],
                 [3, "int", "size", 4, 0],
-                [3, "PPtr<$SkeletonDataModifierAsset>", "data", 12, 0],
+                [3, "PPtr<$UarModifier>", "data", 12, 0],
                 [4, "int", "m_FileID", 4, 8388609],
                 [4, "SInt64", "m_PathID", 8, 8388609],
                 [1, "vector", "fromAnimation", -1, 32768],
@@ -21357,37 +21342,43 @@
           ],
           "refTypes": [],
           "typetrees": {
-            "-7131139798766944344": {
+            "-8402711687071780638": {
               "value": {
-                "m_Name": "SkeletonDataAsset",
-                "m_ExecutionOrder": 0,
-                "m_PropertiesHash": {
-                  "bytes[0]": 206,
-                  "bytes[1]": 227,
-                  "bytes[2]": 3,
-                  "bytes[3]": 244,
-                  "bytes[4]": 7,
-                  "bytes[5]": 20,
-                  "bytes[6]": 193,
-                  "bytes[7]": 238,
-                  "bytes[8]": 121,
-                  "bytes[9]": 163,
-                  "bytes[10]": 243,
-                  "bytes[11]": 104,
-                  "bytes[12]": 117,
-                  "bytes[13]": 232,
-                  "bytes[14]": 166,
-                  "bytes[15]": 86
+                "m_Name": "ghost_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "6970923546142098320"
                 },
-                "m_ClassName": "SkeletonDataAsset",
-                "m_Namespace": "Spine.Unity.OnDemand",
-                "m_AssemblyName": "Assembly-CSharp.dll"
-              }
-            },
-            "-8491410292226470174": {
-              "value": {
-                "m_Name": "ghost",
-                "m_Script": "{\"skeleton\":{\"hash\":\"uarghost\",\"spine\":\"4.2.00\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "3010351642244952297"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
               }
             },
             "1": {
@@ -21396,39 +21387,39 @@
                 "m_PreloadTable": [
                   {
                     "m_FileID": 1,
-                    "m_PathID": "2836002161295838472"
+                    "m_PathID": "6970923546142098320"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-8491410292226470174"
+                    "m_PathID": "-8402711687071780638"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-7131139798766944344"
+                    "m_PathID": "493183218889417177"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "748288795471632206"
+                    "m_PathID": "725241628798199336"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "1020703355699444684"
+                    "m_PathID": "3010351642244952297"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "2752546391946657863"
+                    "m_PathID": "4577517009204848813"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "5367296593006510304"
+                    "m_PathID": "7662959341084025174"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "6675505880037327135"
+                    "m_PathID": "8806234226266990683"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "7967643229524923140"
+                    "m_PathID": "8904307095135801470"
                   }
                 ],
                 "m_Container": [
@@ -21439,7 +21430,7 @@
                       "preloadSize": 9,
                       "asset": {
                         "m_FileID": 0,
-                        "m_PathID": "6675505880037327135"
+                        "m_PathID": "8806234226266990683"
                       }
                     }
                   ]
@@ -21461,63 +21452,7 @@
                 "m_SceneHashes": []
               }
             },
-            "1020703355699444684": {
-              "value": {
-                "m_GameObject": {
-                  "m_FileID": 0,
-                  "m_PathID": "0"
-                },
-                "m_Enabled": 1,
-                "m_Script": {
-                  "m_FileID": 0,
-                  "m_PathID": "2752546391946657863"
-                },
-                "m_Name": "ghost_Atlas",
-                "textureLoadingMode": 1,
-                "onDemandTextureLoader": {
-                  "m_FileID": 0,
-                  "m_PathID": "0"
-                },
-                "atlasFile": {
-                  "m_FileID": 0,
-                  "m_PathID": "7967643229524923140"
-                },
-                "materials": [
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "748288795471632206"
-                  }
-                ]
-              }
-            },
-            "2752546391946657863": {
-              "value": {
-                "m_Name": "SpineAtlasAsset",
-                "m_ExecutionOrder": 0,
-                "m_PropertiesHash": {
-                  "bytes[0]": 31,
-                  "bytes[1]": 127,
-                  "bytes[2]": 26,
-                  "bytes[3]": 83,
-                  "bytes[4]": 99,
-                  "bytes[5]": 74,
-                  "bytes[6]": 82,
-                  "bytes[7]": 26,
-                  "bytes[8]": 126,
-                  "bytes[9]": 226,
-                  "bytes[10]": 213,
-                  "bytes[11]": 99,
-                  "bytes[12]": 68,
-                  "bytes[13]": 51,
-                  "bytes[14]": 230,
-                  "bytes[15]": 44
-                },
-                "m_ClassName": "SpineAtlasAsset",
-                "m_Namespace": "Spine.Unity.OnDemand",
-                "m_AssemblyName": "Assembly-CSharp.dll"
-              }
-            },
-            "5367296593006510304": {
+            "3010351642244952297": {
               "value": {
                 "m_Name": "ghost",
                 "m_ForcedFallbackFormat": 4,
@@ -21552,7 +21487,7 @@
                 }
               }
             },
-            "6675505880037327135": {
+            "4577517009204848813": {
               "value": {
                 "m_GameObject": {
                   "m_FileID": 0,
@@ -21561,19 +21496,108 @@
                 "m_Enabled": 1,
                 "m_Script": {
                   "m_FileID": 0,
-                  "m_PathID": "-7131139798766944344"
+                  "m_PathID": "725241628798199336"
+                },
+                "m_Name": "ghost_Atlas",
+                "textureLoadingMode": 1,
+                "onDemandTextureLoader": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "atlasFile": {
+                  "m_FileID": 0,
+                  "m_PathID": "493183218889417177"
+                },
+                "materials": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8402711687071780638"
+                  }
+                ]
+              }
+            },
+            "493183218889417177": {
+              "value": {
+                "m_Name": "ghost.atlas",
+                "m_Script": "ghost.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n"
+              }
+            },
+            "725241628798199336": {
+              "value": {
+                "m_Name": "SpineAtlasAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 159,
+                  "bytes[1]": 228,
+                  "bytes[2]": 57,
+                  "bytes[3]": 56,
+                  "bytes[4]": 59,
+                  "bytes[5]": 39,
+                  "bytes[6]": 76,
+                  "bytes[7]": 54,
+                  "bytes[8]": 2,
+                  "bytes[9]": 132,
+                  "bytes[10]": 97,
+                  "bytes[11]": 6,
+                  "bytes[12]": 75,
+                  "bytes[13]": 26,
+                  "bytes[14]": 125,
+                  "bytes[15]": 18
+                },
+                "m_ClassName": "SpineAtlasAsset",
+                "m_Namespace": "Spine.Unity.OnDemand",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "7662959341084025174": {
+              "value": {
+                "m_Name": "SkeletonDataAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 162,
+                  "bytes[1]": 206,
+                  "bytes[2]": 228,
+                  "bytes[3]": 66,
+                  "bytes[4]": 239,
+                  "bytes[5]": 240,
+                  "bytes[6]": 250,
+                  "bytes[7]": 1,
+                  "bytes[8]": 92,
+                  "bytes[9]": 159,
+                  "bytes[10]": 234,
+                  "bytes[11]": 67,
+                  "bytes[12]": 151,
+                  "bytes[13]": 1,
+                  "bytes[14]": 232,
+                  "bytes[15]": 102
+                },
+                "m_ClassName": "SkeletonDataAsset",
+                "m_Namespace": "Spine.Unity",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "8806234226266990683": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "7662959341084025174"
                 },
                 "m_Name": "ghost_SkeletonData",
                 "atlasAssets": [
                   {
                     "m_FileID": 0,
-                    "m_PathID": "1020703355699444684"
+                    "m_PathID": "4577517009204848813"
                   }
                 ],
                 "scale": "f32:3c23d70a",
                 "skeletonJSON": {
                   "m_FileID": 0,
-                  "m_PathID": "-8491410292226470174"
+                  "m_PathID": "8904307095135801470"
                 },
                 "isUpgradingBlendModeMaterials": 0,
                 "blendModeMaterials": {
@@ -21594,65 +21618,26 @@
                 }
               }
             },
-            "748288795471632206": {
+            "8904307095135801470": {
               "value": {
-                "m_Name": "ghost_Material",
-                "m_Shader": {
-                  "m_FileID": 1,
-                  "m_PathID": "2836002161295838472"
-                },
-                "m_ShaderKeywords": "",
-                "m_LightmapFlags": 4,
-                "m_EnableInstancingVariants": false,
-                "m_DoubleSidedGI": false,
-                "m_CustomRenderQueue": -1,
-                "stringTagMap": [],
-                "disabledShaderPasses": [],
-                "m_SavedProperties": {
-                  "m_TexEnvs": [
-                    [
-                      "_MainTex",
-                      {
-                        "m_Texture": {
-                          "m_FileID": 0,
-                          "m_PathID": "5367296593006510304"
-                        },
-                        "m_Scale": {
-                          "x": "f32:3f800000",
-                          "y": "f32:3f800000"
-                        },
-                        "m_Offset": {
-                          "x": "f32:00000000",
-                          "y": "f32:00000000"
-                        }
-                      }
-                    ]
-                  ],
-                  "m_Floats": [],
-                  "m_Colors": []
-                }
-              }
-            },
-            "7967643229524923140": {
-              "value": {
-                "m_Name": "ghost.atlas",
-                "m_Script": "ghost.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n"
+                "m_Name": "ghost",
+                "m_Script": "{\"skeleton\":{\"hash\":\"uarghost\",\"spine\":\"4.2.00\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
               }
             }
           },
           "names": {
-            "-7131139798766944344": "SkeletonDataAsset",
-            "-8491410292226470174": "ghost",
+            "-8402711687071780638": "ghost_Material",
             "1": "ondemand",
-            "1020703355699444684": "ghost_Atlas",
-            "2752546391946657863": "SpineAtlasAsset",
-            "5367296593006510304": "ghost",
-            "6675505880037327135": "ghost_SkeletonData",
-            "748288795471632206": "ghost_Material",
-            "7967643229524923140": "ghost.atlas"
+            "3010351642244952297": "ghost",
+            "4577517009204848813": "ghost_Atlas",
+            "493183218889417177": "ghost.atlas",
+            "725241628798199336": "SpineAtlasAsset",
+            "7662959341084025174": "SkeletonDataAsset",
+            "8806234226266990683": "ghost_SkeletonData",
+            "8904307095135801470": "ghost"
           },
           "textures": {
-            "5367296593006510304": {
+            "3010351642244952297": {
               "name": "ghost",
               "format": 4,
               "width": 8,
@@ -21668,7 +21653,7 @@
         {
           "path": "assets/fixtures/spine/ghost_skeletondata.asset",
           "file": "CAB-6c6b18262b728fc3abb85cbcbc091194",
-          "pathId": "6675505880037327135"
+          "pathId": "8806234226266990683"
         }
       ]
     },
@@ -21679,65 +21664,55 @@
       "unityRevision": "2019.4.41f2",
       "files": {
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1": {
-          "sha256": "d4bbe9a70f54b195e6d8fea2997da27ee3b10573a51eab98cd99b4e4307a9bb5",
-          "size": 21340
+          "sha256": "44c30c8515c3d0e562f73d6e3f09dc8c709c5a4380af17f9dd86b46c0231b4e0",
+          "size": 17860
         },
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS": {
-          "sha256": "bb8c1bab9d3b20a520130cb6cf55c9acbc56fbdb212ba9d58847e8590a8cf349",
+          "sha256": "884a0eb0ad1cdc913b0413c99423e47562dbec1ba7b8fd36c67b9bc5ad42c8b8",
           "size": 1024
         }
       },
       "objects": {
         "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1": [
           {
-            "pathId": "-1852063690586228334",
-            "classId": 28,
-            "byteSize": 192
-          },
-          {
-            "pathId": "-1932877445234084228",
+            "pathId": "-1333509663344946893",
             "classId": 21,
             "byteSize": 108
           },
           {
-            "pathId": "-3989560092750537133",
-            "classId": 114,
-            "byteSize": 160
-          },
-          {
-            "pathId": "-4723002142684471360",
-            "classId": 49,
-            "byteSize": 180
-          },
-          {
-            "pathId": "-5682223559032101155",
-            "classId": 28,
-            "byteSize": 192
-          },
-          {
-            "pathId": "-584234500017827719",
-            "classId": 49,
-            "byteSize": 372
-          },
-          {
-            "pathId": "-6611884490849265734",
+            "pathId": "-2008323714379738163",
             "classId": 28,
             "byteSize": 188
           },
           {
-            "pathId": "-7131139798766944344",
-            "classId": 115,
-            "byteSize": 116
+            "pathId": "-2436819112266214100",
+            "classId": 28,
+            "byteSize": 192
           },
           {
-            "pathId": "-855389525845908331",
-            "classId": 21,
-            "byteSize": 108
-          },
-          {
-            "pathId": "-8711871650810432397",
+            "pathId": "-3066402172361777486",
             "classId": 21,
             "byteSize": 104
+          },
+          {
+            "pathId": "-503895001522658334",
+            "classId": 28,
+            "byteSize": 192
+          },
+          {
+            "pathId": "-7158473088829069515",
+            "classId": 114,
+            "byteSize": 72
+          },
+          {
+            "pathId": "-7229480144051004739",
+            "classId": 49,
+            "byteSize": 396
+          },
+          {
+            "pathId": "-8290818795905785043",
+            "classId": 114,
+            "byteSize": 140
           },
           {
             "pathId": "1",
@@ -21745,64 +21720,69 @@
             "byteSize": 528
           },
           {
-            "pathId": "2697378233571512730",
-            "classId": 114,
-            "byteSize": 72
-          },
-          {
-            "pathId": "2752546391946657863",
+            "pathId": "3371567080494119148",
             "classId": 115,
-            "byteSize": 108
+            "byteSize": 100
           },
           {
-            "pathId": "277509492962494178",
-            "classId": 49,
-            "byteSize": 176
-          },
-          {
-            "pathId": "5390939337407389809",
-            "classId": 115,
-            "byteSize": 108
-          },
-          {
-            "pathId": "542120497857268794",
-            "classId": 49,
-            "byteSize": 396
-          },
-          {
-            "pathId": "6123937668407992546",
+            "pathId": "4324604237648494512",
             "classId": 49,
             "byteSize": 140
           },
           {
-            "pathId": "6156046526923319559",
-            "classId": 114,
-            "byteSize": 160
-          },
-          {
-            "pathId": "6515719544610970542",
+            "pathId": "5315214187593576875",
             "classId": 114,
             "byteSize": 72
           },
           {
-            "pathId": "6953372967143582602",
-            "classId": 28,
-            "byteSize": 188
-          },
-          {
-            "pathId": "7158710180139092467",
+            "pathId": "5513626262038564703",
             "classId": 21,
             "byteSize": 108
           },
           {
-            "pathId": "7386864850103129242",
+            "pathId": "5543756143234216266",
+            "classId": 49,
+            "byteSize": 180
+          },
+          {
+            "pathId": "5549542331632818947",
+            "classId": 49,
+            "byteSize": 176
+          },
+          {
+            "pathId": "5854444970959251173",
+            "classId": 49,
+            "byteSize": 372
+          },
+          {
+            "pathId": "5942635288720385282",
             "classId": 114,
             "byteSize": 100
           },
           {
-            "pathId": "7785771249082132946",
+            "pathId": "725241628798199336",
             "classId": 115,
-            "byteSize": 100
+            "byteSize": 108
+          },
+          {
+            "pathId": "7439797197168301120",
+            "classId": 21,
+            "byteSize": 108
+          },
+          {
+            "pathId": "7662959341084025174",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "7750899617410324551",
+            "classId": 114,
+            "byteSize": 160
+          },
+          {
+            "pathId": "8525246341372757875",
+            "classId": 28,
+            "byteSize": 188
           }
         ]
       },
@@ -21864,6 +21844,153 @@
                 [2, "Array", "Array", -1, 16401],
                 [3, "int", "size", 4, 17],
                 [3, "char", "data", 1, 17]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 2,
+              "scriptId": "15f441d01838cd812fdb2c200c404b22",
+              "oldTypeHash": "a2cee442eff0fa015c9fea439701e866",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "atlasAssets", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarAtlasBase>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "float", "scale", 4, 0],
+                [1, "PPtr<$TextAsset>", "skeletonJSON", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
+                [1, "UarBlendModes", "blendModeMaterials", -1, 32768],
+                [2, "UInt8", "requiresBlendModeMaterials", 1, 16640],
+                [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
+                [2, "UarPageMaterial", "additiveMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "multiplyMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "screenMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "skeletonDataModifiers", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarModifier>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "fromAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "toAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "duration", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "float", "data", 4, 0],
+                [1, "float", "defaultMix", 4, 0],
+                [1, "PPtr<$RuntimeAnimatorController>", "controller", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609]
+              ]
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "TextAsset", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "string", "m_Script", -1, 67141633],
+                [2, "Array", "Array", -1, 67125249],
+                [3, "int", "size", 4, 67108865],
+                [3, "char", "data", 1, 67108865]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 1,
+              "scriptId": "78cc7a1839a913af9480187fea543f19",
+              "oldTypeHash": "5638704286073716143cc2ca580b50fc",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "materials", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$Material>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609]
               ]
             },
             {
@@ -22001,122 +22128,6 @@
               ]
             },
             {
-              "classId": 49,
-              "isStrippedType": false,
-              "scriptTypeIndex": -1,
-              "scriptId": null,
-              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "TextAsset", "Base", -1, 32768],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "string", "m_Script", -1, 67141633],
-                [2, "Array", "Array", -1, 67125249],
-                [3, "int", "size", 4, 67108865],
-                [3, "char", "data", 1, 67108865]
-              ]
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
-              "scriptTypeIndex": 2,
-              "scriptId": "15f441d01838cd812fdb2c200c404b22",
-              "oldTypeHash": "cee303f40714c1ee79a3f36875e8a656",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "MonoBehaviour", "Base", -1, 32768],
-                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
-                [2, "int", "m_FileID", 4, 65],
-                [2, "SInt64", "m_PathID", 8, 65],
-                [1, "UInt8", "m_Enabled", 1, 16641],
-                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "vector", "atlasAssets", -1, 0],
-                [2, "Array", "Array", -1, 0],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<$AtlasAssetBase>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609],
-                [1, "float", "scale", 4, 0],
-                [1, "PPtr<$TextAsset>", "skeletonJSON", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
-                [1, "BlendModeMaterials", "blendModeMaterials", -1, 32768],
-                [2, "UInt8", "requiresBlendModeMaterials", 1, 16641],
-                [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
-                [2, "ReplacementMaterial", "additiveMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "multiplyMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "screenMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "skeletonDataModifiers", -1, 0],
-                [2, "Array", "Array", -1, 0],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<$SkeletonDataModifierAsset>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "fromAnimation", -1, 32768],
-                [2, "Array", "Array", -1, 49152],
-                [3, "int", "size", 4, 0],
-                [3, "string", "data", -1, 32768],
-                [4, "Array", "Array", -1, 16385],
-                [5, "int", "size", 4, 1],
-                [5, "char", "data", 1, 1],
-                [1, "vector", "toAnimation", -1, 32768],
-                [2, "Array", "Array", -1, 49152],
-                [3, "int", "size", 4, 0],
-                [3, "string", "data", -1, 32768],
-                [4, "Array", "Array", -1, 16385],
-                [5, "int", "size", 4, 1],
-                [5, "char", "data", 1, 1],
-                [1, "vector", "duration", -1, 32768],
-                [2, "Array", "Array", -1, 16384],
-                [3, "int", "size", 4, 0],
-                [3, "float", "data", 4, 0],
-                [1, "float", "defaultMix", 4, 0],
-                [1, "PPtr<$RuntimeAnimatorController>", "controller", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609]
-              ]
-            },
-            {
               "classId": 142,
               "isStrippedType": false,
               "scriptTypeIndex": -1,
@@ -22187,137 +22198,9 @@
             {
               "classId": 114,
               "isStrippedType": false,
-              "scriptTypeIndex": 3,
-              "scriptId": "78cc7a1839a913af9480187fea543f19",
-              "oldTypeHash": "5638704286073716143cc2ca580b50fc",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "MonoBehaviour", "Base", -1, 32768],
-                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
-                [2, "int", "m_FileID", 4, 65],
-                [2, "SInt64", "m_PathID", 8, 65],
-                [1, "UInt8", "m_Enabled", 1, 16641],
-                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "materials", -1, 0],
-                [2, "Array", "Array", -1, 0],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<$Material>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609]
-              ]
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
               "scriptTypeIndex": 0,
-              "scriptId": "2911a5c668ee38ad03affb22b3cb8701",
-              "oldTypeHash": "cee303f40714c1ee79a3f36875e8a656",
-              "typeDependencies": [],
-              "nodes": [
-                [0, "MonoBehaviour", "Base", -1, 32768],
-                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
-                [2, "int", "m_FileID", 4, 65],
-                [2, "SInt64", "m_PathID", 8, 65],
-                [1, "UInt8", "m_Enabled", 1, 16641],
-                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "string", "m_Name", -1, 557057],
-                [2, "Array", "Array", -1, 540673],
-                [3, "int", "size", 4, 524289],
-                [3, "char", "data", 1, 524289],
-                [1, "vector", "atlasAssets", -1, 0],
-                [2, "Array", "Array", -1, 0],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<$AtlasAssetBase>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609],
-                [1, "float", "scale", 4, 0],
-                [1, "PPtr<$TextAsset>", "skeletonJSON", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609],
-                [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
-                [1, "BlendModeMaterials", "blendModeMaterials", -1, 32768],
-                [2, "UInt8", "requiresBlendModeMaterials", 1, 16641],
-                [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
-                [2, "ReplacementMaterial", "additiveMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "multiplyMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [2, "ReplacementMaterial", "screenMaterials", -1, 32768],
-                [3, "Array", "Array", -1, 32768],
-                [4, "int", "size", 4, 0],
-                [4, "ReplacementMaterial", "data", -1, 32768],
-                [5, "string", "pageName", -1, 32768],
-                [6, "Array", "Array", -1, 16385],
-                [7, "int", "size", 4, 1],
-                [7, "char", "data", 1, 1],
-                [5, "PPtr<$Material>", "material", 12, 0],
-                [6, "int", "m_FileID", 4, 8388609],
-                [6, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "skeletonDataModifiers", -1, 0],
-                [2, "Array", "Array", -1, 0],
-                [3, "int", "size", 4, 0],
-                [3, "PPtr<$SkeletonDataModifierAsset>", "data", 12, 0],
-                [4, "int", "m_FileID", 4, 8388609],
-                [4, "SInt64", "m_PathID", 8, 8388609],
-                [1, "vector", "fromAnimation", -1, 32768],
-                [2, "Array", "Array", -1, 49152],
-                [3, "int", "size", 4, 0],
-                [3, "string", "data", -1, 32768],
-                [4, "Array", "Array", -1, 16385],
-                [5, "int", "size", 4, 1],
-                [5, "char", "data", 1, 1],
-                [1, "vector", "toAnimation", -1, 32768],
-                [2, "Array", "Array", -1, 49152],
-                [3, "int", "size", 4, 0],
-                [3, "string", "data", -1, 32768],
-                [4, "Array", "Array", -1, 16385],
-                [5, "int", "size", 4, 1],
-                [5, "char", "data", 1, 1],
-                [1, "vector", "duration", -1, 32768],
-                [2, "Array", "Array", -1, 16384],
-                [3, "int", "size", 4, 0],
-                [3, "float", "data", 4, 0],
-                [1, "float", "defaultMix", 4, 0],
-                [1, "PPtr<$RuntimeAnimatorController>", "controller", 12, 0],
-                [2, "int", "m_FileID", 4, 8388609],
-                [2, "SInt64", "m_PathID", 8, 8388609]
-              ]
-            },
-            {
-              "classId": 114,
-              "isStrippedType": false,
-              "scriptTypeIndex": 1,
               "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
-              "oldTypeHash": "1f7f1a53634a521a7ee2d5634433e62c",
+              "oldTypeHash": "9fe439383b274c36028461064b1a7d12",
               "typeDependencies": [],
               "nodes": [
                 [0, "MonoBehaviour", "Base", -1, 32768],
@@ -22333,7 +22216,7 @@
                 [3, "int", "size", 4, 524289],
                 [3, "char", "data", 1, 524289],
                 [1, "int", "textureLoadingMode", 4, 0],
-                [1, "PPtr<$OnDemandTextureLoader>", "onDemandTextureLoader", 12, 0],
+                [1, "PPtr<$UarTextureLoader>", "onDemandTextureLoader", 12, 0],
                 [2, "int", "m_FileID", 4, 8388609],
                 [2, "SInt64", "m_PathID", 8, 8388609],
                 [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
@@ -22350,7 +22233,155 @@
           ],
           "refTypes": [],
           "typetrees": {
-            "-1852063690586228334": {
+            "-1333509663344946893": {
+              "value": {
+                "m_Name": "imp-fx_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "6970923546142098320"
+                },
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "-2436819112266214100"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
+              }
+            },
+            "-2008323714379738163": {
+              "value": {
+                "m_Name": "hero",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_Width": 8,
+                "m_Height": 8,
+                "m_CompleteImageSize": 256,
+                "m_TextureFormat": 4,
+                "m_MipCount": 1,
+                "m_IsReadable": false,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_IsPreProcessed": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "image data": "hex:",
+                "m_StreamData": {
+                  "offset": 256,
+                  "size": 256,
+                  "path": "archive:/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS"
+                }
+              }
+            },
+            "-2436819112266214100": {
+              "value": {
+                "m_Name": "imp-fx",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_Width": 8,
+                "m_Height": 8,
+                "m_CompleteImageSize": 256,
+                "m_TextureFormat": 4,
+                "m_MipCount": 1,
+                "m_IsReadable": false,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_IsPreProcessed": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "image data": "hex:",
+                "m_StreamData": {
+                  "offset": 0,
+                  "size": 256,
+                  "path": "archive:/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS"
+                }
+              }
+            },
+            "-3066402172361777486": {
+              "value": {
+                "m_Name": "imp_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "6970923546142098320"
+                },
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "8525246341372757875"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
+              }
+            },
+            "-503895001522658334": {
               "value": {
                 "m_Name": "hero2",
                 "m_ForcedFallbackFormat": 4,
@@ -22385,46 +22416,7 @@
                 }
               }
             },
-            "-1932877445234084228": {
-              "value": {
-                "m_Name": "imp-fx_Material",
-                "m_Shader": {
-                  "m_FileID": 1,
-                  "m_PathID": "2836002161295838472"
-                },
-                "m_ShaderKeywords": "",
-                "m_LightmapFlags": 4,
-                "m_EnableInstancingVariants": false,
-                "m_DoubleSidedGI": false,
-                "m_CustomRenderQueue": -1,
-                "stringTagMap": [],
-                "disabledShaderPasses": [],
-                "m_SavedProperties": {
-                  "m_TexEnvs": [
-                    [
-                      "_MainTex",
-                      {
-                        "m_Texture": {
-                          "m_FileID": 0,
-                          "m_PathID": "-5682223559032101155"
-                        },
-                        "m_Scale": {
-                          "x": "f32:3f800000",
-                          "y": "f32:3f800000"
-                        },
-                        "m_Offset": {
-                          "x": "f32:00000000",
-                          "y": "f32:00000000"
-                        }
-                      }
-                    ]
-                  ],
-                  "m_Floats": [],
-                  "m_Colors": []
-                }
-              }
-            },
-            "-3989560092750537133": {
+            "-7158473088829069515": {
               "value": {
                 "m_GameObject": {
                   "m_FileID": 0,
@@ -22433,27 +22425,49 @@
                 "m_Enabled": 1,
                 "m_Script": {
                   "m_FileID": 0,
-                  "m_PathID": "5390939337407389809"
+                  "m_PathID": "3371567080494119148"
                 },
-                "m_Name": "imp_SkeletonData",
+                "m_Name": "imp-fx_Atlas",
+                "atlasFile": {
+                  "m_FileID": 0,
+                  "m_PathID": "5543756143234216266"
+                },
+                "materials": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-1333509663344946893"
+                  }
+                ]
+              }
+            },
+            "-7229480144051004739": {
+              "value": {
+                "m_Name": "hero",
+                "m_Script": "{\"skeleton\":{\"hash\":\"uarhero\",\"spine\":\"4.2.00\",\"x\":-4,\"y\":0,\"width\":8,\"height\":16},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"head\",\"bone\":\"root\",\"attachment\":\"head\"},{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"head\":{\"head\":{\"y\":12,\"width\":8,\"height\":8}},\"body\":{\"body\":{\"y\":4,\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
+              }
+            },
+            "-8290818795905785043": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "7662959341084025174"
+                },
+                "m_Name": "hero_SkeletonData",
                 "atlasAssets": [
                   {
                     "m_FileID": 0,
-                    "m_PathID": "2697378233571512730"
-                  },
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "0"
-                  },
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "6515719544610970542"
+                    "m_PathID": "5942635288720385282"
                   }
                 ],
                 "scale": "f32:3c23d70a",
                 "skeletonJSON": {
                   "m_FileID": 0,
-                  "m_PathID": "-584234500017827719"
+                  "m_PathID": "-7229480144051004739"
                 },
                 "isUpgradingBlendModeMaterials": 0,
                 "blendModeMaterials": {
@@ -22474,292 +22488,105 @@
                 }
               }
             },
-            "-4723002142684471360": {
-              "value": {
-                "m_Name": "imp-fx.atlas",
-                "m_Script": "\nimp-fx.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nspark\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n"
-              }
-            },
-            "-5682223559032101155": {
-              "value": {
-                "m_Name": "imp-fx",
-                "m_ForcedFallbackFormat": 4,
-                "m_DownscaleFallback": false,
-                "m_Width": 8,
-                "m_Height": 8,
-                "m_CompleteImageSize": 256,
-                "m_TextureFormat": 4,
-                "m_MipCount": 1,
-                "m_IsReadable": false,
-                "m_IgnoreMasterTextureLimit": false,
-                "m_IsPreProcessed": false,
-                "m_StreamingMipmaps": false,
-                "m_StreamingMipmapsPriority": 0,
-                "m_ImageCount": 1,
-                "m_TextureDimension": 2,
-                "m_TextureSettings": {
-                  "m_FilterMode": 1,
-                  "m_Aniso": 1,
-                  "m_MipBias": "f32:00000000",
-                  "m_WrapU": 0,
-                  "m_WrapV": 0,
-                  "m_WrapW": 0
-                },
-                "m_LightmapFormat": 0,
-                "m_ColorSpace": 1,
-                "image data": "hex:",
-                "m_StreamData": {
-                  "offset": 256,
-                  "size": 256,
-                  "path": "archive:/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS"
-                }
-              }
-            },
-            "-584234500017827719": {
-              "value": {
-                "m_Name": "imp",
-                "m_Script": "{\"skeleton\":{\"hash\":\"uarimp\",\"spine\":\"3.8.99\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"},{\"name\":\"spark\",\"bone\":\"root\",\"attachment\":\"spark\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}},\"spark\":{\"spark\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
-              }
-            },
-            "-6611884490849265734": {
-              "value": {
-                "m_Name": "hero",
-                "m_ForcedFallbackFormat": 4,
-                "m_DownscaleFallback": false,
-                "m_Width": 8,
-                "m_Height": 8,
-                "m_CompleteImageSize": 256,
-                "m_TextureFormat": 4,
-                "m_MipCount": 1,
-                "m_IsReadable": false,
-                "m_IgnoreMasterTextureLimit": false,
-                "m_IsPreProcessed": false,
-                "m_StreamingMipmaps": false,
-                "m_StreamingMipmapsPriority": 0,
-                "m_ImageCount": 1,
-                "m_TextureDimension": 2,
-                "m_TextureSettings": {
-                  "m_FilterMode": 1,
-                  "m_Aniso": 1,
-                  "m_MipBias": "f32:00000000",
-                  "m_WrapU": 0,
-                  "m_WrapV": 0,
-                  "m_WrapW": 0
-                },
-                "m_LightmapFormat": 0,
-                "m_ColorSpace": 1,
-                "image data": "hex:",
-                "m_StreamData": {
-                  "offset": 0,
-                  "size": 256,
-                  "path": "archive:/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS"
-                }
-              }
-            },
-            "-7131139798766944344": {
-              "value": {
-                "m_Name": "SkeletonDataAsset",
-                "m_ExecutionOrder": 0,
-                "m_PropertiesHash": {
-                  "bytes[0]": 206,
-                  "bytes[1]": 227,
-                  "bytes[2]": 3,
-                  "bytes[3]": 244,
-                  "bytes[4]": 7,
-                  "bytes[5]": 20,
-                  "bytes[6]": 193,
-                  "bytes[7]": 238,
-                  "bytes[8]": 121,
-                  "bytes[9]": 163,
-                  "bytes[10]": 243,
-                  "bytes[11]": 104,
-                  "bytes[12]": 117,
-                  "bytes[13]": 232,
-                  "bytes[14]": 166,
-                  "bytes[15]": 86
-                },
-                "m_ClassName": "SkeletonDataAsset",
-                "m_Namespace": "Spine.Unity.OnDemand",
-                "m_AssemblyName": "Assembly-CSharp.dll"
-              }
-            },
-            "-855389525845908331": {
-              "value": {
-                "m_Name": "hero_Material",
-                "m_Shader": {
-                  "m_FileID": 1,
-                  "m_PathID": "2836002161295838472"
-                },
-                "m_ShaderKeywords": "",
-                "m_LightmapFlags": 4,
-                "m_EnableInstancingVariants": false,
-                "m_DoubleSidedGI": false,
-                "m_CustomRenderQueue": -1,
-                "stringTagMap": [],
-                "disabledShaderPasses": [],
-                "m_SavedProperties": {
-                  "m_TexEnvs": [
-                    [
-                      "_MainTex",
-                      {
-                        "m_Texture": {
-                          "m_FileID": 0,
-                          "m_PathID": "-6611884490849265734"
-                        },
-                        "m_Scale": {
-                          "x": "f32:3f800000",
-                          "y": "f32:3f800000"
-                        },
-                        "m_Offset": {
-                          "x": "f32:00000000",
-                          "y": "f32:00000000"
-                        }
-                      }
-                    ]
-                  ],
-                  "m_Floats": [],
-                  "m_Colors": []
-                }
-              }
-            },
-            "-8711871650810432397": {
-              "value": {
-                "m_Name": "imp_Material",
-                "m_Shader": {
-                  "m_FileID": 1,
-                  "m_PathID": "2836002161295838472"
-                },
-                "m_ShaderKeywords": "",
-                "m_LightmapFlags": 4,
-                "m_EnableInstancingVariants": false,
-                "m_DoubleSidedGI": false,
-                "m_CustomRenderQueue": -1,
-                "stringTagMap": [],
-                "disabledShaderPasses": [],
-                "m_SavedProperties": {
-                  "m_TexEnvs": [
-                    [
-                      "_MainTex",
-                      {
-                        "m_Texture": {
-                          "m_FileID": 0,
-                          "m_PathID": "6953372967143582602"
-                        },
-                        "m_Scale": {
-                          "x": "f32:3f800000",
-                          "y": "f32:3f800000"
-                        },
-                        "m_Offset": {
-                          "x": "f32:00000000",
-                          "y": "f32:00000000"
-                        }
-                      }
-                    ]
-                  ],
-                  "m_Floats": [],
-                  "m_Colors": []
-                }
-              }
-            },
             "1": {
               "value": {
                 "m_Name": "skeletons",
                 "m_PreloadTable": [
                   {
                     "m_FileID": 1,
-                    "m_PathID": "2836002161295838472"
+                    "m_PathID": "6970923546142098320"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-7131139798766944344"
+                    "m_PathID": "-8290818795905785043"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-6611884490849265734"
+                    "m_PathID": "-7229480144051004739"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-1852063690586228334"
+                    "m_PathID": "-2008323714379738163"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-855389525845908331"
+                    "m_PathID": "-503895001522658334"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "542120497857268794"
+                    "m_PathID": "725241628798199336"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "2752546391946657863"
+                    "m_PathID": "4324604237648494512"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "6123937668407992546"
+                    "m_PathID": "5513626262038564703"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "6156046526923319559"
+                    "m_PathID": "5942635288720385282"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "7158710180139092467"
+                    "m_PathID": "7439797197168301120"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "7386864850103129242"
+                    "m_PathID": "7662959341084025174"
                   },
                   {
                     "m_FileID": 1,
-                    "m_PathID": "2836002161295838472"
+                    "m_PathID": "6970923546142098320"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-8711871650810432397"
+                    "m_PathID": "-7158473088829069515"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-5682223559032101155"
+                    "m_PathID": "-3066402172361777486"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-4723002142684471360"
+                    "m_PathID": "-2436819112266214100"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-3989560092750537133"
+                    "m_PathID": "-1333509663344946893"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-1932877445234084228"
+                    "m_PathID": "3371567080494119148"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-584234500017827719"
+                    "m_PathID": "5315214187593576875"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "277509492962494178"
+                    "m_PathID": "5543756143234216266"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "2697378233571512730"
+                    "m_PathID": "5549542331632818947"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "5390939337407389809"
+                    "m_PathID": "5854444970959251173"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "6515719544610970542"
+                    "m_PathID": "7662959341084025174"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "6953372967143582602"
+                    "m_PathID": "7750899617410324551"
                   },
                   {
                     "m_FileID": 0,
-                    "m_PathID": "7785771249082132946"
+                    "m_PathID": "8525246341372757875"
                   }
                 ],
                 "m_Container": [
@@ -22770,7 +22597,7 @@
                       "preloadSize": 11,
                       "asset": {
                         "m_FileID": 0,
-                        "m_PathID": "6156046526923319559"
+                        "m_PathID": "-8290818795905785043"
                       }
                     }
                   ],
@@ -22781,7 +22608,7 @@
                       "preloadSize": 13,
                       "asset": {
                         "m_FileID": 0,
-                        "m_PathID": "-3989560092750537133"
+                        "m_PathID": "7750899617410324551"
                       }
                     }
                   ]
@@ -22803,7 +22630,40 @@
                 "m_SceneHashes": []
               }
             },
-            "2697378233571512730": {
+            "3371567080494119148": {
+              "value": {
+                "m_Name": "SpineAtlasAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 86,
+                  "bytes[1]": 56,
+                  "bytes[2]": 112,
+                  "bytes[3]": 66,
+                  "bytes[4]": 134,
+                  "bytes[5]": 7,
+                  "bytes[6]": 55,
+                  "bytes[7]": 22,
+                  "bytes[8]": 20,
+                  "bytes[9]": 60,
+                  "bytes[10]": 194,
+                  "bytes[11]": 202,
+                  "bytes[12]": 88,
+                  "bytes[13]": 11,
+                  "bytes[14]": 80,
+                  "bytes[15]": 252
+                },
+                "m_ClassName": "SpineAtlasAsset",
+                "m_Namespace": "Spine.Unity",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "4324604237648494512": {
+              "value": {
+                "m_Name": "hero.atlas",
+                "m_Script": "hero.png\nsize:8,8\nfilter:Linear,Linear\nhead\nbounds:0,0,8,8\n\nhero2.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n"
+              }
+            },
+            "5315214187593576875": {
               "value": {
                 "m_GameObject": {
                   "m_FileID": 0,
@@ -22812,94 +22672,205 @@
                 "m_Enabled": 1,
                 "m_Script": {
                   "m_FileID": 0,
-                  "m_PathID": "7785771249082132946"
+                  "m_PathID": "3371567080494119148"
                 },
                 "m_Name": "imp_Atlas",
                 "atlasFile": {
                   "m_FileID": 0,
-                  "m_PathID": "277509492962494178"
+                  "m_PathID": "5549542331632818947"
                 },
                 "materials": [
                   {
                     "m_FileID": 0,
-                    "m_PathID": "-8711871650810432397"
+                    "m_PathID": "-3066402172361777486"
                   }
                 ]
               }
             },
-            "2752546391946657863": {
+            "5513626262038564703": {
+              "value": {
+                "m_Name": "hero2_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "6970923546142098320"
+                },
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "-503895001522658334"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
+              }
+            },
+            "5543756143234216266": {
+              "value": {
+                "m_Name": "imp-fx.atlas",
+                "m_Script": "\nimp-fx.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nspark\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n"
+              }
+            },
+            "5549542331632818947": {
+              "value": {
+                "m_Name": "imp.atlas",
+                "m_Script": "\nimp.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nbody\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n"
+              }
+            },
+            "5854444970959251173": {
+              "value": {
+                "m_Name": "imp",
+                "m_Script": "{\"skeleton\":{\"hash\":\"uarimp\",\"spine\":\"3.8.99\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"},{\"name\":\"spark\",\"bone\":\"root\",\"attachment\":\"spark\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}},\"spark\":{\"spark\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
+              }
+            },
+            "5942635288720385282": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "725241628798199336"
+                },
+                "m_Name": "hero_Atlas",
+                "textureLoadingMode": 0,
+                "onDemandTextureLoader": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "atlasFile": {
+                  "m_FileID": 0,
+                  "m_PathID": "4324604237648494512"
+                },
+                "materials": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "7439797197168301120"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "5513626262038564703"
+                  }
+                ]
+              }
+            },
+            "725241628798199336": {
               "value": {
                 "m_Name": "SpineAtlasAsset",
                 "m_ExecutionOrder": 0,
                 "m_PropertiesHash": {
-                  "bytes[0]": 31,
-                  "bytes[1]": 127,
-                  "bytes[2]": 26,
-                  "bytes[3]": 83,
-                  "bytes[4]": 99,
-                  "bytes[5]": 74,
-                  "bytes[6]": 82,
-                  "bytes[7]": 26,
-                  "bytes[8]": 126,
-                  "bytes[9]": 226,
-                  "bytes[10]": 213,
-                  "bytes[11]": 99,
-                  "bytes[12]": 68,
-                  "bytes[13]": 51,
-                  "bytes[14]": 230,
-                  "bytes[15]": 44
+                  "bytes[0]": 159,
+                  "bytes[1]": 228,
+                  "bytes[2]": 57,
+                  "bytes[3]": 56,
+                  "bytes[4]": 59,
+                  "bytes[5]": 39,
+                  "bytes[6]": 76,
+                  "bytes[7]": 54,
+                  "bytes[8]": 2,
+                  "bytes[9]": 132,
+                  "bytes[10]": 97,
+                  "bytes[11]": 6,
+                  "bytes[12]": 75,
+                  "bytes[13]": 26,
+                  "bytes[14]": 125,
+                  "bytes[15]": 18
                 },
                 "m_ClassName": "SpineAtlasAsset",
                 "m_Namespace": "Spine.Unity.OnDemand",
                 "m_AssemblyName": "Assembly-CSharp.dll"
               }
             },
-            "277509492962494178": {
+            "7439797197168301120": {
               "value": {
-                "m_Name": "imp.atlas",
-                "m_Script": "\nimp.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nbody\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n"
+                "m_Name": "hero_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "6970923546142098320"
+                },
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "-2008323714379738163"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
               }
             },
-            "5390939337407389809": {
+            "7662959341084025174": {
               "value": {
                 "m_Name": "SkeletonDataAsset",
                 "m_ExecutionOrder": 0,
                 "m_PropertiesHash": {
-                  "bytes[0]": 206,
-                  "bytes[1]": 227,
-                  "bytes[2]": 3,
-                  "bytes[3]": 244,
-                  "bytes[4]": 7,
-                  "bytes[5]": 20,
-                  "bytes[6]": 193,
-                  "bytes[7]": 238,
-                  "bytes[8]": 121,
-                  "bytes[9]": 163,
-                  "bytes[10]": 243,
-                  "bytes[11]": 104,
-                  "bytes[12]": 117,
-                  "bytes[13]": 232,
-                  "bytes[14]": 166,
-                  "bytes[15]": 86
+                  "bytes[0]": 162,
+                  "bytes[1]": 206,
+                  "bytes[2]": 228,
+                  "bytes[3]": 66,
+                  "bytes[4]": 239,
+                  "bytes[5]": 240,
+                  "bytes[6]": 250,
+                  "bytes[7]": 1,
+                  "bytes[8]": 92,
+                  "bytes[9]": 159,
+                  "bytes[10]": 234,
+                  "bytes[11]": 67,
+                  "bytes[12]": 151,
+                  "bytes[13]": 1,
+                  "bytes[14]": 232,
+                  "bytes[15]": 102
                 },
                 "m_ClassName": "SkeletonDataAsset",
                 "m_Namespace": "Spine.Unity",
                 "m_AssemblyName": "Assembly-CSharp.dll"
               }
             },
-            "542120497857268794": {
-              "value": {
-                "m_Name": "hero",
-                "m_Script": "{\"skeleton\":{\"hash\":\"uarhero\",\"spine\":\"4.2.00\",\"x\":-4,\"y\":0,\"width\":8,\"height\":16},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"head\",\"bone\":\"root\",\"attachment\":\"head\"},{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"head\":{\"head\":{\"y\":12,\"width\":8,\"height\":8}},\"body\":{\"body\":{\"y\":4,\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
-              }
-            },
-            "6123937668407992546": {
-              "value": {
-                "m_Name": "hero.atlas",
-                "m_Script": "hero.png\nsize:8,8\nfilter:Linear,Linear\nhead\nbounds:0,0,8,8\n\nhero2.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n"
-              }
-            },
-            "6156046526923319559": {
+            "7750899617410324551": {
               "value": {
                 "m_GameObject": {
                   "m_FileID": 0,
@@ -22908,19 +22879,27 @@
                 "m_Enabled": 1,
                 "m_Script": {
                   "m_FileID": 0,
-                  "m_PathID": "-7131139798766944344"
+                  "m_PathID": "7662959341084025174"
                 },
-                "m_Name": "hero_SkeletonData",
+                "m_Name": "imp_SkeletonData",
                 "atlasAssets": [
                   {
                     "m_FileID": 0,
-                    "m_PathID": "7386864850103129242"
+                    "m_PathID": "5315214187593576875"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-7158473088829069515"
                   }
                 ],
                 "scale": "f32:3c23d70a",
                 "skeletonJSON": {
                   "m_FileID": 0,
-                  "m_PathID": "542120497857268794"
+                  "m_PathID": "5854444970959251173"
                 },
                 "isUpgradingBlendModeMaterials": 0,
                 "blendModeMaterials": {
@@ -22931,41 +22910,17 @@
                   "screenMaterials": []
                 },
                 "skeletonDataModifiers": [],
-                "fromAnimation": ["idle"],
-                "toAnimation": ["idle"],
-                "duration": ["f32:3e4ccccd"],
-                "defaultMix": "f32:3dcccccd",
+                "fromAnimation": [],
+                "toAnimation": [],
+                "duration": [],
+                "defaultMix": "f32:00000000",
                 "controller": {
                   "m_FileID": 0,
                   "m_PathID": "0"
                 }
               }
             },
-            "6515719544610970542": {
-              "value": {
-                "m_GameObject": {
-                  "m_FileID": 0,
-                  "m_PathID": "0"
-                },
-                "m_Enabled": 1,
-                "m_Script": {
-                  "m_FileID": 0,
-                  "m_PathID": "7785771249082132946"
-                },
-                "m_Name": "imp-fx_Atlas",
-                "atlasFile": {
-                  "m_FileID": 0,
-                  "m_PathID": "-4723002142684471360"
-                },
-                "materials": [
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "-1932877445234084228"
-                  }
-                ]
-              }
-            },
-            "6953372967143582602": {
+            "8525246341372757875": {
               "value": {
                 "m_Name": "imp",
                 "m_ForcedFallbackFormat": 4,
@@ -22999,152 +22954,34 @@
                   "path": "archive:/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1/CAB-3bfd4c79ed1e0e60e47036ff17aac9b1.resS"
                 }
               }
-            },
-            "7158710180139092467": {
-              "value": {
-                "m_Name": "hero2_Material",
-                "m_Shader": {
-                  "m_FileID": 1,
-                  "m_PathID": "2836002161295838472"
-                },
-                "m_ShaderKeywords": "",
-                "m_LightmapFlags": 4,
-                "m_EnableInstancingVariants": false,
-                "m_DoubleSidedGI": false,
-                "m_CustomRenderQueue": -1,
-                "stringTagMap": [],
-                "disabledShaderPasses": [],
-                "m_SavedProperties": {
-                  "m_TexEnvs": [
-                    [
-                      "_MainTex",
-                      {
-                        "m_Texture": {
-                          "m_FileID": 0,
-                          "m_PathID": "-1852063690586228334"
-                        },
-                        "m_Scale": {
-                          "x": "f32:3f800000",
-                          "y": "f32:3f800000"
-                        },
-                        "m_Offset": {
-                          "x": "f32:00000000",
-                          "y": "f32:00000000"
-                        }
-                      }
-                    ]
-                  ],
-                  "m_Floats": [],
-                  "m_Colors": []
-                }
-              }
-            },
-            "7386864850103129242": {
-              "value": {
-                "m_GameObject": {
-                  "m_FileID": 0,
-                  "m_PathID": "0"
-                },
-                "m_Enabled": 1,
-                "m_Script": {
-                  "m_FileID": 0,
-                  "m_PathID": "2752546391946657863"
-                },
-                "m_Name": "hero_Atlas",
-                "textureLoadingMode": 0,
-                "onDemandTextureLoader": {
-                  "m_FileID": 0,
-                  "m_PathID": "0"
-                },
-                "atlasFile": {
-                  "m_FileID": 0,
-                  "m_PathID": "6123937668407992546"
-                },
-                "materials": [
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "-855389525845908331"
-                  },
-                  {
-                    "m_FileID": 0,
-                    "m_PathID": "7158710180139092467"
-                  }
-                ]
-              }
-            },
-            "7785771249082132946": {
-              "value": {
-                "m_Name": "SpineAtlasAsset",
-                "m_ExecutionOrder": 0,
-                "m_PropertiesHash": {
-                  "bytes[0]": 86,
-                  "bytes[1]": 56,
-                  "bytes[2]": 112,
-                  "bytes[3]": 66,
-                  "bytes[4]": 134,
-                  "bytes[5]": 7,
-                  "bytes[6]": 55,
-                  "bytes[7]": 22,
-                  "bytes[8]": 20,
-                  "bytes[9]": 60,
-                  "bytes[10]": 194,
-                  "bytes[11]": 202,
-                  "bytes[12]": 88,
-                  "bytes[13]": 11,
-                  "bytes[14]": 80,
-                  "bytes[15]": 252
-                },
-                "m_ClassName": "SpineAtlasAsset",
-                "m_Namespace": "Spine.Unity",
-                "m_AssemblyName": "Assembly-CSharp.dll"
-              }
             }
           },
           "names": {
-            "-1852063690586228334": "hero2",
-            "-1932877445234084228": "imp-fx_Material",
-            "-3989560092750537133": "imp_SkeletonData",
-            "-4723002142684471360": "imp-fx.atlas",
-            "-5682223559032101155": "imp-fx",
-            "-584234500017827719": "imp",
-            "-6611884490849265734": "hero",
-            "-7131139798766944344": "SkeletonDataAsset",
-            "-855389525845908331": "hero_Material",
-            "-8711871650810432397": "imp_Material",
+            "-1333509663344946893": "imp-fx_Material",
+            "-2008323714379738163": "hero",
+            "-2436819112266214100": "imp-fx",
+            "-3066402172361777486": "imp_Material",
+            "-503895001522658334": "hero2",
+            "-7158473088829069515": "imp-fx_Atlas",
+            "-7229480144051004739": "hero",
+            "-8290818795905785043": "hero_SkeletonData",
             "1": "skeletons",
-            "2697378233571512730": "imp_Atlas",
-            "2752546391946657863": "SpineAtlasAsset",
-            "277509492962494178": "imp.atlas",
-            "5390939337407389809": "SkeletonDataAsset",
-            "542120497857268794": "hero",
-            "6123937668407992546": "hero.atlas",
-            "6156046526923319559": "hero_SkeletonData",
-            "6515719544610970542": "imp-fx_Atlas",
-            "6953372967143582602": "imp",
-            "7158710180139092467": "hero2_Material",
-            "7386864850103129242": "hero_Atlas",
-            "7785771249082132946": "SpineAtlasAsset"
+            "3371567080494119148": "SpineAtlasAsset",
+            "4324604237648494512": "hero.atlas",
+            "5315214187593576875": "imp_Atlas",
+            "5513626262038564703": "hero2_Material",
+            "5543756143234216266": "imp-fx.atlas",
+            "5549542331632818947": "imp.atlas",
+            "5854444970959251173": "imp",
+            "5942635288720385282": "hero_Atlas",
+            "725241628798199336": "SpineAtlasAsset",
+            "7439797197168301120": "hero_Material",
+            "7662959341084025174": "SkeletonDataAsset",
+            "7750899617410324551": "imp_SkeletonData",
+            "8525246341372757875": "imp"
           },
           "textures": {
-            "-1852063690586228334": {
-              "name": "hero2",
-              "format": 4,
-              "width": 8,
-              "height": 8,
-              "imageSize": 256,
-              "imageSha256": "a9c178fb769c1b92fae11cde1ab6d3d87f4cdf4cccd127fe7417ac06766a5805",
-              "rgbaSha256": "a9c178fb769c1b92fae11cde1ab6d3d87f4cdf4cccd127fe7417ac06766a5805"
-            },
-            "-5682223559032101155": {
-              "name": "imp-fx",
-              "format": 4,
-              "width": 8,
-              "height": 8,
-              "imageSize": 256,
-              "imageSha256": "8c737858792aefc1cd5388190cd259caaa84aa4eb719ccca047ca72a6ae7c30c",
-              "rgbaSha256": "8c737858792aefc1cd5388190cd259caaa84aa4eb719ccca047ca72a6ae7c30c"
-            },
-            "-6611884490849265734": {
+            "-2008323714379738163": {
               "name": "hero",
               "format": 4,
               "width": 8,
@@ -23153,7 +22990,25 @@
               "imageSha256": "0570f241ddbc935fb20f6f57c06621ae3a01c319bf4a0ef960aa1352b1281bf5",
               "rgbaSha256": "0570f241ddbc935fb20f6f57c06621ae3a01c319bf4a0ef960aa1352b1281bf5"
             },
-            "6953372967143582602": {
+            "-2436819112266214100": {
+              "name": "imp-fx",
+              "format": 4,
+              "width": 8,
+              "height": 8,
+              "imageSize": 256,
+              "imageSha256": "8c737858792aefc1cd5388190cd259caaa84aa4eb719ccca047ca72a6ae7c30c",
+              "rgbaSha256": "8c737858792aefc1cd5388190cd259caaa84aa4eb719ccca047ca72a6ae7c30c"
+            },
+            "-503895001522658334": {
+              "name": "hero2",
+              "format": 4,
+              "width": 8,
+              "height": 8,
+              "imageSize": 256,
+              "imageSha256": "a9c178fb769c1b92fae11cde1ab6d3d87f4cdf4cccd127fe7417ac06766a5805",
+              "rgbaSha256": "a9c178fb769c1b92fae11cde1ab6d3d87f4cdf4cccd127fe7417ac06766a5805"
+            },
+            "8525246341372757875": {
               "name": "imp",
               "format": 4,
               "width": 8,
@@ -23169,12 +23024,12 @@
         {
           "path": "assets/fixtures/spine/hero_skeletondata.asset",
           "file": "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1",
-          "pathId": "6156046526923319559"
+          "pathId": "-8290818795905785043"
         },
         {
           "path": "assets/fixtures/spine/imp_skeletondata.asset",
           "file": "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1",
-          "pathId": "-3989560092750537133"
+          "pathId": "7750899617410324551"
         }
       ]
     },

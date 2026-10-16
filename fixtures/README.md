@@ -118,9 +118,9 @@ downscale.
 
 2019.4.41f2 also has `spine/lz4/skeletons`, `spine/lz4/ondemand` and
 `spine/lz4-notypetree/skeletons` (LZ4, #238): Spine skeletons as spine-unity
-stores them, made with stub scripts of spine-unity's serialized fields and a
-skeleton JSON and atlas text written for them. Two skeletons, one per atlas
-layout (3.8 to 4.2, and 4.1+ with on-demand texture loading compiled in), with
+stores them, made with our own stub scripts that serialize the same fields, and
+a skeleton JSON and atlas text written for them. Two skeletons, one per atlas
+layout (3.8 and 4.0, and 4.1+, which compiles in on-demand texture loading), with
 two atlases and a null entry, or one atlas of two pages; a third whose atlas
 loads its textures on demand; and the first bundle again without type trees.
 The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 18
