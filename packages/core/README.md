@@ -358,7 +358,7 @@ Each of these throws `UnsupportedError` naming what it found:
   (AssetStudio throws for each). `readMesh()` still reads its fields.
 
 Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
-image encoding (PNG, JPEG). Texture and sprite pixels are in
+image encoding. Texture and sprite pixels, and PNG encoding, are in
 [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md).
 
 ## Requirements

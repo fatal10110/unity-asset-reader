@@ -57,8 +57,9 @@ for await (const { rgba, width, height, path, name, formatName } of images(env))
 
 The bytes don't have to come from disk: when they come from an upload or a download, skip
 `unity-asset-reader-node` and call `load(bytes)` (`bytes` is a `Uint8Array` or an `ArrayBuffer`;
-a `Buffer` is a `Uint8Array` too), or `await open(url)` to fetch them. No package here writes image files; to save a PNG, hand the
-RGBA to an image library, for example
+a `Buffer` is a `Uint8Array` too), or `await open(url)` to fetch them. To save a PNG,
+`encodePng({ data: rgba, width, height })` from `unity-asset-reader-texture` returns the file's
+bytes, uncompressed; for smaller files hand the RGBA to an image library, for example
 `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
 ### Browser
@@ -169,7 +170,7 @@ Each of these throws `UnsupportedError`, naming what it found:
   bank (`AudioClip`s from before Unity 5.0).
 
 Not provided at all: decoding video; exporting meshes (OBJ, glTF); mip levels other than the first; the
-`Cubemap`, `Texture2DArray` and `Texture3D` classes; image encoding (PNG, JPEG); writing or
+`Cubemap`, `Texture2DArray` and `Texture3D` classes; JPEG encoding; writing or
 repacking bundles.
 
 ## Development

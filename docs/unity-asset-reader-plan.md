@@ -219,7 +219,7 @@ Each item that brings a decoder or writer ships as its own package on top of cor
 
 ## 7. Explicitly not doing
 
-C#→WASM, FBX, Mono.Cecil DLL reflection, YAML export, LZMA/LZ4 *compression*, repacking/writing bundles, brotli, LZHAM, UnityArchive, GUI, multi-threading, PNG/JPEG encoding.
+C#→WASM, FBX, Mono.Cecil DLL reflection, YAML export, LZMA/LZ4 *compression*, repacking/writing bundles, brotli, LZHAM, UnityArchive, GUI, multi-threading, JPEG encoding. (PNG encoding left this list with #234, see the 2026-10-16c revision.)
 
 **Core to 1.0: ~16–21 working days.**
 
@@ -267,3 +267,5 @@ Revision 2026-10-06 (#153, PR #227, maintainer decision): a second Apache-2.0 ex
 Revision 2026-10-16 (#235, PR #243, maintainer decision): **Unity 2019.1 is the supported floor.** The M2 format-version claim said parse code is ported for all versions upstream handles; it now holds for the container, SerializedFile and type tree code and for the class readers already shipped, which keep their older paths (nothing is removed). A class reader added from now on (`Mesh`, #235; `Shader`, #237) ports only the 2019.1+ layouts of its class and refuses an older version with `UnsupportedError` (kind `"Unity version"`); `readTypeTree()` still reads such an object from its type tree.
 
 Revision 2026-10-16b (#233, maintainer decision): AssetStudio at `c37af7d`, executed outside the repo (R2), is the golden oracle for **export output** (images, models, audio, shader text), since it is already the behavior source of truth and section 15 of `fixtures/BUILDING.md` already runs its pinned methods in an external .NET 8 harness (#221, #230). UnityPy stays the oracle for parsing goldens and names and checks the harness inputs. `scripts/make-export-goldens.py` is the one entry point; it writes `fixtures/assetstudio-export-goldens.json` (PNG pixels, OBJ and WAV hashes and sizes), each entry matched on the UnityPy input metadata as `make-goldens.py` matches its cross-checks. Shader text has no fixture yet and is left to #52. The header, §5, the §6 oracle risk row and R12 name the harness. Replaces §5's "use [AssetStudio] only to cross-check disagreements, not in the harness".
+
+Revision 2026-10-16c (#234, maintainer decision): **PNG encoding is in scope**; §7 keeps only JPEG encoding. `unity-asset-reader-texture` exports `encodePng(image)`, an RGBA8 `RgbaImage` (top row first) to a PNG file. It stays sync (D4) and browser-safe (D3, R4), so `CompressionStream` is out, and it adds no dependency (§1, R8): the zlib stream holds stored deflate blocks, so the file is about the size of the raw pixels, and callers who want smaller files keep using an image library. D5 is unchanged: core encodes nothing. Tested against AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json` (2026-10-16b), pixels compared, not file bytes.

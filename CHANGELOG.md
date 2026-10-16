@@ -123,6 +123,16 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ## unity-asset-reader-texture
 
+### 1.2.0 - Unreleased
+
+- New `encodePng(image)`: an `RgbaImage` (RGBA8, top row first, as `decodeTexture2D` and
+  `decodeSprite` return it; a `decodeImage` result as `{ data: rgba, width, height }`) to a PNG
+  file, 8-bit RGBA, filter type 0. Sync, browser-safe and without a dependency: the zlib stream
+  holds stored (uncompressed) deflate blocks, so the file is about as large as the pixels. A 0x0
+  image, such as a dynamic font's "Font Texture", has no PNG and is refused with `RangeError`, as
+  is data that is not `width * height * 4` bytes. Tested on every fixture Texture2D AssetStudio
+  exports (88): the PNG's pixels equal AssetStudio c37af7d's PNG export's (#233, #234).
+
 ### 1.1.0 - 2026-10-16
 
 - Decode the sprites a Unity 6000.6 `SpriteAtlas` holds itself
