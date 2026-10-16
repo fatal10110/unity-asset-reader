@@ -16,7 +16,7 @@ You do not need Unity, .NET, or a native application installed.
 | Read bundles and their assets | `unity-asset-reader` |
 | Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
 | Load files or folders from disk | Add `unity-asset-reader-node` |
-| Export meshes as OBJ | Add `unity-asset-reader-mesh` |
+| Export meshes as OBJ or glTF | Add `unity-asset-reader-mesh` |
 | Convert audio clips to WAV | Add `unity-asset-reader-audio` |
 | Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
 | Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
@@ -31,7 +31,7 @@ The texture package installs `texture2ddecoder-wasm` automatically.
 - **[Node.js](packages/node/README.md):** load a file or folder with `loadPath()`, including
   split bundles and resource sidecars.
 - **[Meshes](packages/mesh/README.md):** write a `Mesh` as Wavefront OBJ text with
-  `meshToObj()`, as AssetStudio exports it.
+  `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`.
 - **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
   `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound (not Vorbis).
 - **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
@@ -108,7 +108,7 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-texture`](packages/texture/README.md): texture formats, sprites,
     platforms.
   - [`unity-asset-reader-node`](packages/node/README.md): `loadPath()`.
-  - [`unity-asset-reader-mesh`](packages/mesh/README.md): `meshToObj()`.
+  - [`unity-asset-reader-mesh`](packages/mesh/README.md): `meshToObj()`, `meshToGltf()`.
   - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
   - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
   - [`unity-asset-reader-shader`](packages/shader/README.md): `shaderToText()`.
@@ -187,7 +187,7 @@ Each of these throws `UnsupportedError`, naming what it found:
   variants in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.2 and later, Unity 6), and `Int`
   properties, on which AssetStudio fails too.
 
-Not provided at all: decoding video; exporting meshes (OBJ, glTF); mip levels other than the first; the
+Not provided at all: decoding video; exporting models as FBX; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; JPEG encoding; writing or
 repacking bundles.
 

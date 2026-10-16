@@ -64,7 +64,7 @@ packages/
     src/         index.ts   fs + dir scan + sidecar resolution
     tests/
   mesh/                 npm: unity-asset-reader-mesh     isomorphic; deps: core (peer)   (M6, #239)
-    src/         obj.ts (OBJ writer) float.ts (.NET float text) index.ts
+    src/         obj.ts (OBJ writer) gltf.ts (glTF .glb writer) float.ts (.NET float text) index.ts
     tests/
   audio/                npm: unity-asset-reader-audio    isomorphic, sync; deps: core (peer)   (M6, #236)
     src/         fsb5.ts adpcm.ts wav.ts index.ts   FSB5 → WAV

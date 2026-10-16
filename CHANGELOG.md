@@ -252,6 +252,12 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 - `meshToObj(mesh)`: a decoded mesh as Wavefront OBJ text, byte for byte what AssetStudio's
   `ExportMesh` writes, floats written as .NET writes them under en-US. Equal to AssetStudio's OBJ
   for the 12 fixture meshes (#239).
+- `meshToGltf(mesh)`: a decoded mesh as a binary glTF 2.0 file (`.glb`): positions, normals,
+  tangents, UV0 and colours, a triangle primitive per submesh, 16- or 32-bit indices. Its
+  positions, normals and indices are the OBJ's; the Khronos glTF validator accepts it for the 12
+  fixture meshes and for meshes built in the tests (#240). An attribute holding values glTF
+  forbids is left out for the whole mesh: `NORMAL` with a non-unit normal, `TANGENT` with a
+  non-unit tangent, a w other than ±1 or no normals, `COLOR_0` with a component outside 0 to 1.
 
 ## unity-asset-reader-audio
 

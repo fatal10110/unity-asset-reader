@@ -1,7 +1,7 @@
 {
   "name": "unity-asset-reader-mesh",
   "version": "0.0.0",
-  "description": "Mesh export for unity-asset-reader: Wavefront OBJ, as AssetStudio writes it.",
+  "description": "Mesh export for unity-asset-reader: Wavefront OBJ, as AssetStudio writes it, and glTF 2.0 (.glb).",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -31,12 +31,15 @@
     "mesh",
     "obj",
     "wavefront",
+    "gltf",
+    "glb",
     "browser"
   ],
   "peerDependencies": {
     "unity-asset-reader": "^1.2.0"
   },
   "devDependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
     "unity-asset-reader": "*"
   },
   "repository": {

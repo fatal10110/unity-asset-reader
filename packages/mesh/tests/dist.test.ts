@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
@@ -15,12 +15,29 @@ test("emits dist/index.mjs, dist/index.cjs and dist/index.d.ts", () => {
   }
 });
 
-test("the ESM entry point exports meshToObj via import()", async () => {
-  assert.equal(typeof (await import(dist("index.mjs"))).meshToObj, "function");
+test("the ESM entry point exports meshToObj and meshToGltf via import()", async () => {
+  const entry = await import(dist("index.mjs"));
+  assert.equal(typeof entry.meshToObj, "function");
+  assert.equal(typeof entry.meshToGltf, "function");
 });
 
-test("the CJS entry point exports meshToObj via require()", () => {
-  assert.equal(typeof require(dist("index.cjs")).meshToObj, "function");
+test("the CJS entry point exports meshToObj and meshToGltf via require()", () => {
+  const entry = require(dist("index.cjs"));
+  assert.equal(typeof entry.meshToObj, "function");
+  assert.equal(typeof entry.meshToGltf, "function");
+});
+
+test("gltf-validator is for the tests only: not a dependency, not in dist", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.deepEqual(manifest.dependencies, undefined);
+  assert.deepEqual(manifest.optionalDependencies, undefined);
+  assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^1.2.0" });
+  assert.ok(manifest.devDependencies["gltf-validator"]);
+  for (const file of ["index.mjs", "index.cjs", "index.d.ts"]) {
+    const text = readFileSync(dist(file), "utf8");
+    // Names only the validator's code holds (comments here mention the validator).
+    assert.doesNotMatch(text, /gltf[-_]validator|validateBytes|\bdart\b/i, `dist/${file}`);
+  }
 });
 
 test("the published tarball holds dist, LICENSE, NOTICE and README only", () => {
