@@ -12,6 +12,7 @@ import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.
 import { readAssetBundle, type AssetBundle } from "./AssetBundle.js";
 import { readMaterial, type Material } from "./Material.js";
 import { readMeshData, type MeshData } from "./Mesh.js";
+import { readShader, type Shader } from "./Shader.js";
 import { readTexture2D, type Texture2D } from "./Texture2D.js";
 import { readMonoBehaviour, type MonoBehaviour } from "./MonoBehaviour.js";
 import { readMonoScript, type MonoScript } from "./MonoScript.js";
@@ -31,6 +32,7 @@ import {
   toMonoBehaviourFields,
   toMonoScriptFields,
   toMovieTextureFields,
+  toShaderFields,
   toSpriteAtlasFields,
   toSpriteFields,
   toTextAssetFields,
@@ -44,6 +46,7 @@ import {
   type MonoBehaviourFields,
   type MonoScriptFields,
   type MovieTextureFields,
+  type ShaderFields,
   type SpriteAtlasFields,
   type SpriteFields,
   type TextAssetFields,
@@ -102,6 +105,7 @@ export interface ObjectDataMap {
   MonoScript: MonoScript;
   MonoBehaviour: MonoBehaviourData;
   Material: Material;
+  Shader: Shader;
   AudioClip: AudioClipData;
   Font: Font;
   VideoClip: VideoClipData;
@@ -124,6 +128,7 @@ export interface AssetDataMap {
   MonoScript: MonoScriptFields;
   MonoBehaviour: MonoBehaviourFields;
   Material: MaterialFields;
+  Shader: ShaderFields;
   AudioClip: AudioClipFields;
   Font: FontFields;
   VideoClip: VideoClipFields;
@@ -167,6 +172,7 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   MonoScript: readMonoScript,
   MonoBehaviour: readMonoBehaviourData,
   Material: readMaterial,
+  Shader: readShader,
   AudioClip: readAudioClipData,
   Font: readFont,
   VideoClip: readVideoClipData,
@@ -240,6 +246,7 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   MonoScript: toMonoScriptFields,
   MonoBehaviour: toMonoBehaviourFields,
   Material: toMaterialFields,
+  Shader: toShaderFields,
   AudioClip: toAudioClipFields,
   Font: toFontFields,
   VideoClip: toVideoClipFields,

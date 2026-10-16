@@ -1,5 +1,5 @@
 // spineSkeletons (#238) on the spine fixtures of fixtures/BUILDING.md section
-// 18: the grouping against the table written there before the build, the
+// 19: the grouping against the table written there before the build, the
 // TextAsset bytes and page pixels against AssetStudio's export goldens (#233,
 // R12). AssetStudio has no Spine export, so there is no oracle for the
 // grouping itself.
@@ -45,13 +45,13 @@ interface Row {
   pages: string[];
 }
 
-/** The grouping table of fixtures/BUILDING.md section 18, one row per atlas. */
+/** The grouping table of fixtures/BUILDING.md section 19, one row per atlas. */
 function buildingTable(): Row[] {
   const doc = readFileSync(new URL("../../../fixtures/BUILDING.md", import.meta.url), "utf8");
-  const section = doc.split(/^## 18\. /m)[1]?.split(/^## /m)[0];
-  assert.ok(section, "fixtures/BUILDING.md has no section 18");
+  const section = doc.split(/^## 19\. /m)[1]?.split(/^## /m)[0];
+  assert.ok(section, "fixtures/BUILDING.md has no section 19");
   const lines = section.split("\n").filter((line) => line.startsWith("| `"));
-  assert.ok(lines.length > 0, "section 18 has no grouping table");
+  assert.ok(lines.length > 0, "section 19 has no grouping table");
   return lines.map((line) => {
     const cells = line
       .split("|")

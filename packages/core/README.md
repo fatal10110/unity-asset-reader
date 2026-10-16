@@ -268,6 +268,7 @@ readers keep the older layouts they already had.
 | `MonoBehaviour` (`MonoBehaviourFields`) | `script` (the `MonoScript` pointer), `gameObject`, `enabled`, `name`, and `fields`: every field of the script, with a type tree only | Any | Yes |
 | `MonoScript` (`MonoScriptFields`) | `className`, `namespace`, `assemblyName` | 3.4 | Yes |
 | `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
+| `Shader` (`ShaderFields`) | `parsedForm`: the parsed ShaderLab (`name`, properties, sub-shaders, passes, render state, keywords, each variant's parameters); `platforms` and `compressedBlob`: every platform's compiled programs, LZ4-compressed, not decoded | 2019.1 | 2019.4, 2020.3, 6000.3.26f1, 6000.6 |
 | `Texture2D` (`Texture2DFields`) | `width`, `height`, `format` (a `TextureFormat`), `mipCount`, `textureSettings`, `platform` and `imageData`, still encoded (inline or from the `.resS`). Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | Any (gates from 2.6; tested from 3.4) | Yes |
 | `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3, 6000.6 |
 | `SpriteAtlas` (`SpriteAtlasFields`) | `renderDataMap`; before 6000.6 also `packedSprites`, from 6000.6 each entry holds its sprite instead (`spriteInstanceData`: name, rect, pivot, border, mesh) | 2017.1 | 2019.4, 6000.3, 6000.6 |
@@ -288,6 +289,7 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 |---|---|
 | **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
 | **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
+| **Tested** `Shader` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: DX11, GLES3 and Vulkan builds, and Metal from 2020.3 and 6000.3, against `readTypeTree()`; every Shader layout from 2019.1 to 6000.6 against UnityPy's reading of a synthetic object |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
@@ -324,6 +326,7 @@ and throws `UnsupportedError` (kind `"Unity version"`) otherwise:
 | `MonoBehaviour` | Read |
 | `MonoScript` | Refused |
 | `Material` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Shader` | Read in format 21 (Unity 2019.3 and 2019.4), refused otherwise |
 | `Texture2D` | Refused |
 | `Sprite` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `SpriteAtlas` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
@@ -351,8 +354,8 @@ Each of these throws `UnsupportedError` naming what it found:
   version-stripped file where the bytes do not decide the layout
   ([Version-stripped files](#version-stripped-files)). `readTypeTree()` still works on such files.
 - An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
-  `MonoScript`, `MonoBehaviour`, `Sprite`, `SpriteAtlas`, `AudioClip` or `Mesh`, or by `Material`'s
-  from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
+  `MonoScript`, `MonoBehaviour`, `Shader`, `Sprite`, `SpriteAtlas`, `AudioClip` or `Mesh`, or by
+  `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
 - A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
   format Unity does not define, bone weights in an integer format or more than four per vertex
   (AssetStudio throws for each). `readMesh()` still reads its fields.
@@ -420,6 +423,7 @@ Call one yourself only to read an object as a specific class.
 | `readMonoScript` | `MonoScript`, `Hash128` |
 | `readMonoBehaviour` | `MonoBehaviour` (the header); `MonoBehaviourData` is what `obj.read()` returns |
 | `readMaterial` | `Material`, `UnityPropertySheet`, `UnityTexEnv`, `BuildTextureStackReference`, `Color`, `Vector2` |
+| `readShader` | `Shader`, `SerializedShader`, `SerializedProperty`, `SerializedTextureProperty`, `SerializedSubShader`, `SerializedPass`, `SerializedTagMap`, `SerializedShaderState`, `SerializedShaderRTBlendState`, `SerializedStencilOp`, `SerializedShaderFloatValue`, `SerializedShaderVectorValue`, `SerializedProgram`, `SerializedSubProgram`, `SerializedPlayerSubProgram`, `ParserBindChannels`, `ShaderBindChannel`, `ProgramParameters`, `VectorParameter`, `MatrixParameter`, `StructParameter`, `TextureParameter`, `BufferBinding`, `ConstantBuffer`, `UAVParameter`, `SamplerParameter`, `Binding` |
 | `readTexture`, `readTexture2D`, `TextureFormat` | `Texture`, `Texture2D`, `StreamingInfo`, `GLTextureSettings`; `Texture2DData` is what `obj.read()` returns |
 | `readSprite`, `SpritePackingRotation` | `Sprite`, `SpriteRenderData`, `SpriteVertex`, `SpriteBone`, `SecondarySpriteTexture`, `VertexData`, `ChannelInfo`, `SubMesh`, `BlendShapeData`, `BlendShapeVertex`, `MeshBlendShape`, `MeshBlendShapeChannel`, `BoneWeights4`, `AABB`, `Matrix4x4`, `Vector4`, `GUID` |
 | `readSpriteAtlas` | `SpriteAtlas`, `SpriteAtlasData`, `SpriteInstanceData` |
@@ -436,7 +440,7 @@ it; `env.assets()` calls them for you.
 
 | Export | Result types |
 |---|---|
-| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
+| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toShaderFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `ShaderFields` (`SerializedShaderFields`, `SerializedPropertyFields`, `SerializedSubShaderFields`, `SerializedPassFields`, `SerializedShaderStateFields`, `SerializedProgramFields`, `SerializedSubProgramFields`, `SerializedPlayerSubProgramFields`, `ProgramParametersFields`, `VectorParameterFields`, `MatrixParameterFields`, `StructParameterFields`, `TextureParameterFields`, `BufferBindingFields`, `ConstantBufferFields`, `UAVParameterFields`, `SamplerParameterFields`, `BindingFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
 | `toMonoBehaviourFields(data, obj)` | `MonoBehaviourFields`; it takes the object too, whose type tree tells whether `data` holds the script's fields |
 | `EditorExtensionFields`, `NamedObjectFields`, `TextureFields` | The fields every class, every named class and every texture starts with |
 

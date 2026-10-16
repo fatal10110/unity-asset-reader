@@ -78,9 +78,12 @@ def packed_sprite_goldens(path):
 def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
-    textures, atlases = [], []
+    textures, atlases, shaders = [], [], []
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
+        if obj.type.name == "Shader":
+            tree = obj.read_typetree()
+            shaders.append({"name": tree["m_ParsedForm"]["m_Name"], "platforms": tree["platforms"]})
         if obj.type.name == "Texture2D" and "/more-plain/" in name:
             texture = obj.read()
             raw = bytes(texture.get_image_data())
@@ -102,6 +105,11 @@ def evidence(name, path):
                 assert all(entry["downscaleMultiplier"] == 0.5 for entry in entries)
             atlases.append({"name": tree["m_Name"], "isVariant": tree["m_IsVariant"],
                             "sprites": entries})
+    if "/shader/" in name:
+        assert sorted(s["name"] for s in shaders) == ["UAR/ShaderFixture", "UAR/ShaderFixtureSecond"]
+        want = [4] if name.endswith("/windows") else [9, 18]
+        assert all(s["platforms"] == want for s in shaders)
+        return {"shaders": sorted(shaders, key=lambda s: s["name"])}
     if "/more-plain/" in name:
         assert set(textures) == {"R8", "RG16", "RG32", "RGB48", "RGBA64", "R8_SIGNED",
                                  "RG16_SIGNED", "RGB24_SIGNED", "RGBA32_SIGNED", "R16_SIGNED",
@@ -119,6 +127,8 @@ def main():
     paths = [f"editor/6000.6.4f1/{folder}/{bundle}" for folder, bundle in [
         ("more-plain", "textures"), ("sprite", "sprites"), ("variant", "sprites"),
         ("sprite-v2", "sprites"), ("sprite-v2-rect", "sprites"),
+        # The shader bundles built with type trees (#237), Shader dumped too.
+        ("shader/lz4", "windows"), ("shader/lz4", "android"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
@@ -130,7 +140,12 @@ def main():
     }
     for name in paths:
         path = oracle.FIXTURES / name
+        # A Shader's dump only where the reader's check needs it, so
+        # goldens.json is unchanged.
+        if "/shader/" in name:
+            oracle.DUMPED_CLASSES[48] = "Shader"
         result["fixtures"][name] = oracle.read_fixture(path)
+        oracle.DUMPED_CLASSES.pop(48, None)
         result["fixtures"][name]["evidence"] = evidence(name, path)
         for file, atlases in packed_sprite_goldens(path).items():
             result["fixtures"][name]["serialized"][file]["packedSprites"] = atlases

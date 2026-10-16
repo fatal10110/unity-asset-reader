@@ -109,8 +109,11 @@ export function readMonoScript(reader: ObjectReader): MonoScript {
   return out as MonoScript;
 }
 
-/** Sixteen bytes, keyed as `readTypeTree()` keys a `Hash128`. */
-function readHash128(reader: ObjectReader): Hash128 {
+/**
+ * Sixteen bytes, keyed as `readTypeTree()` keys a `Hash128`. Internal: shared
+ * with `Shader.ts`.
+ */
+export function readHash128(reader: ObjectReader): Hash128 {
   const out: Hash128 = {};
   for (let i = 0; i < 16; i++) out[`bytes[${i}]`] = reader.readUInt8();
   return out;
