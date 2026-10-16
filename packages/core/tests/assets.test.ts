@@ -29,6 +29,7 @@ const KNOWN = new Set([
   "MovieTexture",
   "Sprite",
   "SpriteAtlas",
+  "Mesh",
 ]);
 
 /** Load a fixture as bare bytes, the way the usage block does. */
@@ -112,9 +113,14 @@ test("data is reader.read() in its friendly shape, read once and kept", () => {
     assert.deepStrictEqual(first, readAssetData(asset.reader), `${asset.typeName} ${asset.pathId}`);
   }
   const mesh = [...env.assets()].find((a) => a.classId === ClassID.Mesh)!;
-  assert.equal(mesh.type, "Other");
-  assert.equal(mesh.typeName, "Mesh");
-  assert.deepStrictEqual(mesh.data, mesh.reader.readTypeTree());
+  assert.equal(mesh.type, "Mesh");
+  // A class without a hardcoded reader: its type tree as it is.
+  const manifest = [...loadBytes("editor/6000.3.25f1/lz4/lz4").assets()].find(
+    (a) => a.classId === ClassID.AssetBundleManifest,
+  )!;
+  assert.equal(manifest.type, "Other");
+  assert.equal(manifest.typeName, "AssetBundleManifest");
+  assert.deepStrictEqual(manifest.data, manifest.reader.readTypeTree());
 });
 
 test("each call yields the same asset objects", () => {
@@ -144,17 +150,20 @@ test("name without a type tree reads the NamedObject or MonoBehaviour header", (
 });
 
 test("a failed data read throws at access, naming the file, class and path id, every time", () => {
-  const env = loadBytes("editor/6000.3.25f1/lz4-notypetree/main");
-  const mesh = [...env.assets()].find((a) => a.classId === ClassID.Mesh)!;
+  const env = loadBytes("editor/6000.3.25f1/lz4-notypetree/lz4-notypetree");
+  const manifest = [...env.assets()].find((a) => a.classId === ClassID.AssetBundleManifest)!;
   const expected = (error: unknown): boolean => {
     assert.ok(error instanceof UnsupportedError);
-    assert.match(error.message, new RegExp(`^input 0: ${mesh.file}: Mesh ${mesh.pathId}: `));
+    assert.match(
+      error.message,
+      new RegExp(`^input 0: ${manifest.file}: AssetBundleManifest ${manifest.pathId}: `),
+    );
     assert.equal(error.kind, "object without a type tree");
     return true;
   };
-  assert.throws(() => mesh.data, expected);
+  assert.throws(() => manifest.data, expected);
   // A failure is not kept: it is read, and refused, again.
-  assert.throws(() => mesh.data, expected);
+  assert.throws(() => manifest.data, expected);
 });
 
 test("assets(...types) keeps only those types", () => {
@@ -171,14 +180,14 @@ test("assets(...types) keeps only those types", () => {
     assert.equal(typeof sprite.data.rect.width, "number");
   }
 
-  const main = loadBytes("editor/6000.3.25f1/lz4/main");
-  const other: Asset[] = [...main.assets("Other")];
+  const manifest = loadBytes("editor/6000.3.25f1/lz4/lz4");
+  const other: Asset[] = [...manifest.assets("Other")];
   assert.deepStrictEqual(
     other.map((a) => a.typeName),
-    [...main.assets()].filter((a) => !KNOWN.has(a.typeName)).map((a) => a.typeName),
+    [...manifest.assets()].filter((a) => !KNOWN.has(a.typeName)).map((a) => a.typeName),
   );
   assert.ok(other.length > 0);
-  assert.deepStrictEqual([...main.assets("MovieTexture")], []);
+  assert.deepStrictEqual([...manifest.assets("MovieTexture")], []);
 });
 
 test("a path the container does not list, and an env without bundles", () => {

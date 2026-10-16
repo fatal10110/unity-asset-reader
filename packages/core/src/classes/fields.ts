@@ -18,6 +18,15 @@ import type { AudioClipData } from "./AudioClip.js";
 import type { EditorExtension } from "./EditorExtension.js";
 import type { CharacterInfo, Font, Rectf } from "./Font.js";
 import type {
+  CompressedMesh,
+  MeshData,
+  MeshLodInfo,
+  MinMaxAABB,
+  PackedFloatVector,
+  PackedIntVector,
+  VertexBoneWeights,
+} from "./Mesh.js";
+import type {
   BuildTextureStackReference,
   Color,
   Material,
@@ -1037,6 +1046,216 @@ export function toMovieTextureFields(data: MovieTexture): MovieTextureFields {
 }
 
 // ---------------------------------------------------------------------------
+// Mesh
+
+/** The friendly form of {@link MinMaxAABB}: a box by its corners. */
+export interface MinMaxAABBFields {
+  /** Unity: `m_Min`. */
+  min: Vector3;
+  /** Unity: `m_Max`. */
+  max: Vector3;
+}
+
+/** The friendly form of {@link PackedFloatVector}: floats packed into `bitSize` bits each. */
+export interface PackedFloatVectorFields {
+  /** Unity: `m_NumItems`. */
+  numItems: number;
+  /** Unity: `m_Range`. */
+  range: number;
+  /** Unity: `m_Start`. */
+  start: number;
+  /** Unity: `m_Data`. The packed bits, a view (R7). */
+  data: Uint8Array;
+  /** Unity: `m_BitSize`. */
+  bitSize: number;
+}
+
+/** The friendly form of {@link PackedIntVector}: integers packed into `bitSize` bits each. */
+export interface PackedIntVectorFields {
+  /** Unity: `m_NumItems`. */
+  numItems: number;
+  /** Unity: `m_Data`. The packed bits, a view (R7). */
+  data: Uint8Array;
+  /** Unity: `m_BitSize`. */
+  bitSize: number;
+}
+
+/** The friendly form of {@link CompressedMesh}: a mesh built with mesh compression. */
+export interface CompressedMeshFields {
+  /** Unity: `m_Vertices`. */
+  vertices: PackedFloatVectorFields;
+  /** Unity: `m_UV`. */
+  uv: PackedFloatVectorFields;
+  /** Unity: `m_Normals`. */
+  normals: PackedFloatVectorFields;
+  /** Unity: `m_Tangents`. */
+  tangents: PackedFloatVectorFields;
+  /** Unity: `m_Weights`. */
+  weights: PackedIntVectorFields;
+  /** Unity: `m_NormalSigns`. */
+  normalSigns: PackedIntVectorFields;
+  /** Unity: `m_TangentSigns`. */
+  tangentSigns: PackedIntVectorFields;
+  /** Unity: `m_FloatColors`. */
+  floatColors: PackedFloatVectorFields;
+  /** Unity: `m_BoneIndices`. */
+  boneIndices: PackedIntVectorFields;
+  /** Unity: `m_Triangles`. */
+  triangles: PackedIntVectorFields;
+  /** Unity: `m_UVInfo`. The UV channels' layout in `uv` (see {@link CompressedMesh.m_UVInfo}). */
+  uvInfo: number;
+}
+
+/** The friendly form of {@link MeshLodInfo}: a mesh's levels of detail. */
+export interface MeshLodInfoFields {
+  /** Unity: `m_LodSelectionCurve`. */
+  lodSelectionCurve: {
+    /** Unity: `m_LodSlope`. */
+    lodSlope: number;
+    /** Unity: `m_LodBias`. */
+    lodBias: number;
+  };
+  /** Unity: `m_NumLevels`. */
+  numLevels: number;
+  /** Unity: `m_SubMeshes`. One per submesh. */
+  subMeshes: {
+    /** Unity: `m_Levels`. Its index range at each level. */
+    levels: {
+      /** Unity: `m_IndexStart`. */
+      indexStart: number;
+      /** Unity: `m_IndexCount`. */
+      indexCount: number;
+    }[];
+  }[];
+}
+
+/**
+ * The friendly form of {@link MeshData}: the fields of a `Mesh`, and its
+ * vertices and triangles decoded (the fields after `streamData`).
+ */
+export interface MeshFields extends NamedObjectFields {
+  /** Unity: `m_SubMeshes`. */
+  subMeshes: SubMeshFields[];
+  /** Unity: `m_Shapes`. The blend shapes. */
+  shapes: BlendShapeData;
+  /** Unity: `m_BindPose`. */
+  bindPose: Matrix4x4[];
+  /** Unity: `m_BoneNameHashes`. */
+  boneNameHashes: number[];
+  /** Unity: `m_RootBoneNameHash`. */
+  rootBoneNameHash: number;
+  /** Unity: `m_BonesAABB`. */
+  bonesAABB: MinMaxAABBFields[];
+  /** Unity: `m_VariableBoneCountWeights`. */
+  variableBoneCountWeights: {
+    /** Unity: `m_Data`. */
+    data: number[];
+  };
+  /** Unity: `m_MeshCompression`. 0 off, 1 low, 2 medium, 3 high. */
+  meshCompression: number;
+  /** Unity: `m_IsReadable`. */
+  isReadable: boolean;
+  /** Unity: `m_KeepVertices`. */
+  keepVertices: boolean;
+  /** Unity: `m_KeepIndices`. */
+  keepIndices: boolean;
+  /** Unity: `m_IndexFormat`. 0: `UInt16` indices; 1: `UInt32`. */
+  indexFormat: number;
+  /** Unity: `m_IndexBuffer`. The indices in `indexFormat`, a view (R7). */
+  indexBuffer: Uint8Array;
+  /** Unity: `m_VertexData`. */
+  vertexData: VertexDataFields;
+  /** Unity: `m_CompressedMesh`. */
+  compressedMesh: CompressedMeshFields;
+  /** Unity: `m_LocalAABB`. */
+  localAABB: AABBFields;
+  /** Unity: `m_MeshUsageFlags`. Before Unity 6000.6. */
+  meshUsageFlags?: number;
+  /** Unity: `m_CookingOptions`. Unity 2022.1 and later. */
+  cookingOptions?: number;
+  /** Unity: `m_PreBakeConvexCollisionMesh`. Unity 6000.6 and later. */
+  preBakeConvexCollisionMesh?: boolean;
+  /** Unity: `m_PreBakeTriangleCollisionMesh`. Unity 6000.6 and later. */
+  preBakeTriangleCollisionMesh?: boolean;
+  /** Unity: `m_BakedConvexCollisionMesh`. A view (R7). */
+  bakedConvexCollisionMesh: Uint8Array;
+  /** Unity: `m_BakedTriangleCollisionMesh`. A view (R7). */
+  bakedTriangleCollisionMesh: Uint8Array;
+  /** Unity: `m_MeshMetrics[0]`. */
+  "meshMetrics[0]": number;
+  /** Unity: `m_MeshMetrics[1]`. */
+  "meshMetrics[1]": number;
+  /**
+   * Unity: `m_StreamData`. The byte range of a resource file holding the
+   * vertex data when it is not inline (an empty `path` otherwise).
+   */
+  streamData: StreamingInfo;
+  /** Unity: `m_MeshLodInfo`. Unity 6000.2 and later. */
+  meshLodInfo?: MeshLodInfoFields;
+  /** Not a Mesh field: the vertex count (see {@link MeshData.vertexCount}). */
+  vertexCount: number;
+  /** Not a Mesh field: positions (see {@link MeshData.vertices}). */
+  vertices?: Float32Array;
+  /** Not a Mesh field: normals (see {@link MeshData.normals}). */
+  normals?: Float32Array;
+  /** Not a Mesh field: tangents (see {@link MeshData.tangents}). */
+  tangents?: Float32Array;
+  /** Not a Mesh field: RGBA colours (see {@link MeshData.colors}). */
+  colors?: Float32Array;
+  /** Not a Mesh field: UV0 to UV7 (see {@link MeshData.uv}). */
+  uv: (Float32Array | undefined)[];
+  /** Not a Mesh field: bone weights per vertex (see {@link MeshData.skin}). */
+  skin?: VertexBoneWeights[];
+  /** Not a Mesh field: each submesh's triangles (see {@link MeshData.indices}). */
+  indices: Uint32Array[];
+}
+
+/**
+ * A `Mesh` as {@link MeshFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toMeshFields(data: MeshData): MeshFields {
+  return defined({
+    ...namedObject(data),
+    subMeshes: data.m_SubMeshes.map(subMesh),
+    shapes: data.m_Shapes,
+    bindPose: data.m_BindPose,
+    boneNameHashes: data.m_BoneNameHashes,
+    rootBoneNameHash: data.m_RootBoneNameHash,
+    bonesAABB: data.m_BonesAABB.map((box) => ({ min: box.m_Min, max: box.m_Max })),
+    variableBoneCountWeights: { data: data.m_VariableBoneCountWeights.m_Data },
+    meshCompression: data.m_MeshCompression,
+    isReadable: data.m_IsReadable,
+    keepVertices: data.m_KeepVertices,
+    keepIndices: data.m_KeepIndices,
+    indexFormat: data.m_IndexFormat,
+    indexBuffer: data.m_IndexBuffer,
+    vertexData: vertexData(data.m_VertexData),
+    compressedMesh: compressedMesh(data.m_CompressedMesh),
+    localAABB: aabb(data.m_LocalAABB),
+    meshUsageFlags: data.m_MeshUsageFlags,
+    cookingOptions: data.m_CookingOptions,
+    preBakeConvexCollisionMesh: data.m_PreBakeConvexCollisionMesh,
+    preBakeTriangleCollisionMesh: data.m_PreBakeTriangleCollisionMesh,
+    bakedConvexCollisionMesh: data.m_BakedConvexCollisionMesh,
+    bakedTriangleCollisionMesh: data.m_BakedTriangleCollisionMesh,
+    "meshMetrics[0]": data["m_MeshMetrics[0]"],
+    "meshMetrics[1]": data["m_MeshMetrics[1]"],
+    streamData: data.m_StreamData,
+    meshLodInfo: data.m_MeshLodInfo && meshLodInfo(data.m_MeshLodInfo),
+    vertexCount: data.vertexCount,
+    vertices: data.vertices,
+    normals: data.normals,
+    tangents: data.tangents,
+    colors: data.colors,
+    uv: data.uv,
+    skin: data.skin,
+    indices: data.indices,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 
 /** Drop the keys whose value is `undefined`: a field a version does not have is absent. */
@@ -1103,6 +1322,50 @@ function vertexData(data: VertexData): VertexDataFields {
     channels: data.m_Channels,
     data: data.m_DataSize,
   });
+}
+
+function packedFloats(vector: PackedFloatVector): PackedFloatVectorFields {
+  return {
+    numItems: vector.m_NumItems,
+    range: vector.m_Range,
+    start: vector.m_Start,
+    data: vector.m_Data,
+    bitSize: vector.m_BitSize,
+  };
+}
+
+function packedInts(vector: PackedIntVector): PackedIntVectorFields {
+  return { numItems: vector.m_NumItems, data: vector.m_Data, bitSize: vector.m_BitSize };
+}
+
+function compressedMesh(mesh: CompressedMesh): CompressedMeshFields {
+  return {
+    vertices: packedFloats(mesh.m_Vertices),
+    uv: packedFloats(mesh.m_UV),
+    normals: packedFloats(mesh.m_Normals),
+    tangents: packedFloats(mesh.m_Tangents),
+    weights: packedInts(mesh.m_Weights),
+    normalSigns: packedInts(mesh.m_NormalSigns),
+    tangentSigns: packedInts(mesh.m_TangentSigns),
+    floatColors: packedFloats(mesh.m_FloatColors),
+    boneIndices: packedInts(mesh.m_BoneIndices),
+    triangles: packedInts(mesh.m_Triangles),
+    uvInfo: mesh.m_UVInfo,
+  };
+}
+
+function meshLodInfo(info: MeshLodInfo): MeshLodInfoFields {
+  const curve = info.m_LodSelectionCurve;
+  return {
+    lodSelectionCurve: { lodSlope: curve.m_LodSlope, lodBias: curve.m_LodBias },
+    numLevels: info.m_NumLevels,
+    subMeshes: info.m_SubMeshes.map((subMesh) => ({
+      levels: subMesh.m_Levels.map((level) => ({
+        indexStart: level.m_IndexStart,
+        indexCount: level.m_IndexCount,
+      })),
+    })),
+  };
 }
 
 function spriteRenderData(rd: SpriteRenderData): SpriteRenderDataFields {

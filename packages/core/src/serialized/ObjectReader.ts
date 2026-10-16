@@ -256,6 +256,11 @@ export class ObjectReader extends BinaryReader {
    *   a `MonoScript`. `MonoBehaviour`'s header reader refuses one too, but
    *   `read()` reaches it only when the file has no type tree, and Unity
    *   always writes one into an editor file.
+   * @throws {UnsupportedError} for a `Mesh` whose vertices or triangles cannot
+   *   be decoded: a submesh of lines or points (kind `"mesh topology"`), a
+   *   vertex format Unity does not define or bone data in the wrong kind of
+   *   format (`"vertex format"`), more than four bones per vertex
+   *   (`"bones per vertex"`)
    * @throws {UnsupportedError} of kind `"object without a type tree"`, naming
    *   the class id and path id, for a class without a hardcoded reader in a
    *   file built without type trees; and whatever else {@link readTypeTree}
@@ -270,6 +275,8 @@ export class ObjectReader extends BinaryReader {
    *   end exactly at `byteSize`; when a `Texture2D`'s `m_StreamData.offset` is
    *   2^53 or above, or the resource range runs past the end of its file; when
    *   a `Texture2D` of non-zero size has no image data, inline or in a resource file;
+   *   when a `Mesh`'s vertex attributes, indices or packed vectors run past
+   *   the bytes that hold them;
    *   and whatever else {@link readTypeTree} throws, such as for a malformed
    *   type tree or an undeclared `[SerializeReference]` type
    */
