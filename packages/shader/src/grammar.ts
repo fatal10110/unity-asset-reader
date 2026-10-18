@@ -2,8 +2,9 @@
 //
 // The SPIR-V grammar CSspv was generated with (SPIR-V 1.2 and the extensions
 // of its day), as data: the enums in their declaration order, the operands
-// each enum value takes, and every instruction CSspv knows. Generated from
-// the C# file at Razviar/assetstudio c37af7d, not edited by hand.
+// each enum value takes, and every instruction CSspv knows. Written by
+// scripts/make-spirv-grammar.py from that file at Razviar/assetstudio
+// c37af7d; not edited by hand.
 
 /**
  * An operand type: `I` IdRef, `R` IdResult, `T` IdResultType, `S` IdScope,
