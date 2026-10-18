@@ -28,16 +28,15 @@ export const PACKAGES = {
   decoder: { browser: false, noReader: true },
 };
 
-// Preceded by `.` or a word char means a property or a longer name (`ArrayBuffer`);
-// preceded by a quote, a string such as a SPIR-V enum name (#242), unless it is
-// an element access (`globalThis["Buffer"]`).
-const NODE_GLOBALS = [
-  /(?<![.\w"'`])Buffer\b/,
-  /\[\s*["'`]Buffer["'`]\s*\]/,
-  /(?<![.\w])process\b/,
-  /globalThis\.process\b/,
-  /__dirname/,
-];
+// Preceded by `.` or a word char means a property or a longer name (`ArrayBuffer`).
+const NODE_GLOBALS = [/(?<![.\w])Buffer\b/, /(?<![.\w])process\b/, /globalThis\.process\b/, /__dirname/];
+
+// The one string the guard must not read as Node's global: the `["Buffer", 5]`
+// entry of the SPIR-V `Dim` enum in packages/shader/src/grammar.ts (#242), a
+// name and its value. Only that tuple shape is removed before the scan; any
+// other "Buffer" string (`"Buffer" in globalThis`, `Reflect.get(globalThis,
+// "Buffer")`) is still a reference.
+const NOT_GLOBALS = /\[\s*"Buffer",\s*\d+\s*\]/g;
 
 // Anchored at the start of a line, so import-shaped text inside a comment, a JSDoc
 // `@example` or a string literal is not mistaken for an import (core has several
@@ -131,7 +130,7 @@ export async function checkPackage(root, { browser, noReader }) {
           "texture2ddecoder-wasm/*",
         ],
       });
-      const out = outputFiles.map((f) => f.text).join("\n");
+      const out = outputFiles.map((f) => f.text).join("\n").replace(NOT_GLOBALS, "");
       for (const re of NODE_GLOBALS) {
         const hit = out.match(re);
         if (hit) problems.push(`${root}: bundle references ${hit[0]} (R4: node-only global)`);

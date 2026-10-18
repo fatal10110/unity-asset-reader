@@ -40,13 +40,26 @@ for (const [name, code] of [
   });
 }
 
-test("a string that is Buffer's name is not the global, an element access by it is", async () => {
-  const src = 'export const names = ["Rect", "Buffer", `Buffer`];\n';
-  assert.deepEqual(await checkPackage(pkg("buffer-name", src), rules), []);
-  const access = 'export const b = (globalThis as Record<string, unknown>)["Buffer"];\n';
-  const problems = await checkPackage(pkg("buffer-access", access), rules);
-  assert.match(problems.join("\n"), /node-only global/);
+test("the SPIR-V Dim enum's [\"Buffer\", 5] entry is not the global (#242)", async () => {
+  const src = 'export const dim = [["Rect", 4], ["Buffer", 5], ["SubpassData", 6]];\n';
+  assert.deepEqual(await checkPackage(pkg("buffer-enum", src), rules), []);
 });
+
+for (const [i, code] of [
+  '"Buffer" in globalThis',
+  'Reflect.get(globalThis, "Buffer")',
+  'Object.getOwnPropertyDescriptor(globalThis, "Buffer")',
+  '(() => { const n = "Buffer"; return (globalThis as Record<string, unknown>)[n]; })()',
+  '(globalThis as Record<string, unknown>)["Buffer"]',
+  "(self as unknown as Record<string, unknown>)['Buffer']",
+  "(globalThis as Record<string, unknown>)[`Buffer`]",
+  '(globalThis as Record<string, unknown> | undefined)?.["Buffer"]',
+].entries()) {
+  test(`a "Buffer" string used as a name still fails: ${code}`, async () => {
+    const problems = await checkPackage(pkg(`buffer-string-${i}`, `export const b = ${code};\n`), rules);
+    assert.match(problems.join("\n"), /node-only global/, code);
+  });
+}
 
 test("ArrayBuffer and property names are not node globals", async () => {
   const src = "export const a = new ArrayBuffer(1);\nexport const b = ({} as Record<string, number>).process;\n";
