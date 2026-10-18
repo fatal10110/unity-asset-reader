@@ -3,8 +3,6 @@
 // .NET's own message, UTF-8 decoding, and the messages of the exceptions
 // AssetStudio writes into the shader text.
 
-import { CorruptError } from "unity-asset-reader";
-
 /**
  * WHATWG `TextDecoder`, declared here because the package compiles with
  * `lib: ["ES2020"]` and no DOM or node types (R4). It is a global in browsers,
@@ -29,10 +27,11 @@ export function decodeUtf8(bytes: Uint8Array): string {
 }
 
 /**
- * An exception AssetStudio catches and writes into the shader text as
- * `// disassembly error <message>`: only those whose message is fixed text,
- * upstream's own or .NET's, so the text matches to the byte. Any other
- * failure on the way is thrown as {@link CorruptError} or `UnsupportedError`.
+ * An exception of AssetStudio's SPIR-V path (SMOL-V decoding and CSspv's
+ * disassembly), which it catches and writes into the shader text as
+ * `// disassembly error <message>`. Every failure of `smolv.ts` and
+ * `spirv.ts` is one, with the message upstream's code or .NET 8 gives, so
+ * the text matches to the byte.
  */
 export class DisassemblyError extends Error {
   /** @param message the exception's `Message`, as .NET gives it */
@@ -85,12 +84,4 @@ export class StreamReader {
   readUInt32(): number {
     return this.view.getUint32(this.take(4), true);
   }
-}
-
-/**
- * A `CorruptError` for a failure upstream meets as a .NET exception whose
- * text this port does not reproduce (an index or key out of range, a bad cast).
- */
-export function corrupt(what: string): CorruptError {
-  return new CorruptError(`shader program: ${what}`);
 }
