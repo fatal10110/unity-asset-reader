@@ -57,6 +57,28 @@ test("names replace IDs, operands of an enum come from word 1, a float from word
   );
 });
 
+test("a matrix of vectors of a type CSspv does not model prints as upstream's ToString()", () => {
+  // OpTypeEvent declares a type CSspv gives no ResultType (null). A vector of
+  // it fails when printed itself, but inside a matrix C# formats the column
+  // with string interpolation, which writes the null component as nothing.
+  const text = disassemble(
+    module(
+      op(34, 2), // %2 = OpTypeEvent
+      op(23, 3, 2, 4), // %3 = OpTypeVector %2 4
+      op(24, 4, 3, 4), // %4 = OpTypeMatrix %3 4
+      op(1, 4, 5), // %5 = OpUndef %4
+    ),
+  );
+  assert.equal(
+    text,
+    HEADER +
+      "     %2 = OpTypeEvent \n" +
+      "     %3 = OpTypeVector %2 4 \n" +
+      "     %4 = OpTypeMatrix %3 4 \n" +
+      "_4x4 %5 = OpUndef \n",
+  );
+});
+
 test("an opcode CSspv does not know fails with .NET's KeyNotFoundException message", () => {
   // OpDemoteToHelperInvocation (5380) is newer than CSspv's grammar.
   assert.throws(

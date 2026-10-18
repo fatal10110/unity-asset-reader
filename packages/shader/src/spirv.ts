@@ -131,9 +131,15 @@ function typeText(t: SpvType | null): string {
       return `f${t.width}`;
     case "vector":
       return `${typeText(t.component)}_${t.count}`;
-    case "matrix":
-      // StringBuilder.Append(object): nothing for null.
-      return `${t.column ? typeText(t.column) : ""}x${t.count}`;
+    case "matrix": {
+      // StringBuilder.Append(object): nothing for null, else the column's
+      // ToString(), an interpolation that writes a null component as nothing.
+      const column = t.column?.kind === "vector" ? t.column : null;
+      const text = column
+        ? `${column.component ? typeText(column.component) : ""}_${column.count}`
+        : "";
+      return `${text}x${t.count}`;
+    }
     case "image": {
       const access = ["read_only ", "write_only ", "read_write "][t.access] ?? "";
       const dim = ["1D", "2D", "3D", "Cube"][t.dim] ?? "";
