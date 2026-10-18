@@ -17,26 +17,37 @@ const READER = /^(unity-asset-reader(-[\w-]+)?|texture2ddecoder-wasm)(\/|$)/;
 /** A subpath of one of them: a deep import, never allowed (R14). */
 const READER_DEEP = /^(unity-asset-reader(-[\w-]+)?|texture2ddecoder-wasm)\//;
 
-/** What each package is held to. `browser`: bundle for browsers. `noReader`: R14. */
+/**
+ * The one string the guard must not read as Node's global: the `["Buffer", 5]`
+ * entry of the SPIR-V `Dim` enum in packages/shader/src/grammar.ts (#242), a
+ * name and its value, matched with its neighbours so no other `"Buffer"`
+ * tuple passes. It is exempt in the shader package only, and must occur there
+ * exactly once: anything else that says "Buffer" (`"Buffer" in globalThis`,
+ * `globalThis[["Buffer", 5][0]]`) is still a reference.
+ */
+const SPIRV_DIM = {
+  pattern: /\["Rect", 4\],\s*\["Buffer", 5\],\s*\["SubpassData", 6\]/g,
+  count: 1,
+  replacement: '["Rect", 4], ["SubpassData", 6]',
+};
+
+/**
+ * What each package is held to. `browser`: bundle for browsers. `noReader`: R14.
+ * `allow`: text removed from the bundle before the node-global scan, which the
+ * package's sources must hold exactly `count` times.
+ */
 export const PACKAGES = {
   core: { browser: true, noReader: true },
   texture: { browser: true, noReader: false },
   mesh: { browser: true, noReader: false },
   audio: { browser: true, noReader: false },
   spine: { browser: true, noReader: false },
-  shader: { browser: true, noReader: false },
+  shader: { browser: true, noReader: false, allow: SPIRV_DIM },
   decoder: { browser: false, noReader: true },
 };
 
 // Preceded by `.` or a word char means a property or a longer name (`ArrayBuffer`).
 const NODE_GLOBALS = [/(?<![.\w])Buffer\b/, /(?<![.\w])process\b/, /globalThis\.process\b/, /__dirname/];
-
-// The one string the guard must not read as Node's global: the `["Buffer", 5]`
-// entry of the SPIR-V `Dim` enum in packages/shader/src/grammar.ts (#242), a
-// name and its value. Only that tuple shape is removed before the scan; any
-// other "Buffer" string (`"Buffer" in globalThis`, `Reflect.get(globalThis,
-// "Buffer")`) is still a reference.
-const NOT_GLOBALS = /\[\s*"Buffer",\s*\d+\s*\]/g;
 
 // Anchored at the start of a line, so import-shaped text inside a comment, a JSDoc
 // `@example` or a string literal is not mistaken for an import (core has several
@@ -99,10 +110,11 @@ function sourceFiles(dir) {
  * Check one package directory.
  *
  * @param {string} root package directory (contains `src/`)
- * @param {{ browser: boolean, noReader: boolean }} rules what to enforce
+ * @param {{ browser: boolean, noReader: boolean,
+ *   allow?: { pattern: RegExp, count: number, replacement: string } }} rules what to enforce
  * @returns {Promise<string[]>} one message per problem; empty when clean
  */
-export async function checkPackage(root, { browser, noReader }) {
+export async function checkPackage(root, { browser, noReader, allow }) {
   const problems = [];
 
   const files = sourceFiles(join(root, "src"));
@@ -130,7 +142,21 @@ export async function checkPackage(root, { browser, noReader }) {
           "texture2ddecoder-wasm/*",
         ],
       });
-      const out = outputFiles.map((f) => f.text).join("\n").replace(NOT_GLOBALS, "");
+      let texts = outputFiles.map((f) => f.text);
+      if (allow) {
+        // Counted in the sources: each source file is an entry point, so a
+        // module shows up in the output of every file that imports it.
+        const sources = files.map((f) => readFileSync(f, "utf8")).join("\n");
+        const found = sources.match(allow.pattern)?.length ?? 0;
+        if (found !== allow.count) {
+          problems.push(
+            `${root}: src has ${allow.pattern} ${found} times, expected exactly ${allow.count} ` +
+              "(R4: the exemption covers that text only)",
+          );
+        }
+        texts = texts.map((text) => text.replace(allow.pattern, allow.replacement));
+      }
+      const out = texts.join("\n");
       for (const re of NODE_GLOBALS) {
         const hit = out.match(re);
         if (hit) problems.push(`${root}: bundle references ${hit[0]} (R4: node-only global)`);
