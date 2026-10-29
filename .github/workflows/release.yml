@@ -42,8 +42,7 @@ jobs:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry_run)
     runs-on: ubuntu-latest
     env:
-      # The texture decode tests fail instead of skipping when the WASM is missing. Also set for
-      # the full verify that each reader package's prepublishOnly reruns.
+      # The texture decode tests fail instead of skipping when the WASM is missing.
       REQUIRE_WASM: "1"
     steps:
       - uses: actions/checkout@v4
@@ -58,9 +57,13 @@ jobs:
         if: steps.gate.outputs.packages != ''
         env:
           PACKAGES: ${{ steps.gate.outputs.packages }}
+        # --ignore-scripts: the gate ran the full verify already; each reader package's
+        # prepublishOnly would rerun it once per package.
         run: |
           for spec in $PACKAGES; do
-            npm publish -w "${spec%@*}" --access public --dry-run
+            echo "::group::$spec"
+            npm publish -w "${spec%@*}" --access public --ignore-scripts --dry-run
+            echo "::endgroup::"
           done
 
   # Pushes to main and dispatches with `dry_run` unticked. npm's trusted publisher checks the
@@ -100,7 +103,8 @@ jobs:
           echo "node $(node --version), npm $(npm --version)"
 
       # In the plan's order (dependencies first). A name@version already on npm is skipped, so a
-      # run that failed halfway can be re-run. No token: npm authenticates with the job's OIDC
+      # run that failed halfway can be re-run. --ignore-scripts: the gate above ran the full verify
+      # and built every dist/; each reader package's prepublishOnly would rerun it per package. No token: npm authenticates with the job's OIDC
       # token and adds provenance by itself. The NPM_TOKEN secret exists only for the first
       # publish (the bootstrap in RELEASING.md) and is deleted right after it.
       - name: Publish
@@ -124,7 +128,9 @@ jobs:
               echo "::notice::$spec is already on npm, skipping."
               continue
             fi
-            npm publish -w "${spec%@*}" --access public
+            echo "::group::$spec"
+            npm publish -w "${spec%@*}" --access public --ignore-scripts
+            echo "::endgroup::"
             published+=("$spec")
           done
 

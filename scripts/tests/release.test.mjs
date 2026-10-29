@@ -476,10 +476,23 @@ test("the release plan's base is the push's before or the pull request's base", 
   }
   // Every gate step is skipped when there is nothing to release.
   const gated = "if: steps\\.plan\\.outputs\\.packages != ''\\n.*\\n.*run: ";
-  const steps = ["npm ci", "npm run build:wasm", "npm run verify"];
-  for (const step of [...steps, "npm test -w texture2ddecoder-wasm"]) {
-    assert.match(gate, new RegExp(`${gated}${step}\\n`), step);
+  const steps = ["npm ci", "npm run build:wasm", "npm run build:rollup", "npm run test:scripts"];
+  for (const step of [...steps, "npm run check:browser", "npm run check:no-csharp"]) {
+    assert.match(gate, new RegExp(`${gated}${escape(step)}\\n`), step);
   }
+});
+
+// The gate runs the root verify split into steps, one test step per package, so a failure names
+// its package: a package added to PACKAGE_DIRS needs its own step.
+test("the release gate tests every package in its own step, in PACKAGE_DIRS order", () => {
+  const tested = [...gate.matchAll(/\n {6}run: npm test -w (\S+)\n/g)].map((m) => m[1]);
+  assert.deepEqual(tested, PACKAGE_DIRS.map((dir) => manifest(dir).name));
+  const rootScripts = JSON.parse(read("package.json")).scripts;
+  assert.equal(
+    rootScripts.verify,
+    "npm run build && npm test && npm run check:browser && npm run check:no-csharp",
+  );
+  assert.match(rootScripts.test, /&& npm run test:scripts$/);
 });
 
 // npm's trusted publisher does not check the ref, only repo, workflow file and environment. The
@@ -500,8 +513,8 @@ test("only the publish job publishes, in the npm environment, with an OIDC token
   // Publishing: once for real (publish), once with --dry-run (dry-run), from the plan.
   const publishes = [...workflow.matchAll(/^ +(npm publish .*)$/gm)].map((m) => m[1]);
   assert.deepEqual(publishes, [
-    'npm publish -w "${spec%@*}" --access public --dry-run',
-    'npm publish -w "${spec%@*}" --access public',
+    'npm publish -w "${spec%@*}" --access public --ignore-scripts --dry-run',
+    'npm publish -w "${spec%@*}" --access public --ignore-scripts',
   ]);
   const loops = [...workflow.matchAll(/^\s*for spec in (.+); do$/gm)].map((m) => m[1]);
   assert.deepEqual(loops, ["$PACKAGES", "$PACKAGES", "$PUBLISHED"]);
