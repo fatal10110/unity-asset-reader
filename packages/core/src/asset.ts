@@ -1,7 +1,7 @@
 import { readMonoBehaviour } from "./classes/MonoBehaviour.js";
 import { readNamedObject } from "./classes/NamedObject.js";
 import { readShader } from "./classes/Shader.js";
-import { UnsupportedError } from "./errors.js";
+import { CorruptError, UnsupportedError } from "./errors.js";
 import type { PPtr, PPtrResolution } from "./classes/PPtr.js";
 import type { Env } from "./env.js";
 import { classReaderName, readAssetData, type AssetDataMap } from "./classes/registry.js";
@@ -42,8 +42,11 @@ interface AssetOf<T extends AssetType, D> {
   /**
    * `m_Name`, or `""` when the class has none or it cannot be read without
    * its type tree (see {@link Env.assets}). For a `Shader`, its parsed
-   * form's name (`m_ParsedForm.m_Name`, `"UAR/ShaderFixture"`), as
-   * AssetStudio names it: Unity leaves its `m_Name` empty. Read on first
+   * form's name (`m_ParsedForm.m_Name`, `"UAR/ShaderFixture"`), by
+   * AssetStudio's `Shader.Name` formula: Unity leaves its `m_Name` empty.
+   * That reads the whole object; a Shader its reader refuses or cannot fit
+   * (before Unity 2019.1, a stripped file outside format 21, an editor file,
+   * a layout past 6000.6) keeps its `m_Name`, usually `""`. Read on first
    * access and kept.
    */
   readonly name: string;
@@ -186,14 +189,13 @@ export function makeAsset(
 function readName(reader: ObjectReader): string {
   if (reader.type === ClassID.Shader) {
     // Upstream's `Shader.Name` (`m_ParsedForm?.m_Name ?? m_Name`): Unity 5.5+
-    // writes an empty `m_Name` and the name into the parsed form (#244).
+    // writes an empty `m_Name` and the name into the parsed form (#244). A
+    // shader `readShader` cannot read falls back to `m_Name` below, so `name`
+    // throws only where reading `m_Name` does; `data` still reports it.
     try {
       return readShader(reader).m_ParsedForm.m_Name;
     } catch (error) {
-      if (!(error instanceof UnsupportedError)) throw error;
-      // ponytail: a shader the reader refuses (before 2019.1, a stripped
-      // file) keeps its m_Name, often ""; reading the parsed form through
-      // the type tree would name the 5.5 to 2018.4 ones if anyone needs them.
+      if (!(error instanceof UnsupportedError || error instanceof CorruptError)) throw error;
     }
   }
   const nodes = reader.serializedType?.nodes;

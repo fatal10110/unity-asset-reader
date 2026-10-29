@@ -14,6 +14,7 @@ import { test } from "node:test";
 import { loadFixture } from "../../../fixtures/helpers.js";
 import { makeAsset } from "../src/asset.js";
 import { toShaderFields } from "../src/classes/fields.js";
+import { readNamedObject } from "../src/classes/NamedObject.js";
 import {
   readShader,
   type SerializedPass,
@@ -359,12 +360,22 @@ test("a cut or overlong object throws CorruptError with the version known", () =
   assert.throws(() => readShader(synthetic(frame.bytes, "2020.3.30f1", 22)), CorruptError);
 });
 
-test("asset.name of a Shader the reader refuses is its m_Name; a corrupt one throws", () => {
+test("asset.name of a Shader the reader refuses or cannot fit is its m_Name (#244)", () => {
   const env = loadName("editor/2019.4.41f2/shader/lz4/windows");
   const containers = () => ({ pathOf: new Map(), byPath: new Map() });
   const name = (reader: ObjectReader) => makeAsset(reader, "test", containers, env).name;
-  // Before 2019.1: read through the type tree as far as the (empty) m_Name.
-  assert.equal(name(synthetic(frame.bytes, "2018.4.36f1", 17)), "");
-  assert.throws(() => name(synthetic(frame.bytes.subarray(0, 64), "2019.4.41f2", 21)),
+  // The fixture's m_Name is "": give it one, so a fallback to "" cannot pass.
+  assert.equal(readNamedObject(synthetic(frame.bytes, "2019.4.41f2", 21)).m_Name, "");
+  const named = Uint8Array.from(
+    [4, 0, 0, 0, ...new TextEncoder().encode("Kept"), ...frame.bytes.subarray(4)],
+  );
+  // Refused: Unity before 2019.1.
+  assert.equal(name(synthetic(named, "2018.4.36f1", 17)), "Kept");
+  // Cannot fit: 4 bytes past the layout's end, as a layout past 6000.6 would leave.
+  const longer = Uint8Array.from([...named, 0, 0, 0, 0]);
+  assert.throws(() => readShader(synthetic(longer, "2019.4.41f2", 21)), CorruptError);
+  assert.equal(name(synthetic(longer, "2019.4.41f2", 21)), "Kept");
+  // Throws only where reading m_Name itself does.
+  assert.throws(() => name(synthetic(frame.bytes.subarray(0, 2), "2019.4.41f2", 21)),
     CorruptError);
 });
