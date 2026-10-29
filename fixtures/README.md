@@ -199,9 +199,12 @@ sprites (#34).
   `None`): the type tree read as far as `m_Name`, and for a file without type trees UnityPy's own
   TPK type tree for the class. `container` is UnityPy's `env.container`: every `AssetBundle`'s
   `m_Container` entry in order, with the object its pointer resolves to (#183). A `Shader`'s
-  `m_Name` is empty from Unity 5.5, so its name here is `""`, while `asset.name` is its parsed
-  form's name (`m_ParsedForm.m_Name`), as AssetStudio's `Shader.Name` (#244); the shader tests
-  check it against the names the fixture shaders' sources declare.
+  `m_Name` is empty from Unity 5.5, so its name here is `""`, while `asset.name` applies
+  AssetStudio's `Shader.Name` formula (`m_ParsedForm?.m_Name ?? m_Name`) to the parsed form the
+  reader reads (#244); the shader tests check it against the names the fixture shaders' sources
+  declare. AssetStudio `c37af7d` itself stops reading a 6000+ Shader before `m_ParsedForm`, so
+  it names the 6000.3 and 6000.6 fixture shaders `""` too: for those, `asset.name` differs from
+  both oracles.
 - `files` hashes are of the raw node bytes. For a node UnityPy parses as a
   SerializedFile they come from `entry.reader.bytes`, never `entry.save()`,
   which re-serializes and can differ from the original (#81).
