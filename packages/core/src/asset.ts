@@ -1,5 +1,7 @@
 import { readMonoBehaviour } from "./classes/MonoBehaviour.js";
 import { readNamedObject } from "./classes/NamedObject.js";
+import { readShader } from "./classes/Shader.js";
+import { CorruptError, UnsupportedError } from "./errors.js";
 import type { PPtr, PPtrResolution } from "./classes/PPtr.js";
 import type { Env } from "./env.js";
 import { classReaderName, readAssetData, type AssetDataMap } from "./classes/registry.js";
@@ -39,7 +41,13 @@ interface AssetOf<T extends AssetType, D> {
   readonly classId: number;
   /**
    * `m_Name`, or `""` when the class has none or it cannot be read without
-   * its type tree (see {@link Env.assets}). Read on first access and kept.
+   * its type tree (see {@link Env.assets}). For a `Shader`, its parsed
+   * form's name (`m_ParsedForm.m_Name`, `"UAR/ShaderFixture"`), by
+   * AssetStudio's `Shader.Name` formula: Unity leaves its `m_Name` empty.
+   * That reads the whole object; a Shader its reader refuses or cannot fit
+   * (before Unity 2019.1, a stripped file outside format 21, an editor file,
+   * a layout past 6000.6) keeps its `m_Name`, usually `""`. Read on first
+   * access and kept.
    */
   readonly name: string;
   /**
@@ -176,9 +184,20 @@ export function makeAsset(
 /**
  * `m_Name` as cheaply as the object allows: through the type tree as far as
  * `m_Name`; without one, the `NamedObject` header or a `MonoBehaviour`'s
- * header; otherwise `""`.
+ * header; otherwise `""`. A `Shader` is named by its parsed form.
  */
 function readName(reader: ObjectReader): string {
+  if (reader.type === ClassID.Shader) {
+    // Upstream's `Shader.Name` (`m_ParsedForm?.m_Name ?? m_Name`): Unity 5.5+
+    // writes an empty `m_Name` and the name into the parsed form (#244). A
+    // shader `readShader` cannot read falls back to `m_Name` below, so `name`
+    // throws only where reading `m_Name` does; `data` still reports it.
+    try {
+      return readShader(reader).m_ParsedForm.m_Name;
+    } catch (error) {
+      if (!(error instanceof UnsupportedError || error instanceof CorruptError)) throw error;
+    }
+  }
   const nodes = reader.serializedType?.nodes;
   if (nodes && nodes.length > 0) return readTypeTreeName(reader) ?? "";
   if (NAMED_CLASSES.has(reader.type)) return readNamedObject(reader).m_Name;

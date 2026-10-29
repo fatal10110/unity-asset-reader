@@ -12,7 +12,9 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import { loadFixture } from "../../../fixtures/helpers.js";
+import { makeAsset } from "../src/asset.js";
 import { toShaderFields } from "../src/classes/fields.js";
+import { readNamedObject } from "../src/classes/NamedObject.js";
 import {
   readShader,
   type SerializedPass,
@@ -205,6 +207,15 @@ test("asset.data of a Shader: parsedForm under the friendly names", () => {
   }
 });
 
+test("asset.name of a Shader is its parsed form's name, with or without a type tree (#244)", () => {
+  // The names the fixture shaders' sources declare (fixtures/BUILDING.md section 18). UnityPy's
+  // peek_name() gives their empty m_Name; AssetStudio's Shader.Name gives these.
+  for (const name of TYPED.flatMap((n) => [n, twin(n)])) {
+    const names = [...loadName(name).assets("Shader")].map((a) => a.name).sort();
+    assert.deepStrictEqual(names, ["UAR/ShaderFixture", "UAR/ShaderFixtureSecond"], name);
+  }
+});
+
 // --- every other layout: UnityPy's synthetic objects (make-shader-layouts.py) ---------
 
 interface Layout {
@@ -347,4 +358,24 @@ test("a cut or overlong object throws CorruptError with the version known", () =
     err instanceof CorruptError && /ends at \d+ of its \d+ bytes/.test(err.message));
   // The same object read with the wrong layout does not end where it should.
   assert.throws(() => readShader(synthetic(frame.bytes, "2020.3.30f1", 22)), CorruptError);
+});
+
+test("asset.name of a Shader the reader refuses or cannot fit is its m_Name (#244)", () => {
+  const env = loadName("editor/2019.4.41f2/shader/lz4/windows");
+  const containers = () => ({ pathOf: new Map(), byPath: new Map() });
+  const name = (reader: ObjectReader) => makeAsset(reader, "test", containers, env).name;
+  // The fixture's m_Name is "": give it one, so a fallback to "" cannot pass.
+  assert.equal(readNamedObject(synthetic(frame.bytes, "2019.4.41f2", 21)).m_Name, "");
+  const named = Uint8Array.from(
+    [4, 0, 0, 0, ...new TextEncoder().encode("Kept"), ...frame.bytes.subarray(4)],
+  );
+  // Refused: Unity before 2019.1.
+  assert.equal(name(synthetic(named, "2018.4.36f1", 17)), "Kept");
+  // Cannot fit: 4 bytes past the layout's end, as a layout past 6000.6 would leave.
+  const longer = Uint8Array.from([...named, 0, 0, 0, 0]);
+  assert.throws(() => readShader(synthetic(longer, "2019.4.41f2", 21)), CorruptError);
+  assert.equal(name(synthetic(longer, "2019.4.41f2", 21)), "Kept");
+  // Throws only where reading m_Name itself does.
+  assert.throws(() => name(synthetic(frame.bytes.subarray(0, 2), "2019.4.41f2", 21)),
+    CorruptError);
 });

@@ -241,9 +241,13 @@ export interface Env {
    *
    * - `name` reads the type tree only as far as `m_Name`. Without a type tree
    *   it reads the `NamedObject` header of the asset classes (every class with
-   *   a hardcoded reader, `Mesh`, `Shader`, `AnimationClip`,
-   *   `AssetBundleManifest`, ...) or a `MonoBehaviour`'s header, and is `""`
-   *   for any other class (a `GameObject`, a `Transform`).
+   *   a hardcoded reader, `Mesh`, `AnimationClip`, `AssetBundleManifest`, ...)
+   *   or a `MonoBehaviour`'s header, and is `""` for any other class (a
+   *   `GameObject`, a `Transform`). A `Shader`'s name is its parsed form's, so
+   *   it reads the whole object with `readShader`: about 0.2 ms for the
+   *   largest fixture shader's 28 KB parsed form, growing with its size, so
+   *   milliseconds for a large game shader, and `data` reads it again. A
+   *   Shader that reader refuses or cannot fit falls back to `m_Name` as above.
    * - `path` reads every `AssetBundle` object once, for its `m_Container`.
    *   An asset listed under several paths takes the first one.
    * - `data` is `asset.reader.read()`.
