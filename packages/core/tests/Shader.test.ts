@@ -12,6 +12,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import { loadFixture } from "../../../fixtures/helpers.js";
+import { makeAsset } from "../src/asset.js";
 import { toShaderFields } from "../src/classes/fields.js";
 import {
   readShader,
@@ -205,6 +206,15 @@ test("asset.data of a Shader: parsedForm under the friendly names", () => {
   }
 });
 
+test("asset.name of a Shader is its parsed form's name, with or without a type tree (#244)", () => {
+  // The names the fixture shaders' sources declare (fixtures/BUILDING.md section 18). UnityPy's
+  // peek_name() gives their empty m_Name; AssetStudio's Shader.Name gives these.
+  for (const name of TYPED.flatMap((n) => [n, twin(n)])) {
+    const names = [...loadName(name).assets("Shader")].map((a) => a.name).sort();
+    assert.deepStrictEqual(names, ["UAR/ShaderFixture", "UAR/ShaderFixtureSecond"], name);
+  }
+});
+
 // --- every other layout: UnityPy's synthetic objects (make-shader-layouts.py) ---------
 
 interface Layout {
@@ -347,4 +357,14 @@ test("a cut or overlong object throws CorruptError with the version known", () =
     err instanceof CorruptError && /ends at \d+ of its \d+ bytes/.test(err.message));
   // The same object read with the wrong layout does not end where it should.
   assert.throws(() => readShader(synthetic(frame.bytes, "2020.3.30f1", 22)), CorruptError);
+});
+
+test("asset.name of a Shader the reader refuses is its m_Name; a corrupt one throws", () => {
+  const env = loadName("editor/2019.4.41f2/shader/lz4/windows");
+  const containers = () => ({ pathOf: new Map(), byPath: new Map() });
+  const name = (reader: ObjectReader) => makeAsset(reader, "test", containers, env).name;
+  // Before 2019.1: read through the type tree as far as the (empty) m_Name.
+  assert.equal(name(synthetic(frame.bytes, "2018.4.36f1", 17)), "");
+  assert.throws(() => name(synthetic(frame.bytes.subarray(0, 64), "2019.4.41f2", 21)),
+    CorruptError);
 });

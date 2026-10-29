@@ -84,8 +84,12 @@ for (const name of EDITOR) {
       assert.equal(asset.typeName, classIdName(row.classId));
       assert.equal(asset.type, KNOWN.has(asset.typeName) ? asset.typeName : "Other");
 
+      // UnityPy's peek_name() gives a Shader's empty m_Name; asset.name is its parsed
+      // form's name, as AssetStudio's (#244, tested in Shader.test.ts).
       const names = g.serialized![asset.file]!.names;
-      assert.equal(asset.name, names[String(asset.pathId)], `${where} name`);
+      if (asset.type !== "Shader") {
+        assert.equal(asset.name, names[String(asset.pathId)], `${where} name`);
+      }
       assert.equal(asset.path, pathOf.get(key(asset.file, asset.pathId)), `${where} path`);
     }
   });

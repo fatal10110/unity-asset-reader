@@ -69,6 +69,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
   **Behavior change** for `Shader` (in 1.1.0 it was read through its type tree):
   - `asset.type` is `"Shader"`, not `"Other"`, so `env.assets("Other")` no longer yields shaders.
+  - `asset.name` is the parsed form's name (`m_ParsedForm.m_Name`, `"UAR/ShaderFixture"`), as
+    AssetStudio's `Shader.Name`, not the empty `m_Name` (#244). A shader the reader refuses keeps
+    its `m_Name`; a corrupt one throws `CorruptError` on `asset.name` too.
   - `asset.data` is a `ShaderFields` (camelCase names at every level), not the type tree.
   - `obj.read()` gives `Shader`: the type tree's fields, keys and values as `readTypeTree()` gives
     them.

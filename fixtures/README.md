@@ -198,7 +198,10 @@ sprites (#34).
 - `serialized.<file>.names` is UnityPy's `peek_name()` for every object (`""` where it gives
   `None`): the type tree read as far as `m_Name`, and for a file without type trees UnityPy's own
   TPK type tree for the class. `container` is UnityPy's `env.container`: every `AssetBundle`'s
-  `m_Container` entry in order, with the object its pointer resolves to (#183).
+  `m_Container` entry in order, with the object its pointer resolves to (#183). A `Shader`'s
+  `m_Name` is empty from Unity 5.5, so its name here is `""`, while `asset.name` is its parsed
+  form's name (`m_ParsedForm.m_Name`), as AssetStudio's `Shader.Name` (#244); the shader tests
+  check it against the names the fixture shaders' sources declare.
 - `files` hashes are of the raw node bytes. For a node UnityPy parses as a
   SerializedFile they come from `entry.reader.bytes`, never `entry.save()`,
   which re-serializes and can differ from the original (#81).
