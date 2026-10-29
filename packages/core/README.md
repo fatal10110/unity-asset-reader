@@ -83,8 +83,11 @@ for (const sprite of env.assets("Sprite")) sprite.data.rect; // filtered and typ
   methods: what you can turn one into is a function that takes it.
 - **`name`, `path` and `data` are read when you first use them, then kept.** `name` is `m_Name`,
   read only as far as that field (`""` for a class without one, or for a `GameObject` in a bundle
-  without type trees). `path` is the first `m_Container` path of any loaded `AssetBundle` that
-  points at the asset, or `undefined`. `data` is what `obj.read()` returns (below), in the
+  without type trees). A `Shader`'s is its parsed form's name (`"UAR/ShaderFixture"`), by
+  AssetStudio's formula, since Unity leaves its `m_Name` empty; that reads the whole shader. A
+  shader the [Shader reader](#classes) refuses or cannot fit keeps its `m_Name`, usually `""`.
+  `path` is the first `m_Container` path of any loaded `AssetBundle` that points at the asset, or
+  `undefined`. `data` is what `obj.read()` returns (below), in the
   TypeScript-style shape of [Classes](#classes) for a class with a class reader, and as its type
   tree reads it (under Unity's names) for `"Other"`. A read that fails throws when you access it,
   with the file, class and path id in the message, and is tried again on the next access.
