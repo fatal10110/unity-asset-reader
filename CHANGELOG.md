@@ -29,7 +29,7 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
-### 1.2.0 - Unreleased
+### 1.2.0 - 2026-10-29
 
 - A hand-written `Mesh` reader, `readMesh`, for Unity 2019.1 to 6000.6 (#235), the supported
   floor (plan revision 2026-10-16): its fields equal `readTypeTree()` on the 12 fixture meshes
@@ -149,7 +149,7 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ## unity-asset-reader-texture
 
-### 1.2.0 - Unreleased
+### 1.2.0 - 2026-10-29
 
 - New `encodePng(image)`: an `RgbaImage` (RGBA8, top row first, as `decodeTexture2D` and
   `decodeSprite` return it; a `decodeImage` result as `{ data: rgba, width, height }`) to a PNG
@@ -242,10 +242,7 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-mesh
 
-Version 0.0.0 on disk until its first release, which the release workflow never publishes
-(`scripts/check-release.mjs`).
-
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `MeshData`.
 
@@ -261,10 +258,7 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 
 ## unity-asset-reader-audio
 
-Version 0.0.0 on disk until its first release, which the release workflow never publishes
-(`scripts/check-release.mjs`).
-
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1`.
 
@@ -277,10 +271,7 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-spine
 
-Version 0.0.0 on disk until its first release, which the release workflow never publishes
-(`scripts/check-release.mjs`).
-
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1`.
 
@@ -292,10 +283,7 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-shader
 
-Version 0.0.0 on disk until its first release, which the release workflow never publishes
-(`scripts/check-release.mjs`).
-
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1.2.0`, the first core with a `Shader` reader.
 License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
