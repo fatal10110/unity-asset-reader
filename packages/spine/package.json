@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-spine",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Spine skeleton export for unity-asset-reader: skeleton data, atlases and page textures as spine-unity stores them.",
   "license": "MIT",
   "main": "dist/index.cjs",

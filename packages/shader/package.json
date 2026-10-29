@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-shader",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Shader inspection text for unity-asset-reader: GL and Metal source and SPIR-V disassembly, as AssetStudio writes it.",
   "license": "MIT AND BSD-2-Clause",
   "main": "dist/index.cjs",
