@@ -38,5 +38,9 @@ yarn-error.log*
 # Golden oracle venv (UnityPy) - not a dependency of the package or CI
 .venv-oracle/
 
-# Agent worktrees (Claude Code isolation) - never committed
+# Agent worktrees (Claude Code isolation) - never committed. Also holds a waves run's state
+# (.claude/worktrees/.waves) and the shared upstream clones (.claude/worktrees/.ref).
 .claude/worktrees/
+
+# Python bytecode of scripts/agent-tools
+__pycache__/

@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Run a heavy command under a machine-wide lock, so parallel wave lanes take turns.
+
+  heavy [--lock NAME] <command> [args...]
+
+Locks (one holder each, across every worktree and run on this machine):
+  cpu     (default) npm run verify, npm test, builds: about a minute each on 4 CPUs
+  oracle  scripts/make-*goldens.py and the AssetStudio harness (one shared .NET harness dir)
+  unity   Unity editor batch builds on the Windows host
+
+Prints "### STOP" and refuses to run (exit 3) when the cwd or an argument lies in a lane
+worktree of a waves run that is stopping. Exits with the command's own code otherwise.
+"""
+
+import fcntl
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import wave_mail  # noqa: E402
+
+NAME_RE = re.compile(r"[a-z][a-z0-9-]{0,31}")
+
+
+def main(argv):
+    lock = "cpu"
+    if argv[:1] == ["--lock"]:
+        if len(argv) < 2 or not NAME_RE.fullmatch(argv[1]):
+            sys.exit("heavy: --lock wants a name such as cpu, oracle or unity")
+        lock, argv = argv[1], argv[2:]
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        sys.exit(0 if argv else 2)
+    banner = wave_mail.stop_banner([os.getcwd()] + [a for a in argv if a.startswith("/")])
+    if banner:
+        print(banner)
+        sys.exit(3)
+    d = Path(os.environ.get("WAVES_ROOT", wave_mail.DEFAULT_ROOT)) / ".locks"
+    d.mkdir(parents=True, exist_ok=True)
+    with open(d / f"{lock}.lock", "a+") as f:
+        try:
+            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            t = time.time()
+            print(f"heavy: waiting for the {lock} lock", flush=True)
+            fcntl.flock(f, fcntl.LOCK_EX)
+            print(f"heavy: got the {lock} lock after {round(time.time() - t)} s", flush=True)
+        sys.exit(subprocess.run(argv).returncode)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
