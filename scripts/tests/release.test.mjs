@@ -483,16 +483,31 @@ test("the release plan's base is the push's before or the pull request's base", 
 });
 
 // The gate runs the root verify split into steps, one test step per package, so a failure names
-// its package: a package added to PACKAGE_DIRS needs its own step.
+// its package: a package added to PACKAGE_DIRS needs its own step. The root scripts are pinned
+// whole, so a check added to verify, build or test needs a matching gate step too.
 test("the release gate tests every package in its own step, in PACKAGE_DIRS order", () => {
   const tested = [...gate.matchAll(/\n {6}run: npm test -w (\S+)\n/g)].map((m) => m[1]);
   assert.deepEqual(tested, PACKAGE_DIRS.map((dir) => manifest(dir).name));
+  const readers = PACKAGE_DIRS.filter((dir) => dir !== "decoder")
+    .map((dir) => `-w ${manifest(dir).name}`)
+    .join(" ");
   const rootScripts = JSON.parse(read("package.json")).scripts;
+  const gateStep = "changed: add the matching step to .github/actions/release-gate";
   assert.equal(
     rootScripts.verify,
     "npm run build && npm test && npm run check:browser && npm run check:no-csharp",
+    `verify ${gateStep}`,
   );
-  assert.match(rootScripts.test, /&& npm run test:scripts$/);
+  assert.equal(
+    rootScripts.build,
+    `npm run build:rollup -w texture2ddecoder-wasm && npm run build ${readers}`,
+    `build ${gateStep}`,
+  );
+  assert.equal(
+    rootScripts.test,
+    `npm test ${readers} && node scripts/test-decoder.mjs && npm run test:scripts`,
+    `test ${gateStep}`,
+  );
 });
 
 // npm's trusted publisher does not check the ref, only repo, workflow file and environment. The
