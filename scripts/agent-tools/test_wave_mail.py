@@ -200,26 +200,33 @@ class WaveMailTest(unittest.TestCase):
 
     def test_validate_plan(self):
         plan = {"tracks": ["A", "B"], "waves": [
-            {"lanes": [{"slug": "a", "track": "A", "issues": [1], "hot": ["h"]},
-                       {"slug": "b", "track": "B", "issues": [2], "deps": ["a"], "hot": ["h"]}]},
-            {"lanes": [{"slug": "c", "track": "B", "issues": [3], "deps": ["a", "zz"]}]}]}
+            {"lanes": [{"slug": "1-a", "track": "A", "issues": [1], "hot": ["h"]},
+                       {"slug": "2-b", "track": "B", "issues": [2], "deps": ["1-a"], "hot": ["h"]}]},
+            {"lanes": [{"slug": "3-c", "track": "B", "issues": [3], "deps": ["1-a", "zz"]}]}]}
         p = Path(self.tmp.name) / "plan.json"
         p.write_text(json.dumps(plan))
         r = self.run_cli("validate", str(p), check=False)
         self.assertFalse(r["ok"])
         self.assertEqual(sorted(r["errors"]), sorted([
-            "b: same-wave dep a is on another track (A)",
+            "2-b: same-wave dep 1-a is on another track (A)",
             "wave 0: hot group h spans tracks A and B",
-            "c: unknown dep zz"]))
+            "3-c: unknown dep zz"]))
+        plan["waves"][1]["lanes"][0]["branch"] = "wf/whatever"
+        plan["waves"][1]["lanes"].append({"slug": "float-core", "track": "B", "issues": [4]})
+        p.write_text(json.dumps(plan))
+        bad = [e for e in self.run_cli("validate", str(p), check=False)["errors"] if "bad branch" in e]
+        self.assertEqual([e.split(":")[0] for e in bad], ["3-c", "float-core"])
+        plan["waves"][1]["lanes"][0]["branch"] = "fix/3-c"
+        plan["waves"][1]["lanes"].pop()
         plan["waves"][0]["lanes"][0]["implModel"] = ""
         p.write_text(json.dumps(plan))
         r = self.run_cli("validate", str(p), check=False)
-        self.assertIn("a: implModel must be a model name or alias", r["errors"])
+        self.assertIn("1-a: implModel must be a model name or alias", r["errors"])
         plan["waves"][0]["lanes"][0]["implModel"] = "sonnet"
         plan["waves"][0]["lanes"][0]["implEffort"] = "huge"
         p.write_text(json.dumps(plan))
         r = self.run_cli("validate", str(p), check=False)
-        self.assertIn("a: implEffort must be low, medium, high, xhigh or max", r["errors"])
+        self.assertIn("1-a: implEffort must be low, medium, high, xhigh or max", r["errors"])
         plan["waves"][0]["lanes"][0]["implEffort"] = "high"
         plan["waves"][0]["lanes"][0]["slug"] = "Bad Slug"
         p.write_text(json.dumps(plan))

@@ -40,6 +40,8 @@ def primary_checkout():
 
 REPO = Path(os.environ.get("WAVES_REPO") or primary_checkout())
 DEFAULT_ROOT = str(REPO / ".claude" / "worktrees" / ".waves")
+# Upstream clones and shared builds: next to the checkout, outside the repository (R2).
+REF = Path(os.environ.get("WAVES_REF") or REPO.parent / f"{REPO.name}-ref")
 GH_REPO = os.environ.get("WAVES_GH_REPO", "fatal10110/unity-asset-reader")
 # The CI check runs a merge needs on the head (.github/workflows/ci.yml). A job its path filter
 # skips still reports, as "skipped", which counts as passed.
@@ -53,7 +55,9 @@ TERMINAL_STATUSES = {"merged", "no_change", "blocked", "unresolved", "stalled", 
 NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}")
 ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,95}")
 SLUG_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,47}")
+# A safe branch name for git; a plan's lane branches follow the rules doc (RULE_BRANCH_RE).
 BRANCH_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,15}/[a-z0-9][a-z0-9.-]{0,63}")
+RULE_BRANCH_RE = re.compile(r"(feature|fix|docs)/\d+-[a-z0-9][a-z0-9.-]{0,63}")
 
 
 def now():
@@ -528,7 +532,7 @@ def git(*args, check_rc=True):
 
 
 def seed_wasm(path):
-    """Copy the shared decoder WASM build (<worktrees>/.ref/decoder-wasm) into a worktree that has none.
+    """Copy the shared decoder WASM build (<ref>/decoder-wasm) into a worktree that has none.
 
     The build needs Docker and takes minutes; without it the texture decode tests skip locally.
     Returns whether the worktree has the WASM afterwards.
@@ -536,7 +540,7 @@ def seed_wasm(path):
     dst = path / "packages" / "decoder" / "wasm"
     if (dst / "texture2ddecoder.wasm").exists():
         return True
-    src = Path(os.environ.get("WAVES_ROOT", DEFAULT_ROOT)).resolve().parent / ".ref" / "decoder-wasm"
+    src = REF / "decoder-wasm"
     if not (src / "texture2ddecoder.wasm").exists() or not dst.parent.is_dir():
         return False
     dst.mkdir(exist_ok=True)
@@ -549,7 +553,7 @@ def seed_wasm(path):
 def cmd_worktree(a):
     """Create or reuse a lane's worktree with absolute paths, and record it in the lane state.
 
-    Default: the implementation worktree wf-<slug> on --branch (default wf/<slug>; reused if
+    Default: the implementation worktree wf-<slug> on --branch (default feature/<slug>; reused if
     it exists, else from the local branch, else from origin/<branch>, else new from origin/main).
     --review: the detached review worktree review-<slug>, moved to the current origin/<branch>.
     --remove: remove the worktree (and, for the implementation one, the local branch).
@@ -558,7 +562,7 @@ def cmd_worktree(a):
     slug = check(a.lane, SLUG_RE, "lane slug")
     go = REPO
     wt_root = Path(os.environ.get("WAVES_ROOT", DEFAULT_ROOT)).resolve().parent
-    branch = a.branch or read_json(lane_dir(a.run, slug) / "state.json", {}).get("branch") or f"wf/{slug}"
+    branch = a.branch or read_json(lane_dir(a.run, slug) / "state.json", {}).get("branch") or f"feature/{slug}"
     check(branch, BRANCH_RE, "branch")
     path = wt_root / (f"review-{slug}" if a.review else f"wf-{slug}")
     if a.remove:
@@ -576,6 +580,10 @@ def cmd_worktree(a):
         if not remote:
             raise SystemExit(f"origin/{branch} does not exist yet")
         if (path / ".git").exists():
+            # The review worktree never holds work: drop what an oracle rerun left behind.
+            # clean without -x keeps the ignored node_modules and WASM.
+            git("-C", path, "reset", "-q", "--hard")
+            git("-C", path, "clean", "-fdq")
             git("-C", path, "checkout", "-q", "--detach", f"origin/{branch}")
         else:
             git("-C", go, "worktree", "add", "-q", "--detach", path, f"origin/{branch}")
@@ -727,8 +735,10 @@ def validate(plan):
                 errs.append(f"{s}: track {l.get('track')!r} not in plan.tracks")
             if not l.get("issues"):
                 errs.append(f"{s}: no issues")
-            if "branch" in l and not (isinstance(l["branch"], str) and BRANCH_RE.fullmatch(l["branch"])):
-                errs.append(f"{s}: bad branch {l['branch']!r} (<type>/<issue>-<slug>, e.g. feature/261-float-core)")
+            branch = l.get("branch", f"feature/{s}")
+            if not (isinstance(branch, str) and RULE_BRANCH_RE.fullmatch(branch)):
+                errs.append(f"{s}: bad branch {branch!r}: feature|fix|docs/<issue>-<slug>, e.g. feature/261-float-core"
+                            " (without a branch field the slug must start with the issue number)")
             for k in ("implModel", "reviewModel"):
                 if k in l and not (isinstance(l[k], str) and l[k].strip()):
                     errs.append(f"{s}: {k} must be a model name or alias")
@@ -848,7 +858,7 @@ def main(argv=None):
 
     s = add("worktree", cmd_worktree)
     s.add_argument("--lane", required=True)
-    s.add_argument("--branch", help="the lane's branch (default: the one in its state, else wf/<slug>)")
+    s.add_argument("--branch", help="the lane's branch (default: the one in its state, else feature/<slug>)")
     s.add_argument("--review", action="store_true", help="the detached review worktree, moved to origin/<branch>")
     s.add_argument("--remove", action="store_true")
 

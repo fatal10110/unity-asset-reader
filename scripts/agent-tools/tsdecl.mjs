@@ -6,7 +6,7 @@
 // Names match functions, classes, interfaces, type aliases, enums and exported or top-level
 // const/let/var; `Class.member` matches a method, property or accessor of a class or interface.
 // Uses the repository's own `typescript` dev dependency, so the checkout needs `npm ci`.
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 
@@ -67,6 +67,11 @@ function declarations(sf) {
     }
   }
   return found;
+}
+
+if (!existsSync(target)) {
+  console.log(`== ${target}: no such file or directory`);
+  process.exit(0);
 }
 
 const want = new Set(names);
