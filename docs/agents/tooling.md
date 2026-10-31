@@ -43,14 +43,15 @@ python3 scripts/agent-tools/look.py ts:packages/core/src:UnsupportedError.constr
 
 AssetStudio and UnityPy are cloned outside the repository and only read (R2: no C# in the repo,
 never compiled to WASM). `implement-issue` clones them into `${TMPDIR:-/tmp}/uar-ref`; a `waves`
-run shares one set under `<primary checkout>/.claude/worktrees/.ref/` (gitignored):
+run shares one set in `<ref>` = `<primary checkout>-ref`, a sibling directory of the checkout
+(`WAVES_REF` overrides it):
 
 | Path | What |
 | --- | --- |
-| `.ref/assetstudio` | `Razviar/assetstudio` at the export-oracle revision `c37af7d` |
-| `.ref/UnityPy` | `K0lb3/UnityPy` |
-| `.ref/venv-oracle` | Python venv with `UnityPy==1.25.3` for `scripts/make-goldens.py` and friends |
-| `.ref/decoder-wasm` | a decoder WASM build (`texture2ddecoder.js`, `.wasm`), copied into lane worktrees so the texture decode tests run locally |
+| `<ref>/assetstudio` | `Razviar/assetstudio` at the export-oracle revision `c37af7d` |
+| `<ref>/UnityPy` | `K0lb3/UnityPy` |
+| `<ref>/venv-oracle` | Python venv with `UnityPy==1.25.3` for `scripts/make-goldens.py` and friends |
+| `<ref>/decoder-wasm` | a decoder WASM build (`texture2ddecoder.js`, `.wasm`), copied into lane worktrees so the texture decode tests run locally |
 
 Golden regeneration, the AssetStudio .NET harness and the Unity fixture builds are documented in
 [fixtures/BUILDING.md](../../fixtures/BUILDING.md) (§2 build, §4 goldens, §17 the harness). CI
@@ -65,7 +66,8 @@ Built for the [`waves`](../../.claude/skills/waves/SKILL.md) skill; usable on th
   a waves run, plus:
   - `worktree --run R --lane S --branch B [--review] [--remove]`: creates or reuses
     `.claude/worktrees/wf-<slug>` on its branch from `origin/main` (or the detached
-    `review-<slug>` at `origin/<branch>`), seeds the decoder WASM, and prints head, dirty files
+    `review-<slug>` at `origin/<branch>`, reset to a clean tree each round), seeds the decoder
+    WASM, and prints head, dirty files
     and how far it is behind `main`.
   - `pr-state --pr N`: `{state, merged, merge_sha, draft, head, mergeable_state, behind_by}`.
   - `ci-wait --run R --head SHA --wait 570`: waits until every check run on the head finished;

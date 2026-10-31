@@ -39,7 +39,7 @@ yarn-error.log*
 .venv-oracle/
 
 # Agent worktrees (Claude Code isolation) - never committed. Also holds a waves run's state
-# (.claude/worktrees/.waves) and the shared upstream clones (.claude/worktrees/.ref).
+# (.claude/worktrees/.waves).
 .claude/worktrees/
 
 # Python bytecode of scripts/agent-tools

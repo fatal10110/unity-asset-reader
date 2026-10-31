@@ -27,9 +27,10 @@ npm name, public API and tarball file set, and keep building and passing.
 
 ## 2. Precedence
 
-1. User instructions.
-2. [The plan](docs/unity-asset-reader-plan.md). It wins over the rules, issues and this file: if
-   one contradicts it, stop and say so instead of picking a side.
+1. [The plan](docs/unity-asset-reader-plan.md). It wins over everything else: if an issue, the
+   rules or this file contradicts it, stop and say so instead of picking a side. When a user
+   instruction contradicts it, say so before acting; the user may then decide to change the plan.
+2. User instructions, where the plan is silent.
 3. Hard rules R1–R14 ([rules doc](docs/unity-asset-reader-rules.md)), then its design, style and
    test rules.
 4. Upstream behavior: AssetStudio (`Razviar/assetstudio`, MIT) is the source of truth for what a
