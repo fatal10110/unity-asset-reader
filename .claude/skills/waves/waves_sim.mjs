@@ -156,7 +156,7 @@ async function run(args, scen, cap = 2) {
   for (const [slug, kind] of scen.$preload || []) w.preload(slug, 'review', kind)
   const fn = new AsyncFunction('args', 'agent', 'parallel', 'log', 'phase', SRC)
   const res = await Promise.race([
-    fn(args, w.agent, w.parallel, () => {}, () => {}),
+    fn(Object.assign({ root: '/repo' }, args), w.agent, w.parallel, () => {}, () => {}),
     new Promise((_, rej) => setTimeout(() => rej(new Error('deadlock or hang: ' + w.labels.slice(-6).join(' > '))), 5000)),
   ])
   return { res, w }

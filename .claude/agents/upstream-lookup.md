@@ -9,7 +9,7 @@ maxTurns: 25
 
 Answer one bounded, read-only lookup question about upstream behavior.
 
-The references are clones outside the repository: the question or your task names their paths (in a waves run `<primary checkout>/.claude/worktrees/.ref/assetstudio` at the oracle revision c37af7d, and `.ref/UnityPy`); otherwise use `${TMPDIR:-/tmp}/uar-ref/{assetstudio,UnityPy}` as `implement-issue` clones them. Never read or search `@arkntools/unity-js` (AGPL-3.0, rule R1). Never copy C# into the repository (R2).
+The references are clones outside the repository: the question or your task names their paths (in a waves run `<primary checkout>-ref/assetstudio` at the oracle revision c37af7d, and `<primary checkout>-ref/UnityPy`); otherwise use `${TMPDIR:-/tmp}/uar-ref/{assetstudio,UnityPy}` as `implement-issue` clones them. Never read or search `@arkntools/unity-js` (AGPL-3.0, rule R1). Never copy C# into the repository (R2).
 
 Find the symbol with `rg --files -g '<Name>.cs'` or an exact `rg -n`, then read targeted ranges only. AssetStudio is the source of truth; where UnityPy differs, report both.
 

@@ -1,7 +1,7 @@
 {
   "tracks": ["A", "B"],
   "exclusions": "docs PR #181; oracle or licence decisions still open: #259, #260, #241; #160 (no native Rotate90 fixture yet); trigger-gated #69, #50, #49, #51, #130; epics #46, #47, #48, #52",
-  "env": "- Machine: Unity editors on the Windows host, called from WSL with Windows paths for -projectPath/-logFile (fixtures/BUILDING.md section 2): 2019.4.41f2 /mnt/c/Program Files/Unity/Hub/Editor/2019.4.41f2/Editor/Unity.exe, 2020.3.30f1 /mnt/e/Unity/Hub/2020.3.30f1/Editor/Unity.exe, 6000.3.26f1 /mnt/e/Unity/Hub/6000.3.26f1/Editor/Unity.exe, 6000.6.4f1 /mnt/c/Program Files/Unity/Hub/Editor/6000.6.4f1/Editor/Unity.exe. Fixture projects live in C:\\Users\\fatal\\AppData\\Local\\Temp\\uar-*; build a fresh copy once per lane. AssetStudio harness: --dotnet \"/mnt/c/Program Files/dotnet/dotnet.exe\" with a --project under /mnt/c/.",
+  "env": "- Machine (fill in at plan time from the machine notes): Unity editors, called with Windows paths for -projectPath/-logFile (fixtures/BUILDING.md section 2): 2019.4.41f2 <Unity.exe path>, 2020.3.30f1 <Unity.exe path>, 6000.3.26f1 <Unity.exe path>, 6000.6.4f1 <Unity.exe path>. Fixture projects: <fixture project dir>; build a fresh copy once per lane. AssetStudio harness: --dotnet <Windows dotnet.exe> with a --project under <Windows scratch dir>.",
   "waves": [
     {
       "name": "1",

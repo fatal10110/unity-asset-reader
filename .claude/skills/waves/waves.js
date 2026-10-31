@@ -15,17 +15,20 @@ export const meta = {
 // Arguments (see SKILL.md): {run, role: 'track'|'merger'|'helper', track, plan, tool, ...}
 // ---------------------------------------------------------------------------
 const A = args || {}
-const ROOT = A.root || '/home/zorg/workspace/texture2ddecoder-wasm'
+// The primary checkout (absolute). Lane worktrees and run state live under its .claude/worktrees/;
+// the upstream clones live next to it, outside the repository (R2).
+const ROOT = A.root
 const GH_REPO = A.repo || 'fatal10110/unity-asset-reader'
 const WT = ROOT + '/.claude/worktrees'
-const REF = A.ref || WT + '/.ref'
+const REF = A.ref || ROOT + '-ref'
+const WAVES_ROOT = A.wavesRoot || WT + '/.waves'
 const RUN = A.run
 const ROLE = A.role === 'broker' ? 'helper' : (A.role || 'track')
 const PLAN = A.plan || {}
 const TRACKS = PLAN.tracks || []
 const TRACK = A.track
 const TOOL = A.tool || ROOT + '/scripts/agent-tools/wave_mail.py'
-const RUNDIR = (A.wavesRoot || WT + '/.waves') + '/' + RUN
+const RUNDIR = WAVES_ROOT + '/' + RUN
 // impl/review: null = the session model; a lane's implModel/reviewModel overrides it for that lane.
 const M = Object.assign({ merge: 'haiku', coord: 'haiku', deliver: 'haiku', scout: 'haiku', runner: 'haiku', brief: 'sonnet', impl: null, review: null, lookup: null, researcher: null }, A.models || {})
 // Slim agent types (.claude/agents/wave-*.md): each role gets only the tools it uses, so no agent
@@ -51,7 +54,6 @@ const skillRef = name => `the project skill \`${name}\` (Read ${SKILLS}/${name}/
 const SLOTS = A.slots || 2
 const LANES = A.lanesPerTrack || Math.max(1, Math.floor(SLOTS / 2))
 const MAX_ROUNDS = A.maxRounds || 8
-const REVIEW_CI_FIXES = A.reviewCiFixes !== false
 const WAIT_CALLS = A.waitCalls || 6
 const TAKE_CALLS = A.takeCalls || 6
 const MAX_IDLE_MIN = A.maxIdleMin || 240
@@ -72,6 +74,7 @@ let STOPPING = false
 const FINAL = ['merged', 'unresolved', 'stalled', 'merge_blocked', 'failed', 'stopped', 'no_change', 'blocked']
 
 if (!RUN) throw new Error('args.run is required')
+if (!ROOT || !ROOT.startsWith('/')) throw new Error('args.root (the absolute path of the primary checkout) is required')
 if (!['track', 'merger', 'helper'].includes(ROLE)) throw new Error('args.role must be track, merger or helper')
 if (ROLE === 'track' && !TRACKS.includes(TRACK)) throw new Error(`args.track ${TRACK} is not in plan.tracks ${TRACKS.join(',')}`)
 for (const L of (PLAN.waves || []).flatMap(w => w.lanes || [])) {
@@ -80,10 +83,13 @@ for (const L of (PLAN.waves || []).flatMap(w => w.lanes || [])) {
 if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(RUN) || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(EPOCH)) throw new Error('args.run and args.epoch must be simple names')
 if (LANES * 2 > SLOTS) log(`warning: ${LANES} lanes need ${LANES * 2} agent slots but slots=${SLOTS}; lanes will stall on the concurrency cap`)
 
-const MB = `python3 ${TOOL}`
+// The tools take the checkout, the run state and the references from these variables, so they
+// work where the prompts say even when the args move them.
+const TOOL_ENV = `WAVES_REPO=${ROOT} WAVES_ROOT=${WAVES_ROOT} WAVES_REF=${REF}`
+const MB = `${TOOL_ENV} python3 ${TOOL}`
 const AGENT_TOOLS = TOOL.replace(/\/wave_mail\.py$/, '')
-const LOOK = `python3 ${AGENT_TOOLS}/look.py`
-const HEAVY = `${AGENT_TOOLS}/heavy`
+const LOOK = `${TOOL_ENV} python3 ${AGENT_TOOLS}/look.py`
+const HEAVY = `${TOOL_ENV} ${AGENT_TOOLS}/heavy`
 const LANE_DIR = slug => `${RUNDIR}/lanes/${slug}`
 const ALL_LANES = (PLAN.waves || []).flatMap(w => w.lanes || [])
 const LANE_BY = Object.fromEntries(ALL_LANES.map(l => [l.slug, l]))
@@ -121,7 +127,7 @@ Environment rules (all agents):
 - Working directory: start every shell call with \`cd <worktree> &&\` (the worktree ROOT, never a subdirectory) and write every path root-relative (packages/..., fixtures/..., scripts/...), or use \`git -C <worktree>\` / \`--root <worktree>\`. Agent tools are always called by the absolute paths in this prompt.
 - Never guess a path. When you do not know a file's location, find it in the same call: \`rg --files <dir> -g '<Name>*'\` (or ${LOOK} rgl:...). "No such file" means look it up, not try a variant.
 - Path map (relative to the worktree root): package sources packages/<core|texture|node|mesh|audio|spine|shader>/src/ (core's class readers in packages/core/src/classes/, its exports in packages/core/src/index.ts), tests packages/<pkg>/tests/*.test.ts, the decoder packages/decoder/ (do not touch unless the issue says so, R13), fixtures and goldens fixtures/ (how each bundle was built: fixtures/BUILDING.md, one section per fixture set), oracle and guard scripts scripts/ (their tests scripts/tests/), release notes CHANGELOG.md (one section per package), RELEASING.md.
-- Upstream references (read only, cloned outside the repo; never copy C# into the repo or compile it, R2): AssetStudio at ${REF}/assetstudio (checked out at the pinned oracle revision c37af7d), UnityPy at ${REF}/UnityPy. Use them instead of cloning again. Never open or search for @arkntools/unity-js (R1).
+- Upstream references (read only, cloned outside the repository, next to the primary checkout; never copy C# into the repo or compile it, R2): AssetStudio at ${REF}/assetstudio (checked out at the pinned oracle revision c37af7d), UnityPy at ${REF}/UnityPy. Use them instead of cloning again. Never open or search for @arkntools/unity-js (R1).
 - GitHub: the gh CLI, always with \`-R ${GH_REPO}\` (or repos/${GH_REPO}/... for gh api), Bash timeout 300000, up to two retries on HTTP 401 or a network error. Issues: \`gh issue view <n> -R ${GH_REPO} --json number,title,body,labels,state,comments\`. Read each issue once per agent and keep what you need in your notes or worklog.
 - Cost model: every tool call re-sends your WHOLE context (often 100k+ tokens), so the number of calls matters far more than their size. Put every lookup you need right now into ONE call, and never spend a call on something another call can carry.
 - Batched lookups: ${LOOK} <spec>... (run from the worktree, or pass --root <worktree>) does several in one call with capped output:
@@ -308,8 +314,8 @@ LOOP:
    - Action required and N >= ${roundLimit}: send final {"reason":"unresolved"} --set status=unresolved and return status unresolved.
    - Clean: go to step 4.
 3. On ready (round N+1), by reason:
-   - review-fix${REVIEW_CI_FIXES ? ', ci-fix' : ''}, or conflict with "semantic": true: a DELTA re-review. Diff your last reviewed head to the new head in the review worktree; verify each earlier item is fixed; rerun the full verify (and the oracle reruns if the delta touches fixtures or oracle scripts); review the delta in full and other code only where the delta reaches. Read the author's thread replies; do not re-raise a finding rebutted with concrete rule, plan or upstream evidence unless you can show the rebuttal wrong with better evidence, and do not add nits you could have raised earlier unless they are real defects. Post the re-review on GitHub, then step 2.
-   - ${REVIEW_CI_FIXES ? '' : 'ci-fix, or '}conflict with "semantic": false: no review; go to step 4.
+   - review-fix, ci-fix, or conflict with "semantic": true: a DELTA re-review. Diff your last reviewed head to the new head in the review worktree; verify each earlier item is fixed; rerun the full verify (and the oracle reruns if the delta touches fixtures or oracle scripts); review the delta in full and other code only where the delta reaches. Read the author's thread replies; do not re-raise a finding rebutted with concrete rule, plan or upstream evidence unless you can show the rebuttal wrong with better evidence, and do not add nits you could have raised earlier unless they are real defects. Post the re-review on GitHub, then step 2.
+   - conflict with "semantic": false: a RESOLUTION re-review, because every change that reaches main is reviewed, conflict resolutions included. \`git -C ${RW} show --remerge-diff <the merge commit>\` shows only what was resolved by hand: check that it keeps both sides' intent (two CHANGELOG entries, both exports), and that a golden in it came from its oracle; rerun the full verify. Post it on GitHub as a short review, then step 2. If the resolution changed the PR's logic after all, treat it as a delta re-review.
 4. Merge: ${MB} state --run ${RUN} --lane ${L.slug} --set stage=merge , then ask for the merge with head = the head of the latest ready you accepted (the head you reviewed, or for a ready you took to merge without review, the head it names), and act on the answer:
    - merged: send final {"reason":"merged","merge_sha":"<sha>"} --set status=merged; return status merged.
    - ci_failed: send ci {"file":"<file>","head":"<head>"} --set stage=ci-fix; wait (step 3).
@@ -403,12 +409,12 @@ where the object is {"status":"merged|conflict|ci_failed|head_moved|merge_blocke
 PR state and CI come from two compact commands (use them instead of polling gh pr view):
   ${MB} pr-state --pr <n>   -> {state, merged, merge_sha, draft, head, mergeable_state, behind_by}
   ${MB} ci-wait --run ${RUN} --broker merge --head <sha> --wait 570   -> waits in-process; {state: success|failure|pending|error, failed: [{name, conclusion, run_id, job_id}], pending, missing}
-1. Head check: ${MB} pr-state --pr <n>. If the PR is already MERGED (an earlier merge agent merged it, then stopped before answering), do step 5's checks and answer merged with its merge SHA. If the PR head is the requested head, continue. Otherwise git -C ${ROOT} fetch origin ${branch} main and list the extra commits: git -C ${ROOT} log --format='%H %P %s' <requested head>..origin/${branch} . Continue only if the requested head is an ancestor (git -C ${ROOT} merge-base --is-ancestor <requested head> origin/${branch}) and every listed commit is a merge commit (two parent hashes) whose subject starts with "Merge branch 'main'": a branch update an earlier merge attempt made. Anything else is a push the reviewer has not seen: answer head_moved with head = the PR head.
-2. Update: only when pr-state shows behind_by > 0: gh api -X PUT repos/${GH_REPO}/pulls/<n>/update-branch -f expected_head_sha=<head>, then pr-state again until the head changes (at most 5 tries, ${MB} pause --secs 20 between them) for the new head. A 422 whose message names a merge conflict: answer conflict with that message in notes. behind_by 0: continue.
+1. Head check (the requested head is always the one in the request file): ${MB} pr-state --pr <n>. If the PR is already MERGED (an earlier merge agent merged it, then stopped before answering), do step 5's checks and answer merged with its merge SHA. If the PR head is the requested head, continue. Otherwise git -C ${ROOT} fetch origin ${branch} main and list the extra commits: git -C ${ROOT} log --format='%H %P %cn%x09%s' <requested head>..origin/${branch} . Continue only if the requested head is an ancestor (git -C ${ROOT} merge-base --is-ancestor <requested head> origin/${branch}) and every listed commit is a branch update GitHub made: two parent hashes, committer exactly GitHub, and subject exactly "Merge branch 'main' into ${branch}". Anything else (a local "Merge branch 'main' of https://..." included) is a push the reviewer has not seen: answer head_moved with head = the PR head.
+2. Update: only when pr-state shows behind_by > 0: gh api -X PUT repos/${GH_REPO}/pulls/<n>/update-branch -f expected_head_sha=<head>, then pr-state again until the head changes (at most 5 tries, ${MB} pause --secs 20 between them), then go back to step 1 for the new head, which must pass its check. A 422 whose message names a merge conflict: answer conflict with that message in notes. behind_by 0: continue.
 3. CI: ${MB} ci-wait --run ${RUN} --broker merge --head <head> --wait 570 ; while it prints state pending, run it again (at most 10 runs, about 90 minutes; longer: answer retry). It returns success only when every check run on the head finished green and the changes, reader and decoder checks are present (a job its path filter skipped counts). state error: run it once more, then fall back to gh pr checks <n> -R ${GH_REPO}.
    On a failure: list the failing jobs and read their logs (gh run view <run-id> -R ${GH_REPO} --log-failed | tail -n 200). It is a flake only if the failing test has an open flaky-test issue (gh issue list -R ${GH_REPO} --state open --search 'flaky <TestName>') or it fails the same way on the latest main CI run (gh run list -R ${GH_REPO} --branch main --workflow CI --limit 1); then rerun the failed jobs once (gh run rerun <run-id> -R ${GH_REPO} --failed), comment the test name on that issue (or file one labelled area:infra), and go back to waiting. Otherwise write ${D}/ci/c<next number>.md (create the directory if needed) with the head sha, each failing check, the failing test names and about 40 log lines per failure, and answer ci_failed with file = that path and head = the sha.
    Checks that never start or fail for GitHub Actions infrastructure reasons (cancelled, queued > 30 min, runner errors) twice in a row: answer retry with notes "ci outage".
-4. Merge: never edit the PR title or body (its Closes/Part of lines are the implementation agent's decision). If the PR is a draft, mark it ready (gh pr ready <n> -R ${GH_REPO}). gh pr merge <n> -R ${GH_REPO} --squash --match-head-commit <the head verified green>. "Head branch was modified" or "not up to date": back to step 2 (at most 3 times). If the permission system denies the merge, do not try another route: answer merge_blocked.
+4. Merge: never edit the PR title or body (its Closes/Part of lines are the implementation agent's decision). If the PR is a draft, mark it ready (gh pr ready <n> -R ${GH_REPO}). gh pr merge <n> -R ${GH_REPO} --squash --match-head-commit <the head verified green>. "Head branch was modified" or "not up to date": back to step 1, still with the requested head (at most 3 times). If the permission system denies the merge, do not try another route: answer merge_blocked.
 5. After the merge: the merge SHA from pr-state; git -C ${ROOT} push origin --delete ${branch}; confirm every "Closes" issue is closed (gh issue view <i> -R ${GH_REPO} --json state; close any that did not auto-close, commenting the merge SHA); ${MB} state --run ${RUN} --lane ${slug} --set status=merged --set merge_sha=<sha> ; answer merged with merge_sha.
 Return: status, answered (true once the answer command printed "written": true), merge_sha, notes.`
 }

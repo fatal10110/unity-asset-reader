@@ -97,8 +97,11 @@ calls, not their size. The prompts point every agent at:
   locally, through `heavy` (the skills' `npm ci && npm run verify`). Scoped `npm test -w <pkg>`
   while iterating. CI reruns it on Node 20/22 and the floors on every push.
 - **The texture decode tests need the decoder WASM**, which needs Docker. With a shared build in
-  `.claude/worktrees/.ref/decoder-wasm/` (preflight), every worktree gets a copy and the tests run
-  locally; without it they skip and CI's `decoder` job is their only gate.
+  `<ref>/decoder-wasm/` (preflight), every worktree gets a copy and the tests run locally; without
+  it they skip and CI's `decoder` job is their only gate.
+- **Every push is reviewed**, CI fixes and conflict resolutions included: a conflict the
+  implementation agent marks not semantic still gets a resolution review
+  (`git show --remerge-diff` of the merge), only a cheaper one.
 - **CI cannot run the oracles or Unity.** A lane that changes fixtures, goldens or oracle scripts
   regenerates the goldens with the oracle commands of `fixtures/BUILDING.md` (R12) and names them
   on an "Oracle runs (local only; CI cannot run them)" line of the PR body. The reviewer reruns
@@ -179,9 +182,10 @@ approved a grouping in this conversation.
 - `<tool>` is the absolute path of `scripts/agent-tools/wave_mail.py` in the checkout this skill
   was loaded from. Until this skill is on `main`, that checkout is the worktree that has it, not
   the primary checkout.
-- Upstream references, shared by every lane (outside the repo, R2):
+- Upstream references, shared by every lane, in `<ref>` = `<primary checkout>-ref` (a sibling
+  directory, outside the repository: R2):
   ```bash
-  REF=<primary checkout>/.claude/worktrees/.ref; mkdir -p "$REF"
+  REF=<primary checkout>-ref; mkdir -p "$REF"
   [ -d "$REF/assetstudio" ] || git clone -q https://github.com/Razviar/assetstudio "$REF/assetstudio"
   git -C "$REF/assetstudio" checkout -q --detach c37af7dfcdafee93e33b5da9f0285c97998d6ae3
   [ -d "$REF/UnityPy" ] || git clone -q --depth 1 https://github.com/K0lb3/UnityPy "$REF/UnityPy"
@@ -204,15 +208,16 @@ approved a grouping in this conversation.
 ## Step 3: launch
 
 Launch one Workflow per track, one merger and one helper broker, all in the same turn, with the
-same `run`, `plan` and `tool`. Pass `scriptPath` as the absolute path of `waves.js`. If the tool
+same `run`, `root`, `plan` and `tool`. `root` is the absolute path of the primary checkout
+(`dirname "$(git rev-parse --path-format=absolute --git-common-dir)"`). Pass `scriptPath` as the absolute path of `waves.js`. If the tool
 refuses a path outside the session directory, Read the file once and pass its text as `script`;
 then reuse the persisted path that result returns.
 
 ```text
-Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, role: "merger", plan, tool}})
-Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, role: "helper", plan, tool}})
-Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, role: "track", track: "A", plan, tool}})
-Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, role: "track", track: "B", plan, tool}})
+Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, root, role: "merger", plan, tool}})
+Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, root, role: "helper", plan, tool}})
+Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, root, role: "track", track: "A", plan, tool}})
+Workflow({scriptPath: "<skill dir>/waves.js", args: {run, epoch, root, role: "track", track: "B", plan, tool}})
 ```
 
 `plan` is the parsed plan object (a JSON value, not a string). `epoch` names this launch: `"1"` for
@@ -222,13 +227,13 @@ Optional args:
 
 | Arg | Default | Meaning |
 | --- | --- | --- |
-| `root` | `/home/zorg/workspace/texture2ddecoder-wasm` | the primary checkout; worktrees and run state live under its `.claude/worktrees/` |
+| `root` | required | the primary checkout; lane worktrees live under its `.claude/worktrees/` |
 | `repo` | `fatal10110/unity-asset-reader` | the GitHub repository |
-| `ref` | `<root>/.claude/worktrees/.ref` | the upstream clones and the oracle venv |
+| `ref` | `<root>-ref` | the upstream clones, the oracle venv and the shared decoder WASM, outside the repository |
+| `wavesRoot` | `<root>/.claude/worktrees/.waves` | where run state lives |
 | `slots` | 2 | the per-workflow agent cap; sets `lanesPerTrack` = floor(slots/2) |
 | `lanesPerTrack` | from `slots` | lanes running at once in one track |
 | `maxRounds` | 8 | review rounds per PR before the lane ends `unresolved` |
-| `reviewCiFixes` | true | a CI fix gets a delta review before the next merge attempt |
 | `waitCalls` | 6 | recv calls (~9.5 min each) per first-push watcher agent |
 | `takeCalls` | 6 | take polls (~9.5 min each) per broker poller agent before it returns |
 | `maxIdleMin` | 240 | minutes without a mailbox message before a lane ends `stalled` |

@@ -11,7 +11,7 @@ background: true
 
 Perform one read-only investigation of upstream behavior and report what the code does on the bytes.
 
-The references are clones outside the repository: the question or your task names their paths (in a waves run `<primary checkout>/.claude/worktrees/.ref/assetstudio` at the oracle revision c37af7d, and `.ref/UnityPy`); otherwise use `${TMPDIR:-/tmp}/uar-ref/{assetstudio,UnityPy}`. Never read or search `@arkntools/unity-js` (AGPL-3.0, rule R1). Never copy C# into the repository (R2). AssetStudio is the source of truth (plan §5); UnityPy is the parsing oracle, so where the two differ, say where and which one the goldens follow.
+The references are clones outside the repository: the question or your task names their paths (in a waves run `<primary checkout>-ref/assetstudio` at the oracle revision c37af7d, and `<primary checkout>-ref/UnityPy`); otherwise use `${TMPDIR:-/tmp}/uar-ref/{assetstudio,UnityPy}`. Never read or search `@arkntools/unity-js` (AGPL-3.0, rule R1). Never copy C# into the repository (R2). AssetStudio is the source of truth (plan §5); UnityPy is the parsing oracle, so where the two differ, say where and which one the goldens follow.
 
 Use exact `rg` for names and `rg --files` for files; read targeted ranges. Follow every call that affects the bytes read or written (alignment helpers, version checks, platform switches, endianness, the reader's base class).
 
