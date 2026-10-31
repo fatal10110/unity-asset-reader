@@ -104,9 +104,10 @@ jobs:
 
       # In the plan's order (dependencies first). A name@version already on npm is skipped, so a
       # run that failed halfway can be re-run. --ignore-scripts: the gate above ran the full verify
-      # and built every dist/; each reader package's prepublishOnly would rerun it per package. No token: npm authenticates with the job's OIDC
-      # token and adds provenance by itself. The NPM_TOKEN secret exists only for the first
-      # publish (the bootstrap in RELEASING.md) and is deleted right after it.
+      # and built every dist/; each reader package's prepublishOnly would rerun it per package.
+      # No token: npm authenticates with the job's OIDC token and adds provenance by itself. The
+      # NPM_TOKEN secret exists only for the first publish (the bootstrap in RELEASING.md) and is
+      # deleted right after it.
       - name: Publish
         id: publish
         if: steps.gate.outputs.packages != ''
