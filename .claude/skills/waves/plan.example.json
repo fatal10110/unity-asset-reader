@@ -1,0 +1,31 @@
+{
+  "tracks": ["A", "B"],
+  "exclusions": "docs PR #181; oracle or licence decisions still open: #259, #260, #241; #160 (no native Rotate90 fixture yet); trigger-gated #69, #50, #49, #51, #130; epics #46, #47, #48, #52",
+  "env": "- Machine (fill in at plan time from the machine notes): Unity editors, called with Windows paths for -projectPath/-logFile (fixtures/BUILDING.md section 2): 2019.4.41f2 <Unity.exe path>, 2020.3.30f1 <Unity.exe path>, 6000.3.26f1 <Unity.exe path>, 6000.6.4f1 <Unity.exe path>. Fixture projects: <fixture project dir>; build a fresh copy once per lane. AssetStudio harness: --dotnet <Windows dotnet.exe> with a --project under <Windows scratch dir>.",
+  "waves": [
+    {
+      "name": "1",
+      "lanes": [
+        {"slug": "261-float-core", "track": "A", "issues": [261],
+         "note": "Move formatSingle/formatSingleInvariant and the .NET table test into core; mesh and shader import them. No version change in this PR (RELEASING.md): CHANGELOG entries under Unreleased.", "hot": ["core-exports"]},
+        {"slug": "255-resolve-pointer", "track": "A", "issues": [255],
+         "note": "One core helper replacing the copies in texture/src/sprite.ts and spine/src/skeletons.ts, same errors and messages.", "hot": ["core-exports"]},
+        {"slug": "230-variant-cross-check", "track": "A", "issues": [230],
+         "note": "No Unity rebuild: cross-check script + .NET harness on the existing 6000.6 variant fixture, then the byte-exact test."},
+        {"slug": "253-mesh-fixtures", "track": "B", "issues": [253, 257], "branch": "feature/253-mesh-fixtures",
+         "note": "One PR (approved): both add a mesh to the same 2019.4 and 6000.x fixture projects, so one Unity build, one golden regeneration and one update of the core Mesh test counts. #257 is the baseVertex deviation from upstream (record it next to the golden)."},
+        {"slug": "251-adpcm-fixtures", "track": "B", "issues": [251],
+         "note": "ADPCM clips in the section 11 audio fixtures; WAV goldens from AssetStudio."},
+        {"slug": "254-spine-split", "track": "B", "issues": [254],
+         "note": "Split bundle and stub atlas type in section 18; lands before #255's helper ideally, which this lane's tests then guard."}
+      ]
+    },
+    {
+      "name": "2",
+      "lanes": [
+        {"slug": "252-float-fast-path", "track": "A", "issues": [252], "deps": ["261-float-core"],
+         "note": "The formatter now lives in core (#261): add the fast path there. Wave 1's #253 OBJ goldens (scientific notation, fractional floats) are the end-to-end guard. The .NET 8 comparison of 1M+ floats runs outside the repo (R2)."}
+      ]
+    }
+  ]
+}
