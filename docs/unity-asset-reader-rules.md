@@ -2,7 +2,7 @@
 
 Condensed, checkable form of [the plan](unity-asset-reader-plan.md) and [CONTRIBUTING](../CONTRIBUTING.md). The plan wins on conflict; if the two disagree, fix this file in the same PR.
 
-Used by humans and by the `.claude/skills/` workflows (`implement-issue`, `review-implementation`, `fix-pr-comments`). Each rule has an ID so reviews can cite it.
+Used by humans and by the `.claude/skills/` workflows (`implement-issue`, `review-implementation`, `fix-pr-comments`, and `waves`, which runs the other three for several issues at once). Each rule has an ID so reviews can cite it.
 
 ## Hard rules (a violation blocks merge)
 
@@ -64,4 +64,4 @@ From the repo root. `verify` = build every package (TS only, no Docker) + test +
 - Commits: imperative subject ≤ 50 chars, optional `type:` prefix (`feat:`, `fix:`, `docs:`, `test:`, `chore:`), body explains why. One logical change per commit.
 - One issue per PR. PR body contains `Closes #<issue>`, an Acceptance table (criterion → test or evidence), the verification output summary, and a **Deviations** section (write "None" if none).
 - Versions: every package versions on its own (plan D7). Changing a package's `version` on `main` publishes it (plan D8, [RELEASING.md](../RELEASING.md)), so a version changes only in a release PR, together with that package's `CHANGELOG.md` entry; `scripts/tests/release.test.mjs` fails when the entry is missing. Never change a version in a feature PR.
-- Never push to `main`, never force-push a branch under review, never merge your own PR from a skill.
+- Never push to `main`, never force-push a branch under review, never merge your own PR from a skill. The one exception is `waves`: the user's invocation of it authorizes its merge agent to squash-merge a PR once its review agent found nothing left to fix and CI is green on that head.
