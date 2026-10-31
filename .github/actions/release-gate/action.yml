@@ -43,17 +43,64 @@ runs:
           echo "::notice::To release: ${plan#packages=}"
         fi
 
-    # The gate: the same checks as CI's reader and decoder jobs, with the WASM built from the
-    # pinned emsdk (#57), since the decoder tarball ships it.
-    - if: steps.plan.outputs.packages != ''
+    # The gate: the same checks as CI's reader and decoder jobs (the root `verify`, plus the
+    # WASM built from the pinned emsdk (#57), since the decoder tarball ships it), one step per
+    # package so a failure names its package. Packages in PACKAGE_DIRS order: each test step
+    # builds its package first (`pretest`), after what it depends on.
+    # scripts/tests/release.test.mjs keeps one test step per package.
+    - name: Install
+      if: steps.plan.outputs.packages != ''
       shell: bash
       run: npm ci
-    - if: steps.plan.outputs.packages != ''
+    - name: "decoder: build WASM"
+      if: steps.plan.outputs.packages != ''
       shell: bash
       run: npm run build:wasm
-    - if: steps.plan.outputs.packages != ''
+    - name: "decoder: build"
+      if: steps.plan.outputs.packages != ''
       shell: bash
-      run: npm run verify
-    - if: steps.plan.outputs.packages != ''
+      run: npm run build:rollup
+    - name: "decoder: test"
+      if: steps.plan.outputs.packages != ''
       shell: bash
       run: npm test -w texture2ddecoder-wasm
+    - name: "core: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader
+    - name: "texture: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-texture
+    - name: "node: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-node
+    - name: "mesh: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-mesh
+    - name: "audio: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-audio
+    - name: "spine: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-spine
+    - name: "shader: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-shader
+    - name: Repo script tests
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm run test:scripts
+    - name: Browser-safety check
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm run check:browser
+    - name: No-C# check
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm run check:no-csharp

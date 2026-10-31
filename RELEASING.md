@@ -91,13 +91,15 @@ already on npm is dropped, so a run with nothing left ends green with a notice.
    earlier in the same run satisfies either, naming the package, the range and what npm has.
    Nothing is published then.
 2. **Gate:** `npm ci`, `npm run build:wasm` (Docker, the pinned emsdk of #57; the decoder tarball
-   ships `wasm/`), `npm run verify` with `REQUIRE_WASM=1` (nothing may skip), and
-   `npm test -w texture2ddecoder-wasm`. The submodule is checked out.
-3. **Publish** each package, in order, with `npm publish -w <name> --access public` on Node 22
-   and `npm@^11.5.1` (trusted publishing needs npm CLI 11.5.1 or later and Node 22.14.0 or later,
-   [npm docs](https://docs.npmjs.com/trusted-publishers), checked 2026-09-28). Each reader
-   package's `prepublishOnly` (`npm run verify --prefix ../..`) reruns the gate once more, and
-   the decoder's rebuilds its WASM and bundle. A `name@version` already on npm is skipped.
+   ships `wasm/`), then the root `npm run verify` split into steps with `REQUIRE_WASM=1` (nothing
+   may skip): the decoder's build and tests, one build-and-test step per reader package, the
+   `scripts/tests`, `check:browser` and the no-C# guard. The submodule is checked out.
+3. **Publish** each package, in order, with `npm publish -w <name> --access public
+   --ignore-scripts` on Node 22 and `npm@^11.5.1` (trusted publishing needs npm CLI 11.5.1 or
+   later and Node 22.14.0 or later, [npm docs](https://docs.npmjs.com/trusted-publishers), checked
+   2026-09-28). `--ignore-scripts` skips `prepublishOnly`, which would rerun the whole gate once
+   per package: the tarballs are the `dist/` and `wasm/` the gate built and tested. A
+   `name@version` already on npm is skipped.
 4. **Tag** each package that got published, also when a later one failed: an annotated tag
    `<name>@<version>` (for example `texture2ddecoder-wasm@1.2.3`) on the released commit, pushed
    by a separate `tag` job, the only one with `contents: write`. An existing tag is skipped. Tags
