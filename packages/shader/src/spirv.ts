@@ -15,7 +15,8 @@
 // DisassemblyError with the message .NET 8 gives it, as AssetStudio writes
 // that message into the text.
 
-import { formatSingle } from "./float.js";
+import { formatSingle } from "unity-asset-reader";
+
 import { ENUMS, INSTRUCTIONS, type GrammarEnum, type OperandCode } from "./grammar.js";
 import { decodeUtf8, DisassemblyError, StreamReader } from "./net.js";
 

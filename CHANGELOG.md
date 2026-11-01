@@ -29,6 +29,12 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
+### 1.3.0 - Unreleased
+
+- `formatSingle(value)` and `formatSingleInvariant(value)` write a float32 as .NET 8's
+  `float.ToString()` does under en-US and invariant culture. They moved here from the mesh and
+  shader packages, which both need them (#261).
+
 ### 1.2.0 - 2026-10-29
 
 - A hand-written `Mesh` reader, `readMesh`, for Unity 2019.1 to 6000.6 (#235), the supported
@@ -246,6 +252,11 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-mesh
 
+### 1.0.1 - Unreleased
+
+- Floats are written through core's `formatSingle` instead of the package's own copy; the output
+  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
+
 ### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `MeshData`.
@@ -286,6 +297,11 @@ First release. Peer: `unity-asset-reader@^1`.
   textures on demand (4.1+) and an atlas type without `atlasFile` throw `UnsupportedError` (#238).
 
 ## unity-asset-reader-shader
+
+### 1.0.1 - Unreleased
+
+- Floats are written through core's `formatSingle` instead of the package's own copy; the output
+  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
 
 ### 1.0.0 - 2026-10-29
 
