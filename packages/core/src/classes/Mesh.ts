@@ -198,8 +198,9 @@ export interface MeshData extends Mesh {
   /**
    * Upstream `m_Indices`, split by submesh: each submesh's triangles, three
    * indices each, with strips and quads turned into triangle lists (strips
-   * without their degenerate triangles). As upstream's, the indices are not
-   * offset by `baseVertex`.
+   * without their degenerate triangles). Each index is offset by its
+   * submesh's `baseVertex`, so it points into `vertices` as it is; upstream's
+   * (AssetStudio's and UnityPy's) are not.
    */
   indices: Uint32Array[];
 }
@@ -844,10 +845,38 @@ class Decoder {
   /**
    * Upstream `GetTriangles`: each submesh's indices as a triangle list. A
    * strip drops its degenerate triangles and flips every other one's winding;
-   * quads split along their first diagonal.
+   * quads split along their first diagonal. Unlike upstream's, each index is
+   * offset by its submesh's `baseVertex`.
+   *
+   * @throws {CorruptError} for an index a `baseVertex` offsets past the
+   * mesh's vertices.
    */
   triangles(): Uint32Array[] {
-    return this.mesh.m_SubMeshes.map((subMesh, i) => this.subMeshTriangles(subMesh, i));
+    return this.mesh.m_SubMeshes.map((subMesh, i) => this.offsetTriangles(subMesh, i));
+  }
+
+  /**
+   * One submesh's triangles, each index plus the submesh's `baseVertex`,
+   * which Unity adds when it draws (2017.3+, so always set at the 2019.1 floor).
+   */
+  private offsetTriangles(subMesh: SubMesh, i: number): Uint32Array {
+    const triangles = this.subMeshTriangles(subMesh, i);
+    const base = subMesh.baseVertex ?? 0;
+    // Without an offset, upstream's indices as they are, unchecked as upstream's.
+    if (base === 0) return triangles;
+    // A copy: a triangle list is a view of the index buffer.
+    const out = new Uint32Array(triangles.length);
+    for (let k = 0; k < triangles.length; k++) {
+      const index = triangles[k]! + base;
+      if (index >= this.vertexCount) {
+        throw new CorruptError(
+          `${this.owner} submesh ${i}: index ${index} (${triangles[k]} + baseVertex ${base}) ` +
+            `is past the ${this.vertexCount} vertices`,
+        );
+      }
+      out[k] = index;
+    }
+    return out;
   }
 
   /** One submesh's part of upstream's `GetTriangles`. */

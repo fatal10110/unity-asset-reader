@@ -279,7 +279,7 @@ readers keep the older layouts they already had.
 | `VideoClip` (`VideoClipFields`) | `width`, `height`, `frameRate`, `frameCount` and `videoData`: the video file as imported (e.g. WebM, MP4), not decoded | 5.6 | Yes |
 | `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
 | `MovieTexture` (`MovieTextureFields`) | `movieData` (the Ogg Theora file), `loop`, `audioClip` | 3.4 | No, unit tests only |
-| `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
+| `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles, offset by its `baseVertex`, which AssetStudio leaves out), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
 
 "Yes" is all three fixture editors. Every other class (`GameObject`, `Transform`, `AnimationClip`,
 ...) comes from its type tree. In a bundle without type trees, `obj.read()`
@@ -361,7 +361,8 @@ Each of these throws `UnsupportedError` naming what it found:
   `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
 - A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
   format Unity does not define, bone weights in an integer format or more than four per vertex
-  (AssetStudio throws for each). `readMesh()` still reads its fields.
+  (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
+  `baseVertex` takes an index past the vertices throws `CorruptError`.
 
 Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
 image encoding. Texture and sprite pixels, and PNG encoding, are in
