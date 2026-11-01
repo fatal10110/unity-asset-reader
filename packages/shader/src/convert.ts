@@ -4,6 +4,8 @@
 import {
   CorruptError,
   decompressLz4,
+  formatSingle,
+  formatSingleInvariant,
   UnsupportedError,
   type SerializedPass,
   type SerializedProgram,
@@ -17,7 +19,6 @@ import {
   type SerializedTagMap,
   type Shader,
 } from "unity-asset-reader";
-import { formatSingle, formatSingleInvariant } from "./float.js";
 import { decodeUtf8, DisassemblyError, StreamReader } from "./net.js";
 import { decodedBufferSize, decodeSmolv } from "./smolv.js";
 import { disassemble } from "./spirv.js";

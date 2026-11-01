@@ -1,9 +1,7 @@
-// Copied from unity-asset-reader-mesh's src/float.ts (#239), which a feature package cannot
-// import (R14).
-//
 // How .NET (Core 3.0 and later) writes a `float` with `ToString()` under the
 // en-US culture, which is what AssetStudio's OBJ export does (`AppendFormat`
-// with `{0}` on the culture of its export thread): the shortest decimal that
+// with `{0}` on the culture of its export thread) and what its ShaderConverter
+// writes for property defaults and render state: the shortest decimal that
 // reads back as the same float32, in fixed or scientific notation.
 //
 // Checked against .NET 8 on 2.2 million floats (every exponent at and around

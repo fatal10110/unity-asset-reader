@@ -52,6 +52,7 @@ packages/
       serialized/SerializedFile.ts TypeTree.ts TypeTreeReader.ts CommonString.ts ClassID.ts ObjectReader.ts
       classes/   Object NamedObject PPtr AssetBundle TextAsset Texture2D Sprite SpriteAtlas
                  MonoBehaviour MonoScript AudioClip Material Mesh ...     (field readers only, no pixel work)
+      float.ts   formatSingle(), formatSingleInvariant(): float32 as .NET text (mesh, shader)
       env.ts     load(), resource resolver (.resS / .resource lookup across loaded files)
       asset.ts   Asset (plain data + `type` discriminant) for env.assets() / env.get()
       open.ts    open(): fetch / Blob / Response → load(); the only async in core
@@ -64,7 +65,7 @@ packages/
     src/         index.ts   fs + dir scan + sidecar resolution
     tests/
   mesh/                 npm: unity-asset-reader-mesh     isomorphic; deps: core (peer)   (M6, #239)
-    src/         obj.ts (OBJ writer) gltf.ts (glTF .glb writer) float.ts (.NET float text) index.ts
+    src/         obj.ts (OBJ writer) gltf.ts (glTF .glb writer) index.ts
     tests/
   audio/                npm: unity-asset-reader-audio    isomorphic, sync; deps: core (peer)   (M6, #236)
     src/         fsb5.ts adpcm.ts wav.ts index.ts   FSB5 → WAV
@@ -73,7 +74,7 @@ packages/
     src/         skeletons.ts (spine-unity objects by type tree field name) index.ts
     tests/
   shader/               npm: unity-asset-reader-shader   isomorphic, sync; deps: core (peer)   (M6, #242)
-    src/         convert.ts (ShaderConverter) smolv.ts spirv.ts grammar.ts (CSspv) float.ts net.ts index.ts
+    src/         convert.ts (ShaderConverter) smolv.ts spirv.ts grammar.ts (CSspv) net.ts index.ts
     tests/
   decoder/              npm: texture2ddecoder-wasm       standalone WASM texture decoder, own version line
     src/ tests/ scripts/ examples/ texture2ddecoder/ (submodule) wasm_bindings.cpp

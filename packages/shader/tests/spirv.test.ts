@@ -7,7 +7,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { formatSingle } from "../src/float.js";
+import { formatSingle } from "unity-asset-reader";
+
 import { DisassemblyError } from "../src/net.js";
 import { disassemble } from "../src/spirv.js";
 
