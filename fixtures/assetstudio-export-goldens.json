@@ -192,6 +192,42 @@
         }
       }
     },
+    "editor/2019.4.41f2/lz4-notypetree/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "-3167796404339944738": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "2118581737049998852": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/lz4-notypetree/audio": {
       "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
         "8082097006500496530": {
@@ -310,6 +346,42 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "-3167796404339944738": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "2118581737049998852": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
           }
         }
       }
@@ -1754,6 +1826,42 @@
         }
       }
     },
+    "editor/2019.4.41f2/stripped/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "-3167796404339944738": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "2118581737049998852": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/stripped/audio": {
       "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
         "8082097006500496530": {
@@ -1926,6 +2034,42 @@
         }
       }
     },
+    "editor/2020.3.30f1/lz4-notypetree/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "2295068750607241059": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "4635772262332350208": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        }
+      }
+    },
     "editor/2020.3.30f1/lz4-notypetree/audio": {
       "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
         "-5417295752519730674": {
@@ -2044,6 +2188,42 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "2295068750607241059": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "4635772262332350208": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
           }
         }
       }
@@ -2496,6 +2676,42 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        }
+      }
+    },
+    "editor/2020.3.30f1/stripped/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "2295068750607241059": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a8aaeadcb31846cd6abc0889d885b914224ce1b10d48b1a08e19b2d2520cff01",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        },
+        "4635772262332350208": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "eda748cba260f2d21201148ac8bc65e27f3b4a1d3c6df9914645ea3661913617",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
         }
       }
     },
@@ -4171,6 +4387,78 @@
         }
       }
     },
+    "editor/6000.3.26f1/lz4-notypetree/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "1318902803100645839": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "565a44a4138ef949cf0fae77d4dd5bbb523e4455b5790c3f6ad3bf08db66c775",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        },
+        "5347681364058335587": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "e1deef662b33f5c23463c1669f85bb8fe937ffd0a10eab4570df9edc1e7d0ae9",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/lz4/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "1318902803100645839": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "565a44a4138ef949cf0fae77d4dd5bbb523e4455b5790c3f6ad3bf08db66c775",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        },
+        "5347681364058335587": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "e1deef662b33f5c23463c1669f85bb8fe937ffd0a10eab4570df9edc1e7d0ae9",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        }
+      }
+    },
     "editor/6000.3.26f1/mesh/lz4-notypetree/mesh": {
       "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
         "-1524767021796067512": {
@@ -4408,6 +4696,42 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+        }
+      }
+    },
+    "editor/6000.3.26f1/stripped/adpcm": {
+      "CAB-333a25f4ea19566c1a144e5e562221f1": {
+        "1318902803100645839": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "565a44a4138ef949cf0fae77d4dd5bbb523e4455b5790c3f6ad3bf08db66c775",
+            "name": "stereo-adpcm",
+            "dataSize": 4640,
+            "dataSha256": "1430d2317c78621bb398080e66249e4f183d4c3b3b39ab20c8f75736dc0a0b5f"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 16172,
+            "sha256": "2392ba1351a92e18f0ff4e8b9e67cafc93b24aa08b8c70e9a6acc6767b938ea6"
+          }
+        },
+        "5347681364058335587": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "e1deef662b33f5c23463c1669f85bb8fe937ffd0a10eab4570df9edc1e7d0ae9",
+            "name": "tone-adpcm",
+            "dataSize": 3232,
+            "dataSha256": "123af75814a9005412f723b37eee75b8c78ce886f873fab885036bc537a55f38"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 11180,
+            "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
         }
       }
     },

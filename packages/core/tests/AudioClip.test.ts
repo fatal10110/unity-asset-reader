@@ -39,7 +39,8 @@ for (const name of FIXTURES) {
   test(`${name}: readAudioClip equals the golden dump, read() the golden audio bytes`, () => {
     const tree = goldenTree(name, ClassID.AudioClip);
     const objects = objectsOf(name, ClassID.AudioClip);
-    // A PCM clip and a Vorbis one (fixtures/BUILDING.md section 11).
+    // A PCM clip and a Vorbis one, or the mono and stereo ADPCM clips
+    // (fixtures/BUILDING.md section 11).
     assert.equal(objects.length, 2);
     for (const { env, reader, dump, enableTypeTree } of objects) {
       assert.ok(dump, `no golden dump for AudioClip ${reader.pathId}`);
@@ -94,8 +95,8 @@ test("the AudioClip checks cover formats 21 and 22, typed, notypetree and versio
     [...seen].sort(),
     ["21 notypetree", "21 stripped", "21 typed", "22 notypetree", "22 stripped", "22 typed"],
   );
-  // PCM and Vorbis, both FSB5 in the .resource.
-  assert.deepEqual([...formats].sort(), [0, 1]);
+  // PCM, Vorbis and ADPCM, all FSB5 in the .resource.
+  assert.deepEqual([...formats].sort(), [0, 1, 2]);
 });
 
 test("the resolved audio is an FMOD sound bank (FSB5), as Unity 5+ writes it", () => {
