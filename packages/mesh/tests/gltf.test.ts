@@ -13,6 +13,8 @@ import {
   CorruptError,
   GfxPrimitiveType,
   load,
+  ObjectReader,
+  readSerializedFile,
   UnsupportedError,
   type MeshData,
   type SubMesh,
@@ -208,8 +210,8 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
   return reader.read<MeshData>();
 }
 
-test("there are 12 fixture Meshes", () => {
-  assert.equal(MESHES.length, 12);
+test("there are 27 fixture Meshes", () => {
+  assert.equal(MESHES.length, 27);
 });
 
 for (const { fixture, file, pathId } of MESHES) {
@@ -221,6 +223,19 @@ for (const { fixture, file, pathId } of MESHES) {
     assertSameAsObj(readMesh(fixture, file, pathId));
   });
 }
+
+test("basevertex's .glb draws its triangle on vertices 3 to 5 (#257)", () => {
+  const offset = MESHES.map((m) => readMesh(m.fixture, m.file, m.pathId)).filter(
+    (mesh) => mesh.m_Name === "basevertex",
+  );
+  assert.equal(offset.length, 6);
+  for (const mesh of offset) {
+    const doc = readGlb(meshToGltf(mesh));
+    const indices = doc.json.meshes[0]!.primitives[0]!.indices;
+    // The winding reversed, as the OBJ's.
+    assert.deepEqual(accessor(doc, indices), [5, 4, 3]);
+  }
+});
 
 // --- meshes built here ----------------------------------------------------------------
 
@@ -383,6 +398,58 @@ for (const [what, count, last] of [
     assertSameAsObj(mesh);
   });
 }
+
+/**
+ * The 2020.3 basevertex fixture Mesh grown to 65539 vertices, its submesh's
+ * baseVertex 65536: 16-bit indices 0, 1, 2 that the offset takes past 16 bits.
+ * Patched in the object's bytes, so it is decoded by `obj.read()` (#257).
+ */
+function grownBaseVertex(): MeshData {
+  const fixture = "editor/2020.3.30f1/mesh/lz4/mesh";
+  const env = load([{ name: fixture, data: loadFixture(fixture) }]);
+  const reader = env.objects.find(
+    (o) => o.type === ClassID.Mesh && o.read<MeshData>().m_Name === "basevertex",
+  )!;
+  const node = env.files.find((f) => f.path === reader.fileName)!;
+  const file = readSerializedFile(node.data);
+  const info = file.objects.find((o) => o.pathId === reader.pathId)!;
+  const bytes = node.data.subarray(info.byteStart, info.byteStart + info.byteSize);
+  const u32 = (at: number): number =>
+    new DataView(bytes.buffer, bytes.byteOffset + at, 4).getUint32(0, true);
+  // m_Name "basevertex" (4 + 10 bytes, aligned: 16), one submesh: firstByte,
+  // indexCount, topology, then baseVertex.
+  assert.equal(u32(32), 3);
+  // m_VertexData: m_VertexCount 6, 14 channels, m_DataSize of 6 float3 positions.
+  let at = 36;
+  while (!(u32(at) === 6 && u32(at + 4) === 14 && u32(at + 64) === 72)) at += 4;
+  const count = 65539;
+  const vertices = new Float32Array(count * 3);
+  vertices.set([0, 0, 0, 0, 1, 0, 1, 0, 0], 65536 * 3);
+  const data = at + 68;
+  const out = new Uint8Array(bytes.length - 72 + vertices.byteLength);
+  out.set(bytes.subarray(0, data));
+  out.set(new Uint8Array(vertices.buffer), data);
+  out.set(bytes.subarray(data + 72), data + vertices.byteLength);
+  const patch = new DataView(out.buffer);
+  patch.setUint32(32, 65536, true);
+  patch.setUint32(at, count, true);
+  patch.setUint32(at + 64, vertices.byteLength, true);
+  return new ObjectReader(out, file, { ...info, byteStart: 0, byteSize: out.length }).read();
+}
+
+test("a 16-bit mesh whose baseVertex takes indices past 65535 is written 32-bit", async () => {
+  const mesh = grownBaseVertex();
+  assert.equal(mesh.m_IndexFormat, 0);
+  assert.equal(mesh.m_SubMeshes[0]!.baseVertex, 65536);
+  assert.deepStrictEqual(mesh.indices, [Uint32Array.of(65536, 65537, 65538)]);
+  const glb = meshToGltf(mesh);
+  await assertValid(glb);
+  const doc = readGlb(glb);
+  const indices = doc.json.meshes[0]!.primitives[0]!.indices;
+  assert.equal(doc.json.accessors[indices]!.componentType, 5125);
+  assert.deepEqual(accessor(doc, indices), [65538, 65537, 65536]);
+  assertSameAsObj(mesh);
+});
 
 test("4 floats per position and normal, 3 per UV and colour: glTF takes its part", async () => {
   const mesh: MeshData = {

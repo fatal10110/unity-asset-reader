@@ -24,19 +24,24 @@ import { meshToObj } from "../src/index.js";
 interface ExportEntry {
   class: string;
   obj?: { size: number; sha256: string };
+  exportError?: string;
+  /** AssetStudio's OBJ of a Mesh with a submesh baseVertex, no golden (#257). */
+  objWithoutBaseVertex?: { size: number; sha256: string };
 }
 
 const GOLDENS = new URL("../../../fixtures/assetstudio-export-goldens.json", import.meta.url);
 const goldens = JSON.parse(readFileSync(GOLDENS, "utf8")) as { fixtures: Record<string, Record<string, Record<string, ExportEntry>>> };
 
-/** Every Mesh with an OBJ golden: fixture, file, path ID, golden. */
-const MESHES = Object.entries(goldens.fixtures).flatMap(([fixture, files]) =>
+/** Every fixture Mesh: fixture, file, path ID, export entry. */
+const ALL = Object.entries(goldens.fixtures).flatMap(([fixture, files]) =>
   Object.entries(files).flatMap(([file, objects]) =>
     Object.entries(objects)
       .filter(([, entry]) => entry.class === "Mesh")
-      .map(([pathId, entry]) => ({ fixture, file, pathId: BigInt(pathId), obj: entry.obj! })),
+      .map(([pathId, entry]) => ({ fixture, file, pathId: BigInt(pathId), entry })),
   ),
 );
+/** Every Mesh with an OBJ golden. */
+const MESHES = ALL.filter(({ entry }) => entry.obj).map((m) => ({ ...m, obj: m.entry.obj! }));
 
 /** The fixture Mesh as `obj.read()` decodes it. */
 function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
@@ -49,9 +54,16 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 
-test("the export goldens have an OBJ for each of the 12 fixture Meshes", () => {
-  assert.equal(MESHES.length, 12);
-  for (const { obj } of MESHES) assert.ok(obj, "a Mesh without an OBJ golden");
+test("the export goldens have an OBJ for 21 of the 27 fixture Meshes", () => {
+  // Each main bundle's triangle, detail and compressed (fixtures/BUILDING.md
+  // section 20); the six basevertex meshes have none (#257).
+  assert.equal(ALL.length, 27);
+  assert.equal(MESHES.length, 21);
+  const without = ALL.filter(({ entry }) => !entry.obj);
+  assert.equal(without.length, 6);
+  for (const { entry } of without) {
+    assert.match(entry.exportError!, /^not exported: ExportMesh leaves out the submesh's baseVertex 3/);
+  }
 });
 
 for (const { fixture, file, pathId, obj } of MESHES) {
@@ -61,6 +73,58 @@ for (const { fixture, file, pathId, obj } of MESHES) {
     assert.equal(sha256(bytes), obj.sha256);
   });
 }
+
+test("detail's OBJ golden has vt, vn, scientific and fractional floats, two groups (#253)", () => {
+  const detail = MESHES.filter(({ fixture, file, pathId }) => {
+    return readMesh(fixture, file, pathId).m_Name === "detail";
+  });
+  assert.equal(detail.length, 6);
+  for (const { fixture, file, pathId } of detail) {
+    // Byte for byte AssetStudio's OBJ, by the test above.
+    const text = meshToObj(readMesh(fixture, file, pathId));
+    const lines = text.split("\r\n");
+    assert.equal(lines.filter((l) => l.startsWith("vt ")).length, 8, fixture);
+    assert.equal(lines.filter((l) => l.startsWith("vn ")).length, 8, fixture);
+    assert.match(text, /^v \S+ [0-9.]+E\+\d+ /m, fixture);
+    assert.match(text, /^v \S+ [0-9.]+E-\d+ /m, fixture);
+    assert.match(text, /^v \S+ 0\.5 0\.25\r$/m, fixture);
+    assert.deepEqual(
+      lines.filter((l) => l.startsWith("g detail_")),
+      ["g detail_0", "g detail_1"],
+      fixture,
+    );
+  }
+});
+
+/** The fixture Meshes with a submesh baseVertex (#257): no OBJ golden. */
+const OFFSET = ALL.filter(({ entry }) => entry.objWithoutBaseVertex);
+
+test("basevertex's OBJ draws its triangle on vertices 3 to 5 (#257)", () => {
+  assert.equal(OFFSET.length, 6);
+  for (const { fixture, file, pathId } of OFFSET) {
+    const text = meshToObj(readMesh(fixture, file, pathId));
+    // 1-based, the winding reversed: indices 3, 4, 5.
+    assert.deepEqual(
+      text.split("\r\n").filter((l) => l.startsWith("f ")),
+      ["f 6/6/6 5/5/5 4/4/4"],
+      fixture,
+    );
+  }
+});
+
+test("AssetStudio's OBJ of basevertex differs from meshToObj's by the baseVertex alone", () => {
+  // ExportMesh writes the indices without the offset, so its faces use
+  // vertices 0 to 2: the same text as the mesh with its offset taken off.
+  for (const { fixture, file, pathId, entry } of OFFSET) {
+    const mesh = readMesh(fixture, file, pathId);
+    const indices = mesh.indices.map((triangles, i) =>
+      triangles.map((index) => index - mesh.m_SubMeshes[i]!.baseVertex!),
+    );
+    const bytes = encode(meshToObj({ ...mesh, indices }));
+    assert.equal(bytes.length, entry.objWithoutBaseVertex!.size, fixture);
+    assert.equal(sha256(bytes), entry.objWithoutBaseVertex!.sha256, fixture);
+  }
+});
 
 /** One fixture mesh to change. */
 const BASE = (() => {

@@ -501,6 +501,90 @@
         }
       }
     },
+    "editor/2019.4.41f2/mesh/lz4-notypetree/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-2721278527805802049": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 724,
+            "objectSha256": "f56851447c3d322cb9d76d264ef4077e5e4f84299acd207e2f6a37d2c6ad22cf",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        },
+        "-5398004561968637103": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 484,
+            "objectSha256": "a9311c60c85e67108ab57841014617561950d8cb18adb7b9baa75a4b0c3ba781",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/mesh/lz4/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-2721278527805802049": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 724,
+            "objectSha256": "f56851447c3d322cb9d76d264ef4077e5e4f84299acd207e2f6a37d2c6ad22cf",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        },
+        "-5398004561968637103": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 484,
+            "objectSha256": "a9311c60c85e67108ab57841014617561950d8cb18adb7b9baa75a4b0c3ba781",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/mesh/lz4/mesh-compressed": {
+      "CAB-c751f7fc82b0dde1f3794065239507e5": {
+        "3570015367352999700": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 548,
+            "objectSha256": "4eb2f24ace24183c1662b0aa9bbe7c819a02d44a829e54951ca76c550fd47d4a",
+            "name": "compressed"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 804,
+            "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/more-plain/textures": {
       "CAB-b6ec7271e16d6169fe23b363bfe34b24": {
         "-1907343062372087922": {
@@ -2273,6 +2357,90 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/mesh/lz4-notypetree/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-742743565720691645": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 488,
+            "objectSha256": "a95601383512d5069a97cf05e128b2851e408584ceb81aaf354cff7a354a35bc",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        },
+        "-8723295237667798098": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 728,
+            "objectSha256": "d53a02727e9e2c141dda7883cf7a57361c2ed8e7f917cb878b5f697c38717755",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/mesh/lz4/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-742743565720691645": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 488,
+            "objectSha256": "a95601383512d5069a97cf05e128b2851e408584ceb81aaf354cff7a354a35bc",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        },
+        "-8723295237667798098": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 728,
+            "objectSha256": "d53a02727e9e2c141dda7883cf7a57361c2ed8e7f917cb878b5f697c38717755",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/mesh/lz4/mesh-compressed": {
+      "CAB-c751f7fc82b0dde1f3794065239507e5": {
+        "2826291374693315191": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 552,
+            "objectSha256": "f6945cca7cab0b95b8839b2d41515ce398df3f61b311f3984b5c4280a3c89056",
+            "name": "compressed"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 804,
+            "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
           }
         }
       }
@@ -4125,6 +4293,90 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/mesh/lz4-notypetree/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-1524767021796067512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 520,
+            "objectSha256": "d23e130cf4aa8dd360567385146c03389c038ac9a3c0f32c9a2a147b2c94c778",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        },
+        "-6887542423864536022": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 772,
+            "objectSha256": "a9e3a145a6ded7d2fb36f3cf2b46f3bd4cb4afabe6c2d574d7e8c2c3d10fa4e8",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/mesh/lz4/mesh": {
+      "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
+        "-1524767021796067512": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 520,
+            "objectSha256": "d23e130cf4aa8dd360567385146c03389c038ac9a3c0f32c9a2a147b2c94c778",
+            "name": "basevertex"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "exportError": "not exported: ExportMesh leaves out the submesh's baseVertex 3, which unity-asset-reader adds to the indices (#257)",
+          "objWithoutBaseVertex": {
+            "size": 111,
+            "sha256": "2fc75702907ef0ea6ad21ab5e5fec2aaa090592f1d57311bf95d1ee107b10e0e"
+          }
+        },
+        "-6887542423864536022": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 772,
+            "objectSha256": "a9e3a145a6ded7d2fb36f3cf2b46f3bd4cb4afabe6c2d574d7e8c2c3d10fa4e8",
+            "name": "detail"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 528,
+            "sha256": "f3be291f4189cac988cfccfab41e7cded7efcb1e4bf52a2e779e8b1fd4c6dffa"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/mesh/lz4/mesh-compressed": {
+      "CAB-c751f7fc82b0dde1f3794065239507e5": {
+        "-3475791707206193720": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 596,
+            "objectSha256": "5c82daf2f3400da91c03f3665fb34fd8387f5ea5356a48ed8174928605be51ff",
+            "name": "compressed"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 804,
+            "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
           }
         }
       }
