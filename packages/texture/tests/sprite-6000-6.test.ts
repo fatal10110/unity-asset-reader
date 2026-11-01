@@ -11,7 +11,9 @@
 // downscaleMultiplier. So, independently of UnityPy: the fixture's pixels say
 // where they are (`fixtures/BUILDING.md` section 12), and the 6000.3 build of
 // the same project holds the same sprites as Sprite objects, whose tight
-// images AssetStudio's executed `CutImage` gave (`ASSETSTUDIO_RGBA`).
+// images AssetStudio's executed `CutImage` gave (`ASSETSTUDIO_RGBA`). The
+// variant's half-scale sprites: AssetStudio's `CutImage`, executed on this
+// atlas' own entries (`assetStudioCrossCheck`, #230).
 
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -78,6 +80,11 @@ interface PackedGolden {
   oracleNote: string;
   /** A variant entry's: UnityPy ignores the downscale, so the hash is not the answer. */
   variantOracleNote?: string;
+  /**
+   * A variant entry's answer: AssetStudio's executed `CutImage`, rows as stored
+   * (`assetstudio-modern-cross-checks.json`, #230).
+   */
+  assetStudioCrossCheck?: { width: number; height: number; rgbaSha256: string; verdict: string };
 }
 
 type ModernSerialized = {
@@ -359,57 +366,23 @@ test("imageInfo describes a packed sprite from its atlas entry and instance data
 
 // --- the variant atlas: resized before the cut (#153) ---------------------------------
 
-/**
- * Mean absolute difference per channel between two images of the same size,
- * over the pixels whose 3x3 neighbourhood is opaque in `master`.
- */
-function interiorDifference(out: RgbaImage, master: RgbaImage): number {
-  const { width, height } = master;
-  let sum = 0;
-  let count = 0;
-  for (let y = 1; y + 1 < height; y++) {
-    for (let x = 1; x + 1 < width; x++) {
-      let opaque = true;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          if (master.data[((y + dy) * width + x + dx) * 4 + 3] !== 255) opaque = false;
-        }
-      }
-      if (!opaque) continue;
-      for (let c = 0; c < 4; c++) {
-        const i = (y * width + x) * 4 + c;
-        sum += Math.abs(out.data[i]! - master.data[i]!);
-      }
-      count++;
-    }
-  }
-  assert.ok(count > 0);
-  return sum / count / 4;
-}
-
-test(`${VARIANT}: a half-scale packed sprite is cut from its atlas resized`, async () => {
-  const variant = PLAIN.filter((p) => p.fixture === VARIANT);
-  const half = variant.filter((p) => p.golden.variantOracleNote);
+test(`${VARIANT}: a half-scale packed sprite is AssetStudio's cut, to the byte`, async () => {
+  const half = PLAIN.filter((p) => p.fixture === VARIANT && p.golden.variantOracleNote);
   assert.deepEqual(half.map((p) => p.golden.name).sort(), ["r_a", "r_b"]);
   for (const p of half) {
-    const master = variant.find(
-      (x) => !x.golden.variantOracleNote && x.golden.name === p.golden.name,
-    )!;
+    const want = p.golden.assetStudioCrossCheck!;
+    assert.equal(want.verdict, "AssetStudio");
     assert.equal(p.location.rect.downscaleMultiplier, 0.5);
     assert.deepEqual([p.image!.width, p.image!.height], [32, 32]);
     const out = await decodePlain(p);
     // AssetStudio's size: the texture resized to 64x64, the rectangle cut out of it.
-    assert.deepEqual([out.width, out.height], [p.golden.width, p.golden.height]);
+    assert.deepEqual([out.width, out.height], [want.width, want.height]);
     const info = imageInfo(p.packed);
     const sizes = [info.width, info.height, info.sprite.texture.width];
     assert.deepEqual(sizes, [out.width, out.height, 32]);
     // UnityPy crops the texture unscaled; that is not the answer.
     assert.notEqual(stored(out), p.golden.rgbaSha256);
-    // Not bit-exactly checkable (no AssetStudio run of this 6000.6 variant, #230), but
-    // the resampled half-scale sprite is the full-scale one, blurred: measured 1.19 (r_a)
-    // and 0.41 (r_b) per channel; cut one pixel off, they are 2.59 and 1.81.
-    const difference = interiorDifference(out, await decodePlain(master));
-    assert.ok(difference < 1.5, `${p.golden.name}: ${difference}`);
+    assert.equal(stored(out), want.rgbaSha256, p.golden.name);
   }
   // r_a lies outside the unscaled 32x32 texture: only the resize makes it cuttable.
   const r = half.find((p) => p.golden.name === "r_a")!;

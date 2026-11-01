@@ -1246,7 +1246,7 @@ would mix two oracle versions in one file for no extra check.
 |---|---|---|
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
 | `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`). #229: its 17 packed sprites (RGBA32) are cut to UnityPy's crop, every opaque pixel of its own image lands where section 12's recipe drew it, and their tight masks equal AssetStudio's images of the same sprites in the 6000.3 build |
-| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is checked to the byte on the 2019.4 variant (section 14). #229: this variant's half-scale sprites are cut at AssetStudio's size and checked for closeness to the master's crop only; their pixels differ from 2019.4's, and no AssetStudio run of them exists yet (#230) |
+| `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is checked to the byte on the 2019.4 variant (section 14). #229: this variant's half-scale sprites are cut at AssetStudio's size; their pixels differ from 2019.4's. #230: they are checked to the byte against AssetStudio's executed `CutImage` of this atlas' own entries (section 15, `--modern`) |
 | `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder; their tight masks (all tight-packed) against `sprite/sprites`' masks, without it |
 | `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4. #229: as `sprite-v2` |
 
@@ -1370,9 +1370,9 @@ refuses format 23. This proves container integrity, not pixel decoder support.
 - #153: the variant's type-tree bytes are validated; UnityPy ignores its
   downscale field for sprite export. The resampler is chosen and checked to the
   byte against the AssetStudio bicubic cross-check of the 2019.4 variant
-  (sections 14 and 15). This 6000.6 variant's sprites are cut since #229, but
-  checked for size and closeness only: an AssetStudio run of them needs
-  `cross-check-fixture-oracles.py` extended to format 23 (#230).
+  (sections 14 and 15). This 6000.6 variant's sprites are cut since #229, and
+  checked to the byte against AssetStudio's executed `CutImage` of them since
+  #230 (section 15, `--modern`).
 - #229: a Sprite object that points at a 6000.6 atlas is still refused with
   `UnsupportedError`: no fixture has one, to show whether its own `m_RD` or the
   atlas' `*spriteInstanceData` holds its mesh. The V2 atlases' tight masks do
@@ -1502,12 +1502,25 @@ Clone the MIT reference outside this repository and check out revision
 git clone https://github.com/Razviar/assetstudio.git <external-source>
 git -C <external-source> checkout --detach c37af7dfcdafee93e33b5da9f0285c97998d6ae3
 .venv-oracle/bin/python scripts/cross-check-fixture-oracles.py --source <external-source> --project <external-harness> --output fixtures/assetstudio-fixture-cross-checks.json --dotnet <dotnet-executable>
+<modern-oracle>/bin/python scripts/cross-check-fixture-oracles.py --modern --source <external-source> --project <external-harness> --output fixtures/assetstudio-modern-cross-checks.json --dotnet <dotnet-executable>
 .venv-oracle/bin/python scripts/make-goldens.py
 <modern-oracle>/bin/python scripts/make-modern-goldens.py
 npm run verify
 ```
 
 Use the separate UnityPy 1.25.4 environment from section 13 for modern goldens.
+`--modern` (#230) runs the same harness on the section 13 6000.6
+`variant/sprites` bundle, which only UnityPy 1.25.4 reads: its `half` atlas
+holds `r_a` and `r_b` itself, with no Sprite objects, so the inputs (texture
+bytes, `textureRect`, `textureRectOffset`, `settingsRaw`,
+`downscaleMultiplier`) come from each `m_RenderDataMap` entry. Its report is
+`assetstudio-modern-cross-checks.json`, kept apart so that the 2019.4 report
+and its UnityPy 1.25.3 inputs stay as they are; `make-modern-goldens.py`
+attaches its summaries to the variant entries of `packedSprites`, matched on
+those inputs, and stops if one does not match. A Windows `dotnet.exe` run from
+WSL works: the generator hands it Windows paths (`wslpath -w`) and names its
+variables in `WSLENV`. On 2026-11-01 the first `dotnet.exe` call from WSL
+sometimes failed with no output and a `UtilAcceptVsock` line; rerun it.
 The generator rejects source/harness paths inside this checkout, validates the
 source Git blobs before extracting methods, and places C#, project files,
 NuGet packages, the lock file and raw temporary output only in the external harness directory.
@@ -1538,6 +1551,12 @@ rejected before `CutImage`, so no tight-mask or full-app equivalence is claimed.
 `CutImage` calls ImageSharp's default [bicubic resize without companding](https://github.com/SixLabors/ImageSharp/blob/v2.1.3/src/ImageSharp/Processing/Extensions/Transforms/ResizeExtensions.cs),
 resizing the entire atlas before cropping/undoing native packing. Its top-down
 result is flipped back to stored rows; BGRA becomes RGBA exactly once.
+The harness runs with `DOTNET_EnableFMA=0`: on a CPU with AVX2 and FMA,
+ImageSharp 2.1.3 sums a resize kernel with fused multiply-adds, and on this
+host that moved channels of the 2019.4 and 6000.6 `r_b` by 1 (42 pixels of the
+6000.6 one). The committed 2019.4 report holds the scalar sums; with FMA off
+the same host reproduces it byte for byte, and the 6000.6 report is made the
+same way (#230).
 
 The report stores complete RGBA bytes, not just hashes, for future per-channel
 tolerance tests. Golden generators attach summaries only when the input hash,
