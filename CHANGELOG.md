@@ -286,6 +286,11 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-spine
 
+### 1.0.1 - Unreleased
+
+- Tests for a split build (atlas asset, Material and page in a second bundle) and for an atlas
+  asset of another type; no code change (#254).
+
 ### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1`.
