@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Candidate format-23 goldens (#108, #153, #155, #160, #229), UnityPy 1.25.4.
+"""Candidate format-23 goldens (#108, #153, #155, #160, #229, #230), UnityPy 1.25.4.
 
 Use a separate oracle environment from the format-21/22 goldens. These files
 have metadata/generic dump coverage; their texture and atlas features remain candidates.
-The sprites a 6000.6 atlas holds itself get UnityPy's crop (`packedSprites`).
+The sprites a 6000.6 atlas holds itself get UnityPy's crop (`packedSprites`);
+the variant's half-scale ones also AssetStudio's executed CutImage
+(`assetstudio-modern-cross-checks.json`, `cross-check-fixture-oracles.py --modern`).
 No decoded output from the library under test is used here.
 """
 import importlib.util
@@ -20,6 +22,8 @@ sys.dont_write_bytecode = True
 spec = importlib.util.spec_from_file_location("oracle", ROOT / "scripts/make-goldens.py")
 oracle = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(oracle)
+CROSS_CHECKS_FILE = "assetstudio-modern-cross-checks.json"
+CROSS_CHECKS = json.loads((ROOT / "fixtures" / CROSS_CHECKS_FILE).read_text())
 
 PACKED_SPRITE_NOTE = (
     "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. "
@@ -29,9 +33,37 @@ PACKED_SPRITE_NOTE = (
 )
 PACKED_VARIANT_NOTE = (
     "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash "
-    "is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this "
-    "6000.6 variant yet (#230)."
+    "is unsuitable for variant-resize acceptance. Verdict: AssetStudio; use "
+    "assetStudioCrossCheck dimensions and rgbaSha256. Full bicubic reference pixels: "
+    "assetstudio-modern-cross-checks.json; rectangle path only, no tight-mask claim (#230)."
 )
+
+
+def cross_check(name, data, raw):
+    """AssetStudio's CutImage of a variant entry, matched on its input metadata.
+
+    The summary as make-goldens.py's `cross_check_summary`; the complete
+    pixels stay in the report.
+    """
+    texture = data.texture.deref_parse_as_object()
+    metadata = {
+        "textureWidth": texture.m_Width, "textureHeight": texture.m_Height,
+        "imageSha256": oracle.sha256(bytes(texture.get_image_data())),
+        "textureRect": {key: getattr(data.textureRect, key) for key in ["x", "y", "width", "height"]},
+        "textureRectOffset": {key: getattr(data.textureRectOffset, key) for key in ["x", "y"]},
+        "settingsRaw": raw, "downscaleMultiplier": data.downscaleMultiplier,
+    }
+    assert CROSS_CHECKS["verdict"] == "AssetStudio"
+    for references in CROSS_CHECKS["variants"].values():
+        reference = references.get(name)
+        if reference and all(reference[key] == value for key, value in metadata.items()):
+            rgba = bytes.fromhex(reference["rgbaHex"])
+            assert len(rgba) == reference["width"] * reference["height"] * 4
+            assert oracle.sha256(rgba) == reference["rgbaSha256"]
+            return {**{key: value for key, value in reference.items() if key != "rgbaHex"},
+                    "verdict": CROSS_CHECKS["verdict"], "reference": CROSS_CHECKS_FILE}
+    raise SystemExit(f"{name}: no AssetStudio cross-check matches its inputs; rerun "
+                     "cross-check-fixture-oracles.py --modern (fixtures/BUILDING.md section 15)")
 
 
 def packed_sprite_goldens(path):
@@ -70,6 +102,7 @@ def packed_sprite_goldens(path):
             }
             if data.downscaleMultiplier != 1:
                 entry["variantOracleNote"] = PACKED_VARIANT_NOTE
+                entry["assetStudioCrossCheck"] = cross_check(entry["name"], data, raw)
             entries.append(entry)
         out.setdefault(obj.assets_file.name, {})[str(obj.path_id)] = entries
     return out
