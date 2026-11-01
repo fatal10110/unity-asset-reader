@@ -462,6 +462,7 @@ For tools that work below `load()`:
 | `SerializedType`, `TypeTreeNode` | A type entry and its type tree |
 | `SerializedFileFormatVersion`, `BuildTarget` | Format version and target platform constants |
 | `decompressLz4`, `lzmaDecompress`, `gunzip`, `unzlib` | The block decompressors, each checking its output size |
+| `formatSingle(value)`, `formatSingleInvariant(value)` | Write a float32 as .NET 8's `float.ToString()` does, under en-US and invariant culture |
 | `BinaryReader`, `Endian` | Bounds-checked reader over a `Uint8Array`, little- or big-endian |
 | `UnsupportedError`, `CorruptError`, `ResourceNotFoundError` | See [Errors](#errors) |
 

@@ -2,12 +2,11 @@
 
 import {
   CorruptError,
+  formatSingle,
   GfxPrimitiveType,
   UnsupportedError,
   type MeshData,
 } from "unity-asset-reader";
-
-import { formatSingle } from "./float.js";
 
 /**
  * Upstream writes each line with `AppendLine` or an explicit `\r\n`; on

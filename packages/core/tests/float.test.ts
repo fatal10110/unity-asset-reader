@@ -1,8 +1,9 @@
 // formatSingle against .NET 8's `float.ToString()` under en-US, the call
-// AssetStudio's ShaderConverter makes for property defaults and render state.
-// The table is .NET's own output for these bit patterns, copied with
-// src/float.ts from unity-asset-reader-mesh (#239), where a .NET 8 program
-// outside the repo wrote it (R2/R12).
+// AssetStudio's OBJ export and ShaderConverter make. The table is .NET's own
+// output for these bit patterns (written by a .NET 8 program outside the repo,
+// as the export goldens are, R2/R12): a sample of the 2.2 million floats
+// src/float.ts was checked on, picked for the edges of the notation and of the
+// round trip.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";

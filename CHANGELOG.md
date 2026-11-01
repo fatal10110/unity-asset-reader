@@ -35,6 +35,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   `vertices` as Unity draws them (#257). AssetStudio and UnityPy leave it out; every fixture
   mesh but the new `basevertex` one has a `baseVertex` of 0 and decodes as before. An index the
   offset takes past the vertex count throws `CorruptError`.
+- `formatSingle(value)` and `formatSingleInvariant(value)` write a float32 as .NET 8's
+  `float.ToString()` does under en-US and invariant culture. They moved here from the mesh and
+  shader packages, which both need them (#261).
 
 ### 1.2.0 - 2026-10-29
 
@@ -260,6 +263,8 @@ First release. Peer: `unity-asset-reader@^1`.
   index 65535 or above is written with 32-bit glTF indices. The OBJ equals AssetStudio's for
   the new fixture meshes with UV0, normals, scientific-notation floats, two submeshes and mesh
   compression (#253).
+- Floats are written through core's `formatSingle` instead of the package's own copy; the output
+  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
 
 ### 1.0.0 - 2026-10-29
 
@@ -301,6 +306,11 @@ First release. Peer: `unity-asset-reader@^1`.
   textures on demand (4.1+) and an atlas type without `atlasFile` throw `UnsupportedError` (#238).
 
 ## unity-asset-reader-shader
+
+### 1.0.1 - Unreleased
+
+- Floats are written through core's `formatSingle` instead of the package's own copy; the output
+  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
 
 ### 1.0.0 - 2026-10-29
 
