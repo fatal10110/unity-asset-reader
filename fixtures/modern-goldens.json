@@ -8818,7 +8818,30 @@
                 "height": 33,
                 "rgbaSha256": "6beb20ced1316d749127a02cfb1dab33b23bb41b2bd4b307d5799e234f4812b1",
                 "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229).",
-                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this 6000.6 variant yet (#230)."
+                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance. Verdict: AssetStudio; use assetStudioCrossCheck dimensions and rgbaSha256. Full bicubic reference pixels: assetstudio-modern-cross-checks.json; rectangle path only, no tight-mask claim (#230).",
+                "assetStudioCrossCheck": {
+                  "width": 34,
+                  "height": 33,
+                  "imageSha256": "2c24801450f23cda37c1d03041655de08f1ce7eb0b06882a0e97dfb509c935fd",
+                  "rgbaSha256": "c38a45cf4630391eb4564e4229383c61f829389d47c5cb450dfa145996656e97",
+                  "firstPixel": [0, 0, 0, 0],
+                  "textureWidth": 32,
+                  "textureHeight": 32,
+                  "textureRect": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "width": 34.0,
+                    "height": 33.0
+                  },
+                  "textureRectOffset": {
+                    "x": 0.0,
+                    "y": 0.0
+                  },
+                  "settingsRaw": 3139,
+                  "downscaleMultiplier": 0.5,
+                  "verdict": "AssetStudio",
+                  "reference": "assetstudio-modern-cross-checks.json"
+                }
               },
               {
                 "name": "r_a",
@@ -8829,7 +8852,30 @@
                 "height": 8,
                 "rgbaSha256": "7b6436b0c98f62380866d9432c2af0ee08ce16a171bda6951aecd95ee1307d61",
                 "oracleNote": "UnityPy 1.25.4 exports Sprite objects only, and a 6000.6 atlas' packed sprites have none. This is UnityPy's own get_image_from_sprite (crop and undone packing flip, packing mode forced to Rectangle, as make-goldens.py's rgbaSha256), given a stand-in sprite that names only the atlas and this entry's render-data key; no tight mesh is applied (#229).",
-                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance; no AssetStudio cross-check exists for this 6000.6 variant yet (#230)."
+                "variantOracleNote": "UnityPy crops the variant atlas but ignores downscaleMultiplier. Its retained pixel hash is unsuitable for variant-resize acceptance. Verdict: AssetStudio; use assetStudioCrossCheck dimensions and rgbaSha256. Full bicubic reference pixels: assetstudio-modern-cross-checks.json; rectangle path only, no tight-mask claim (#230).",
+                "assetStudioCrossCheck": {
+                  "width": 10,
+                  "height": 8,
+                  "imageSha256": "2c24801450f23cda37c1d03041655de08f1ce7eb0b06882a0e97dfb509c935fd",
+                  "rgbaSha256": "a66dc40b22aeef38ba5f236d1021110d7346e74f27c479b79ab7f07023f289de",
+                  "firstPixel": [12, 7, 184, 232],
+                  "textureWidth": 32,
+                  "textureHeight": 32,
+                  "textureRect": {
+                    "x": 36.0,
+                    "y": 0.0,
+                    "width": 10.0,
+                    "height": 8.0
+                  },
+                  "textureRectOffset": {
+                    "x": 0.0,
+                    "y": 0.0
+                  },
+                  "settingsRaw": 3075,
+                  "downscaleMultiplier": 0.5,
+                  "verdict": "AssetStudio",
+                  "reference": "assetstudio-modern-cross-checks.json"
+                }
               }
             ],
             "-5205555241037833595": [

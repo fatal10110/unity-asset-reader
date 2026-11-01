@@ -422,8 +422,9 @@ sprites (#34).
   opaque pixel against section 12's recipe. The V2 builds' masks (DXT5
   atlases) are checked, over an opaque stand-in texture, against those V1
   masks; `r_b`, rectangle-packed in V1 and 6000.3, has none to equal. The
-  6000.6 variant's half-scale sprites are checked for size and closeness only
-  (#230).
+  6000.6 variant's half-scale sprites are checked to the byte against
+  AssetStudio's executed `CutImage` (`assetstudio-modern-cross-checks.json`,
+  #230).
 
 ## Regenerating
 
@@ -489,6 +490,10 @@ The same unsigned plain inputs in `modern-goldens.json` receive these references
 Format-23 metadata and generic dumps are tested against the sidecar (#223),
 and all five unsigned plain conversions are tested against it by #108.
 The 6000.6 Sprite/SpriteAtlas class layouts are read since #228.
+`assetstudio-modern-cross-checks.json` is the same report for the 6000.6
+variant's `r_a` and `r_b`, read from the atlas' own render data with UnityPy
+1.25.4; `modern-goldens.json` attaches its summaries to the variant entries of
+`packedSprites` (#230).
 
 The external .NET harness executes unmodified methods from the same pinned
 AssetStudio revision as RGB48, including `SpriteHelper.CutImage`. Its pinned

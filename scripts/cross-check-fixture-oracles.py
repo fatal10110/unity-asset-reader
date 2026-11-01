@@ -4,6 +4,10 @@
 All inputs come from our editor bundles through UnityPy. The unmodified C#
 methods and their .NET project are generated outside the repository (R2).
 This is not execution of the full AssetStudio application or its tight mask.
+
+Default: the 2019.4 plain textures and variant sprites, with UnityPy 1.25.3.
+`--modern`: the 6000.6 variant atlas' sprites (#230), with UnityPy 1.25.4,
+which reads format 23; they get their own output file.
 """
 import argparse
 import base64
@@ -28,6 +32,7 @@ BLOBS = {
 }
 PLAIN = "editor/2019.4.41f2/more-plain/textures"
 VARIANT = "editor/2019.4.41f2/variant/sprites"
+MODERN_VARIANT = "editor/6000.6.4f1/variant/sprites"
 FORMATS = {"RG16": (62, 2), "RG32": (72, 4), "RGBA64": (74, 8)}
 NUGET_SOURCE = "https://api.nuget.org/v3/index.json"
 PACKAGE_HASHES = {
@@ -66,6 +71,37 @@ def source_files(source):
     return result
 
 
+def variant_job(name, data):
+    """One rectangle-packed half-scale entry of a variant atlas' m_RenderDataMap."""
+    texture = data.texture.deref_parse_as_object()
+    assert texture.m_TextureFormat == 4
+    assert data.downscaleMultiplier == 0.5
+    assert (data.settingsRaw >> 1) & 1 == 1, "rectangle-only oracle; tight masking is not executed"
+    rect = {key: float(getattr(data.textureRect, key)) for key in ["x", "y", "width", "height"]}
+    offset = {key: float(getattr(data.textureRectOffset, key)) for key in ["x", "y"]}
+    raw = bytes(texture.get_image_data())
+    assert len(raw) == texture.m_Width * texture.m_Height * 4
+    return {"kind": "variant", "name": name, "format": 4,
+            "width": texture.m_Width, "height": texture.m_Height, "raw": raw,
+            "textureRect": rect, "textureRectOffset": offset,
+            "settingsRaw": int(data.settingsRaw), "downscaleMultiplier": 0.5}
+
+
+def modern_inputs():
+    """The 6000.6 variant atlas' sprites. The atlas holds them itself
+    (`*spriteInstanceData`), with no Sprite objects, so walk its m_RenderDataMap."""
+    jobs = []
+    for obj in UnityPy.load(str(ROOT / "fixtures/bundles" / MODERN_VARIANT)).objects:
+        if obj.type.name != "SpriteAtlas":
+            continue
+        atlas = obj.read()
+        if atlas.m_IsVariant:
+            jobs += [variant_job(data.spriteInstanceData.spriteName, data)
+                     for _, data in atlas.m_RenderDataMap]
+    assert sorted(job["name"] for job in jobs) == ["r_a", "r_b"]
+    return sorted(jobs, key=lambda job: job["name"])
+
+
 def inputs():
     jobs = []
     for obj in UnityPy.load(str(ROOT / "fixtures/bundles" / PLAIN)).objects:
@@ -90,18 +126,7 @@ def inputs():
         atlas = sprite.m_SpriteAtlas.deref_parse_as_object()
         assert atlas.m_IsVariant
         data = next(value for key, value in atlas.m_RenderDataMap if key == sprite.m_RenderDataKey)
-        texture = data.texture.deref_parse_as_object()
-        assert texture.m_TextureFormat == 4
-        assert data.downscaleMultiplier == 0.5
-        assert (data.settingsRaw >> 1) & 1 == 1, "rectangle-only oracle; tight masking is not executed"
-        rect = {key: float(getattr(data.textureRect, key)) for key in ["x", "y", "width", "height"]}
-        offset = {key: float(getattr(data.textureRectOffset, key)) for key in ["x", "y"]}
-        raw = bytes(texture.get_image_data())
-        assert len(raw) == texture.m_Width * texture.m_Height * 4
-        jobs.append({"kind": "variant", "name": sprite.m_Name, "format": 4,
-                     "width": texture.m_Width, "height": texture.m_Height, "raw": raw,
-                     "textureRect": rect, "textureRectOffset": offset,
-                     "settingsRaw": int(data.settingsRaw), "downscaleMultiplier": 0.5})
+        jobs.append(variant_job(sprite.m_Name, data))
     assert {job["name"] for job in jobs if job["kind"] == "variant"} == {"r_a", "r_b"}
     return sorted(jobs, key=lambda job: (job["kind"], job["name"]))
 
@@ -218,14 +243,26 @@ def main():
     for name in ["source", "project", "output"]:
         parser.add_argument("--" + name, required=True, type=pathlib.Path)
     parser.add_argument("--dotnet", default=shutil.which("dotnet"))
+    parser.add_argument("--modern", action="store_true",
+                        help="the 6000.6 variant atlas (format 23, UnityPy 1.25.4) instead of 2019.4")
     args = parser.parse_args()
-    if UnityPy.__version__ != "1.25.3":
-        raise SystemExit("requires UnityPy==1.25.3 for the 2019 acceptance bundles")
+    unitypy, variant = ("1.25.4", MODERN_VARIANT) if args.modern else ("1.25.3", VARIANT)
+    if UnityPy.__version__ != unitypy:
+        raise SystemExit(f"requires UnityPy=={unitypy} for {variant}")
     if not args.dotnet:
         raise SystemExit(".NET 8 SDK required; supply --dotnet")
+    # A Windows dotnet.exe run from WSL gets Windows paths (make-export-goldens.py's Host).
+    wsl = sys.platform != "win32" and args.dotnet.lower().endswith(".exe")
+
+    def host(path):
+        if not wsl:
+            return str(path)
+        return subprocess.run(["wslpath", "-w", str(path)], check=True, capture_output=True,
+                              text=True).stdout.strip()
+
     source, project = external(args.source), external(args.project)
     sources = source_files(source)
-    jobs = inputs()
+    jobs = modern_inputs() if args.modern else inputs()
     for name in ["Program.cs", "Check.csproj", "NuGet.config", "packages.lock.json", "obj", "bin", "packages", "cli-home"]:
         external(project / name)
     project.mkdir(parents=True, exist_ok=True)
@@ -245,12 +282,20 @@ def main():
         raw_path, output_path = project / f"{index}.raw", project / f"{index}.rgba"
         raw_path.write_bytes(job["raw"])
         manifest.append({**{key: value for key, value in job.items() if key != "raw"},
-                         "input": str(raw_path), "output": str(output_path)})
+                         "input": host(raw_path), "output": host(output_path)})
     (project / "jobs.json").write_text(json.dumps(manifest))
     environment = dict(os.environ, DOTNET_CLI_HOME=str(project / "cli-home"),
                        NUGET_PACKAGES=str(project / "packages"),
-                       DOTNET_CLI_TELEMETRY_OPTOUT="1", DOTNET_NOLOGO="1")
-    restore = [args.dotnet, "restore", str(project / "Check.csproj"), "--configfile", str(project / "NuGet.config")]
+                       DOTNET_CLI_TELEMETRY_OPTOUT="1", DOTNET_NOLOGO="1",
+                       # ImageSharp 2.1.3 sums a resize kernel with fused multiply-adds where the
+                       # CPU has FMA, which moves some channels by 1. The committed references
+                       # are its scalar sums, so they do not depend on the host (#230).
+                       DOTNET_EnableFMA="0")
+    if wsl:
+        # WSL passes a variable to a Windows process only when WSLENV names it; /p translates a path.
+        names = "DOTNET_CLI_HOME/p:NUGET_PACKAGES/p:DOTNET_CLI_TELEMETRY_OPTOUT:DOTNET_NOLOGO:DOTNET_EnableFMA"
+        environment["WSLENV"] = ":".join(filter(None, [os.environ.get("WSLENV"), names]))
+    restore = [args.dotnet, "restore", host(project / "Check.csproj"), "--configfile", host(project / "NuGet.config")]
     if (project / "packages.lock.json").exists():
         restore.append("--locked-mode")
     subprocess.run(restore, env=environment, check=True)
@@ -263,22 +308,25 @@ def main():
         actual = base64.b64encode(hashlib.sha512(archive.read_bytes()).digest()).decode()
         if actual != expected:
             raise SystemExit("NuGet archive checksum mismatch: " + identity)
-    subprocess.run([args.dotnet, "build", str(project / "Check.csproj"), "--no-restore", "-o", str(project / "bin")],
+    subprocess.run([args.dotnet, "build", host(project / "Check.csproj"), "--no-restore", "-o", host(project / "bin")],
                    env=environment, check=True)
-    subprocess.run([args.dotnet, str(project / "bin/Check.dll"), str(project / "jobs.json"),
-                    str(project / "results.json")], env=environment, check=True)
+    subprocess.run([args.dotnet, host(project / "bin/Check.dll"), host(project / "jobs.json"),
+                    host(project / "results.json")], env=environment, check=True)
     dimensions = json.loads((project / "results.json").read_text())
     result = {
         "verdict": "AssetStudio", "revision": REVISION, "sourceBlobs": BLOBS,
         "source": f"https://github.com/Razviar/assetstudio/tree/{REVISION}/AssetStudio.Utility",
-        "generator": "scripts/cross-check-fixture-oracles.py", "inputOracle": "UnityPy 1.25.3",
+        "generator": "scripts/cross-check-fixture-oracles.py", "inputOracle": "UnityPy " + unitypy,
         "nugetSource": NUGET_SOURCE, "packageSha512": PACKAGE_HASHES,
         "packages": {"SixLabors.ImageSharp.Drawing": "1.0.0-beta15", "SixLabors.ImageSharp": "2.1.3", "SixLabors.Fonts": "1.0.0-beta18"},
         "execution": "Unmodified DecodeRG16/RG32/RGBA64/RGBA32, DownScaleFrom16BitTo8Bit and CutImage methods in an external .NET 8 harness. Metadata/loading shims; rectangle path only, tight path rejected. ImageSharp default bicubic resize. Full AssetStudio application not run. BGRA swapped to RGBA once; CutImage output flipped back to bottom row first.",
-        "plain": {}, "variants": {VARIANT: {}},
+        "plain": {}, "variants": {variant: {}},
     }
-    for job, manifest_job, size in zip(jobs, manifest, dimensions):
-        rgba = pathlib.Path(manifest_job["output"]).read_bytes()
+    if args.modern:
+        del result["plain"]
+        result["execution"] = "Unmodified DecodeRGBA32 and CutImage methods in an external .NET 8 harness, on the 6000.6 variant atlas' own sprites (m_RenderDataMap entries; no Sprite objects exist). Metadata/loading shims; rectangle path only, tight path rejected. ImageSharp default bicubic resize, scalar kernel sums (DOTNET_EnableFMA=0). Full AssetStudio application not run. BGRA swapped to RGBA once; CutImage output flipped back to bottom row first."
+    for index, (job, size) in enumerate(zip(jobs, dimensions)):
+        rgba = (project / f"{index}.rgba").read_bytes()
         assert len(rgba) == size["width"] * size["height"] * 4
         pixels = {**size, "imageSha256": digest(job["raw"]), "rgbaSha256": digest(rgba),
                   "rgbaHex": rgba.hex(), "firstPixel": list(rgba[:4])}
@@ -288,10 +336,11 @@ def main():
             rect = job["textureRect"]
             assert size == {"width": math.ceil(rect["x"] + rect["width"]) - math.floor(rect["x"]),
                             "height": math.ceil(rect["y"] + rect["height"]) - math.floor(rect["y"])}
-            result["variants"][VARIANT][job["name"]] = {**pixels, "textureWidth": job["width"], "textureHeight": job["height"],
+            result["variants"][variant][job["name"]] = {**pixels, "textureWidth": job["width"], "textureHeight": job["height"],
                 **{key: job[key] for key in ["textureRect", "textureRectOffset", "settingsRaw", "downscaleMultiplier"]}}
     args.output.write_text(json.dumps(result, indent=2) + "\n")
-    print("Generated three plain and two native half-scale variant references: " + str(args.output))
+    print(("Generated two" if args.modern else "Generated three plain and two")
+          + " native half-scale variant references: " + str(args.output))
 
 
 if __name__ == "__main__":
