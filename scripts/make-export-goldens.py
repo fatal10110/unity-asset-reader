@@ -30,6 +30,9 @@ exports different bytes in two runs. A Shader with Direct3D programs (D3D9,
 D3D11, D3D11_9x) gets one without being exported: ShaderConverter turns them
 into text with Windows' D3DCompiler or the GUI's native HLSLDecompiler, so the
 text depends on the host, and unity-asset-reader-shader refuses them anyway.
+A Mesh with a submesh baseVertex gets one too: ExportMesh writes its indices
+without the offset, which unity-asset-reader applies (#257); the entry keeps
+that OBJ's size and hash as `objWithoutBaseVertex`.
 
 Everything executable - the extracted AssetStudio tree, the C# harness, the
 NuGet packages and AssetStudio's bundled FMOD library - lives in --project,
@@ -242,7 +245,17 @@ public static class Program {
                                 break;
                             }
                             var text = File.ReadAllBytes(Single(outDir));
-                            result["obj"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
+                            var objFile = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
+                            // ExportMesh writes the indices without their submesh's baseVertex,
+                            // so its faces use the wrong vertices; unity-asset-reader adds it
+                            // (#257). No golden; the OBJ is kept to check it differs by that alone.
+                            var offset = mesh.m_SubMeshes.FirstOrDefault(sub => sub.baseVertex != 0);
+                            if (offset != null) {
+                                result["exportError"] = "not exported: ExportMesh leaves out the submesh's baseVertex " + offset.baseVertex + ", which unity-asset-reader adds to the indices (#257)";
+                                result["objWithoutBaseVertex"] = objFile;
+                                break;
+                            }
+                            result["obj"] = objFile;
                             break;
                         }
                         case AudioClip clip: {
@@ -549,7 +562,7 @@ def main() -> None:
             else:
                 entry["inputOracle"] += "; object bytes: UnityPy 1.25.3"
             entry["input"] = actual
-        for output in [*OUTPUTS, "exportError"]:
+        for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex"]:
             if output in result:
                 entry[output] = result[output]
         if ("exportError" in entry) == any(k in entry for k in OUTPUTS):

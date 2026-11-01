@@ -1731,7 +1731,7 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
-| 12 Mesh (`main` bundles) | 12 OBJ | |
+| 27 Mesh (`main` bundles; `mesh` bundles, section 20) | 21 OBJ | 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
 | 18 AudioClip (`audio` bundles) | 18 WAV | |
 | 28 TextAsset | 28 files | |
 | 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
@@ -2491,3 +2491,182 @@ Build/spine-lz4-notypetree/skeletons  -> fixtures/bundles/editor/2019.4.41f2/spi
 then rerun `make-goldens.py` (it dumps the MonoBehaviours', Materials',
 TextAssets' and Texture2Ds' type trees) and `make-export-goldens.py`
 (section 17: each TextAsset's file and each page's PNG).
+
+## 20. The `mesh` bundles (#253, #257)
+
+Three meshes made from code, in their own bundles beside the existing ones, so
+the `main` bundles and their goldens stay as they are. Editors: 2019.4.41f2,
+2020.3.30f1 and 6000.3.26f1 (6000.3.25f1 is no longer installed, as in section
+18). Formats 21 and 22 only: AssetStudio `c37af7d` cannot read format 23
+(6000.6), so a 6000.6 mesh would have no OBJ golden.
+
+- `detail`: 8 vertices with UV0 and normals. Its positions include a negative
+  zero, values below 1e-4 and at or above 1e9 (written in scientific notation)
+  and fractions. It has two submeshes: triangles (0, 1, 2), (0, 2, 3), and the
+  quad 4, 5, 6, 7, which Unity keeps as `topology` 2.
+- `basevertex`: the reproduction of #257. Six vertices and one submesh,
+  `SetIndices(new[] { 0, 1, 2 }, MeshTopology.Triangles, 0, true, 3)`: the
+  index buffer holds 0, 1, 2 and `baseVertex` is 3, so Unity draws vertices 3,
+  4 and 5. The build log has a `FIXTURE-INFO basevertex baseVertex=3
+  idx=3,4,5 raw=0,1,2` line.
+- `compressed`: `detail`'s data with `MeshUtility.SetMeshCompression(Medium)`.
+  The build moves its vertices and triangles to `m_CompressedMesh`
+  (`m_VertexData` empty). It has a bundle of its own, `mesh-compressed`.
+
+Not built: a mesh streamed to a `.resS` (#253 lists it as optional). A plain
+`Mesh` asset in an AssetBundle is not streamed, and the vertex streams are
+already covered by `packages/core/tests/Mesh.test.ts`.
+
+Create a project per editor named `uar-253-mesh-<editor version>`, with
+`ProjectSettings/` and `Packages/` copied from one of the projects above and
+only this file under `Assets/`.
+
+`Assets/Editor/BuildMeshes.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// The mesh fixtures (#253, #257), created from code and built once per
+// variant: "detail" (UV0, normals, fractional, tiny, huge and negative-zero
+// coordinates, a triangle and a quad submesh), "basevertex" (one submesh whose
+// indices 0, 1, 2 are offset by baseVertex 3) and "compressed" (detail's data
+// with mesh compression on, in a bundle of its own).
+public static class BuildMeshes
+{
+    const string Dir = "Assets/Fixtures/mesh";
+
+    public static void Build()
+    {
+        // Keep every vertex channel: no renderer uses these meshes.
+        PlayerSettings.stripUnusedMeshComponents = false;
+        Directory.CreateDirectory(Dir);
+        Save(Detail("detail"), "detail");
+        Save(BaseVertex(), "basevertex");
+        var compressed = Detail("compressed");
+        MeshUtility.SetMeshCompression(compressed, ModelImporterMeshCompression.Medium);
+        Save(compressed, "compressed");
+        AssetDatabase.SaveAssets();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static Mesh Detail(string name)
+    {
+        var mesh = new Mesh { name = name };
+        mesh.vertices = new[]
+        {
+            new Vector3(-0f, 0.5f, 0.25f),
+            new Vector3(1.5f, 0.000012345f, -2.75f),
+            new Vector3(1e9f, 3.14159f, 0.1f),
+            new Vector3(-0.333333f, 2.5e10f, 7e-5f),
+            new Vector3(0.125f, -0f, 1f),
+            new Vector3(2f, 0.001f, -1e-7f),
+            new Vector3(123456.79f, 1e-3f, 0f),
+            new Vector3(-4.5e9f, -0.5f, 0.75f),
+        };
+        mesh.normals = new[]
+        {
+            new Vector3(0f, 0f, -1f),
+            new Vector3(0.6f, 0f, 0.8f),
+            new Vector3(-0.267261f, 0.534522f, 0.801784f),
+            new Vector3(0f, 1f, 0f),
+            new Vector3(0.707107f, -0.707107f, 0f),
+            new Vector3(-0f, 0f, 1f),
+            new Vector3(0.1f, 0.2f, 0.974679f),
+            new Vector3(-1f, 0f, 0f),
+        };
+        mesh.uv = new[]
+        {
+            new Vector2(0f, 0f),
+            new Vector2(0.333333f, 0.000031f),
+            new Vector2(1f, 0.5f),
+            new Vector2(0.75f, 0.125f),
+            new Vector2(0.1f, 0.9f),
+            new Vector2(1.5e-5f, 0.2f),
+            new Vector2(0.6f, 0.7f),
+            new Vector2(-0.25f, 1.25f),
+        };
+        mesh.subMeshCount = 2;
+        mesh.SetIndices(new[] { 0, 1, 2, 0, 2, 3 }, MeshTopology.Triangles, 0);
+        mesh.SetIndices(new[] { 4, 5, 6, 7 }, MeshTopology.Quads, 1);
+        return mesh;
+    }
+
+    static Mesh BaseVertex()
+    {
+        var mesh = new Mesh { name = "basevertex" };
+        mesh.vertices = new[]
+        {
+            new Vector3(0f, 0f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1f, 0f, 0f),
+            new Vector3(2f, 0f, 0f), new Vector3(2f, 1f, 0f), new Vector3(3f, 0f, 0f),
+        };
+        mesh.SetIndices(new[] { 0, 1, 2 }, MeshTopology.Triangles, 0, true, 3);
+        var check = mesh.GetIndices(0, true);
+        var raw = mesh.GetIndices(0, false);
+        Debug.Log("FIXTURE-INFO basevertex baseVertex=" + mesh.GetBaseVertex(0) +
+            " idx=" + string.Join(",", check) + " raw=" + string.Join(",", raw));
+        return mesh;
+    }
+
+    static void Save(Mesh mesh, string name)
+    {
+        AssetDatabase.CreateAsset(mesh, Dir + "/" + name + ".asset");
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", "mesh-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "mesh", assetNames = new[] { Dir + "/detail.asset", Dir + "/basevertex.asset" } },
+            new AssetBundleBuild { assetBundleName = "mesh-compressed", assetNames = new[] { Dir + "/compressed.asset" } },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: mesh " + name);
+        Debug.Log("FIXTURE-OK mesh " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildMeshes.Build` (same command
+as section 2). The log must hold two `FIXTURE-OK mesh` lines. Copy only these
+files (not `mesh-lz4`, the manifest bundle):
+
+```
+Build/mesh-lz4/mesh                  ->  fixtures/bundles/editor/<editor version>/mesh/lz4/mesh
+Build/mesh-lz4/mesh-compressed       ->  fixtures/bundles/editor/<editor version>/mesh/lz4/mesh-compressed
+Build/mesh-lz4-notypetree/mesh       ->  fixtures/bundles/editor/<editor version>/mesh/lz4-notypetree/mesh
+```
+
+`Build/mesh-lz4-notypetree/mesh-compressed` is not committed. Unity compresses
+the mesh again for each variant, and the two builds do not quantize alike: on
+all three editors their `m_CompressedMesh.m_Normals` differ (on 2019.4 and
+2020.3 the second build's `m_Range` is 1.9999847 and `m_Start` -0.9999924,
+where the first's are 2 and -1). So the typed twin cannot check the build
+without type trees.
+
+Then rerun the goldens:
+
+```bash
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --project <external-harness> --dotnet <dotnet-executable>
+```
+
+`make-goldens.py` (UnityPy 1.25.3) dumps each Mesh's type tree, so
+`packages/core/tests/Mesh.test.ts` compares `readMesh()` with it. The decoded
+vertices, normals and UV0 are compared with the float32 values of the
+script above.
+
+`make-export-goldens.py` (section 17) records an OBJ for `detail` and
+`compressed`. `basevertex` gets no golden (plan section 6: the oracle is
+wrong). AssetStudio's `GetTriangles` (`Classes/Mesh.cs`) never reads
+`baseVertex`, and UnityPy's `get_triangles` does not either, so `ExportMesh`
+writes `f 3/3/3 2/2/2 1/1/1`. unity-asset-reader adds the offset and writes
+`f 6/6/6 5/5/5 4/4/4`. The harness records that verdict as the entry's
+`exportError` and keeps AssetStudio's OBJ as `objWithoutBaseVertex`.
+`packages/mesh/tests/obj.test.ts` checks that `meshToObj`, given the same mesh
+with the offset taken off its indices, writes exactly that file.

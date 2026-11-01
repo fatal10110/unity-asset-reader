@@ -31,6 +31,10 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- `MeshData.indices` adds each submesh's `baseVertex` to its indices, so they point into
+  `vertices` as Unity draws them (#257). AssetStudio and UnityPy leave it out; every fixture
+  mesh but the new `basevertex` one has a `baseVertex` of 0 and decodes as before. An index the
+  offset takes past the vertex count throws `CorruptError`.
 - `formatSingle(value)` and `formatSingleInvariant(value)` write a float32 as .NET 8's
   `float.ToString()` does under en-US and invariant culture. They moved here from the mesh and
   shader packages, which both need them (#261).
@@ -254,6 +258,11 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ### 1.0.1 - Unreleased
 
+- `meshToObj` and `meshToGltf` draw a submesh with a `baseVertex` on the vertices it offsets
+  its indices to, through core's `MeshData.indices` (#257); a 16-bit mesh that offset takes to
+  index 65535 or above is written with 32-bit glTF indices. The OBJ equals AssetStudio's for
+  the new fixture meshes with UV0, normals, scientific-notation floats, two submeshes and mesh
+  compression (#253).
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
   is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
 

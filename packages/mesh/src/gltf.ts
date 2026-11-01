@@ -71,8 +71,7 @@ interface Attribute {
  * image and Unity's (and OBJ's) the bottom left. Colours are copied as they
  * are, RGB or RGBA. Indices are unsigned 16-bit when the mesh's
  * `m_IndexFormat` is, unless one is 65535 (glTF's primitive restart value)
- * or above (a hand-built `MeshData`), else 32-bit; as in `MeshData` and the
- * OBJ, they are not offset by the submesh's `baseVertex`.
+ * or above (a submesh's `baseVertex` can take one there), else 32-bit.
  *
  * An attribute holding values glTF forbids is left out, for the whole mesh,
  * so the file stays valid (as the Khronos glTF validator checks it):
