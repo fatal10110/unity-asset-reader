@@ -138,7 +138,11 @@ a skeleton JSON and atlas text written for them. Two skeletons, one per atlas
 layout (3.8 and 4.0, and 4.1+, which compiles in on-demand texture loading), with
 two atlases and a null entry, or one atlas of two pages; a third whose atlas
 loads its textures on demand; and the first bundle again without type trees.
-The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 19
+`spine/lz4/split` and `spine/lz4/splitatlas` (#254) split a skeleton from its
+atlas asset, which takes its atlas text, Material and page with it;
+`spine/lz4/otheratlas` has a skeleton whose atlas asset is of our own other
+atlas type; `spine/lz4-notypetree/splitatlas` is `splitatlas` without type
+trees. The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 19
 lists what each skeleton is grouped as.
 
 NaN does not have one bit pattern everywhere, and that comes from Unity: every

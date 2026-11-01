@@ -1733,9 +1733,9 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 | --- | --- | --- |
 | 12 Mesh (`main` bundles) | 12 OBJ | |
 | 18 AudioClip (`audio` bundles) | 18 WAV | |
-| 28 TextAsset | 28 files | |
+| 32 TextAsset | 32 files | |
 | 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
-| 138 Texture2D | 97 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
+| 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
 which call the right `Decode*` method by name, stay the AssetStudio verdict.
@@ -2186,12 +2186,28 @@ order (`packages/spine/tests/spine.test.ts` reads this table):
 | `spine/lz4/skeletons` | `hero_SkeletonData` | `hero` | `hero.atlas` | `hero`, `hero2` |
 | `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp.atlas` | `imp` |
 | `spine/lz4/skeletons` | `imp_SkeletonData` | `imp` | `imp-fx.atlas` | `imp-fx` |
+| `spine/lz4/split` | `wisp_SkeletonData` | `wisp` | `wisp.atlas` | `wisp` |
 
 - `hero_SkeletonData` (4.1+ atlas layout): one atlas, `hero_Atlas`, with two pages,
   `textureLoadingMode` `Normal`.
 - `imp_SkeletonData` (3.8 and 4.0 atlas layout): `atlasAssets` is `imp_Atlas`, a null
   entry, `imp-fx_Atlas`. spine-unity skips the null entry
   (`SkeletonDataAsset.GetAtlasArray`), so the skeleton has two atlases.
+- `spine/lz4/split` and `spine/lz4/splitatlas` (#254): a split build.
+  `wisp_SkeletonData` (and its JSON) is in `split`; its atlas asset `wisp_Atlas`
+  (4.1+ layout, `Normal`) is in `splitatlas`, and takes its atlas text,
+  Material and page with it. The row above is `split` loaded together with
+  `splitatlas`; `split` alone has the skeleton but not its atlas.
+- `spine/lz4/otheratlas` (#254): `shade_SkeletonData`, whose one atlas asset
+  `shade_Atlas` is `Spine.Unity.UarOtherAtlasAsset`, our own atlas type with
+  neither `atlasFile` nor `materials` (as spine-unity's other atlas types, such
+  as `SpineSpriteAtlasAsset`, are not `SpineAtlasAsset`s): `spineSkeletons`
+  refuses it, naming `shade_Atlas`.
+- `spine/lz4-notypetree/splitatlas` (#254): `splitatlas` built with
+  `DisableWriteTypeTree`. Both builds name a bundle's SerializedFile after the
+  bundle's name, so `split` (with type trees) loaded with it finds its atlas
+  asset there, without a type tree: `spineSkeletons` refuses it, naming
+  `wisp_Atlas`.
 - `spine/lz4/ondemand`: `ghost_SkeletonData`, whose atlas `ghost_Atlas` has
   `textureLoadingMode` `OnDemand`, which spine-unity builds with placeholder
   textures in the materials: `spineSkeletons` refuses it.
@@ -2218,6 +2234,9 @@ printf '\nimp.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: n
 printf '\nimp-fx.png\nsize: 8,8\nformat: RGBA8888\nfilter: Linear,Linear\nrepeat: none\nspark\n  rotate: false\n  xy: 0, 0\n  size: 8, 8\n  orig: 8, 8\n  offset: 0, 0\n  index: -1\n' > imp-fx.atlas.txt
 printf '{"skeleton":{"hash":"uarghost","spine":"4.2.00","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > ghost.json
 printf 'ghost.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > ghost.atlas.txt
+printf '{"skeleton":{"hash":"uarwisp","spine":"4.2.00","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > wisp.json
+printf 'wisp.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n' > wisp.atlas.txt
+printf '{"skeleton":{"hash":"uarshade","spine":"4.2.00","width":8,"height":8},"bones":[{"name":"root"}],"slots":[{"name":"body","bone":"root","attachment":"body"}],"skins":[{"name":"default","attachments":{"body":{"body":{"width":8,"height":8}}}}],"animations":{"idle":{}}}\n' > shade.json
 ```
 
 The hero JSON and atlas text are Spine 4.x's export format, the imp ones 3.8's;
@@ -2233,7 +2252,7 @@ def png(name, page):
     chunk = lambda t, d: struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
     data = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 8, 8, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 0)) + chunk(b"IEND", b"")
     open(name, "wb").write(data)
-for page, name in enumerate(["hero.png", "hero2.png", "imp.png", "imp-fx.png", "ghost.png"], 1):
+for page, name in enumerate(["hero.png", "hero2.png", "imp.png", "imp-fx.png", "ghost.png", "wisp.png"], 1):
     png(name, page)
 ```
 
@@ -2252,6 +2271,10 @@ sha256 of each file:
 8946f6c1e5e8a71196fb5c0e4ed4053ff881d2ca5f5e41cb844006ef038d286d  ghost.json
 1d804a8efa9ced3f9601ec44ccfc94626427ee1dcfd4df08afe0b061f2f297c8  ghost.atlas.txt
 8aafa8abaf30aa4912faca2c62285194457902e1ba9c870851d5c089c791faf1  ghost.png
+eb550200017581578294d1bd03449b3d605f3082727640b437aa4c1ca614d044  wisp.json
+4f8f7f1ede0d334012d8ccb251aaafa238bd53d10c3f8b3486818a2d3ed58e2c  wisp.atlas.txt
+2045f7a939e5b7875ce4274b71cdbb7a8fb210f362e5b97eaac345d7e44dd011  wisp.png
+6f18c54041e266d4e47ecebf80707b256aead744f4eece47adc8466c30b994e4  shade.json
 ```
 
 `page.shader`, the smallest shader with a `_MainTex` slot:
@@ -2281,7 +2304,8 @@ Shader "UAR/SpinePage"
 ### Stub scripts
 
 Under `Assets/Scripts/Spine/` (`SkeletonDataAsset.cs`, `SpineAtlasAsset.cs`,
-`UarTypes.cs`) and `Assets/Scripts/SpineOnDemand/` (`SpineAtlasAsset.cs`).
+`UarTypes.cs`, `UarOtherAtlasAsset.cs`) and `Assets/Scripts/SpineOnDemand/`
+(`SpineAtlasAsset.cs`).
 Unity takes two scripts of the same file name in different folders, as long
 as their namespaces differ. One `SkeletonDataAsset` serves both atlas
 layouts, through the common base `UarAtlasBase`:
@@ -2354,6 +2378,14 @@ namespace Spine.Unity
     }
 }
 
+// Spine/UarOtherAtlasAsset.cs
+namespace Spine.Unity
+{
+    // An atlas type of our own that is not a SpineAtlasAsset (#254): neither atlasFile
+    // nor materials.
+    public class UarOtherAtlasAsset : UarAtlasBase { }
+}
+
 // SpineOnDemand/SpineAtlasAsset.cs
 using UnityEngine;
 
@@ -2383,7 +2415,9 @@ using OnDemand = Spine.Unity.OnDemand;
 // Spine skeletons laid out as spine-unity stores them (#238), with our stub
 // scripts: hero (4.1+ atlas layout, one atlas, two pages), imp (3.8/4.0 atlas
 // layout, two atlases and a null entry between them, one page each), and ghost
-// (4.1+ layout, texture loading mode OnDemand) in a bundle of its own.
+// (4.1+ layout, texture loading mode OnDemand) in a bundle of its own; wisp
+// (4.1+ layout) split from its atlas asset, and shade, whose atlas asset is our
+// own other atlas type, each in bundles of their own (#254).
 public static class BuildSpine
 {
     const string Dir = "Assets/Fixtures/spine";
@@ -2452,13 +2486,22 @@ public static class BuildSpine
         // A null entry, which spine-unity skips.
         var imp = Skeleton("imp", new UarAtlasBase[] { PlainAtlas("imp", "imp"), null, PlainAtlas("imp-fx", "imp-fx") });
         var ghost = Skeleton("ghost", new UarAtlasBase[] { OnDemandAtlas("ghost", 1, "ghost") });
+        var wisp = Skeleton("wisp", new UarAtlasBase[] { OnDemandAtlas("wisp", 0, "wisp") });
+        var shadeAtlas = ScriptableObject.CreateInstance<UarOtherAtlasAsset>();
+        Save(shadeAtlas, "shade_Atlas");
+        var shade = Skeleton("shade", new UarAtlasBase[] { shadeAtlas });
         AssetDatabase.SaveAssets();
 
         // The shader goes into a bundle of its own (not committed), so the page
         // Materials point at another file for it and the bundles stay small.
+        // wisp_Atlas is named into splitatlas, so its atlas text, Material and page
+        // go there with it and the split bundle points at that bundle for them.
         var builds = new[] {
             new AssetBundleBuild { assetBundleName = "skeletons", assetNames = new[] { hero, imp } },
             new AssetBundleBuild { assetBundleName = "ondemand", assetNames = new[] { ghost } },
+            new AssetBundleBuild { assetBundleName = "split", assetNames = new[] { wisp } },
+            new AssetBundleBuild { assetBundleName = "splitatlas", assetNames = new[] { Dir + "/wisp_Atlas.asset" } },
+            new AssetBundleBuild { assetBundleName = "otheratlas", assetNames = new[] { shade } },
             new AssetBundleBuild { assetBundleName = "spinedeps", assetNames = new[] { Dir + "/page.shader" } },
         };
         var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
@@ -2480,13 +2523,23 @@ public static class BuildSpine
 ### Build
 
 Same command as section 2, with `-executeMethod BuildSpine.Build`; the log
-must hold two `FIXTURE-OK spine` lines. Copy only these three files:
+must hold two `FIXTURE-OK spine` lines. Copy only these seven files:
 
 ```
-Build/spine-lz4/skeletons             -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/skeletons
-Build/spine-lz4/ondemand              -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/ondemand
-Build/spine-lz4-notypetree/skeletons  -> fixtures/bundles/editor/2019.4.41f2/spine/lz4-notypetree/skeletons
+Build/spine-lz4/skeletons              -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/skeletons
+Build/spine-lz4/ondemand               -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/ondemand
+Build/spine-lz4-notypetree/skeletons   -> fixtures/bundles/editor/2019.4.41f2/spine/lz4-notypetree/skeletons
+Build/spine-lz4/split                  -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/split
+Build/spine-lz4/splitatlas             -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/splitatlas
+Build/spine-lz4/otheratlas             -> fixtures/bundles/editor/2019.4.41f2/spine/lz4/otheratlas
+Build/spine-lz4-notypetree/splitatlas  -> fixtures/bundles/editor/2019.4.41f2/spine/lz4-notypetree/splitatlas
 ```
+
+The first three come from the #238 build, the other four from a build of a
+project made from this page for #254, which also wrote the first three: those
+were not replaced (section 4 says why a rebuild changes them). The two builds
+share no asset, so mixing them is safe: `split` points at `splitatlas` by the
+SerializedFile name, which depends only on the bundle name.
 
 then rerun `make-goldens.py` (it dumps the MonoBehaviours', Materials',
 TextAssets' and Texture2Ds' type trees) and `make-export-goldens.py`

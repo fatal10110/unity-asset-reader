@@ -1197,6 +1197,49 @@
         }
       }
     },
+    "editor/2019.4.41f2/spine/lz4-notypetree/splitatlas": {
+      "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+        "-5081227630508509430": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 188,
+            "objectSha256": "8ed634f57a9129c413a09fa16943f0a41678382d79fa86b1895757f00ffd9800",
+            "name": "wisp",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 8,
+            "height": 8,
+            "imageSize": 256,
+            "imageSha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 8,
+            "rgbaSha256": "2f32425e11427eb6425ca2ff1257b3995e04c4c3a931f1a10ccf0a82d07ca7f9",
+            "pngSize": 113,
+            "pngSha256": "a324c5352eefbb838cc4e4e500ffa023106734ae011fdb03fe924290b1228639"
+          }
+        },
+        "7164637912654133429": {
+          "class": "TextAsset",
+          "input": {
+            "classId": 49,
+            "byteSize": 80,
+            "objectSha256": "c88b4dd9a569f7576e16442797079c2ab9f1c64b78072e40894ad1cfcec91a1a",
+            "name": "wisp.atlas",
+            "scriptSize": 59,
+            "scriptSha256": "4f8f7f1ede0d334012d8ccb251aaafa238bd53d10c3f8b3486818a2d3ed58e2c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "bytes": {
+            "size": 59,
+            "sha256": "4f8f7f1ede0d334012d8ccb251aaafa238bd53d10c3f8b3486818a2d3ed58e2c"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/spine/lz4/ondemand": {
       "CAB-6c6b18262b728fc3abb85cbcbc091194": {
         "3010351642244952297": {
@@ -1252,6 +1295,26 @@
           "bytes": {
             "size": 266,
             "sha256": "8946f6c1e5e8a71196fb5c0e4ed4053ff881d2ca5f5e41cb844006ef038d286d"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/spine/lz4/otheratlas": {
+      "CAB-3a408ccac60495a234fe372a193c01c8": {
+        "8085416767284674898": {
+          "class": "TextAsset",
+          "input": {
+            "classId": 49,
+            "byteSize": 284,
+            "objectSha256": "e3334ec180a342159fd5791ea2396ecfdf2d3b98ad71a063d1b236ebd6c0c57f",
+            "name": "shade",
+            "scriptSize": 266,
+            "scriptSha256": "6f18c54041e266d4e47ecebf80707b256aead744f4eece47adc8466c30b994e4"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "bytes": {
+            "size": 266,
+            "sha256": "6f18c54041e266d4e47ecebf80707b256aead744f4eece47adc8466c30b994e4"
           }
         }
       }
@@ -1428,6 +1491,69 @@
             "rgbaSha256": "5d49a09ca0121041af34ca2c0edc03a76858f9259245f8b7297c0bcdc7e6fbc4",
             "pngSize": 108,
             "pngSha256": "f99848001dbb64ebceb8f4020234c513caed14be9dda099c40a72d0c57309ce5"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/spine/lz4/split": {
+      "CAB-4ccedeb91b5048a2fa220409f78b15c5": {
+        "5740095282350586327": {
+          "class": "TextAsset",
+          "input": {
+            "classId": 49,
+            "byteSize": 280,
+            "objectSha256": "856cfc8d090edffecad92ed2f19630417d0abcf72aa0bdbbbcc3db03be39b4bb",
+            "name": "wisp",
+            "scriptSize": 265,
+            "scriptSha256": "eb550200017581578294d1bd03449b3d605f3082727640b437aa4c1ca614d044"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "bytes": {
+            "size": 265,
+            "sha256": "eb550200017581578294d1bd03449b3d605f3082727640b437aa4c1ca614d044"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/spine/lz4/splitatlas": {
+      "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+        "-5081227630508509430": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 188,
+            "objectSha256": "8ed634f57a9129c413a09fa16943f0a41678382d79fa86b1895757f00ffd9800",
+            "name": "wisp",
+            "format": 4,
+            "formatName": "RGBA32",
+            "width": 8,
+            "height": 8,
+            "imageSize": 256,
+            "imageSha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 8,
+            "height": 8,
+            "rgbaSha256": "2f32425e11427eb6425ca2ff1257b3995e04c4c3a931f1a10ccf0a82d07ca7f9",
+            "pngSize": 113,
+            "pngSha256": "a324c5352eefbb838cc4e4e500ffa023106734ae011fdb03fe924290b1228639"
+          }
+        },
+        "7164637912654133429": {
+          "class": "TextAsset",
+          "input": {
+            "classId": 49,
+            "byteSize": 80,
+            "objectSha256": "c88b4dd9a569f7576e16442797079c2ab9f1c64b78072e40894ad1cfcec91a1a",
+            "name": "wisp.atlas",
+            "scriptSize": 59,
+            "scriptSha256": "4f8f7f1ede0d334012d8ccb251aaafa238bd53d10c3f8b3486818a2d3ed58e2c"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "bytes": {
+            "size": 59,
+            "sha256": "4f8f7f1ede0d334012d8ccb251aaafa238bd53d10c3f8b3486818a2d3ed58e2c"
           }
         }
       }

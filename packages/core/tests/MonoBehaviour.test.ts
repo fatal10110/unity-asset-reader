@@ -58,14 +58,15 @@ for (const name of FIXTURES) {
       // m_Script leads to the MonoScript naming the class, with or without a type tree.
       const found = env.resolve(header.m_Script, reader);
       assert.equal(found.status, "found");
+      let className = "";
       if (found.status === "found") {
-        const script = readMonoScript(found.object);
+        className = readMonoScript(found.object).m_ClassName;
         const classNames = name.endsWith("/registry/refs")
           ? ["RegistryData"]
           : name.includes("/spine/")
-            ? ["SkeletonDataAsset", "SpineAtlasAsset"]
+            ? ["SkeletonDataAsset", "SpineAtlasAsset", "UarOtherAtlasAsset"]
             : ["FixtureData"];
-        assert.ok(classNames.includes(script.m_ClassName), script.m_ClassName);
+        assert.ok(classNames.includes(className), className);
       }
 
       const obj = env.objects.find((o) => o.pathId === reader.pathId)!;
@@ -74,7 +75,9 @@ for (const name of FIXTURES) {
         assert.deepEqual(firstFields(tree, 4), header);
         // obj.read() is the whole object: the type tree, header first.
         assert.deepEqual(obj.read(), tree);
-        assert.ok(Object.keys(tree).length > 4);
+        // The spine fixtures' other atlas type (#254) declares no field of its own.
+        if (className === "UarOtherAtlasAsset") assert.equal(Object.keys(tree).length, 4);
+        else assert.ok(Object.keys(tree).length > 4);
       } else {
         assert.equal(reader.serializedType?.nodes, null, "the file has a type tree after all");
         assert.throws(() => reader.readTypeTree(), UnsupportedError);

@@ -24382,6 +24382,145 @@
         }
       ]
     },
+    "editor/2019.4.41f2/spine/lz4-notypetree/splitatlas": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+          "sha256": "8a8ce381a14c907d73b15cee176b5789159ce46cd212d548eb854c7097db14c2",
+          "size": 4920
+        },
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d.resS": {
+          "sha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032",
+          "size": 256
+        }
+      },
+      "objects": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": [
+          {
+            "pathId": "-117530638031325854",
+            "classId": 21,
+            "byteSize": 108
+          },
+          {
+            "pathId": "-3138739211269455426",
+            "classId": 114,
+            "byteSize": 88
+          },
+          {
+            "pathId": "-5081227630508509430",
+            "classId": 28,
+            "byteSize": 188
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 236
+          },
+          {
+            "pathId": "7164637912654133429",
+            "classId": 49,
+            "byteSize": 80
+          },
+          {
+            "pathId": "8347920830156833934",
+            "classId": 115,
+            "byteSize": 108
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2\n2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": false,
+          "externals": [
+            {
+              "path": "archive:/CAB-36b39d14f694597a201f2479b705a023/CAB-36b39d14f694597a201f2479b705a023",
+              "guid": "00000000000000000000000000000000",
+              "type": 0
+            }
+          ],
+          "types": [
+            {
+              "classId": 115,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f46e8e30ecc293493f18ab27134210ee",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "512dc6156c2d621c9f03b4db6490f569",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 0,
+              "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
+              "oldTypeHash": "9fe439383b274c36028461064b1a7d12",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 21,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "d871346d990bbc294d02f4c366bf1b6d",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": null,
+              "nodes": null
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {},
+          "names": {
+            "-117530638031325854": "wisp_Material",
+            "-3138739211269455426": "wisp_Atlas",
+            "-5081227630508509430": "wisp",
+            "1": "splitatlas",
+            "7164637912654133429": "wisp.atlas",
+            "8347920830156833934": "SpineAtlasAsset"
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/spine/wisp_atlas.asset",
+          "file": "CAB-7dd9f5219db7cc25722db304f4c0af7d",
+          "pathId": "-3138739211269455426"
+        }
+      ]
+    },
     "editor/2019.4.41f2/spine/lz4/ondemand": {
       "signature": "UnityFS",
       "formatVersion": 7,
@@ -25174,6 +25313,504 @@
           "path": "assets/fixtures/spine/ghost_skeletondata.asset",
           "file": "CAB-6c6b18262b728fc3abb85cbcbc091194",
           "pathId": "8806234226266990683"
+        }
+      ]
+    },
+    "editor/2019.4.41f2/spine/lz4/otheratlas": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-3a408ccac60495a234fe372a193c01c8": {
+          "sha256": "520fcb744808e02a6dbe2a638eee6aca3c42219f87063260b74c4c41257e431c",
+          "size": 8692
+        }
+      },
+      "objects": {
+        "CAB-3a408ccac60495a234fe372a193c01c8": [
+          {
+            "pathId": "-174518889918771214",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "-3581788832992892841",
+            "classId": 114,
+            "byteSize": 140
+          },
+          {
+            "pathId": "-4668370982576091303",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 216
+          },
+          {
+            "pathId": "6281494687323091456",
+            "classId": 114,
+            "byteSize": 44
+          },
+          {
+            "pathId": "8085416767284674898",
+            "classId": 49,
+            "byteSize": 284
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-3a408ccac60495a234fe372a193c01c8": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 115,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f46e8e30ecc293493f18ab27134210ee",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoScript", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ExecutionOrder", 4, 16],
+                [1, "Hash128", "m_PropertiesHash", 16, 16],
+                [2, "UInt8", "bytes[0]", 1, 16],
+                [2, "UInt8", "bytes[1]", 1, 16],
+                [2, "UInt8", "bytes[2]", 1, 16],
+                [2, "UInt8", "bytes[3]", 1, 16],
+                [2, "UInt8", "bytes[4]", 1, 16],
+                [2, "UInt8", "bytes[5]", 1, 16],
+                [2, "UInt8", "bytes[6]", 1, 16],
+                [2, "UInt8", "bytes[7]", 1, 16],
+                [2, "UInt8", "bytes[8]", 1, 16],
+                [2, "UInt8", "bytes[9]", 1, 16],
+                [2, "UInt8", "bytes[10]", 1, 16],
+                [2, "UInt8", "bytes[11]", 1, 16],
+                [2, "UInt8", "bytes[12]", 1, 16],
+                [2, "UInt8", "bytes[13]", 1, 16],
+                [2, "UInt8", "bytes[14]", 1, 16],
+                [2, "UInt8", "bytes[15]", 1, 16],
+                [1, "string", "m_ClassName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_Namespace", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_AssemblyName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 0,
+              "scriptId": "15f441d01838cd812fdb2c200c404b22",
+              "oldTypeHash": "a2cee442eff0fa015c9fea439701e866",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "atlasAssets", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarAtlasBase>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "float", "scale", 4, 0],
+                [1, "PPtr<$TextAsset>", "skeletonJSON", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
+                [1, "UarBlendModes", "blendModeMaterials", -1, 32768],
+                [2, "UInt8", "requiresBlendModeMaterials", 1, 16640],
+                [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
+                [2, "UarPageMaterial", "additiveMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "multiplyMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "screenMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "skeletonDataModifiers", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarModifier>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "fromAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "toAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "duration", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "float", "data", 4, 0],
+                [1, "float", "defaultMix", 4, 0],
+                [1, "PPtr<$RuntimeAnimatorController>", "controller", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 1,
+              "scriptId": "79d9e3296ed70d5c5162d72d59734856",
+              "oldTypeHash": "71bb6a6b6c8f052f948db64c7dd3ca4f",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289]
+              ]
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "TextAsset", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "string", "m_Script", -1, 67141633],
+                [2, "Array", "Array", -1, 67125249],
+                [3, "int", "size", 4, 67108865],
+                [3, "char", "data", 1, 67108865]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-174518889918771214": {
+              "value": {
+                "m_Name": "UarOtherAtlasAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 113,
+                  "bytes[1]": 187,
+                  "bytes[2]": 106,
+                  "bytes[3]": 107,
+                  "bytes[4]": 108,
+                  "bytes[5]": 143,
+                  "bytes[6]": 5,
+                  "bytes[7]": 47,
+                  "bytes[8]": 148,
+                  "bytes[9]": 141,
+                  "bytes[10]": 182,
+                  "bytes[11]": 76,
+                  "bytes[12]": 125,
+                  "bytes[13]": 211,
+                  "bytes[14]": 202,
+                  "bytes[15]": 79
+                },
+                "m_ClassName": "UarOtherAtlasAsset",
+                "m_Namespace": "Spine.Unity",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "-3581788832992892841": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "-4668370982576091303"
+                },
+                "m_Name": "shade_SkeletonData",
+                "atlasAssets": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "6281494687323091456"
+                  }
+                ],
+                "scale": "f32:3c23d70a",
+                "skeletonJSON": {
+                  "m_FileID": 0,
+                  "m_PathID": "8085416767284674898"
+                },
+                "isUpgradingBlendModeMaterials": 0,
+                "blendModeMaterials": {
+                  "requiresBlendModeMaterials": 0,
+                  "applyAdditiveMaterial": 0,
+                  "additiveMaterials": [],
+                  "multiplyMaterials": [],
+                  "screenMaterials": []
+                },
+                "skeletonDataModifiers": [],
+                "fromAnimation": [],
+                "toAnimation": [],
+                "duration": [],
+                "defaultMix": "f32:00000000",
+                "controller": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                }
+              }
+            },
+            "-4668370982576091303": {
+              "value": {
+                "m_Name": "SkeletonDataAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 162,
+                  "bytes[1]": 206,
+                  "bytes[2]": 228,
+                  "bytes[3]": 66,
+                  "bytes[4]": 239,
+                  "bytes[5]": 240,
+                  "bytes[6]": 250,
+                  "bytes[7]": 1,
+                  "bytes[8]": 92,
+                  "bytes[9]": 159,
+                  "bytes[10]": 234,
+                  "bytes[11]": 67,
+                  "bytes[12]": 151,
+                  "bytes[13]": 1,
+                  "bytes[14]": 232,
+                  "bytes[15]": 102
+                },
+                "m_ClassName": "SkeletonDataAsset",
+                "m_Namespace": "Spine.Unity",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "otheratlas",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4668370982576091303"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-3581788832992892841"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-174518889918771214"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "6281494687323091456"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8085416767284674898"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/spine/shade_skeletondata.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 5,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-3581788832992892841"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "otheratlas",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "6281494687323091456": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "-174518889918771214"
+                },
+                "m_Name": "shade_Atlas"
+              }
+            },
+            "8085416767284674898": {
+              "value": {
+                "m_Name": "shade",
+                "m_Script": "{\"skeleton\":{\"hash\":\"uarshade\",\"spine\":\"4.2.00\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
+              }
+            }
+          },
+          "names": {
+            "-174518889918771214": "UarOtherAtlasAsset",
+            "-3581788832992892841": "shade_SkeletonData",
+            "-4668370982576091303": "SkeletonDataAsset",
+            "1": "otheratlas",
+            "6281494687323091456": "shade_Atlas",
+            "8085416767284674898": "shade"
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/spine/shade_skeletondata.asset",
+          "file": "CAB-3a408ccac60495a234fe372a193c01c8",
+          "pathId": "-3581788832992892841"
         }
       ]
     },
@@ -26550,6 +27187,1024 @@
           "path": "assets/fixtures/spine/imp_skeletondata.asset",
           "file": "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1",
           "pathId": "7750899617410324551"
+        }
+      ]
+    },
+    "editor/2019.4.41f2/spine/lz4/split": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-4ccedeb91b5048a2fa220409f78b15c5": {
+          "sha256": "1b7b849074b1f12b61286ba861d6c07e31e0f7e4c91b027a3218e6edef646ca7",
+          "size": 8128
+        }
+      },
+      "objects": {
+        "CAB-4ccedeb91b5048a2fa220409f78b15c5": [
+          {
+            "pathId": "-4668370982576091303",
+            "classId": 115,
+            "byteSize": 108
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 212
+          },
+          {
+            "pathId": "5522389595301529999",
+            "classId": 114,
+            "byteSize": 140
+          },
+          {
+            "pathId": "5740095282350586327",
+            "classId": 49,
+            "byteSize": 280
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-4ccedeb91b5048a2fa220409f78b15c5": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [
+            {
+              "path": "archive:/CAB-7dd9f5219db7cc25722db304f4c0af7d/CAB-7dd9f5219db7cc25722db304f4c0af7d",
+              "guid": "00000000000000000000000000000000",
+              "type": 0
+            }
+          ],
+          "types": [
+            {
+              "classId": 115,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f46e8e30ecc293493f18ab27134210ee",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoScript", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ExecutionOrder", 4, 16],
+                [1, "Hash128", "m_PropertiesHash", 16, 16],
+                [2, "UInt8", "bytes[0]", 1, 16],
+                [2, "UInt8", "bytes[1]", 1, 16],
+                [2, "UInt8", "bytes[2]", 1, 16],
+                [2, "UInt8", "bytes[3]", 1, 16],
+                [2, "UInt8", "bytes[4]", 1, 16],
+                [2, "UInt8", "bytes[5]", 1, 16],
+                [2, "UInt8", "bytes[6]", 1, 16],
+                [2, "UInt8", "bytes[7]", 1, 16],
+                [2, "UInt8", "bytes[8]", 1, 16],
+                [2, "UInt8", "bytes[9]", 1, 16],
+                [2, "UInt8", "bytes[10]", 1, 16],
+                [2, "UInt8", "bytes[11]", 1, 16],
+                [2, "UInt8", "bytes[12]", 1, 16],
+                [2, "UInt8", "bytes[13]", 1, 16],
+                [2, "UInt8", "bytes[14]", 1, 16],
+                [2, "UInt8", "bytes[15]", 1, 16],
+                [1, "string", "m_ClassName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_Namespace", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_AssemblyName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 0,
+              "scriptId": "15f441d01838cd812fdb2c200c404b22",
+              "oldTypeHash": "a2cee442eff0fa015c9fea439701e866",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "atlasAssets", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarAtlasBase>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "float", "scale", 4, 0],
+                [1, "PPtr<$TextAsset>", "skeletonJSON", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "UInt8", "isUpgradingBlendModeMaterials", 1, 16640],
+                [1, "UarBlendModes", "blendModeMaterials", -1, 32768],
+                [2, "UInt8", "requiresBlendModeMaterials", 1, 16640],
+                [2, "UInt8", "applyAdditiveMaterial", 1, 16640],
+                [2, "UarPageMaterial", "additiveMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "multiplyMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [2, "UarPageMaterial", "screenMaterials", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "UarPageMaterial", "data", -1, 32768],
+                [5, "string", "pageName", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "PPtr<$Material>", "material", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "skeletonDataModifiers", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$UarModifier>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "fromAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "toAnimation", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "vector", "duration", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "float", "data", 4, 0],
+                [1, "float", "defaultMix", 4, 0],
+                [1, "PPtr<$RuntimeAnimatorController>", "controller", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609]
+              ]
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "TextAsset", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "string", "m_Script", -1, 67141633],
+                [2, "Array", "Array", -1, 67125249],
+                [3, "int", "size", 4, 67108865],
+                [3, "char", "data", 1, 67108865]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-4668370982576091303": {
+              "value": {
+                "m_Name": "SkeletonDataAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 162,
+                  "bytes[1]": 206,
+                  "bytes[2]": 228,
+                  "bytes[3]": 66,
+                  "bytes[4]": 239,
+                  "bytes[5]": 240,
+                  "bytes[6]": 250,
+                  "bytes[7]": 1,
+                  "bytes[8]": 92,
+                  "bytes[9]": 159,
+                  "bytes[10]": 234,
+                  "bytes[11]": 67,
+                  "bytes[12]": 151,
+                  "bytes[13]": 1,
+                  "bytes[14]": 232,
+                  "bytes[15]": 102
+                },
+                "m_ClassName": "SkeletonDataAsset",
+                "m_Namespace": "Spine.Unity",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "split",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4668370982576091303"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "5522389595301529999"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "5740095282350586327"
+                  },
+                  {
+                    "m_FileID": 1,
+                    "m_PathID": "-3138739211269455426"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/spine/wisp_skeletondata.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 4,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "5522389595301529999"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "split",
+                "m_Dependencies": ["splitatlas"],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "5522389595301529999": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "-4668370982576091303"
+                },
+                "m_Name": "wisp_SkeletonData",
+                "atlasAssets": [
+                  {
+                    "m_FileID": 1,
+                    "m_PathID": "-3138739211269455426"
+                  }
+                ],
+                "scale": "f32:3c23d70a",
+                "skeletonJSON": {
+                  "m_FileID": 0,
+                  "m_PathID": "5740095282350586327"
+                },
+                "isUpgradingBlendModeMaterials": 0,
+                "blendModeMaterials": {
+                  "requiresBlendModeMaterials": 0,
+                  "applyAdditiveMaterial": 0,
+                  "additiveMaterials": [],
+                  "multiplyMaterials": [],
+                  "screenMaterials": []
+                },
+                "skeletonDataModifiers": [],
+                "fromAnimation": [],
+                "toAnimation": [],
+                "duration": [],
+                "defaultMix": "f32:00000000",
+                "controller": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                }
+              }
+            },
+            "5740095282350586327": {
+              "value": {
+                "m_Name": "wisp",
+                "m_Script": "{\"skeleton\":{\"hash\":\"uarwisp\",\"spine\":\"4.2.00\",\"width\":8,\"height\":8},\"bones\":[{\"name\":\"root\"}],\"slots\":[{\"name\":\"body\",\"bone\":\"root\",\"attachment\":\"body\"}],\"skins\":[{\"name\":\"default\",\"attachments\":{\"body\":{\"body\":{\"width\":8,\"height\":8}}}}],\"animations\":{\"idle\":{}}}\n"
+              }
+            }
+          },
+          "names": {
+            "-4668370982576091303": "SkeletonDataAsset",
+            "1": "split",
+            "5522389595301529999": "wisp_SkeletonData",
+            "5740095282350586327": "wisp"
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/spine/wisp_skeletondata.asset",
+          "file": "CAB-4ccedeb91b5048a2fa220409f78b15c5",
+          "pathId": "5522389595301529999"
+        }
+      ]
+    },
+    "editor/2019.4.41f2/spine/lz4/splitatlas": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+          "sha256": "6b5bbf9d132a4ee29e2c0b71dd4acfbdcb11c5dbbe8b0b214757ef9e8eb803c7",
+          "size": 10376
+        },
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d.resS": {
+          "sha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032",
+          "size": 256
+        }
+      },
+      "objects": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": [
+          {
+            "pathId": "-117530638031325854",
+            "classId": 21,
+            "byteSize": 108
+          },
+          {
+            "pathId": "-3138739211269455426",
+            "classId": 114,
+            "byteSize": 88
+          },
+          {
+            "pathId": "-5081227630508509430",
+            "classId": 28,
+            "byteSize": 188
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 236
+          },
+          {
+            "pathId": "7164637912654133429",
+            "classId": 49,
+            "byteSize": 80
+          },
+          {
+            "pathId": "8347920830156833934",
+            "classId": 115,
+            "byteSize": 108
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-7dd9f5219db7cc25722db304f4c0af7d": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [
+            {
+              "path": "archive:/CAB-36b39d14f694597a201f2479b705a023/CAB-36b39d14f694597a201f2479b705a023",
+              "guid": "00000000000000000000000000000000",
+              "type": 0
+            }
+          ],
+          "types": [
+            {
+              "classId": 115,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f46e8e30ecc293493f18ab27134210ee",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoScript", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ExecutionOrder", 4, 16],
+                [1, "Hash128", "m_PropertiesHash", 16, 16],
+                [2, "UInt8", "bytes[0]", 1, 16],
+                [2, "UInt8", "bytes[1]", 1, 16],
+                [2, "UInt8", "bytes[2]", 1, 16],
+                [2, "UInt8", "bytes[3]", 1, 16],
+                [2, "UInt8", "bytes[4]", 1, 16],
+                [2, "UInt8", "bytes[5]", 1, 16],
+                [2, "UInt8", "bytes[6]", 1, 16],
+                [2, "UInt8", "bytes[7]", 1, 16],
+                [2, "UInt8", "bytes[8]", 1, 16],
+                [2, "UInt8", "bytes[9]", 1, 16],
+                [2, "UInt8", "bytes[10]", 1, 16],
+                [2, "UInt8", "bytes[11]", 1, 16],
+                [2, "UInt8", "bytes[12]", 1, 16],
+                [2, "UInt8", "bytes[13]", 1, 16],
+                [2, "UInt8", "bytes[14]", 1, 16],
+                [2, "UInt8", "bytes[15]", 1, 16],
+                [1, "string", "m_ClassName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_Namespace", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17],
+                [1, "string", "m_AssemblyName", -1, 32784],
+                [2, "Array", "Array", -1, 16401],
+                [3, "int", "size", 4, 17],
+                [3, "char", "data", 1, 17]
+              ]
+            },
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "512dc6156c2d621c9f03b4db6490f569",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ForcedFallbackFormat", 4, 0],
+                [1, "bool", "m_DownscaleFallback", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IgnoreMasterTextureLimit", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 1],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "unsigned int", "offset", 4, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 114,
+              "isStrippedType": false,
+              "scriptTypeIndex": 0,
+              "scriptId": "d58fa54ce19d9d47746ac43131c79f61",
+              "oldTypeHash": "9fe439383b274c36028461064b1a7d12",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "MonoBehaviour", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 65],
+                [2, "SInt64", "m_PathID", 8, 65],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<MonoScript>", "m_Script", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "textureLoadingMode", 4, 0],
+                [1, "PPtr<$UarTextureLoader>", "onDemandTextureLoader", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "PPtr<$TextAsset>", "atlasFile", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "materials", -1, 0],
+                [2, "Array", "Array", -1, 0],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<$Material>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609]
+              ]
+            },
+            {
+              "classId": 21,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "d871346d990bbc294d02f4c366bf1b6d",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Material", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "PPtr<Shader>", "m_Shader", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "string", "m_ShaderKeywords", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "unsigned int", "m_LightmapFlags", 4, 0],
+                [1, "bool", "m_EnableInstancingVariants", 1, 0],
+                [1, "bool", "m_DoubleSidedGI", 1, 16384],
+                [1, "int", "m_CustomRenderQueue", 4, 0],
+                [1, "map", "stringTagMap", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [1, "vector", "disabledShaderPasses", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "UnityPropertySheet", "m_SavedProperties", -1, 32768],
+                [2, "map", "m_TexEnvs", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "pair", "data", -1, 32768],
+                [5, "string", "first", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "UnityTexEnv", "second", 28, 0],
+                [6, "PPtr<Texture>", "m_Texture", 12, 0],
+                [7, "int", "m_FileID", 4, 8388609],
+                [7, "SInt64", "m_PathID", 8, 8388609],
+                [6, "Vector2f", "m_Scale", 8, 2097152],
+                [7, "float", "x", 4, 2097152],
+                [7, "float", "y", 4, 2097152],
+                [6, "Vector2f", "m_Offset", 8, 2097152],
+                [7, "float", "x", 4, 2097152],
+                [7, "float", "y", 4, 2097152],
+                [2, "map", "m_Floats", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "pair", "data", -1, 32768],
+                [5, "string", "first", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "float", "second", 4, 0],
+                [2, "map", "m_Colors", -1, 32768],
+                [3, "Array", "Array", -1, 32768],
+                [4, "int", "size", 4, 0],
+                [4, "pair", "data", -1, 32768],
+                [5, "string", "first", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 1],
+                [7, "char", "data", 1, 1],
+                [5, "ColorRGBA", "second", 16, 2097152],
+                [6, "float", "r", 4, 2097153],
+                [6, "float", "g", 4, 2097153],
+                [6, "float", "b", 4, 2097153],
+                [6, "float", "a", 4, 2097153]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 49,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "486ba4e15dbd6aea8ac1a064305889c8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "TextAsset", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "string", "m_Script", -1, 67141633],
+                [2, "Array", "Array", -1, 67125249],
+                [3, "int", "size", 4, 67108865],
+                [3, "char", "data", 1, 67108865]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-117530638031325854": {
+              "value": {
+                "m_Name": "wisp_Material",
+                "m_Shader": {
+                  "m_FileID": 1,
+                  "m_PathID": "226212056015863827"
+                },
+                "m_ShaderKeywords": "",
+                "m_LightmapFlags": 4,
+                "m_EnableInstancingVariants": false,
+                "m_DoubleSidedGI": false,
+                "m_CustomRenderQueue": -1,
+                "stringTagMap": [],
+                "disabledShaderPasses": [],
+                "m_SavedProperties": {
+                  "m_TexEnvs": [
+                    [
+                      "_MainTex",
+                      {
+                        "m_Texture": {
+                          "m_FileID": 0,
+                          "m_PathID": "-5081227630508509430"
+                        },
+                        "m_Scale": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000"
+                        },
+                        "m_Offset": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000"
+                        }
+                      }
+                    ]
+                  ],
+                  "m_Floats": [],
+                  "m_Colors": []
+                }
+              }
+            },
+            "-3138739211269455426": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_Enabled": 1,
+                "m_Script": {
+                  "m_FileID": 0,
+                  "m_PathID": "8347920830156833934"
+                },
+                "m_Name": "wisp_Atlas",
+                "textureLoadingMode": 0,
+                "onDemandTextureLoader": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "atlasFile": {
+                  "m_FileID": 0,
+                  "m_PathID": "7164637912654133429"
+                },
+                "materials": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-117530638031325854"
+                  }
+                ]
+              }
+            },
+            "-5081227630508509430": {
+              "value": {
+                "m_Name": "wisp",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_Width": 8,
+                "m_Height": 8,
+                "m_CompleteImageSize": 256,
+                "m_TextureFormat": 4,
+                "m_MipCount": 1,
+                "m_IsReadable": false,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_IsPreProcessed": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "image data": "hex:",
+                "m_StreamData": {
+                  "offset": 0,
+                  "size": 256,
+                  "path": "archive:/CAB-7dd9f5219db7cc25722db304f4c0af7d/CAB-7dd9f5219db7cc25722db304f4c0af7d.resS"
+                }
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "splitatlas",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 1,
+                    "m_PathID": "226212056015863827"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5081227630508509430"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-3138739211269455426"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-117530638031325854"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "7164637912654133429"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8347920830156833934"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/spine/wisp_atlas.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 6,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-3138739211269455426"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "splitatlas",
+                "m_Dependencies": ["spinedeps"],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "7164637912654133429": {
+              "value": {
+                "m_Name": "wisp.atlas",
+                "m_Script": "wisp.png\nsize:8,8\nfilter:Linear,Linear\nbody\nbounds:0,0,8,8\n"
+              }
+            },
+            "8347920830156833934": {
+              "value": {
+                "m_Name": "SpineAtlasAsset",
+                "m_ExecutionOrder": 0,
+                "m_PropertiesHash": {
+                  "bytes[0]": 159,
+                  "bytes[1]": 228,
+                  "bytes[2]": 57,
+                  "bytes[3]": 56,
+                  "bytes[4]": 59,
+                  "bytes[5]": 39,
+                  "bytes[6]": 76,
+                  "bytes[7]": 54,
+                  "bytes[8]": 2,
+                  "bytes[9]": 132,
+                  "bytes[10]": 97,
+                  "bytes[11]": 6,
+                  "bytes[12]": 75,
+                  "bytes[13]": 26,
+                  "bytes[14]": 125,
+                  "bytes[15]": 18
+                },
+                "m_ClassName": "SpineAtlasAsset",
+                "m_Namespace": "Spine.Unity.OnDemand",
+                "m_AssemblyName": "Assembly-CSharp.dll"
+              }
+            }
+          },
+          "names": {
+            "-117530638031325854": "wisp_Material",
+            "-3138739211269455426": "wisp_Atlas",
+            "-5081227630508509430": "wisp",
+            "1": "splitatlas",
+            "7164637912654133429": "wisp.atlas",
+            "8347920830156833934": "SpineAtlasAsset"
+          },
+          "textures": {
+            "-5081227630508509430": {
+              "name": "wisp",
+              "format": 4,
+              "width": 8,
+              "height": 8,
+              "imageSize": 256,
+              "imageSha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032",
+              "rgbaSha256": "cb6ce38f6062fee0538f07a2fdfb9798a65918bcb90e60e6e795c33c4d531032"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/spine/wisp_atlas.asset",
+          "file": "CAB-7dd9f5219db7cc25722db304f4c0af7d",
+          "pathId": "-3138739211269455426"
         }
       ]
     },
