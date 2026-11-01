@@ -855,13 +855,16 @@ Three more bundles per editor, `audio`, `font` and `video`, built with
 `lz4`, `lz4-notypetree` (`DisableWriteTypeTree`) and `stripped`
 (`AssetBundleStripUnityVersion`, so the SerializedFile says `"0.0.0"`). They go
 into the variant folders of sections 3 and 7 next to the bundles already there;
-the manifest bundle of this build is not copied.
+the manifest bundle of this build is not copied. A fourth bundle, `adpcm`, came
+later from projects of its own, with 6000.3.26f1 in place of 6000.3.25f1 (see
+[ADPCM clips](#adpcm-clips-251)).
 
 | Bundle | Objects | Where the bytes are |
 |---|---|---|
 | `audio` | two AudioClips from one WAV: `tone-pcm` (PCM) and `tone-vorbis` (Vorbis, load in background) | an FMOD sound bank (FSB5) each, in the bundle's `.resource` node |
 | `font` | one Font (dynamic, font data included), with the Material and the 0x0 "Font Texture" the importer makes | the TrueType file, inline in `m_FontData` |
 | `video` | one VideoClip, imported without transcoding | the WebM file as it went in, in the bundle's `.resource` node |
+| `adpcm` | two IMA ADPCM AudioClips: `tone-adpcm` (mono) and `stereo-adpcm` | an FSB5 bank each, in the bundle's `.resource` node |
 
 The dynamic font's "Font Texture" has no image data at all (0x0, no `.resS`),
 so it gets no texture golden; see [`README.md`](README.md#oracle-notes).
@@ -1011,6 +1014,128 @@ each object carries (`rawData`).
 No fixture holds a MovieTexture: from 2019.3 Unity's type tree for it has only
 the `Texture` fields, and none of these editors imports a movie as one. Its
 reader is checked against hand-built layouts from UnityPy's TPK data instead.
+
+### ADPCM clips (#251)
+
+The `adpcm` bundle holds two AudioClips imported as `AudioCompressionFormat.ADPCM`
+(FSB5 codec IMAADPCM), `DecompressOnLoad`: `tone-adpcm`, mono, from `tone.wav`
+above, and `stereo-adpcm`, from a generated stereo WAV with a different sine per
+channel, so a channel swap or mix shows. It is a bundle of its own so the
+`audio` bundles and their goldens stay as they are. Editors: 2019.4.41f2,
+2020.3.30f1 and 6000.3.26f1 (6000.3.25f1 is no longer installed, as in section
+18), each into `lz4`, `lz4-notypetree` and `stripped`.
+
+| File | Bytes | sha256 |
+|---|---|---|
+| `tone-adpcm.wav` | 11068 | `8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac` |
+| `stereo-adpcm.wav` | 16044 | `0708d364c2440356e0aebc24bbceb3e833332c8914d9103fcb23e5533725a7b2` |
+
+Both are byte-exact from `gen_adpcm.py` with Python 3.12 (standard library
+only); `tone-adpcm.wav` is `tone.wav` of `gen_media.py` under another name.
+
+```bash
+python3 gen_adpcm.py <project>/Assets/Fixtures/adpcm
+```
+
+`gen_adpcm.py`:
+
+```python
+import hashlib, math, pathlib, struct, sys, wave
+
+out = pathlib.Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
+rate = 22050
+
+def write(name, channels, frames):
+    with wave.open(str(out / name), "wb") as w:
+        w.setnchannels(channels); w.setsampwidth(2); w.setframerate(rate); w.writeframes(frames)
+
+def sine(amp, hz, i):
+    return round(amp * math.sin(2 * math.pi * hz * i / rate))
+
+# tone-adpcm.wav: tone.wav of section 11, 0.25 s of a 440 Hz sine, mono,
+# 5512 frames = 86 full IMA ADPCM frames of 64 samples + 8.
+write("tone-adpcm.wav", 1, b"".join(struct.pack("<h", sine(12000, 440, i)) for i in range(rate // 4)))
+
+# stereo-adpcm.wav: 4000 frames (62 full frames + 32), 440 Hz left at 12000,
+# 660 Hz right at 6000, so a channel swap or mix shows in the output.
+write("stereo-adpcm.wav", 2, b"".join(
+    struct.pack("<hh", sine(12000, 440, i), sine(6000, 660, i)) for i in range(4000)))
+
+for name in ("tone-adpcm.wav", "stereo-adpcm.wav"):
+    data = (out / name).read_bytes()
+    print(name, len(data), hashlib.sha256(data).hexdigest())
+```
+
+Create a project per editor named `uar-251-adpcm-<editor version>`, with
+`ProjectSettings/` and `Packages/` copied from one of the projects above, and
+only the two WAVs and this file under `Assets/`.
+
+`Assets/Editor/BuildAdpcm.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// Two IMA ADPCM AudioClips, mono and stereo, from generated WAVs (#251).
+// Each clip's FSB5 bank goes to the bundle's .resource node.
+public static class BuildAdpcm
+{
+    const string Dir = "Assets/Fixtures/adpcm";
+
+    public static void Build()
+    {
+        Audio(Dir + "/tone-adpcm.wav");
+        Audio(Dir + "/stereo-adpcm.wav");
+
+        var builds = new[] {
+            new AssetBundleBuild { assetBundleName = "adpcm", assetNames = new[] { Dir + "/tone-adpcm.wav", Dir + "/stereo-adpcm.wav" } },
+        };
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4, builds);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree, builds);
+        Emit("stripped", lz4 | BuildAssetBundleOptions.AssetBundleStripUnityVersion, builds);
+    }
+
+    static void Audio(string path)
+    {
+        var imp = (AudioImporter)AssetImporter.GetAtPath(path);
+        var s = imp.defaultSampleSettings;
+        s.compressionFormat = AudioCompressionFormat.ADPCM;
+        s.loadType = AudioClipLoadType.DecompressOnLoad;
+        imp.defaultSampleSettings = s;
+        imp.SaveAndReimport();
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts, AssetBundleBuild[] builds)
+    {
+        var dir = Path.Combine("Build", "adpcm-" + name);
+        Directory.CreateDirectory(dir);
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: adpcm " + name);
+        Debug.Log("FIXTURE-OK adpcm " + name + " -> " + dir);
+    }
+}
+```
+
+Build with `-executeMethod BuildAdpcm.Build` (same command as section 2), once
+per project. The log must hold three `FIXTURE-OK adpcm` lines. Copy only
+`Build/adpcm-<variant>/adpcm` to `fixtures/bundles/editor/<editor
+version>/<variant>/`, for `<variant>` in `lz4`, `lz4-notypetree` and
+`stripped`: 9 files, about 72 KB. Then rerun `make-goldens.py` and
+`make-export-goldens.py` (section 17).
+
+What the banks hold, the same in all three editors: 22050 Hz, and whole IMA
+ADPCM frames only. Unity pads the source to a multiple of 64 samples per
+channel, so the bank header says 5568 frames for `tone-adpcm` (87 frames of
+0x24 bytes, from 5512) and 4032 for `stereo-adpcm` (63 frames of 0x48 bytes,
+from 4000). AssetStudio's WAV (FMOD's decode) has exactly that many frames of
+16-bit samples, and `fsb5ToWav()` equals it byte for byte
+(`packages/audio/tests/adpcm-fixtures.test.ts`). Two IMA ADPCM details these
+clips cannot reach stay covered by the hand-built banks only: a partial last
+frame, since Unity writes none, and a step index byte above 88 (read as u8 and
+clamped to 88, where vgmstream reads it signed), since Unity's encoder writes
+only 0 to 88.
 
 ## 12. The `sprite` bundles (#34)
 
@@ -1732,7 +1857,7 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 27 Mesh (`main` bundles; `mesh` bundles, section 20) | 21 OBJ | 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
-| 18 AudioClip (`audio` bundles) | 18 WAV | |
+| 36 AudioClip (`audio` and `adpcm` bundles, section 11) | 36 WAV | |
 | 28 TextAsset | 28 files | |
 | 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
 | 138 Texture2D | 97 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
