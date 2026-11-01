@@ -1,4 +1,4 @@
-// Mesh (#235): the hardcoded reader against readTypeTree() on the 12 fixture
+// Mesh (#235): the hardcoded reader against readTypeTree() on the 27 fixture
 // Mesh objects and on hand-built layouts at every version gate of Unity's
 // type trees, read through those trees themselves (`fixtures/tpk-trees.json`,
 // UnityPy's TPK data), and the decoding of upstream's `ProcessData` on hand-built
@@ -34,20 +34,27 @@ function withNumberOffset(tree: Record<string, unknown>): Record<string, unknown
   return { ...tree, m_StreamData: { ...stream, offset: Number(stream.offset) } };
 }
 
-// --- the 12 fixture Meshes ------------------------------------------------------------
+// --- the 27 fixture Meshes ------------------------------------------------------------
 
 const FIXTURES = fixturesWith(ClassID.Mesh);
 
-test("the fixtures hold 12 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
+test("the fixtures hold 27 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
   const count = FIXTURES.flatMap((name) =>
     Object.values(golden(name).objects).flatMap((objs) =>
       objs.filter((o) => o.classId === ClassID.Mesh),
     ),
   ).length;
-  assert.equal(count, 12);
+  // A triangle in each main bundle; detail and basevertex, typed and not, and
+  // compressed, typed only (fixtures/BUILDING.md section 20; #253, #257).
+  assert.equal(count, 12 + 3 * 2 * 2 + 3);
   for (const editor of ["2019.4.41f2", "2020.3.30f1", "6000.3.25f1"]) {
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4/main`), editor);
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4-notypetree/main`), editor);
+  }
+  for (const editor of MESH_EDITORS) {
+    for (const name of ["lz4/mesh", "lz4-notypetree/mesh", "lz4/mesh-compressed"]) {
+      assert.ok(FIXTURES.includes(`editor/${editor}/mesh/${name}`), name);
+    }
   }
 });
 
@@ -57,7 +64,7 @@ for (const name of FIXTURES) {
     // id, as its typed twin.
     const twin = loadName(typedTwin(name));
     const meshes = loadName(name).objects.filter((o) => o.type === ClassID.Mesh);
-    assert.equal(meshes.length, 1);
+    assert.equal(meshes.length, name.endsWith("/mesh") ? 2 : 1);
     for (const reader of meshes) {
       const mesh = readMesh(reader);
       assert.equal(reader.position, reader.byteSize, "byteSize not consumed exactly");
@@ -73,6 +80,7 @@ for (const name of FIXTURES) {
     }
   });
 
+  if (!name.endsWith("/main")) continue;
   test(`${name}: read() decodes the one triangle the fixture project builds`, () => {
     for (const reader of loadName(name).objects.filter((o) => o.type === ClassID.Mesh)) {
       const data = reader.read<MeshData>();
@@ -98,6 +106,75 @@ for (const name of FIXTURES) {
   });
 }
 
+// --- the mesh bundles (#253, #257) -------------------------------------------------------
+
+const MESH_EDITORS = ["2019.4.41f2", "2020.3.30f1", "6000.3.26f1"];
+const MESH_BUNDLES = FIXTURES.filter((name) => name.includes("/mesh/"));
+
+/** The fixture Mesh named `name` in a mesh bundle, decoded. */
+function meshNamed(fixture: string, name: string): MeshData {
+  const meshes = loadName(fixture)
+    .objects.filter((o) => o.type === ClassID.Mesh)
+    .map((o) => o.read<MeshData>());
+  const mesh = meshes.find((m) => m.m_Name === name);
+  assert.ok(mesh, `${fixture}: no Mesh ${name}`);
+  return mesh;
+}
+
+// fixtures/BUILDING.md section 20, BuildMeshes.cs: the source values, as float32.
+const DETAIL_VERTICES = Float32Array.of(
+  ...[-0, 0.5, 0.25, 1.5, 0.000012345, -2.75, 1e9, 3.14159, 0.1, -0.333333, 2.5e10, 7e-5],
+  ...[0.125, -0, 1, 2, 0.001, -1e-7, 123456.79, 1e-3, 0, -4.5e9, -0.5, 0.75],
+);
+const DETAIL_NORMALS = Float32Array.of(
+  ...[0, 0, -1, 0.6, 0, 0.8, -0.267261, 0.534522, 0.801784, 0, 1, 0],
+  ...[0.707107, -0.707107, 0, -0, 0, 1, 0.1, 0.2, 0.974679, -1, 0, 0],
+);
+const DETAIL_UV = Float32Array.of(
+  ...[0, 0, 0.333333, 0.000031, 1, 0.5, 0.75, 0.125],
+  ...[0.1, 0.9, 1.5e-5, 0.2, 0.6, 0.7, -0.25, 1.25],
+);
+// A triangle submesh (0, 1, 2), (0, 2, 3), and the quad 4, 5, 6, 7 split.
+const DETAIL_INDICES = [Uint32Array.of(0, 1, 2, 0, 2, 3), Uint32Array.of(4, 5, 6, 4, 6, 7)];
+
+test("each mesh bundle is in the fixtures, typed and not", () => {
+  assert.equal(MESH_BUNDLES.length, MESH_EDITORS.length * 3);
+});
+
+for (const name of MESH_BUNDLES.filter((n) => n.endsWith("/mesh"))) {
+  test(`${name}: detail decodes to its float32 source, UV0 and normals, quads split`, () => {
+    const mesh = meshNamed(name, "detail");
+    assert.deepEqual(mesh.m_SubMeshes.map((s) => s.topology), [0, 2]);
+    assert.equal(mesh.vertexCount, 8);
+    // Float32Array equality compares each element with Object.is: -0 is kept.
+    assert.deepStrictEqual(mesh.vertices, DETAIL_VERTICES);
+    assert.deepStrictEqual(mesh.normals, DETAIL_NORMALS);
+    assert.deepStrictEqual(mesh.uv, [DETAIL_UV, ...new Array(7).fill(undefined)]);
+    assert.deepStrictEqual(mesh.indices, DETAIL_INDICES);
+  });
+
+  test(`${name}: basevertex's indices 0, 1, 2 are offset by its baseVertex 3 (#257)`, () => {
+    const mesh = meshNamed(name, "basevertex");
+    assert.equal(mesh.m_SubMeshes.length, 1);
+    assert.equal(mesh.m_SubMeshes[0]!.baseVertex, 3);
+    // The index buffer holds the indices as SetIndices was given them, 16-bit.
+    assert.equal(mesh.m_IndexFormat, 0);
+    assert.deepEqual([...mesh.m_IndexBuffer], [0, 0, 1, 0, 2, 0]);
+    assert.equal(mesh.vertexCount, 6);
+    assert.deepStrictEqual(mesh.indices, [Uint32Array.of(3, 4, 5)]);
+  });
+}
+
+for (const name of MESH_BUNDLES.filter((n) => n.endsWith("/mesh-compressed"))) {
+  test(`${name}: compressed holds detail in m_CompressedMesh, its faces intact`, () => {
+    const mesh = meshNamed(name, "compressed");
+    assert.equal(mesh.m_VertexData.m_VertexCount, 0);
+    assert.equal(mesh.m_CompressedMesh.m_Vertices.m_NumItems, 8 * 3);
+    assert.equal(mesh.vertexCount, 8);
+    assert.deepStrictEqual(mesh.indices, DETAIL_INDICES);
+  });
+}
+
 // --- hand-built layouts at every version gate (TPK) -------------------------------------
 
 /** One vertex channel of the input: `[stream, offset, format, dimension]`. */
@@ -118,7 +195,7 @@ interface Packed {
 interface MeshInput {
   /** Fill the fields the decoding ignores (blend shapes, bones, LOD), to test the layout. */
   rich?: boolean;
-  subMeshes?: { firstByte: number; indexCount: number; topology: number }[];
+  subMeshes?: { firstByte: number; indexCount: number; topology: number; baseVertex?: number }[];
   indexFormat?: number;
   indexBuffer?: Uint8Array;
   vertexCount?: number;
@@ -165,7 +242,8 @@ function meshLayout(w: Writer, unity: UnityVersion, input: MeshInput = {}): Mesh
     firstByte: w.u32(s.firstByte),
     indexCount: w.u32(s.indexCount),
     topology: w.i32(s.topology),
-    baseVertex: w.u32(n++),
+    // Distinct in a rich layout, else 0 unless given: indices read as written.
+    baseVertex: w.u32(s.baseVertex ?? (rich ? n++ : 0)),
     firstVertex: w.u32(n++),
     vertexCount: w.u32(n++),
     localAABB: aabb(),
@@ -681,6 +759,53 @@ test("indices: a submesh past the index buffer throws CorruptError", () => {
       /Mesh -?\d+ submesh 0: indices \d+ to \d+ run past the 3 of the index buffer/,
     );
   }
+});
+
+test("indices: a 16-bit submesh's baseVertex takes them to 65536 and above (#257)", () => {
+  const { reader } = handBuilt({
+    // No channels: the vertex count alone bounds the indices.
+    vertexCount: 65539,
+    indexBuffer: bytesOf(...[0, 1, 2, 2, 1, 0].map((i): [string, number] => ["u16", i])),
+    subMeshes: [
+      { firstByte: 0, indexCount: 3, topology: 0, baseVertex: 65536 },
+      { firstByte: 6, indexCount: 3, topology: 0 },
+    ],
+  });
+  const fields = readMesh(reader);
+  assert.equal(fields.m_IndexFormat, 0);
+  const data = reader.read<MeshData>();
+  assert.deepStrictEqual(data.indices, [Uint32Array.of(65536, 65537, 65538), Uint32Array.of(2, 1, 0)]);
+  // The offset indices are a copy: the index buffer keeps the indices as written.
+  assert.deepEqual([...data.m_IndexBuffer], [0, 0, 1, 0, 2, 0, 2, 0, 1, 0, 0, 0]);
+});
+
+test("indices: a strip's and quads' faces are offset too", () => {
+  const offset = (topology: number, indices: number[]): Uint32Array => {
+    const { reader } = handBuilt({
+      vertexCount: 20,
+      indexBuffer: bytesOf(...indices.map((i): [string, number] => ["u16", i])),
+      subMeshes: [{ firstByte: 0, indexCount: indices.length, topology, baseVertex: 10 }],
+    });
+    return reader.read<MeshData>().indices[0]!;
+  };
+  assert.deepStrictEqual(offset(1, [0, 1, 2, 3]), Uint32Array.of(10, 11, 12, 12, 11, 13));
+  assert.deepStrictEqual(offset(2, [0, 1, 2, 3]), Uint32Array.of(10, 11, 12, 10, 12, 13));
+});
+
+test("indices: an index baseVertex offsets past the vertices throws CorruptError", () => {
+  const { reader } = handBuilt({
+    vertexCount: 3,
+    indexBuffer: bytesOf(...[0, 1, 2].map((i): [string, number] => ["u16", i])),
+    subMeshes: [{ firstByte: 0, indexCount: 3, topology: 0, baseVertex: 1 }],
+  });
+  assert.throws(
+    () => reader.read<MeshData>(),
+    (err: unknown) =>
+      err instanceof CorruptError &&
+      /^Mesh -?\d+ submesh 0: index 3 \(2 \+ baseVertex 1\) is past the 3 vertices$/.test(
+        err.message,
+      ),
+  );
 });
 
 // --- decoding: the compressed mesh ------------------------------------------------------

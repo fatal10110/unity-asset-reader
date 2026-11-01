@@ -29,6 +29,13 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
+### 1.3.0 - Unreleased
+
+- `MeshData.indices` adds each submesh's `baseVertex` to its indices, so they point into
+  `vertices` as Unity draws them (#257). AssetStudio and UnityPy leave it out; every fixture
+  mesh but the new `basevertex` one has a `baseVertex` of 0 and decodes as before. An index the
+  offset takes past the vertex count throws `CorruptError`.
+
 ### 1.2.0 - 2026-10-29
 
 - A hand-written `Mesh` reader, `readMesh`, for Unity 2019.1 to 6000.6 (#235), the supported
@@ -245,6 +252,14 @@ First release. Peer: `unity-asset-reader@^1`.
   picks up `.resS`/`.resource` sidecars.
 
 ## unity-asset-reader-mesh
+
+### 1.0.1 - Unreleased
+
+- `meshToObj` and `meshToGltf` draw a submesh with a `baseVertex` on the vertices it offsets
+  its indices to, through core's `MeshData.indices` (#257); a 16-bit mesh that offset takes to
+  index 65535 or above is written with 32-bit glTF indices. The OBJ equals AssetStudio's for
+  the new fixture meshes with UV0, normals, scientific-notation floats, two submeshes and mesh
+  compression (#253).
 
 ### 1.0.0 - 2026-10-29
 
