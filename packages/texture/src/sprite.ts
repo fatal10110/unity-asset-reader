@@ -6,7 +6,7 @@
 import {
   ClassID,
   CorruptError,
-  ResourceNotFoundError,
+  resolveOrThrow,
   SpritePackingRotation,
   UnsupportedError,
 } from "unity-asset-reader";
@@ -15,7 +15,6 @@ import type {
   Env,
   ObjectReader,
   PPtr,
-  PPtrResolution,
   Rectf,
   Sprite,
   SpriteAtlas,
@@ -313,8 +312,8 @@ export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): Sprite
 
   const atlasPointer = sprite.m_SpriteAtlas;
   const atlas = atlasPointer ? env.resolve(atlasPointer, obj) : undefined;
-  if (atlas?.status === "found") {
-    const atlasObj = checkClass(atlas.object, ClassID.SpriteAtlas, `${what}'s atlas`);
+  if (atlasPointer && atlas?.status === "found") {
+    const atlasObj = resolveOrThrow(env, atlasPointer, obj, `${what}'s atlas`, ClassID.SpriteAtlas);
     const data = atlasObj.read<SpriteAtlas>();
     if (!data.m_PackedSprites) {
       // 6000.6+: the atlas holds its sprites (spriteInstanceData), which packedSprites()
@@ -350,7 +349,7 @@ export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): Sprite
   // its file not loaded, or the pointer dangling.
   const rd = sprite.m_RD;
   if (rd.texture.m_PathID === 0n && atlasPointer && atlas && atlas.status !== "null") {
-    found(atlas, atlasPointer, `${what}'s atlas, which holds its texture,`);
+    resolveOrThrow(env, atlasPointer, obj, `${what}'s atlas, which holds its texture,`);
   }
   const texture = findTexture(env, rd.texture, obj, `${what}'s texture`);
   const alphaTexture = findAlphaTexture(env, rd.alphaTexture, obj, `${what}'s alpha texture`);
@@ -363,7 +362,13 @@ export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): Sprite
  * `spriteInstanceData` is the sprite, under a `Sprite`'s field names.
  */
 function locatePacked(packed: PackedSprite, env: Env): SpriteLocation {
-  const atlasObj = checkClass(packed.atlas.reader, ClassID.SpriteAtlas, "a PackedSprite's atlas");
+  const atlasObj = packed.atlas.reader;
+  if (atlasObj.type !== ClassID.SpriteAtlas) {
+    throw new CorruptError(
+      `a PackedSprite's atlas (path id ${atlasObj.pathId}) is class ${atlasObj.type}, ` +
+        `not ${ClassID.SpriteAtlas}`,
+    );
+  }
   const data = atlasObj.read<SpriteAtlas>();
   const what =
     `packed sprite "${packed.name}" of atlas "${data.m_Name}" (path id ${atlasObj.pathId})`;
@@ -397,8 +402,7 @@ function locatePacked(packed: PackedSprite, env: Env): SpriteLocation {
 
 /** The Texture2D a pointer names. */
 function findTexture(env: Env, pointer: PPtr, from: ObjectReader, what: string): ObjectReader {
-  const texture = found(env.resolve(pointer, from), pointer, what);
-  return checkClass(texture, ClassID.Texture2D, what);
+  return resolveOrThrow(env, pointer, from, what, ClassID.Texture2D);
 }
 
 /**
@@ -412,44 +416,6 @@ function findAlphaTexture(
   what: string,
 ): ObjectReader | undefined {
   return pointer && pointer.m_PathID !== 0n ? findTexture(env, pointer, from, what) : undefined;
-}
-
-/**
- * The object a pointer resolved to, or the reason there is none as an error.
- *
- * @throws {ResourceNotFoundError} when its file is not loaded
- * @throws {CorruptError} otherwise
- */
-function found(resolution: PPtrResolution, pointer: PPtr, what: string): ObjectReader {
-  switch (resolution.status) {
-    case "found":
-      return resolution.object;
-    case "fileNotLoaded":
-      throw notLoaded(resolution.fileName, `${what} (path id ${pointer.m_PathID}) is in`);
-    case "null":
-      throw new CorruptError(`${what} is a null pointer`);
-    case "fileIdOutOfRange":
-      throw new CorruptError(`${what} has file id ${pointer.m_FileID}, past the file's externals`);
-    case "objectNotFound":
-      throw new CorruptError(
-        `${what} (path id ${pointer.m_PathID}) is not in ${resolution.fileName}`,
-      );
-  }
-}
-
-/** A {@link ResourceNotFoundError} for a SerializedFile a pointer needs. */
-function notLoaded(fileName: string, what: string): ResourceNotFoundError {
-  const error = new ResourceNotFoundError(fileName, fileName);
-  error.message = `${what} ${fileName}, which is not loaded: pass it to load() too`;
-  return error;
-}
-
-/** `obj`, when it is of class `classId`. */
-function checkClass(obj: ObjectReader, classId: number, what: string): ObjectReader {
-  if (obj.type !== classId) {
-    throw new CorruptError(`${what} (path id ${obj.pathId}) is class ${obj.type}, not ${classId}`);
-  }
-  return obj;
 }
 
 /**

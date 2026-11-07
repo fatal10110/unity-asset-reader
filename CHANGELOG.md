@@ -42,6 +42,10 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   settled with doubles, and only the rare float on an end of its interval or halfway between
   two decimals takes the exact search. The output is unchanged, checked against .NET 8 on 2.7
   million floats (#252).
+- `resolveOrThrow(env, pptr, from, what, classId?)` follows a pointer that must lead somewhere:
+  the object, checked to be of class `classId` when given, or an error naming the field:
+  `ResourceNotFoundError` for a file that is not loaded, `CorruptError` for a null or dangling
+  pointer or the wrong class. The texture and spine packages had a copy each (#255).
 
 ### 1.2.0 - 2026-10-29
 
@@ -166,6 +170,11 @@ First release. The core: isomorphic, synchronous, no WASM.
   input `CorruptError`, a missing sidecar `ResourceNotFoundError`.
 
 ## unity-asset-reader-texture
+
+### 1.2.1 - Unreleased
+
+- Sprites follow their texture and atlas pointers with core's `resolveOrThrow`; the errors and
+  their messages are unchanged (#255). Needs `unity-asset-reader` 1.3.0.
 
 ### 1.2.0 - 2026-10-29
 
@@ -312,6 +321,8 @@ First release. Peer: `unity-asset-reader@^1`.
 
 - Tests for a split build (atlas asset, Material and page in a second bundle) and for an atlas
   asset of another type; no code change (#254).
+- Skeleton data follows its pointers with core's `resolveOrThrow`; the errors and their messages
+  are unchanged (#255). Needs `unity-asset-reader` 1.3.0.
 
 ### 1.0.0 - 2026-10-29
 

@@ -1,11 +1,10 @@
-import { ClassID, CorruptError, ResourceNotFoundError, UnsupportedError } from "unity-asset-reader";
+import { ClassID, CorruptError, resolveOrThrow, UnsupportedError } from "unity-asset-reader";
 import type {
   Asset,
   Env,
   MonoScript,
   ObjectReader,
   PPtr,
-  PPtrResolution,
   TypeTreeObject,
   TypeTreeValue,
 } from "unity-asset-reader";
@@ -224,35 +223,5 @@ function target(
   classId: number,
   what: string,
 ): ObjectReader {
-  const pointer = pptr(value, what);
-  const object = found(env.resolve(pointer, from), pointer, what);
-  if (object.type !== classId) {
-    throw new CorruptError(
-      `${what} (path id ${object.pathId}) is class ${object.type}, not ${classId}`,
-    );
-  }
-  return object;
-}
-
-/** The object of a resolution, or the error saying why there is none. */
-function found(resolution: PPtrResolution, pointer: PPtr, what: string): ObjectReader {
-  switch (resolution.status) {
-    case "found":
-      return resolution.object;
-    case "fileNotLoaded": {
-      const error = new ResourceNotFoundError(resolution.fileName, resolution.fileName);
-      error.message =
-        `${what} (path id ${pointer.m_PathID}) is in ${resolution.fileName}, which is not ` +
-        "loaded: pass it to load() too";
-      throw error;
-    }
-    case "null":
-      throw new CorruptError(`${what} is a null pointer`);
-    case "fileIdOutOfRange":
-      throw new CorruptError(`${what} has file id ${pointer.m_FileID}, past the file's externals`);
-    case "objectNotFound":
-      throw new CorruptError(
-        `${what} (path id ${pointer.m_PathID}) is not in ${resolution.fileName}`,
-      );
-  }
+  return resolveOrThrow(env, pptr(value, what), from, what, classId);
 }
