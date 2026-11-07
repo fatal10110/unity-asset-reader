@@ -97,6 +97,12 @@ and `stripped` (#41), built from generated source files
   the Material and the empty 0x0 "Font Texture" the importer adds
 - `video` - one VideoClip, the WebM file in the bundle's `.resource` node
 
+2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 have `adpcm` in `lz4`,
+`lz4-notypetree` and `stripped` (#251): two IMA ADPCM AudioClips, mono and
+stereo, from generated WAVs ([`BUILDING.md`](BUILDING.md) section 11, "ADPCM
+clips"). The 6000.3 build is 6000.3.26f1, as 6000.3.25f1 was no longer
+installed.
+
 2019.4.41f2's `stripped` bundles are format 21, the others' format 22. No
 fixture holds a MovieTexture (no fixture editor makes one with a movie).
 

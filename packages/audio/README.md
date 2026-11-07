@@ -42,10 +42,11 @@ sample, a 44-byte header, then the sample frames, interleaved, little-endian.
 | `FADPCM` | 16-bit, decoded |
 | `GCADPCM` (mono) | 16-bit, decoded |
 
-Tested on editor-built bundles: the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and
-**6000.3.25f1** bundles (with and without type trees, and version-stripped) converts to
-AssetStudio's WAV byte for byte. The ADPCM codecs are tested on hand-built banks only: no fixture
-holds an ADPCM clip yet ([#251](https://github.com/fatal10110/unity-asset-reader/issues/251)).
+Tested on editor-built bundles (with and without type trees, and version-stripped), which convert
+to AssetStudio's WAV byte for byte: the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and
+**6000.3.25f1** bundles, and a mono and a stereo IMAADPCM clip of **2019.4.41f2**, **2020.3.30f1**
+and **6000.3.26f1** bundles. Unity writes whole IMAADPCM frames only, so a partial last frame is
+tested on hand-built banks, as are FADPCM and GCADPCM.
 
 ## Not supported
 

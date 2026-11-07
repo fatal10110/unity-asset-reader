@@ -282,6 +282,12 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 
 ## unity-asset-reader-audio
 
+### 1.0.1 - Unreleased
+
+- The IMAADPCM decode is checked against editor-built clips: a mono and a stereo clip of
+  2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 bundles convert to AssetStudio's WAV byte for byte
+  (#251).
+
 ### 1.0.0 - 2026-10-29
 
 First release. Peer: `unity-asset-reader@^1`.
