@@ -48,9 +48,9 @@ As AssetStudio's `ShaderConverter.Convert()` writes it:
   - Vulkan (`vulkan`): each stage decoded from SMOL-V and disassembled to SPIR-V assembly, as
     AssetStudio's CSspv disassembler prints it. Where AssetStudio cannot decode or disassemble a
     program, the text has the `// disassembly error <message>` line AssetStudio writes. Unity
-    2020.3 stores SMOL-V in a newer format (header version `0x01010000`) than AssetStudio's
-    decoder reads, so its Vulkan programs read `// disassembly error Unable to decode SMOL-V
-    shader`; those of Unity 2019.4 are disassembled.
+    2020.3 stores SMOL-V in a newer encoding (header version `0x01010000`) than AssetStudio's
+    decoder reads; it is decoded as aras-p/smol-v decodes it, and disassembled as AssetStudio
+    disassembles the SPIR-V, so Unity 2019.4 and 2020.3 Vulkan programs are both disassembled.
   - Console programs: their bytes as UTF-8.
 - `UsePass "<name>"` and `GrabPass { "<texture>" }` passes.
 - Lines end with `\n`; there is no final newline. Floats are written as .NET writes a `float`
@@ -92,7 +92,8 @@ Full JSDoc is in the bundled `index.d.ts`.
 - [CSspv](https://github.com/Anteru/csspv) (BSD-2-Clause, © 2017 Matthäus G. Chajdas): the SPIR-V
   disassembler is hand-ported from it, as AssetStudio vendors it in `AssetStudio.Utility/CSspv/`.
 - [smol-v](https://github.com/aras-p/smol-v) (MIT or public domain, © 2016-2018 Aras Pranckevicius): the
-  SMOL-V format AssetStudio's decoder reads.
+  SMOL-V format AssetStudio's decoder reads; the decoder of its newer encoding (Unity 2020.3 and
+  later) is hand-ported from smol-v's `source/smolv.cpp`, which is also the oracle of its goldens.
 - [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): the oracle that names the
   inputs of the test goldens.
 

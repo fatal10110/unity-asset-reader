@@ -13,7 +13,8 @@ of the five exported classes:
   TextAsset  AssetStudio.CLI  Exporter.ExportTextAsset(item, dir), the file it writes
   Shader     AssetStudio.CLI  Exporter.ExportShader(item, dir), the .shader file
              ShaderConverter.Convert() writes; not run for a shader with
-             Direct3D programs (see below)
+             Direct3D programs (see below). Vulkan stages in the newer SMOL-V
+             encoding: see "Vulkan programs" below
 
 UnityPy stays the oracle for what goes in. The objects come from the committed
 UnityPy goldens (goldens.json, modern-goldens.json), each with the input
@@ -34,16 +35,44 @@ A Mesh with a submesh baseVertex gets one too: ExportMesh writes its indices
 without the offset, which unity-asset-reader applies (#257); the entry keeps
 that OBJ's size and hash as `objWithoutBaseVertex`.
 
+Vulkan programs (plan section 5, revision 2026-11-07, #260): each stage is a
+SMOL-V stream, which AssetStudio decodes with its C# port of smol-v's
+2016-08-31 code. Unity 2020.3 and later write encoding version 1 (the high
+byte of the header's version word), which that port predates: AssetStudio
+writes "// disassembly error Unable to decode SMOL-V shader" for every such
+program. The oracle for those is a hybrid. Their SPIR-V comes from
+aras-p/smol-v at SMOLV_REVISION, smolv::Decode, built here with g++ from a
+clone outside the repository (--smolv) with a small generated main. Their text
+is AssetStudio's own CSspv disassembler (SpirV.Module.ReadFrom, Disassembler)
+on those words, framed as SpirVShaderConverter.Convert and
+ShaderSubProgram.Export frame it (the "// hash:" line, one stage after the
+other, "// disassembly error <message>" when a stage fails). Stages of
+encoding version 0 keep AssetStudio's decoder; smol-v with
+kDecodeFlagUse20160831AsZeroVersion must decode every one of them to
+AssetStudio's words, or the run fails. The steps:
+
+  1. a "dump" harness run writes each Vulkan stage's SMOL-V bytes, and for
+     version 0 the words AssetStudio's SmolvDecoder gives, to <project>/stages;
+  2. smol-v decodes them: version 0 with the 2016-08-31 flag (the check),
+     later versions with no flags;
+  3. the export runs call ExportShader unmodified, then replace the text of
+     each program with a stage of version 1, AssetStudio's error line, by the
+     hybrid text.
+
+Each Shader golden lists its stages under shader.spirv, by the sha256 of the
+stage's SMOL-V bytes: the encoding version and the size and sha256 of the
+SPIR-V, or the error that stops the stage.
+
 Everything executable - the extracted AssetStudio tree, the C# harness, the
-NuGet packages and AssetStudio's bundled FMOD library - lives in --project,
-outside the repository (R2). The only committed output is
-fixtures/assetstudio-export-goldens.json. Needs a Windows .NET 8 SDK:
+NuGet packages, AssetStudio's bundled FMOD library, the smol-v source and its
+build - lives in --project, outside the repository (R2). The only committed
+output is fixtures/assetstudio-export-goldens.json. Needs a Windows .NET 8 SDK:
 AssetStudio's texture decoder package and FMOD library are Windows builds.
 From WSL, pass the Windows dotnet.exe; paths are translated with wslpath.
 
 Usage:
   .venv-oracle/bin/python scripts/make-export-goldens.py --source <assetstudio clone> \\
-      --project <external dir> [--dotnet <dotnet>]
+      --smolv <aras-p/smol-v clone> --project <external dir> [--dotnet <dotnet>]
 """
 import argparse
 import base64
@@ -67,6 +96,10 @@ OUTPUT = ROOT / "fixtures" / "assetstudio-export-goldens.json"
 REVISION = "c37af7dfcdafee93e33b5da9f0285c97998d6ae3"
 # git rev-parse c37af7d^{tree}: the extracted source is exactly this tree.
 TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
+# aras-p/smol-v (MIT / Unlicense), the SPIR-V oracle for SMOL-V encoding version 1.
+SMOLV_REVISION = "6303e979b59153ee7007fd14e06d3fed8687b64c"
+# git rev-parse 6303e97^{tree}: the source is exactly this tree.
+SMOLV_TREE = "3486b96991f9c886b8fca6817043f571aa48c648"
 TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP = 28, 43, 48, 49, 83
 CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", SHADER: "Shader", TEXTASSET: "TextAsset",
            AUDIOCLIP: "AudioClip"}
@@ -109,7 +142,10 @@ METHODS = {
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
-    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()",
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); "
+              "Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v "
+              f"{SMOLV_REVISION[:7]} smolv::Decode, disassembled by AssetStudio's "
+              "SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert",
 }
 
 HARNESS = r'''using System;
@@ -119,16 +155,21 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using AssetStudio;
+using Smolv;
 using AssetStudio.CLI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 // Generated by scripts/make-export-goldens.py (unity-asset-reader #233). Calls
-// AssetStudio's exporters unmodified; nothing here changes what they write.
+// AssetStudio's exporters unmodified; nothing here changes what they write,
+// except the text of Vulkan programs in SMOL-V encoding version 1, which the
+// hybrid oracle replaces (#260; see the script).
 public sealed class StderrLogger : ILogger {
     public readonly List<string> Errors = new List<string>();
     public void Log(LoggerEvent e, string message) {
@@ -147,6 +188,149 @@ public static class Program {
         var files = Directory.Exists(dir) ? Directory.GetFiles(dir) : new string[0];
         if (files.Length != 1) throw new Exception("expected one exported file in " + dir + ", found " + files.Length);
         return files[0];
+    }
+
+    // --- Vulkan programs: the hybrid oracle for SMOL-V encoding version 1 (#260) ---
+
+    static readonly MethodInfo exportSnippet = typeof(SpirVShaderConverter).GetMethod(
+        "ExportSnippet", BindingFlags.NonPublic | BindingFlags.Static)
+        ?? throw new Exception("SpirVShaderConverter.ExportSnippet not found");
+
+    // ShaderConverter.ConvertSerializedShader's blob walk: every SPIR-V program.
+    static List<ShaderSubProgram> SpirvPrograms(Shader shader) {
+        var found = new List<ShaderSubProgram>();
+        if (shader.compressedBlob == null) return found;
+        for (var i = 0; i < shader.platforms.Length; i++) {
+            ShaderProgram program = null;
+            for (var j = 0; j < shader.offsets[i].Length; j++) {
+                var decompressed = new byte[shader.decompressedLengths[i][j]];
+                var packed = shader.compressedBlob.AsSpan().Slice((int)shader.offsets[i][j], (int)shader.compressedLengths[i][j]);
+                if (LZ4.Instance.Decompress(packed, decompressed) != decompressed.Length) throw new IOException("Lz4 decompression error");
+                using var blob = new EndianBinaryReader(new MemoryStream(decompressed), EndianType.LittleEndian);
+                if (j == 0) program = new ShaderProgram(blob, shader);
+                program.Read(blob, j);
+            }
+            if (program == null) continue;
+            found.AddRange(program.m_SubPrograms.Where(p => p != null && p.m_ProgramType == ShaderGpuProgramType.SPIRV));
+        }
+        return found;
+    }
+
+    // SpirVShaderConverter.Convert's stage table: (offset, size) of each stage.
+    static List<(int offset, int size)> Stages(byte[] code) {
+        var stages = new List<(int, int)>();
+        using var reader = new BinaryReader(new MemoryStream(code));
+        reader.ReadInt32(); // requirements
+        int minOffset = code.Length;
+        for (int i = 0; i < 5; i++) {
+            if (reader.BaseStream.Position >= minOffset) break;
+            int offset = reader.ReadInt32();
+            int size = reader.ReadInt32();
+            if (size > 0) {
+                if (offset < minOffset) minOffset = offset;
+                stages.Add((offset, size));
+            }
+        }
+        return stages;
+    }
+
+    // A stage's file name in the stages directory: the sha256 of its SMOL-V bytes.
+    static string StageName(byte[] code, int offset, int size) =>
+        Sha(code.AsSpan(offset, Math.Min(size, code.Length - offset)).ToArray());
+
+    // AssetStudio's SpirVShaderConverter.ExportSnippet, its exceptions unwrapped.
+    static string UpstreamSnippet(Stream stream, int offset, int size) {
+        try {
+            return (string)exportSnippet.Invoke(null, new object[] { stream, offset, size });
+        } catch (TargetInvocationException e) {
+            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+            throw;
+        }
+    }
+
+    // ExportSnippet with the hybrid's words for a stage of encoding version 1 or later.
+    static string HybridSnippet(MemoryStream stream, byte[] code, int offset, int size, string stagesDir) {
+        stream.Position = offset;
+        int decodedSize = SmolvDecoder.GetDecodedBufferSize(stream);
+        if (decodedSize == 0 || code[offset + 7] == 0) return UpstreamSnippet(stream, offset, size);
+        if (decodedSize < 0) throw new OverflowException();
+        var path = Path.Combine(stagesDir, StageName(code, offset, size) + ".spv");
+        if (File.Exists(path + ".fail")) throw new Exception("Unable to decode SMOL-V shader");
+        var module = SpirV.Module.ReadFrom(new MemoryStream(File.ReadAllBytes(path)));
+        return new SpirV.Disassembler().Disassemble(module, SpirV.DisassemblyOptions.Default).Replace("\r\n", "\n");
+    }
+
+    // SpirVShaderConverter.Convert with HybridSnippet for each stage.
+    static string HybridConvert(byte[] code, string stagesDir) {
+        var sb = new StringBuilder();
+        using var stream = new MemoryStream(code);
+        using var reader = new BinaryReader(stream);
+        reader.ReadInt32(); // requirements
+        int minOffset = code.Length;
+        for (int i = 0; i < 5; i++) {
+            if (reader.BaseStream.Position >= minOffset) break;
+            int offset = reader.ReadInt32();
+            int size = reader.ReadInt32();
+            if (size > 0) {
+                if (offset < minOffset) minOffset = offset;
+                var position = stream.Position;
+                sb.Append(HybridSnippet(stream, code, offset, size, stagesDir));
+                stream.Position = position;
+            }
+        }
+        return sb.ToString();
+    }
+
+    // ShaderSubProgram.Export's SPIRV case, with the given converter.
+    static string ProgramText(ShaderSubProgram program, Func<byte[], string> convert) {
+        var sb = new StringBuilder();
+        try {
+            sb.Append($"// hash: {program.ComputeHash64(program.m_ProgramCode):x8}\n");
+            sb.Append(convert(program.m_ProgramCode));
+        } catch (Exception e) {
+            sb.Append($"// disassembly error {e.Message}\n");
+        }
+        return sb.ToString();
+    }
+
+    // The dump run: each stage's SMOL-V bytes and, for encoding version 0, the
+    // words AssetStudio's SmolvDecoder gives (ExportSnippet's decode).
+    static List<Dictionary<string, object>> DumpStages(Shader shader, string stagesDir) {
+        var stages = new List<Dictionary<string, object>>();
+        foreach (var program in SpirvPrograms(shader)) {
+            var code = program.m_ProgramCode;
+            List<(int offset, int size)> table;
+            try {
+                table = Stages(code);
+            } catch (EndOfStreamException) {
+                // Convert fails on this program before any stage: no stages.
+                continue;
+            }
+            foreach (var (offset, size) in table) {
+                var stage = new Dictionary<string, object>();
+                stages.Add(stage);
+                try {
+                    using var stream = new MemoryStream(code);
+                    stream.Position = offset;
+                    int decodedSize = SmolvDecoder.GetDecodedBufferSize(stream);
+                    if (decodedSize == 0) throw new Exception("Invalid SMOL-V shader header");
+                    var name = StageName(code, offset, size);
+                    stage["sha256"] = name;
+                    File.WriteAllBytes(Path.Combine(stagesDir, name + ".smolv"), code.AsSpan(offset, Math.Min(size, code.Length - offset)).ToArray());
+                    stage["encoding"] = (int)code[offset + 7];
+                    if (code[offset + 7] != 0) {
+                        if (decodedSize < 0) throw new OverflowException();
+                        continue;
+                    }
+                    using var decoded = new MemoryStream(new byte[decodedSize]);
+                    if (!SmolvDecoder.Decode(stream, size, decoded)) throw new Exception("Unable to decode SMOL-V shader");
+                    File.WriteAllBytes(Path.Combine(stagesDir, name + ".c37.spv"), decoded.ToArray());
+                } catch (Exception e) {
+                    stage["error"] = e.Message;
+                }
+            }
+        }
+        return stages;
     }
 
     public static int Main(string[] args) {
@@ -168,6 +352,9 @@ public static class Program {
         var exportTextAsset = Method("ExportTextAsset");
         var exportShader = Method("ExportShader");
         var game = GameManager.GetGame(GameType.Normal);
+        // "dump": only the Vulkan stages of each Shader; "export": every export.
+        var dump = args[2] == "dump";
+        var stagesDir = args[3];
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
             var manager = new AssetsManager { Game = game };
@@ -194,6 +381,16 @@ public static class Program {
                     ["classId"] = (int)obj.type, ["byteSize"] = obj.byteSize, ["objectSha256"] = Sha(obj.GetRawData()),
                 };
                 result["input"] = input;
+                if (dump) {
+                    if (obj is Shader dumped) {
+                        try {
+                            result["stages"] = DumpStages(dumped, stagesDir);
+                        } catch (Exception error) {
+                            result["dumpError"] = error.GetType().Name + ": " + error.Message;
+                        }
+                    }
+                    continue;
+                }
                 try {
                     var item = new AssetItem(obj);
                     switch (obj) {
@@ -300,6 +497,26 @@ public static class Program {
                                 break;
                             }
                             var text = File.ReadAllBytes(Single(outDir));
+                            // The hybrid oracle (#260): each SPIR-V program's text, as
+                            // AssetStudio wrote it, replaced by the hybrid's where they differ.
+                            var utf8 = new UTF8Encoding(false, true);
+                            var written = utf8.GetString(text);
+                            if (!utf8.GetBytes(written).AsSpan().SequenceEqual(text)) {
+                                result["harnessError"] = "the .shader file does not round-trip through UTF-8";
+                                break;
+                            }
+                            foreach (var program in SpirvPrograms(shader)) {
+                                var upstream = ProgramText(program, SpirVShaderConverter.Convert);
+                                var hybrid = ProgramText(program, code => HybridConvert(code, stagesDir));
+                                if (upstream == hybrid) continue;
+                                if (!written.Contains(upstream)) {
+                                    result["harnessError"] = "AssetStudio's text of SPIR-V program " + upstream.Split('\n')[0] + " is not in the .shader file";
+                                    break;
+                                }
+                                written = written.Replace(upstream, hybrid);
+                            }
+                            if (result.ContainsKey("harnessError")) break;
+                            text = utf8.GetBytes(written);
                             result["shader"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
                             break;
                         }
@@ -317,6 +534,56 @@ public static class Program {
         File.WriteAllText(args[1], JsonSerializer.Serialize(results));
         return 0;
     }
+}
+'''
+
+# smol-v's decoder over files: built with smolv.cpp, outside the repository.
+SMOLV_MAIN = r'''// Generated by scripts/make-export-goldens.py (unity-asset-reader #260).
+// smolv-decode <0831|none> <in> <out> [<in> <out> ...]: decode each SMOL-V
+// file with smolv::Decode, kDecodeFlagUse20160831AsZeroVersion or no flags;
+// write the SPIR-V to <out>, or an empty <out>.fail when Decode returns false.
+#include "smolv.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+
+static bool readAll(const char* path, std::vector<unsigned char>& data) {
+    FILE* f = std::fopen(path, "rb");
+    if (!f) return false;
+    unsigned char buf[65536];
+    size_t n;
+    while ((n = std::fread(buf, 1, sizeof buf, f)) > 0) data.insert(data.end(), buf, buf + n);
+    std::fclose(f);
+    return true;
+}
+
+static bool writeAll(const std::string& path, const std::vector<unsigned char>& data) {
+    FILE* f = std::fopen(path.c_str(), "wb");
+    if (!f) return false;
+    bool ok = data.empty() || std::fwrite(data.data(), 1, data.size(), f) == data.size();
+    return std::fclose(f) == 0 && ok;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 4 || argc % 2 != 0) return 2;
+    uint32_t flags;
+    if (std::strcmp(argv[1], "0831") == 0) flags = smolv::kDecodeFlagUse20160831AsZeroVersion;
+    else if (std::strcmp(argv[1], "none") == 0) flags = smolv::kDecodeFlagNone;
+    else return 2;
+    for (int i = 2; i < argc; i += 2) {
+        std::vector<unsigned char> in;
+        if (!readAll(argv[i], in)) { std::fprintf(stderr, "cannot read %s\n", argv[i]); return 1; }
+        size_t size = smolv::GetDecodedBufferSize(in.data(), in.size());
+        std::vector<unsigned char> out(size);
+        bool ok = size != 0 && smolv::Decode(in.data(), in.size(), out.data(), out.size(), flags);
+        if (!writeAll(ok ? std::string(argv[i + 1]) : std::string(argv[i + 1]) + ".fail",
+                      ok ? out : std::vector<unsigned char>())) {
+            std::fprintf(stderr, "cannot write %s\n", argv[i + 1]);
+            return 1;
+        }
+    }
+    return 0;
 }
 '''
 
@@ -436,6 +703,75 @@ def extract_source(source: pathlib.Path, target: pathlib.Path) -> None:
         tar.extractall(target, filter="data")
 
 
+def build_smolv(source: pathlib.Path, project: pathlib.Path) -> pathlib.Path:
+    """Build smol-v SMOLV_REVISION's decoder, from its tree as git stores it, with g++."""
+    gxx = shutil.which("g++")
+    if not gxx:
+        raise SystemExit("g++ required to build smol-v's decoder")
+    tree = subprocess.run(["git", "-C", str(source), "rev-parse", SMOLV_REVISION + "^{tree}"],
+                          check=True, capture_output=True, text=True).stdout.strip()
+    if tree != SMOLV_TREE:
+        raise SystemExit(f"{source}: {SMOLV_REVISION} has tree {tree}, expected {SMOLV_TREE}")
+    target = project / "smolv"
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True)
+    for name in ["smolv.cpp", "smolv.h"]:
+        data = subprocess.run(["git", "-C", str(source), "show", f"{SMOLV_REVISION}:source/{name}"],
+                              check=True, capture_output=True).stdout
+        (target / name).write_bytes(data)
+    (target / "main.cpp").write_text(SMOLV_MAIN)
+    exe = target / "smolv-decode"
+    subprocess.run([gxx, "-O2", "-std=c++11", "-o", str(exe), str(target / "smolv.cpp"),
+                    str(target / "main.cpp")], check=True)
+    return exe
+
+
+def decode_stages(exe: pathlib.Path, stages: pathlib.Path, dumped: dict[int, dict]) -> dict[str, dict]:
+    """smol-v on every dumped stage: the check on version 0, the words of later versions.
+
+    Returns each stage's golden by the sha256 of its SMOL-V bytes."""
+    found: dict[str, dict] = {}
+    for result in dumped.values():
+        for stage in result.get("stages", []):
+            if "sha256" in stage:
+                found.setdefault(stage["sha256"], stage)
+    v0 = [n for n, s in found.items() if s["encoding"] == 0]
+    later = [n for n, s in found.items() if s["encoding"] != 0 and "error" not in s]
+    for flags, names, suffix in [("0831", v0, ".0831.spv"), ("none", later, ".spv")]:
+        # Batches keep the command line short.
+        for i in range(0, len(names), 200):
+            pairs = [str(stages / f"{n}{p}") for n in names[i:i + 200]
+                     for p in (".smolv", suffix)]
+            subprocess.run([str(exe), flags, *pairs], check=True)
+
+    def read(path: pathlib.Path) -> bytes | None:
+        return path.read_bytes() if path.exists() else None
+
+    goldens: dict[str, dict] = {}
+    for name, stage in found.items():
+        golden = {"encoding": stage["encoding"]}
+        if stage["encoding"] == 0:
+            ours, theirs = read(stages / f"{name}.c37.spv"), read(stages / f"{name}.0831.spv")
+            if ours != theirs:
+                raise SystemExit(f"stage {name}: smol-v {SMOLV_REVISION[:7]} with "
+                                 "kDecodeFlagUse20160831AsZeroVersion does not reproduce "
+                                 f"AssetStudio's SmolvDecoder ({stage.get('error', 'words differ')})")
+            words = ours
+        elif "error" in stage:
+            words = None
+        else:
+            words = read(stages / f"{name}.spv")
+            if words is None:
+                stage["error"] = "Unable to decode SMOL-V shader"
+        if words is not None:
+            golden["size"], golden["sha256"] = len(words), sha256(words)
+        else:
+            golden["error"] = stage["error"]
+        goldens[name] = golden
+    return goldens
+
+
 def build(host: Host, project: pathlib.Path) -> pathlib.Path:
     harness = project / "harness"
     harness.mkdir(parents=True, exist_ok=True)
@@ -477,6 +813,8 @@ def main() -> None:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--source", required=True, type=pathlib.Path,
                         help="a git clone of Razviar/assetstudio holding " + REVISION)
+    parser.add_argument("--smolv", required=True, type=pathlib.Path,
+                        help="a git clone of aras-p/smol-v holding " + SMOLV_REVISION)
     parser.add_argument("--project", required=True, type=pathlib.Path,
                         help="an external directory for the build and the run")
     parser.add_argument("--dotnet", default=shutil.which("dotnet") or shutil.which("dotnet.exe"))
@@ -486,14 +824,16 @@ def main() -> None:
     if not args.dotnet:
         raise SystemExit(".NET 8 SDK (Windows) required; supply --dotnet")
     source, project = external(args.source), external(args.project)
+    smolv = external(args.smolv)
     host = Host(args.dotnet)
 
     jobs = expected_jobs()
     project.mkdir(parents=True, exist_ok=True)
     extract_source(source, project / "assetstudio")
     exe = build(host, project)
+    smolv_exe = build_smolv(smolv, project)
 
-    for name in ["inputs", "runs"]:
+    for name in ["inputs", "runs", "stages"]:
         if (project / name).exists():
             shutil.rmtree(project / name)
     bundles, flat = [], []
@@ -505,7 +845,10 @@ def main() -> None:
         bundles.append((key, bundle, [len(flat) + i for i in range(len(objects))]))
         flat.extend({**job, "fixture": key} for job in objects)
 
-    def run(name: str) -> dict[int, dict]:
+    stages = project / "stages"
+    stages.mkdir()
+
+    def run(name: str, mode: str = "export") -> dict[int, dict]:
         """One harness process over every job, exporting into runs/<name>/<index>/."""
         manifest = [{"input": host.path(bundle), "editor": editor_of(key), "objects": [
             {"index": i, "file": flat[i]["file"], "pathId": flat[i]["pathId"],
@@ -515,8 +858,13 @@ def main() -> None:
         results_file = project / "runs" / f"{name}-results.json"
         jobs_file.parent.mkdir(parents=True, exist_ok=True)
         jobs_file.write_text(json.dumps(manifest, indent=1))
-        host.run(str(exe), host.path(jobs_file), host.path(results_file))
+        host.run(str(exe), host.path(jobs_file), host.path(results_file), mode,
+                 host.path(stages))
         return {r.pop("index"): r for r in json.loads(results_file.read_text())}
+
+    # The Vulkan stages first: smol-v decodes them between the two harness runs.
+    dumped = run("dump", "dump")
+    stage_goldens = decode_stages(smolv_exe, stages, dumped)
 
     # Two runs: an export that differs between them is no golden.
     results, again = run("a"), run("b")
@@ -533,6 +881,17 @@ def main() -> None:
         where = f"{key} {job['file']} {job['pathId']}"
         if result is None:
             raise SystemExit(f"{where}: the harness returned no result")
+        if "harnessError" in result:
+            raise SystemExit(f"{where}: {result['harnessError']}")
+        if "shader" in result:
+            # AssetStudio cannot walk the blob of a 6000+ Shader either; one it
+            # exports has to be walked here too.
+            if "dumpError" in dumped[index]:
+                raise SystemExit(f"{where}: the dump run failed: {dumped[index]['dumpError']}")
+            spirv = {s["sha256"]: stage_goldens[s["sha256"]]
+                     for s in dumped[index].get("stages", []) if "sha256" in s}
+            if spirv:
+                result["shader"]["spirv"] = spirv
         entry = {"class": CLASSES[job["expected"]["classId"]], "input": job["expected"],
                  "inputOracle": job["golden"]}
         actual = result.get("input")
@@ -572,7 +931,9 @@ def main() -> None:
         print(f"  {where:<90} {entry['class']:<10} {status}")
 
     golden = {
-        "_oracle": f"AssetStudio {REVISION[:7]} (Razviar/assetstudio), executed",
+        "_oracle": f"AssetStudio {REVISION[:7]} (Razviar/assetstudio), executed; Vulkan "
+                   f"stages of SMOL-V encoding version 1: aras-p/smol-v {SMOLV_REVISION[:7]} "
+                   "words, AssetStudio's disassembler for the text",
         "_generator": "scripts/make-export-goldens.py",
         "revision": REVISION,
         "tree": TREE,
@@ -588,6 +949,9 @@ def main() -> None:
                      "exporters called on the en-US culture of the GUI's export thread. PNG "
                      "decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 "
                      "pixels in the PNG's row order, top row first.",
+        "smolv": {"revision": SMOLV_REVISION, "tree": SMOLV_TREE,
+                  "source": f"https://github.com/aras-p/smol-v/tree/{SMOLV_REVISION}",
+                  "build": "g++ -O2 -std=c++11 source/smolv.cpp and the script's SMOLV_MAIN"},
         "culture": "en-US",
         "fmod": {"path": FMOD, "sha256": FMOD_SHA256},
         "nugetSource": NUGET_SOURCE,

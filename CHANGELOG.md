@@ -342,6 +342,10 @@ First release. Peer: `unity-asset-reader@^1`.
   is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
 - Writing floats is faster through the next core's `formatSingle`; the output is unchanged
   (#252).
+- Vulkan programs of Unity 2020.3 and later, stored in SMOL-V encoding version 1, are now decoded
+  (as aras-p/smol-v decodes them) and disassembled, where the text used to read
+  `// disassembly error Unable to decode SMOL-V shader`. The text of such shaders changes;
+  Unity 2019.4 text is unchanged (#260).
 
 ### 1.0.0 - 2026-10-29
 

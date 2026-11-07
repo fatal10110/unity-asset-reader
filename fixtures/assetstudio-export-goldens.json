@@ -1,5 +1,5 @@
 {
-  "_oracle": "AssetStudio c37af7d (Razviar/assetstudio), executed",
+  "_oracle": "AssetStudio c37af7d (Razviar/assetstudio), executed; Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v 6303e97 words, AssetStudio's disassembler for the text",
   "_generator": "scripts/make-export-goldens.py",
   "revision": "c37af7dfcdafee93e33b5da9f0285c97998d6ae3",
   "tree": "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa",
@@ -10,9 +10,15 @@
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
-    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()"
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v 6303e97 smolv::Decode, disassembled by AssetStudio's SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert"
   },
   "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
+  "smolv": {
+    "revision": "6303e979b59153ee7007fd14e06d3fed8687b64c",
+    "tree": "3486b96991f9c886b8fca6817043f571aa48c648",
+    "source": "https://github.com/aras-p/smol-v/tree/6303e979b59153ee7007fd14e06d3fed8687b64c",
+    "build": "g++ -O2 -std=c++11 source/smolv.cpp and the script's SMOLV_MAIN"
+  },
   "culture": "en-US",
   "fmod": {
     "path": "AssetStudio.GUI/Libraries/x64/fmod.dll",
@@ -1074,7 +1080,64 @@
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
             "size": 887250,
-            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c"
+            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c",
+            "spirv": {
+              "bd1facfb8ace79bf23e0c666fbb2beb8d6b45fd5afdc863cc09edbc2e687dccc": {
+                "encoding": 0,
+                "size": 8912,
+                "sha256": "05addf692196f551c1ff4d12467145ea9786aa157563d93ee7b2df40f6a7c6c4"
+              },
+              "c066b73af50207bdb79672ea0d41c8e1ebe9e511619077e828f6331b00e8b7b4": {
+                "encoding": 0,
+                "size": 3504,
+                "sha256": "255c7e9e39cb1cc8cf8ec651eaaaa675ff5434e20942bd226dc0b81cd166d62d"
+              },
+              "8a4135081872e3c0d56ca6bf53af01b36fbcf02c29552a428ec50297f0883251": {
+                "encoding": 0,
+                "size": 10708,
+                "sha256": "f724d3dcb8bf543b312155d76fabef5035d7d8c9cd6b03efcda670fae9008bad"
+              },
+              "430c5614a56b31b2596d3fd22541c52323553f584e8fed552667ad54c9aaafda": {
+                "encoding": 0,
+                "size": 4176,
+                "sha256": "fe10730d55b79c61176207d5f9ceb23a20e965c91a579664c6a524779e4b6ed5"
+              },
+              "8eba44afd0742169709ff8a702ccc577e2fcf004e0351e31437c94fcb2ca8675": {
+                "encoding": 0,
+                "size": 4020,
+                "sha256": "6c7e63638d6a8d0911fea08dd778cb4ff796ff9a6b2e1023c24e6c6f466e9d21"
+              },
+              "7b2284006247c41279c174daf7aebf523b520c203de91011c479bc6f5b00a418": {
+                "encoding": 0,
+                "size": 4708,
+                "sha256": "2a7924021a1f173ae17f0436aeba232bcb12c99590bc9cda299cecd1ff3163ac"
+              },
+              "ca4fab7b5efcea08c97ec31806ee56bde83880345925e51239abf224c6672b6b": {
+                "encoding": 0,
+                "size": 3380,
+                "sha256": "17863a9eb88a8a765d351955b5b4befa609e4ca12d3e502dafef370f13793326"
+              },
+              "78797916e12dc7a78dd84ade42696267234dba91d80e7a4f3ad0a85bb15e652f": {
+                "encoding": 0,
+                "size": 1932,
+                "sha256": "0b8105df80b99ffabee9442d4de988cd01b527fc33ec08e00b09d2f9c42b3308"
+              },
+              "7262dfbc19b61b08b8d5bfe4134ffc3a607ca579e5d88ea70348983f69fe132b": {
+                "encoding": 0,
+                "size": 2276,
+                "sha256": "49027cc8b580fefdbefb3f5c71ba96f7f8b141dbcada47536e1c67f829d3258f"
+              },
+              "745e8927a6ef7000b1f03f435a8bb6618d9dda43a72fa16aa53a20e6b56dc228": {
+                "encoding": 0,
+                "size": 2032,
+                "sha256": "48929f08505a651b3d342b8c7106e06cb855c9e55b9ebcee30b6e567c9043d13"
+              },
+              "56d285f8ee16ae0f27e11b25d33e944a1f6924782294d3a869230e896860ab78": {
+                "encoding": 0,
+                "size": 476,
+                "sha256": "2e03cc4b69dd05b00e16ed487de71254f04fb50a6f2aecc7bef3e975fb4ed63f"
+              }
+            }
           }
         },
         "-7198395739723353546": {
@@ -1088,7 +1151,19 @@
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
             "size": 33919,
-            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413"
+            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413",
+            "spirv": {
+              "745e8927a6ef7000b1f03f435a8bb6618d9dda43a72fa16aa53a20e6b56dc228": {
+                "encoding": 0,
+                "size": 2032,
+                "sha256": "48929f08505a651b3d342b8c7106e06cb855c9e55b9ebcee30b6e567c9043d13"
+              },
+              "56d285f8ee16ae0f27e11b25d33e944a1f6924782294d3a869230e896860ab78": {
+                "encoding": 0,
+                "size": 476,
+                "sha256": "2e03cc4b69dd05b00e16ed487de71254f04fb50a6f2aecc7bef3e975fb4ed63f"
+              }
+            }
           }
         }
       }
@@ -1132,7 +1207,64 @@
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
             "size": 887250,
-            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c"
+            "sha256": "afbd38226ba37797ae99dccb1a02aeb8e97902e8af9b826177cfba0d85bd873c",
+            "spirv": {
+              "bd1facfb8ace79bf23e0c666fbb2beb8d6b45fd5afdc863cc09edbc2e687dccc": {
+                "encoding": 0,
+                "size": 8912,
+                "sha256": "05addf692196f551c1ff4d12467145ea9786aa157563d93ee7b2df40f6a7c6c4"
+              },
+              "c066b73af50207bdb79672ea0d41c8e1ebe9e511619077e828f6331b00e8b7b4": {
+                "encoding": 0,
+                "size": 3504,
+                "sha256": "255c7e9e39cb1cc8cf8ec651eaaaa675ff5434e20942bd226dc0b81cd166d62d"
+              },
+              "8a4135081872e3c0d56ca6bf53af01b36fbcf02c29552a428ec50297f0883251": {
+                "encoding": 0,
+                "size": 10708,
+                "sha256": "f724d3dcb8bf543b312155d76fabef5035d7d8c9cd6b03efcda670fae9008bad"
+              },
+              "430c5614a56b31b2596d3fd22541c52323553f584e8fed552667ad54c9aaafda": {
+                "encoding": 0,
+                "size": 4176,
+                "sha256": "fe10730d55b79c61176207d5f9ceb23a20e965c91a579664c6a524779e4b6ed5"
+              },
+              "8eba44afd0742169709ff8a702ccc577e2fcf004e0351e31437c94fcb2ca8675": {
+                "encoding": 0,
+                "size": 4020,
+                "sha256": "6c7e63638d6a8d0911fea08dd778cb4ff796ff9a6b2e1023c24e6c6f466e9d21"
+              },
+              "7b2284006247c41279c174daf7aebf523b520c203de91011c479bc6f5b00a418": {
+                "encoding": 0,
+                "size": 4708,
+                "sha256": "2a7924021a1f173ae17f0436aeba232bcb12c99590bc9cda299cecd1ff3163ac"
+              },
+              "ca4fab7b5efcea08c97ec31806ee56bde83880345925e51239abf224c6672b6b": {
+                "encoding": 0,
+                "size": 3380,
+                "sha256": "17863a9eb88a8a765d351955b5b4befa609e4ca12d3e502dafef370f13793326"
+              },
+              "78797916e12dc7a78dd84ade42696267234dba91d80e7a4f3ad0a85bb15e652f": {
+                "encoding": 0,
+                "size": 1932,
+                "sha256": "0b8105df80b99ffabee9442d4de988cd01b527fc33ec08e00b09d2f9c42b3308"
+              },
+              "7262dfbc19b61b08b8d5bfe4134ffc3a607ca579e5d88ea70348983f69fe132b": {
+                "encoding": 0,
+                "size": 2276,
+                "sha256": "49027cc8b580fefdbefb3f5c71ba96f7f8b141dbcada47536e1c67f829d3258f"
+              },
+              "745e8927a6ef7000b1f03f435a8bb6618d9dda43a72fa16aa53a20e6b56dc228": {
+                "encoding": 0,
+                "size": 2032,
+                "sha256": "48929f08505a651b3d342b8c7106e06cb855c9e55b9ebcee30b6e567c9043d13"
+              },
+              "56d285f8ee16ae0f27e11b25d33e944a1f6924782294d3a869230e896860ab78": {
+                "encoding": 0,
+                "size": 476,
+                "sha256": "2e03cc4b69dd05b00e16ed487de71254f04fb50a6f2aecc7bef3e975fb4ed63f"
+              }
+            }
           }
         },
         "-7198395739723353546": {
@@ -1146,7 +1278,19 @@
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
             "size": 33919,
-            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413"
+            "sha256": "302bc3740c8ed6c5cf0dd4a9c6332b4999c9a10cb4b0db0be7ef5674c3353413",
+            "spirv": {
+              "745e8927a6ef7000b1f03f435a8bb6618d9dda43a72fa16aa53a20e6b56dc228": {
+                "encoding": 0,
+                "size": 2032,
+                "sha256": "48929f08505a651b3d342b8c7106e06cb855c9e55b9ebcee30b6e567c9043d13"
+              },
+              "56d285f8ee16ae0f27e11b25d33e944a1f6924782294d3a869230e896860ab78": {
+                "encoding": 0,
+                "size": 476,
+                "sha256": "2e03cc4b69dd05b00e16ed487de71254f04fb50a6f2aecc7bef3e975fb4ed63f"
+              }
+            }
           }
         }
       }
@@ -2637,8 +2781,65 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
-            "size": 105551,
-            "sha256": "3a838bdd987825dd13be0a16baab18c5a739b1bba0c600d22fbd11bb78869d7c"
+            "size": 918554,
+            "sha256": "01fbccd4c62bd27b4bb5711f96e81c5e86006a7ddbb9a18dfedd8c70978238d2",
+            "spirv": {
+              "d8f34a235ff919389ae025355435ffd2e0bfda92f4209e5a361b08bba8e97a03": {
+                "encoding": 1,
+                "size": 9096,
+                "sha256": "f857aead91e74775a003fc74b100de4aaebea5f04847bc9863efb4366f60ffd8"
+              },
+              "dfc48fc240e6ebd630c120515fcd1e8e0c9c353a116a2c7e17ae6699cb04c4e3": {
+                "encoding": 1,
+                "size": 3688,
+                "sha256": "79944cb5c511487f47c2636affe91eaf2d5a207b9fd891173f60a309c1ac0714"
+              },
+              "098e91097c479503c61f1b56ac92c78c3b748e40374344caeac3e593f8b61e1e": {
+                "encoding": 1,
+                "size": 10892,
+                "sha256": "9410e08d878ac439f1bf56d79e281d2c2956acab4a1115f11cf8890232b8b889"
+              },
+              "f6d07f0e08825504ea0013c6269b283099ea0c3b09a40bbc285937d4fda25c8f": {
+                "encoding": 1,
+                "size": 4360,
+                "sha256": "eff0af241f1a3ce60c56b9093b2cb93a00c4fb462d733f0786d0d1289cd85035"
+              },
+              "9be5186c90271ac2576776917a3079eaacc5a287f14a24c51bc643c79b49617f": {
+                "encoding": 1,
+                "size": 4204,
+                "sha256": "7a66f8310b387979da99ab34cb78a7b756d98a4d383f4629287d9a78b4d98ad0"
+              },
+              "6675a92c5ae97b730828bd93af29e30376c086af9a7c11ed498503cba69d67d1": {
+                "encoding": 1,
+                "size": 4892,
+                "sha256": "3092b6ea0c90a7f4332b4bf8364a4ab1b9f4893ac8cb2061a6313088c740f55d"
+              },
+              "cb2d01466bb4817c6f7ac5ae61e12adbb427140968fc287a1632732583e6b506": {
+                "encoding": 1,
+                "size": 3564,
+                "sha256": "d5b44ec6aed3a047ff91797212865b19552de0ed3833879bf30607484e6ac6c6"
+              },
+              "999df9aee7ad404a889879dad1af6e91a484cf9e4b331b40dfba840636b2cd51": {
+                "encoding": 1,
+                "size": 2116,
+                "sha256": "f38795bff27af18a20883561a5f34dd0f648cd70b5ececb25751e178857a49a1"
+              },
+              "da107ecee13c2bc2eb1a4e7af0581b9d9d880bfee56fed2ba126b871e66eb78f": {
+                "encoding": 1,
+                "size": 2452,
+                "sha256": "167c4bca5946301638e00711eb5c54d2f32d6fbc0df2c45f5fe416b659f248d6"
+              },
+              "fef0be5eda68328eb7677961216c237484eff518eb6c7aebde4850d0f78219be": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "e901e3fbab1a388e202112edb1171ba5b66b223125e0e15921d36e60e000bc40"
+              },
+              "8e65c90458488f861b85942946b649fe55c43b1117546ac1aa9b56c7b3966561": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "dba62572f9586dfb91376133867bb40adc3e9ecb35c5203918291e405e78edce"
+              }
+            }
           }
         },
         "8824481709471347674": {
@@ -2651,8 +2852,20 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
-            "size": 6239,
-            "sha256": "77bb3e1918eec0f4a2601b00f9401891eb04a356cd312027ebd9d25f7d301b63"
+            "size": 38123,
+            "sha256": "7504f735cfd9556538acced47c88a3ce816cb2d0725fceaf53523d5c032d51d1",
+            "spirv": {
+              "fef0be5eda68328eb7677961216c237484eff518eb6c7aebde4850d0f78219be": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "e901e3fbab1a388e202112edb1171ba5b66b223125e0e15921d36e60e000bc40"
+              },
+              "8e65c90458488f861b85942946b649fe55c43b1117546ac1aa9b56c7b3966561": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "dba62572f9586dfb91376133867bb40adc3e9ecb35c5203918291e405e78edce"
+              }
+            }
           }
         }
       }
@@ -2727,8 +2940,65 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
-            "size": 105551,
-            "sha256": "3a838bdd987825dd13be0a16baab18c5a739b1bba0c600d22fbd11bb78869d7c"
+            "size": 918554,
+            "sha256": "01fbccd4c62bd27b4bb5711f96e81c5e86006a7ddbb9a18dfedd8c70978238d2",
+            "spirv": {
+              "d8f34a235ff919389ae025355435ffd2e0bfda92f4209e5a361b08bba8e97a03": {
+                "encoding": 1,
+                "size": 9096,
+                "sha256": "f857aead91e74775a003fc74b100de4aaebea5f04847bc9863efb4366f60ffd8"
+              },
+              "dfc48fc240e6ebd630c120515fcd1e8e0c9c353a116a2c7e17ae6699cb04c4e3": {
+                "encoding": 1,
+                "size": 3688,
+                "sha256": "79944cb5c511487f47c2636affe91eaf2d5a207b9fd891173f60a309c1ac0714"
+              },
+              "098e91097c479503c61f1b56ac92c78c3b748e40374344caeac3e593f8b61e1e": {
+                "encoding": 1,
+                "size": 10892,
+                "sha256": "9410e08d878ac439f1bf56d79e281d2c2956acab4a1115f11cf8890232b8b889"
+              },
+              "f6d07f0e08825504ea0013c6269b283099ea0c3b09a40bbc285937d4fda25c8f": {
+                "encoding": 1,
+                "size": 4360,
+                "sha256": "eff0af241f1a3ce60c56b9093b2cb93a00c4fb462d733f0786d0d1289cd85035"
+              },
+              "9be5186c90271ac2576776917a3079eaacc5a287f14a24c51bc643c79b49617f": {
+                "encoding": 1,
+                "size": 4204,
+                "sha256": "7a66f8310b387979da99ab34cb78a7b756d98a4d383f4629287d9a78b4d98ad0"
+              },
+              "6675a92c5ae97b730828bd93af29e30376c086af9a7c11ed498503cba69d67d1": {
+                "encoding": 1,
+                "size": 4892,
+                "sha256": "3092b6ea0c90a7f4332b4bf8364a4ab1b9f4893ac8cb2061a6313088c740f55d"
+              },
+              "cb2d01466bb4817c6f7ac5ae61e12adbb427140968fc287a1632732583e6b506": {
+                "encoding": 1,
+                "size": 3564,
+                "sha256": "d5b44ec6aed3a047ff91797212865b19552de0ed3833879bf30607484e6ac6c6"
+              },
+              "999df9aee7ad404a889879dad1af6e91a484cf9e4b331b40dfba840636b2cd51": {
+                "encoding": 1,
+                "size": 2116,
+                "sha256": "f38795bff27af18a20883561a5f34dd0f648cd70b5ececb25751e178857a49a1"
+              },
+              "da107ecee13c2bc2eb1a4e7af0581b9d9d880bfee56fed2ba126b871e66eb78f": {
+                "encoding": 1,
+                "size": 2452,
+                "sha256": "167c4bca5946301638e00711eb5c54d2f32d6fbc0df2c45f5fe416b659f248d6"
+              },
+              "fef0be5eda68328eb7677961216c237484eff518eb6c7aebde4850d0f78219be": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "e901e3fbab1a388e202112edb1171ba5b66b223125e0e15921d36e60e000bc40"
+              },
+              "8e65c90458488f861b85942946b649fe55c43b1117546ac1aa9b56c7b3966561": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "dba62572f9586dfb91376133867bb40adc3e9ecb35c5203918291e405e78edce"
+              }
+            }
           }
         },
         "8824481709471347674": {
@@ -2741,8 +3011,20 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "shader": {
-            "size": 6239,
-            "sha256": "77bb3e1918eec0f4a2601b00f9401891eb04a356cd312027ebd9d25f7d301b63"
+            "size": 38123,
+            "sha256": "7504f735cfd9556538acced47c88a3ce816cb2d0725fceaf53523d5c032d51d1",
+            "spirv": {
+              "fef0be5eda68328eb7677961216c237484eff518eb6c7aebde4850d0f78219be": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "e901e3fbab1a388e202112edb1171ba5b66b223125e0e15921d36e60e000bc40"
+              },
+              "8e65c90458488f861b85942946b649fe55c43b1117546ac1aa9b56c7b3966561": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "dba62572f9586dfb91376133867bb40adc3e9ecb35c5203918291e405e78edce"
+              }
+            }
           }
         }
       }

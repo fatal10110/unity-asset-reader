@@ -116,20 +116,19 @@ for (const s of WITH_TEXT) {
   });
 }
 
-test("2019.4's Vulkan programs are disassembled, 2020.3's are AssetStudio's error line", () => {
-  // AssetStudio's SMOL-V decoder predates the format 2020.3 writes (header
-  // version 0x01010000): it reports a failed decode, and the golden holds
-  // that line, so ours must too.
+test("2019.4's and 2020.3's Vulkan programs are both disassembled", () => {
+  // 2020.3 writes SMOL-V encoding version 1 (header version 0x01010000),
+  // which AssetStudio's decoder predates; its golden is the hybrid oracle's
+  // (smol-v's words, AssetStudio's disassembler; plan section 5, #260).
   const text = (fixture: string): string => {
     const s = WITH_TEXT.find((w) => w.fixture === fixture)!;
     return shaderToText(readShader(s.fixture, s.file, s.pathId));
   };
-  const old = text("editor/2019.4.41f2/shader/lz4/android");
-  assert.match(old, /\n; SPIR-V\n; Version: 1\.0\n; Generator: Khronos Glslang Reference Front End; /);
-  assert.doesNotMatch(old, /disassembly error/);
-  const newer = text("editor/2020.3.30f1/shader/lz4/android");
-  assert.match(newer, /"\/\/ hash: [0-9a-f]{8,16}\n\/\/ disassembly error Unable to decode SMOL-V shader\n"/);
-  assert.doesNotMatch(newer, /; SPIR-V/);
+  for (const editor of ["2019.4.41f2", "2020.3.30f1"]) {
+    const out = text(`editor/${editor}/shader/lz4/android`);
+    assert.match(out, /\n; SPIR-V\n; Version: 1\.0\n; Generator: Khronos Glslang Reference Front End; /);
+    assert.doesNotMatch(out, /disassembly error/, editor);
+  }
 });
 
 for (const s of SHADERS.filter((x) => !x.entry.shader)) {
