@@ -1798,10 +1798,12 @@ a clean clone; no Unity, no fixture rebuild:
 git clone https://github.com/Razviar/assetstudio.git <external-source>
 git clone https://github.com/aras-p/smol-v.git <external-smolv>
 python3 -m venv .venv-oracle && .venv-oracle/bin/pip install UnityPy==1.25.3
-.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --project <external-harness> --dotnet <dotnet-executable>
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
 npm run verify
 ```
 
+`<modern-oracle>` is section 13's UnityPy 1.25.4 environment; it reads the type
+trees of the shaders of step 4c (#259).
 `<external-source>` needs only to hold the revision (any checkout state: the
 script extracts the revision's tree with `git archive` and checks its tree id).
 `<external-smolv>` likewise needs to hold aras-p/smol-v
@@ -1811,7 +1813,8 @@ script extracts the revision's tree with `git archive` and checks its tree id).
 refuses one inside it (R2). It takes about a minute, and needs network access
 for the first NuGet restore.
 
-Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above), `g++` (C++11,
+Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above), `<modern-oracle>`
+(UnityPy 1.25.4), `g++` (C++11,
 in the shell running the script; WSL's does) and a **Windows .NET 8 SDK**. AssetStudio's texture decoder package
 (`Kyaru.Texture2DDecoder.Windows`) and the FMOD library it ships are Windows
 builds. From WSL, pass the Windows `dotnet.exe`, for example
@@ -1875,6 +1878,19 @@ What it does, all inside `<external-harness>`:
    and `ShaderSubProgram.Export` frame it, in place of AssetStudio's error
    line. A stage CSspv cannot read keeps its `// disassembly error` line; no
    fixture stage hits one.
+4c. Shaders with variants in `m_PlayerSubPrograms` (#259, plan section 5
+   revision 2026-11-08a): `c37af7d` skips every 6000+ Shader and its
+   converter reads only `m_SubPrograms`, so these get the composite oracle
+   instead of `ExportShader`, in the same runs. The script's
+   `--player-programs` mode, under `<modern-oracle>`, reads each Shader's type
+   tree; the harness fills AssetStudio's own `SerializedShader` with it by
+   field name, turns each distinct (`m_BlobIndex`, `m_GpuProgramType`) of a
+   stage's `m_PlayerSubPrograms` (its groups in order, where it first
+   appears) into one `SerializedSubProgram` of tier 0 after `m_SubPrograms`,
+   reads the blob entries those name with `ShaderSubProgram(reader, false)`
+   (the others are parameter entries, `m_ParameterBlobIndices`), and calls
+   `ShaderConverter.ConvertSerializedShader`; Vulkan programs then get step
+   4b's text. The entry carries `oracle`, and its `input` is UnityPy 1.25.4's.
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
    the fixture), texture format, size and image data hash, audio, font and video
@@ -1898,7 +1914,7 @@ that stops it), `font` or `video` (`size`,
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
-| 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones; the Vulkan programs of the 2020.3 Android ones from the hybrid of step 4b | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
+| 36 Shader (`shader` bundles, section 18) | 17 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 5 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android bundles. The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 

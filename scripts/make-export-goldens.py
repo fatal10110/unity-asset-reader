@@ -68,6 +68,29 @@ Each Shader golden lists its stages under shader.spirv, by the sha256 of the
 stage's SMOL-V bytes: the encoding version and the size and sha256 of the
 SPIR-V, or the error that stops the stage.
 
+Shaders with variants in m_PlayerSubPrograms (plan section 5, revision
+2026-11-08a, #259): Unity 2021.3.10, 2022.1.13, 2022.2 and later list them
+there, which c37af7d's ShaderConverter does not read, and its Shader reader
+skips every 6000+ Shader. Their oracle is a composite, run by the same
+harness instead of ExportShader:
+
+  1. UnityPy 1.25.4 (--modern-python, which also reads format 23) reads the
+     Shader's type tree (this script's --player-programs mode);
+  2. the harness fills AssetStudio's own SerializedShader with it, by field
+     name; each distinct (m_BlobIndex, m_GpuProgramType) of a stage's
+     m_PlayerSubPrograms, its groups in order, where it first appears,
+     becomes one SerializedSubProgram of hardware tier 0 after the stage's
+     m_SubPrograms;
+  3. each blob entry those name is read by c37af7d's ShaderSubProgram(reader,
+     false); the others are the variants' parameters (m_ParameterBlobIndices),
+     which do not read as programs and which the text leaves out;
+  4. ShaderConverter's own ConvertSerializedShader writes the text after its
+     header; Vulkan programs then go through the hybrid as above.
+
+ConvertSerializedSubPrograms writes "hw_tierNN" only for a blob index and type
+with several variants; each has one here, so the text has none. These goldens
+carry "oracle": the composite.
+
 Two kinds of Sprite get their golden and a `verdict`, where
 unity-asset-reader-texture's decodeSprite differs from GetImage() by design:
 one cut from a texture with an ETC1 split alpha texture (GetImage() never reads
@@ -84,7 +107,8 @@ From WSL, pass the Windows dotnet.exe; paths are translated with wslpath.
 
 Usage:
   .venv-oracle/bin/python scripts/make-export-goldens.py --source <assetstudio clone> \\
-      --smolv <aras-p/smol-v clone> --project <external dir> [--dotnet <dotnet>]
+      --smolv <aras-p/smol-v clone> --modern-python <UnityPy 1.25.4 python> \\
+      --project <external dir> [--dotnet <dotnet>]
 """
 import argparse
 import base64
@@ -92,7 +116,9 @@ import hashlib
 import io
 import json
 import pathlib
+import re
 import shutil
+import struct
 import subprocess
 import sys
 import tarfile
@@ -163,6 +189,12 @@ PACKAGE_SHA512 = {
     "Vortice.Mathematics/1.7.6": "R2yq/lCV2jveczsY//gB+eCxvYLmv/9wdZQzrWUJQgX6BMZVrobctSbYR2rRyKC9H7+KHfPhGMoqsLUTLiuDKA==",
     "ZstdSharp.Port/0.7.2": "P6bMQYwgczSwP+sNkIMeoi5/zpE9/zD+fLT9l7bovVs3H/HVkxErMTcxNL9axFTfa5sAIQ+i8xru3w3bVlqQUg==",
 }
+# What a Shader with variants in m_PlayerSubPrograms records as its oracle (#259).
+COMPOSITE = ("composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree "
+             "in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) "
+             "of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries "
+             "read by ShaderSubProgram(reader, false), text by "
+             "ShaderConverter.ConvertSerializedShader")
 METHODS = {
     "Texture2D": "AssetStudio.CLI.Exporter.ExportTexture2D(item, dir, ImageFormat.Png)",
     "Sprite": "AssetStudio.CLI.Exporter.ExportSprite(item, dir, ImageFormat.Png), Sprite.GetImage()",
@@ -172,18 +204,21 @@ METHODS = {
     "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); "
               "Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v "
               f"{SMOLV_REVISION[:7]} smolv::Decode, disassembled by AssetStudio's "
-              "SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert",
+              "SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert; "
+              "variants in m_PlayerSubPrograms: " + COMPOSITE,
     "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
     "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)",
 }
 
 HARNESS = r'''using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -220,6 +255,208 @@ public static class Program {
     }
 
     // --- Vulkan programs: the hybrid oracle for SMOL-V encoding version 1 (#260) ---
+
+    // Each SPIR-V program's text, as AssetStudio wrote it, replaced by the
+    // hybrid's where they differ; null, with a harnessError, when it is not there.
+    static string ReplaceSpirv(string written, IEnumerable<ShaderSubProgram> programs, string stagesDir,
+                               Dictionary<string, object> result) {
+        // Replace() changes every copy, so a program whose text another
+        // program already had is done.
+        var replaced = new HashSet<string>();
+        foreach (var program in programs) {
+            var upstream = ProgramText(program, SpirVShaderConverter.Convert);
+            var hybrid = ProgramText(program, code => HybridConvert(code, stagesDir));
+            if (upstream == hybrid || !replaced.Add(upstream)) continue;
+            if (!written.Contains(upstream)) {
+                result["harnessError"] = "AssetStudio's text of SPIR-V program " + upstream.Split('\n')[0] + " is not in the .shader file";
+                return null;
+            }
+            written = written.Replace(upstream, hybrid);
+        }
+        return written;
+    }
+
+    // --- Shaders with variants in m_PlayerSubPrograms: the composite oracle (#259) ---
+    // c37af7d's Shader reader skips every 6000+ Shader, and its ShaderConverter
+    // reads only m_SubPrograms. The composite (plan section 5, revision
+    // 2026-11-08a): UnityPy 1.25.4's type tree fills AssetStudio's own
+    // SerializedShader; each distinct (m_BlobIndex, m_GpuProgramType) of a
+    // stage's m_PlayerSubPrograms becomes one SerializedSubProgram of tier 0
+    // after its m_SubPrograms; ShaderSubProgram(reader, false) reads each blob
+    // entry those name; ShaderConverter's own ConvertSerializedShader writes the text.
+
+    static readonly MethodInfo convertSerialized = typeof(ShaderConverter).GetMethod(
+        "ConvertSerializedShader", BindingFlags.NonPublic | BindingFlags.Static, null,
+        new[] { typeof(SerializedShader), typeof(ShaderCompilerPlatform[]), typeof(ShaderProgram[]) }, null)
+        ?? throw new Exception("ShaderConverter.ConvertSerializedShader(SerializedShader, ...) not found");
+    static readonly string convertHeader = (string)(typeof(ShaderConverter).GetField(
+        "header", BindingFlags.NonPublic | BindingFlags.Static)
+        ?? throw new Exception("ShaderConverter.header not found")).GetValue(null);
+    static readonly string[] stageFields =
+        { "progVertex", "progFragment", "progGeometry", "progHull", "progDomain", "progRayTracing" };
+
+    static bool IsList(Type t) => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>);
+
+    static object Collection(Type t, List<JsonElement> items) {
+        var element = t.IsArray ? t.GetElementType() : t.GetGenericArguments()[0];
+        if (t.IsArray) {
+            var array = Array.CreateInstance(element, items.Count);
+            for (var i = 0; i < items.Count; i++) array.SetValue(Fill(element, items[i]), i);
+            return array;
+        }
+        var list = (IList)Activator.CreateInstance(t);
+        foreach (var item in items) list.Add(Fill(element, item));
+        return list;
+    }
+
+    // A type tree value, as the script encodes it (a float as "f:<its bits>",
+    // bytes as base64, a map as [key, value] pairs), as a value of type t: a
+    // class's public fields by their names, a fixed array the type tree writes
+    // as numbered fields (m_DefValue[0], rtBlend0) from those.
+    static object Fill(Type t, JsonElement e) {
+        if (t == typeof(string)) return e.GetString();
+        if (t == typeof(float)) {
+            var text = e.GetString();
+            if (!text.StartsWith("f:")) throw new Exception("not a float: " + text);
+            return BitConverter.Int32BitsToSingle(unchecked((int)uint.Parse(text.Substring(2), CultureInfo.InvariantCulture)));
+        }
+        if (t == typeof(bool)) return e.ValueKind == JsonValueKind.Number ? e.GetInt64() != 0 : e.GetBoolean();
+        if (t.IsEnum) return Enum.ToObject(t, e.GetInt64());
+        if (t.IsPrimitive) return Convert.ChangeType(e.GetInt64(), t, CultureInfo.InvariantCulture);
+        if (t == typeof(byte[]) && e.ValueKind == JsonValueKind.String) return Convert.FromBase64String(e.GetString());
+        if (t.IsArray || IsList(t)) return Collection(t, e.EnumerateArray().ToList());
+        if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(KeyValuePair<,>)) {
+            var pair = e.EnumerateArray().ToList();
+            var types = t.GetGenericArguments();
+            return Activator.CreateInstance(t, Fill(types[0], pair[0]), Fill(types[1], pair[1]));
+        }
+        var o = RuntimeHelpers.GetUninitializedObject(t);
+        foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.Instance)) {
+            if (e.TryGetProperty(f.Name, out var v)) {
+                f.SetValue(o, Fill(f.FieldType, v));
+                continue;
+            }
+            if (!f.FieldType.IsArray && !IsList(f.FieldType)) continue;
+            var items = new List<JsonElement>();
+            for (var i = 0; ; i++) {
+                if (e.TryGetProperty(f.Name + "[" + i + "]", out var x) || e.TryGetProperty(f.Name + i, out x)) items.Add(x);
+                else break;
+            }
+            f.SetValue(o, Collection(f.FieldType, items));
+        }
+        return o;
+    }
+
+    static uint[] Uints(JsonElement e) => e.EnumerateArray().Select(x => x.GetUInt32()).ToArray();
+
+    // The composite's input: the parsed form with the player variants as
+    // m_SubPrograms, the platforms, and each platform's programs.
+    static (SerializedShader form, ShaderCompilerPlatform[] platforms, ShaderProgram[] programs) Composite(JsonElement c) {
+        var form = (SerializedShader)Fill(typeof(SerializedShader), c.GetProperty("form"));
+        var referenced = new HashSet<uint>();
+        foreach (var subShader in form.m_SubShaders) {
+            foreach (var pass in subShader.m_Passes) {
+                foreach (var field in stageFields) {
+                    var program = (SerializedProgram)typeof(SerializedPass).GetField(field).GetValue(pass);
+                    if (program == null) continue;
+                    program.m_SubPrograms ??= new List<SerializedSubProgram>();
+                    var seen = new HashSet<(uint, ShaderGpuProgramType)>();
+                    foreach (var group in program.m_PlayerSubPrograms ?? new List<List<SerializedPlayerSubProgram>>()) {
+                        foreach (var player in group) {
+                            if (!seen.Add((player.m_BlobIndex, player.m_GpuProgramType))) continue;
+                            var variant = (SerializedSubProgram)RuntimeHelpers.GetUninitializedObject(typeof(SerializedSubProgram));
+                            variant.m_BlobIndex = player.m_BlobIndex;
+                            variant.m_GpuProgramType = player.m_GpuProgramType;
+                            variant.m_ShaderHardwareTier = 0;
+                            program.m_SubPrograms.Add(variant);
+                            referenced.Add(player.m_BlobIndex);
+                        }
+                    }
+                }
+            }
+        }
+        var platforms = c.GetProperty("platforms").EnumerateArray().Select(p => (ShaderCompilerPlatform)p.GetInt32()).ToArray();
+        var version = c.GetProperty("version").EnumerateArray().Select(v => v.GetInt32()).ToArray();
+        var blob = Convert.FromBase64String(c.GetProperty("compressedBlob").GetString());
+        var offsets = c.GetProperty("offsets");
+        var compressedLengths = c.GetProperty("compressedLengths");
+        var decompressedLengths = c.GetProperty("decompressedLengths");
+        var programs = new ShaderProgram[platforms.Length];
+        for (var i = 0; i < platforms.Length; i++) {
+            var offset = Uints(offsets[i]);
+            var compressed = Uints(compressedLengths[i]);
+            var size = Uints(decompressedLengths[i]);
+            for (var j = 0; j < offset.Length; j++) {
+                var decompressed = new byte[size[j]];
+                if (LZ4.Instance.Decompress(blob.AsSpan().Slice((int)offset[j], (int)compressed[j]), decompressed) != decompressed.Length) throw new IOException("Lz4 decompression error");
+                using var reader = new EndianBinaryReader(new MemoryStream(decompressed), EndianType.LittleEndian);
+                if (j == 0) {
+                    // ShaderProgram's constructor, without its game check (GameType.Normal).
+                    var entries = new ShaderSubProgramEntry[reader.ReadInt32()];
+                    for (var k = 0; k < entries.Length; k++) entries[k] = new ShaderSubProgramEntry(reader, version);
+                    programs[i] = (ShaderProgram)RuntimeHelpers.GetUninitializedObject(typeof(ShaderProgram));
+                    programs[i].entries = entries;
+                    programs[i].m_SubPrograms = new ShaderSubProgram[entries.Length];
+                }
+                var table = programs[i].entries;
+                for (var k = 0; k < table.Length; k++) {
+                    if (table[k].Segment != j || !referenced.Contains((uint)k)) continue;
+                    reader.BaseStream.Position = table[k].Offset;
+                    try {
+                        programs[i].m_SubPrograms[k] = new ShaderSubProgram(reader, false);
+                    } catch (Exception) {
+                        // The same index on a platform that does not run the variant's
+                        // type may be a parameter entry: ConvertSerializedSubPrograms
+                        // never reads it there, and a null fails if it does.
+                    }
+                }
+            }
+        }
+        return (form, platforms, programs);
+    }
+
+    static IEnumerable<ShaderSubProgram> CompositeSpirv(ShaderProgram[] programs) =>
+        programs.Where(p => p != null).SelectMany(p => p.m_SubPrograms)
+            .Where(p => p != null && p.m_ProgramType == ShaderGpuProgramType.SPIRV);
+
+    // One composite job: the dump run's stages, or the text.
+    static void RunComposite(JsonElement c, bool dump, string stagesDir, Dictionary<string, object> result) {
+        var given = c.GetProperty("input");
+        result["input"] = new Dictionary<string, object> {
+            ["classId"] = given.GetProperty("classId").GetInt32(),
+            ["byteSize"] = given.GetProperty("byteSize").GetInt64(),
+            ["objectSha256"] = given.GetProperty("objectSha256").GetString(),
+            ["name"] = given.GetProperty("name").GetString(),
+        };
+        result["oracle"] = "composite";
+        var (form, platforms, programs) = Composite(c);
+        if (dump) {
+            try {
+                result["stages"] = DumpStages(CompositeSpirv(programs), stagesDir);
+            } catch (Exception error) {
+                result["dumpError"] = error.GetType().Name + ": " + error.Message;
+            }
+            return;
+        }
+        var d3d = platforms.Where(p => p == ShaderCompilerPlatform.D3D9 || p == ShaderCompilerPlatform.D3D11
+                || p == ShaderCompilerPlatform.D3D11_9x).Select(p => p.ToString()).FirstOrDefault();
+        if (d3d != null) {
+            result["exportError"] = "not exported: its " + d3d + " programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host";
+            return;
+        }
+        string written;
+        try {
+            written = convertHeader + (string)convertSerialized.Invoke(null, new object[] { form, platforms, programs });
+        } catch (TargetInvocationException error) {
+            var inner = error.InnerException;
+            result["exportError"] = "ShaderConverter.ConvertSerializedShader throws " + inner.GetType().Name + ": " + inner.Message.Split('\n')[0];
+            return;
+        }
+        written = ReplaceSpirv(written, CompositeSpirv(programs), stagesDir, result);
+        if (written == null) return;
+        var text = new UTF8Encoding(false, true).GetBytes(written);
+        result["shader"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
+    }
 
     static readonly MethodInfo exportSnippet = typeof(SpirVShaderConverter).GetMethod(
         "ExportSnippet", BindingFlags.NonPublic | BindingFlags.Static)
@@ -324,9 +561,9 @@ public static class Program {
 
     // The dump run: each stage's SMOL-V bytes and, for encoding version 0, the
     // words AssetStudio's SmolvDecoder gives (ExportSnippet's decode).
-    static List<Dictionary<string, object>> DumpStages(Shader shader, string stagesDir) {
+    static List<Dictionary<string, object>> DumpStages(IEnumerable<ShaderSubProgram> programs, string stagesDir) {
         var stages = new List<Dictionary<string, object>>();
-        foreach (var program in SpirvPrograms(shader)) {
+        foreach (var program in programs) {
             var code = program.m_ProgramCode;
             List<(int offset, int size)> table;
             try {
@@ -435,6 +672,11 @@ public static class Program {
         // "dump": only the Vulkan stages of each Shader; "export": every export.
         var dump = args[2] == "dump";
         var stagesDir = args[3];
+        // The composite's jobs (#259), by index: UnityPy 1.25.4's type trees.
+        var composite = new Dictionary<int, JsonElement>();
+        foreach (var c in JsonDocument.Parse(File.ReadAllText(args[4])).RootElement.EnumerateObject()) {
+            composite[int.Parse(c.Name, CultureInfo.InvariantCulture)] = c.Value;
+        }
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
             var manager = new AssetsManager { Game = game };
@@ -451,6 +693,10 @@ public static class Program {
                 var outDir = want.GetProperty("output").GetString();
                 var result = new Dictionary<string, object> { ["index"] = want.GetProperty("index").GetInt32() };
                 results.Add(result);
+                if (composite.TryGetValue(want.GetProperty("index").GetInt32(), out var player)) {
+                    RunComposite(player, dump, stagesDir, result);
+                    continue;
+                }
                 var file = manager.assetsFileList.FirstOrDefault(f => f.fileName == fileName);
                 if (file == null || !file.ObjectsDic.TryGetValue(pathId, out var obj)) {
                     var why = logger.Errors.Count > 0 ? ": " + logger.Errors[0] : "";
@@ -464,7 +710,7 @@ public static class Program {
                 if (dump) {
                     if (obj is Shader dumped) {
                         try {
-                            result["stages"] = DumpStages(dumped, stagesDir);
+                            result["stages"] = DumpStages(SpirvPrograms(dumped), stagesDir);
                         } catch (Exception error) {
                             result["dumpError"] = error.GetType().Name + ": " + error.Message;
                         }
@@ -585,20 +831,8 @@ public static class Program {
                                 result["harnessError"] = "the .shader file does not round-trip through UTF-8";
                                 break;
                             }
-                            // Replace() changes every copy, so a program whose text another
-                            // program already had is done.
-                            var replaced = new HashSet<string>();
-                            foreach (var program in SpirvPrograms(shader)) {
-                                var upstream = ProgramText(program, SpirVShaderConverter.Convert);
-                                var hybrid = ProgramText(program, code => HybridConvert(code, stagesDir));
-                                if (upstream == hybrid || !replaced.Add(upstream)) continue;
-                                if (!written.Contains(upstream)) {
-                                    result["harnessError"] = "AssetStudio's text of SPIR-V program " + upstream.Split('\n')[0] + " is not in the .shader file";
-                                    break;
-                                }
-                                written = written.Replace(upstream, hybrid);
-                            }
-                            if (result.ContainsKey("harnessError")) break;
+                            written = ReplaceSpirv(written, SpirvPrograms(shader), stagesDir, result);
+                            if (written == null) break;
                             text = utf8.GetBytes(written);
                             result["shader"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
                             break;
@@ -876,6 +1110,57 @@ def decode_stages(exe: pathlib.Path, stages: pathlib.Path, dumped: dict[int, dic
     return goldens
 
 
+def encode_tree(value):
+    """A type tree value for the harness's Fill: floats by their float32 bits, bytes base64."""
+    if isinstance(value, float):
+        return "f:%d" % struct.unpack("<I", struct.pack("<f", value))[0]
+    if isinstance(value, (bytes, bytearray)):
+        return base64.b64encode(value).decode()
+    if isinstance(value, dict):
+        return {k: encode_tree(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [encode_tree(v) for v in value]
+    return value
+
+
+def player_programs(requests_file: pathlib.Path, output: pathlib.Path) -> None:
+    """--player-programs mode, under UnityPy 1.25.4: the composite's input (#259).
+
+    For each requested Shader whose type tree lists variants in
+    m_PlayerSubPrograms: its input metadata, its parsed form and its blob."""
+    if UnityPy.__version__ != "1.25.4":
+        raise SystemExit("--player-programs requires UnityPy==1.25.4, the modern-goldens.json oracle")
+    requests = json.loads(requests_file.read_text())
+    found = {}
+    for key in sorted({r["fixture"] for r in requests}):
+        config.FALLBACK_UNITY_VERSION = editor_of(key)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            env = UnityPy.load(str(FIXTURES / key))
+        objects = {(obj.assets_file.name, str(obj.path_id)): obj for obj in env.objects}
+        for request in (r for r in requests if r["fixture"] == key):
+            obj = objects[(request["file"], request["pathId"])]
+            tree = obj.read_typetree()
+            stages = [pass_.get(field) or {} for sub in tree["m_ParsedForm"]["m_SubShaders"]
+                      for pass_ in sub["m_Passes"]
+                      for field in ("progVertex", "progFragment", "progGeometry", "progHull",
+                                    "progDomain", "progRayTracing")]
+            if not any(group for stage in stages for group in stage.get("m_PlayerSubPrograms", [])):
+                continue
+            found[str(request["index"])] = {
+                "input": {"classId": SHADER, "byteSize": obj.byte_size, "name": tree["m_Name"],
+                          "objectSha256": sha256(bytes(obj.get_raw_data()))},
+                "version": [int(n) for n in re.findall(r"\d+", editor_of(key))[:4]],
+                "form": encode_tree(tree["m_ParsedForm"]),
+                "platforms": tree["platforms"],
+                "offsets": tree["offsets"],
+                "compressedLengths": tree["compressedLengths"],
+                "decompressedLengths": tree["decompressedLengths"],
+                "compressedBlob": base64.b64encode(bytes(tree["compressedBlob"])).decode(),
+            }
+    output.write_text(json.dumps(found))
+
+
 def build(host: Host, project: pathlib.Path) -> pathlib.Path:
     harness = project / "harness"
     harness.mkdir(parents=True, exist_ok=True)
@@ -913,12 +1198,18 @@ def build(host: Host, project: pathlib.Path) -> pathlib.Path:
 
 
 def main() -> None:
+    if sys.argv[1:2] == ["--player-programs"]:
+        player_programs(pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3]))
+        return
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--source", required=True, type=pathlib.Path,
                         help="a git clone of Razviar/assetstudio holding " + REVISION)
     parser.add_argument("--smolv", required=True, type=pathlib.Path,
                         help="a git clone of aras-p/smol-v holding " + SMOLV_REVISION)
+    parser.add_argument("--modern-python", required=True, type=pathlib.Path,
+                        help="a Python with UnityPy 1.25.4 (the modern-goldens.json oracle), "
+                             "which reads the type trees of the composite's Shaders")
     parser.add_argument("--project", required=True, type=pathlib.Path,
                         help="an external directory for the build and the run")
     parser.add_argument("--dotnet", default=shutil.which("dotnet") or shutil.which("dotnet.exe"))
@@ -952,6 +1243,17 @@ def main() -> None:
     stages = project / "stages"
     stages.mkdir()
 
+    # The composite's input (#259): every Shader job, read by UnityPy 1.25.4.
+    requests = [{"index": i, "fixture": job["fixture"], "file": job["file"],
+                 "pathId": job["pathId"]} for i, job in enumerate(flat)
+                if job["expected"]["classId"] == SHADER]
+    (project / "runs").mkdir(parents=True, exist_ok=True)
+    (project / "runs" / "player-requests.json").write_text(json.dumps(requests))
+    composite = project / "runs" / "player-programs.json"
+    subprocess.run([str(args.modern_python), "-I", str(pathlib.Path(__file__).resolve()),
+                    "--player-programs", str(project / "runs" / "player-requests.json"),
+                    str(composite)], check=True)
+
     def run(name: str, mode: str = "export") -> dict[int, dict]:
         """One harness process over every job, exporting into runs/<name>/<index>/."""
         manifest = [{"input": host.path(bundle), "editor": editor_of(key), "objects": [
@@ -963,7 +1265,7 @@ def main() -> None:
         jobs_file.parent.mkdir(parents=True, exist_ok=True)
         jobs_file.write_text(json.dumps(manifest, indent=1))
         host.run(str(exe), host.path(jobs_file), host.path(results_file), mode,
-                 host.path(stages))
+                 host.path(stages), host.path(composite))
         return {r.pop("index"): r for r in json.loads(results_file.read_text())}
 
     # The Vulkan stages first: smol-v decodes them between the two harness runs.
@@ -1025,6 +1327,8 @@ def main() -> None:
             else:
                 entry["inputOracle"] += "; object bytes: UnityPy 1.25.3"
             entry["input"] = actual
+        if result.get("oracle") == "composite":
+            entry["oracle"] = COMPOSITE
         for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex", "alphaTexture",
                        "variantAtlas"]:
             if output in result:
@@ -1055,6 +1359,8 @@ def main() -> None:
                      "net8.0-windows; objects loaded with its AssetsManager (one bundle per "
                      "folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the "
                      "fixture's path, which a version-stripped file needs); "
+                     "Shaders with variants in m_PlayerSubPrograms: the composite instead "
+                     "(their entries' \"oracle\"); "
                      "exporters called on the en-US culture of the GUI's export thread. PNG "
                      "decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 "
                      "pixels in the PNG's row order, top row first.",

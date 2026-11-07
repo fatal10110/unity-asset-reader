@@ -96,7 +96,7 @@ function stages(shader: Shader): Record<string, Stage> {
   return out;
 }
 
-test("the goldens list the Vulkan stages of 2019.4 (encoding 0) and 2020.3 (encoding 1)", () => {
+test("the goldens list the Vulkan stages of 2019.4 (encoding 0), 2020.3 and 6000.x (encoding 1)", () => {
   const encodings = (editor: string): number[] => [
     ...new Set(
       WITH_STAGES.filter((s) => s.fixture.includes(`/${editor}/`)).flatMap((s) =>
@@ -104,9 +104,12 @@ test("the goldens list the Vulkan stages of 2019.4 (encoding 0) and 2020.3 (enco
       ),
     ),
   ];
-  assert.equal(WITH_STAGES.length, 8);
+  // 8 by ExportShader; 3 6000.x Android UAR/ShaderFixtureSecond by the composite (#259).
+  assert.equal(WITH_STAGES.length, 11);
   assert.deepEqual(encodings("2019.4.41f2"), [0]);
   assert.deepEqual(encodings("2020.3.30f1"), [1]);
+  assert.deepEqual(encodings("6000.3.26f1"), [1]);
+  assert.deepEqual(encodings("6000.6.4f1"), [1]);
 });
 
 for (const s of WITH_STAGES) {

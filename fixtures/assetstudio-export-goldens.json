@@ -11,11 +11,11 @@
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
-    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v 6303e97 smolv::Decode, disassembled by AssetStudio's SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert",
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v 6303e97 smolv::Decode, disassembled by AssetStudio's SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert; variants in m_PlayerSubPrograms: composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
     "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
     "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)"
   },
-  "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
+  "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); Shaders with variants in m_PlayerSubPrograms: the composite instead (their entries' \"oracle\"); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
   "smolv": {
     "revision": "6303e979b59153ee7007fd14e06d3fed8687b64c",
     "tree": "3486b96991f9c886b8fca6817043f571aa48c648",
@@ -7249,7 +7249,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "ShaderConverter.ConvertSerializedShader throws ArgumentOutOfRangeException: Specified argument was out of the range of valid values."
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7260,7 +7261,23 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 12890,
+            "sha256": "aa160a3a600c162302f0a22d99da91a9c83d8228483ffc3f466df3ce5183be37",
+            "spirv": {
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
         }
       }
     },
@@ -7275,7 +7292,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "ShaderConverter.ConvertSerializedShader throws ArgumentOutOfRangeException: Specified argument was out of the range of valid values."
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7286,7 +7304,11 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 2844,
+            "sha256": "eec050156ce5c856ca82d6381f0f8ad7eba031b58613c1401801408eaeaa4a78"
+          }
         }
       }
     },
@@ -7301,7 +7323,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7312,7 +7335,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         }
       }
     },
@@ -7327,7 +7351,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "ShaderConverter.ConvertSerializedShader throws ArgumentOutOfRangeException: Specified argument was out of the range of valid values."
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7338,7 +7363,23 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 12890,
+            "sha256": "aa160a3a600c162302f0a22d99da91a9c83d8228483ffc3f466df3ce5183be37",
+            "spirv": {
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
         }
       }
     },
@@ -7353,7 +7394,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "ShaderConverter.ConvertSerializedShader throws ArgumentOutOfRangeException: Specified argument was out of the range of valid values."
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7364,7 +7406,11 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 2844,
+            "sha256": "eec050156ce5c856ca82d6381f0f8ad7eba031b58613c1401801408eaeaa4a78"
+          }
         }
       }
     },
@@ -7379,7 +7425,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         },
         "8472761294463186102": {
           "class": "Shader",
@@ -7390,7 +7437,8 @@
             "name": ""
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
-          "exportError": "ArgumentNullException: Value cannot be null. (Parameter 'bytes')"
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         }
       }
     },
@@ -7649,20 +7697,39 @@
           "input": {
             "classId": 48,
             "byteSize": 25460,
+            "objectSha256": "1f36b8ae667aa76c362f801d99a1feded5bf261ab3c83c71b92c3ecb7cdb318b",
             "name": ""
           },
-          "inputOracle": "modern-goldens.json",
-          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "ShaderConverter.ConvertSerializedShader throws ArgumentOutOfRangeException: Specified argument was out of the range of valid values."
         },
         "8856072133837691360": {
           "class": "Shader",
           "input": {
             "classId": 48,
             "byteSize": 4300,
+            "objectSha256": "4b56c2efc66eef170db4a3a403d4eb775c8a754064fd6df323aac7570a8525d6",
             "name": ""
           },
-          "inputOracle": "modern-goldens.json",
-          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 12890,
+            "sha256": "aa160a3a600c162302f0a22d99da91a9c83d8228483ffc3f466df3ce5183be37",
+            "spirv": {
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
         }
       }
     },
@@ -7673,20 +7740,24 @@
           "input": {
             "classId": 48,
             "byteSize": 18116,
+            "objectSha256": "ed07caec8b7e39b4988c63f1914c9c7d80e72dfe29573bbf17d3f74aa6d9e8b3",
             "name": ""
           },
-          "inputOracle": "modern-goldens.json",
-          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         },
         "8856072133837691360": {
           "class": "Shader",
           "input": {
             "classId": 48,
             "byteSize": 3420,
+            "objectSha256": "2738b070f82d8596e0821f208d3cf74d219476854f2726816533a72110b66a15",
             "name": ""
           },
-          "inputOracle": "modern-goldens.json",
-          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
         }
       }
     },
