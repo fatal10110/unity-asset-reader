@@ -20,7 +20,7 @@ import {
   type Shader,
 } from "unity-asset-reader";
 import { decodeUtf8, DisassemblyError, StreamReader } from "./net.js";
-import { decodedBufferSize, decodeSmolv } from "./smolv.js";
+import { decodedBufferSize, decodeSmolv, decodeSmolvV1 } from "./smolv.js";
 import { disassemble } from "./spirv.js";
 
 /** AssetStudio's `ShaderCompilerPlatform`, the values of `Shader.platforms`. */
@@ -183,7 +183,7 @@ function stages(pass: SerializedPass): [string, SerializedProgram][] {
 // --- the compiled programs (ShaderProgram, ShaderSubProgram) -----------------
 
 /** One compiled program of the blob (`ShaderSubProgram`). */
-interface SubProgram {
+export interface SubProgram {
   type: number;
   keywords: string[];
   localKeywords: string[] | undefined;
@@ -193,9 +193,13 @@ interface SubProgram {
 /**
  * Every platform's programs, by blob index: each platform's part of the blob,
  * decompressed, holds a table of entries (offset, length and, from Unity
- * 2019.3, the segment the program is in) and the programs.
+ * 2019.3, the segment the program is in) and the programs. Exported for the
+ * tests.
+ *
+ * @throws {CorruptError} when a platform's blob does not decompress to its
+ *   size, or a program's entry or bytes run past the blob
  */
-function readPrograms(shader: Shader): (SubProgram | undefined)[][] {
+export function readPrograms(shader: Shader): (SubProgram | undefined)[][] {
   // Before 2019.3 each of the three is one value per platform, from 2019.3 a
   // list (the segments); the entries name a segment from 2019.3 on.
   const segmented = shader.offsets.some((o) => Array.isArray(o));
@@ -323,8 +327,8 @@ class BlobReader {
   }
 }
 
-/** `ShaderSubProgram.Export()`: keywords, then the program in quotes. */
-function subProgramText(program: SubProgram): string {
+/** `ShaderSubProgram.Export()`: keywords, then the program in quotes. Exported for the tests. */
+export function subProgramText(program: SubProgram): string {
   let out = "";
   if (program.keywords.length > 0) {
     out += `Keywords { ${program.keywords.map((k) => `"${k}" `).join("")}}\n`;
@@ -448,19 +452,46 @@ function spirvText(code: Uint8Array): string {
 
 /** `SpirVShaderConverter.ExportSnippet`: one stage, SMOL-V decoded and disassembled. */
 function snippetText(reader: StreamReader, offset: number, size: number): string {
+  return disassemble(stageWords(reader.bytes, offset, size));
+}
+
+/**
+ * The SPIR-V of one stage of a Vulkan program: `size` bytes of SMOL-V at
+ * `offset` in the program's code. A stream of encoding version 0 (the high
+ * byte of its version word; Unity 2019.4) is decoded as AssetStudio's
+ * `SmolvDecoder` decodes it; one of version 1 (Unity 2020.3 and later), which
+ * that decoder predates, as aras-p/smol-v's `Decode` does (plan section 5,
+ * revision 2026-11-07c, #260). Exported for the tests.
+ *
+ * @param code the program's code (`m_ProgramCode`)
+ * @param offset where the stage starts
+ * @param size the stage's size in bytes
+ * @returns the SPIR-V module
+ * @throws {DisassemblyError} with AssetStudio's message where the stage does
+ *   not decode: "Invalid SMOL-V shader header" for a stream shorter than a
+ *   header, "Unable to decode SMOL-V shader" for a failed decode
+ */
+export function stageWords(code: Uint8Array, offset: number, size: number): Uint8Array {
   if (offset < 0) {
     // MemoryStream.Position = a negative value.
     throw new DisassemblyError("Non-negative number required. (Parameter 'value')");
   }
+  const reader = new StreamReader(code);
   reader.position = offset;
   const decodedSize = decodedBufferSize(reader);
   if (decodedSize === 0) throw new DisassemblyError("Invalid SMOL-V shader header");
   if (decodedSize < 0) throw new DisassemblyError("Arithmetic operation resulted in an overflow.");
+  // A header is there (decodedSize is not 0): byte 7 is the encoding version.
+  if (code[offset + 7] !== 0) {
+    const words = decodeSmolvV1(code.subarray(offset, offset + size));
+    if (!words) throw new DisassemblyError("Unable to decode SMOL-V shader");
+    return words;
+  }
   const decoded = new Uint8Array(decodedSize);
   if (!decodeSmolv(reader, size, decoded)) {
     throw new DisassemblyError("Unable to decode SMOL-V shader");
   }
-  return disassemble(decoded);
+  return decoded;
 }
 
 /**

@@ -1796,19 +1796,23 @@ a clean clone; no Unity, no fixture rebuild:
 
 ```text
 git clone https://github.com/Razviar/assetstudio.git <external-source>
+git clone https://github.com/aras-p/smol-v.git <external-smolv>
 python3 -m venv .venv-oracle && .venv-oracle/bin/pip install UnityPy==1.25.3
-.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --project <external-harness> --dotnet <dotnet-executable>
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --project <external-harness> --dotnet <dotnet-executable>
 npm run verify
 ```
 
 `<external-source>` needs only to hold the revision (any checkout state: the
 script extracts the revision's tree with `git archive` and checks its tree id).
+`<external-smolv>` likewise needs to hold aras-p/smol-v
+`6303e979b59153ee7007fd14e06d3fed8687b64c` (MIT or Unlicense); the script takes
+`source/smolv.cpp` and `smolv.h` from that revision's tree, checked by its id.
 `<external-harness>` is a scratch directory outside this checkout; the script
 refuses one inside it (R2). It takes about a minute, and needs network access
 for the first NuGet restore.
 
-Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above) and a **Windows
-.NET 8 SDK**. AssetStudio's texture decoder package
+Requirements: the `.venv-oracle` (UnityPy 1.25.3, created above), `g++` (C++11,
+in the shell running the script; WSL's does) and a **Windows .NET 8 SDK**. AssetStudio's texture decoder package
 (`Kyaru.Texture2DDecoder.Windows`) and the FMOD library it ships are Windows
 builds. From WSL, pass the Windows `dotnet.exe`, for example
 `--dotnet "/mnt/c/Program Files/dotnet/dotnet.exe"`, and a `--project` under
@@ -1852,6 +1856,25 @@ What it does, all inside `<external-harness>`:
    names, with the extension of `m_OriginalPath` (#277). The exporters run on
    en-US, the culture the GUI's export thread sets
    (the CLI would use the host's, which changes the OBJ's numbers).
+   Vulkan programs in SMOL-V encoding version 1 get the hybrid text of step 4b.
+4b. Vulkan programs (#260, plan section 5 revision 2026-11-07c). Unity 2020.3
+   writes SMOL-V encoding version 1 (header version word `0x01010000`), which
+   AssetStudio's decoder (a C# port of smol-v's 2016-08-31 code) predates: its
+   text for those programs is `// disassembly error Unable to decode SMOL-V
+   shader`. Before the two runs, a dump run of the harness writes each Vulkan
+   stage's SMOL-V bytes to `<external-harness>/stages`, with the words
+   AssetStudio's `SmolvDecoder` gives for encoding version 0. The script builds
+   smol-v's decoder with `g++ -O2 -std=c++11` (`smolv.cpp` and a small `main`
+   the script writes, in `<external-harness>/smolv`) and runs it: encoding 0
+   with `kDecodeFlagUse20160831AsZeroVersion`, which must give AssetStudio's
+   words for every stage or the run stops (all 11 distinct 2019.4 stages
+   agree); later encodings with no flags. In the two runs, after
+   `ExportShader`, each SPIR-V program with a stage of version 1 gets its text
+   from AssetStudio's own CSspv disassembler (`SpirV.Module.ReadFrom`,
+   `Disassembler`) on smol-v's words, framed as `SpirVShaderConverter.Convert`
+   and `ShaderSubProgram.Export` frame it, in place of AssetStudio's error
+   line. A stage CSspv cannot read keeps its `// disassembly error` line; no
+   fixture stage hits one.
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
    the fixture), texture format, size and image data hash, audio, font and video
@@ -1862,7 +1885,10 @@ Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
 pathId) and holds `input` (the metadata it was matched on) and one of `png`
 (`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
 **top row first**, plus the PNG file's own size and hash), `obj`, `wav`,
-`bytes` or `shader` (`size`, `sha256` of the file), `font` or `video` (`size`,
+`bytes` or `shader` (`size`, `sha256` of the file; for a shader with Vulkan
+programs also `spirv`, each stage by the sha256 of its SMOL-V bytes with its
+`encoding` version and the `size` and `sha256` of its SPIR-V, or the `error`
+that stops it), `font` or `video` (`size`,
 `sha256` and `extension` of the file), or `exportError`:
 
 | Objects | Golden | Why not |
@@ -1872,7 +1898,7 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
-| 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
+| 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones; the Vulkan programs of the 2020.3 Android ones from the hybrid of step 4b | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
@@ -2857,7 +2883,7 @@ Then rerun the goldens:
 
 ```bash
 .venv-oracle/bin/python scripts/make-goldens.py
-.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --project <external-harness> --dotnet <dotnet-executable>
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --project <external-harness> --dotnet <dotnet-executable>
 ```
 
 `make-goldens.py` (UnityPy 1.25.3) dumps each Mesh's type tree, so
