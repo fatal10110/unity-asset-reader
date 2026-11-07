@@ -505,10 +505,13 @@ public static class Program {
                                 result["harnessError"] = "the .shader file does not round-trip through UTF-8";
                                 break;
                             }
+                            // Replace() changes every copy, so a program whose text another
+                            // program already had is done.
+                            var replaced = new HashSet<string>();
                             foreach (var program in SpirvPrograms(shader)) {
                                 var upstream = ProgramText(program, SpirVShaderConverter.Convert);
                                 var hybrid = ProgramText(program, code => HybridConvert(code, stagesDir));
-                                if (upstream == hybrid) continue;
+                                if (upstream == hybrid || !replaced.Add(upstream)) continue;
                                 if (!written.Contains(upstream)) {
                                     result["harnessError"] = "AssetStudio's text of SPIR-V program " + upstream.Split('\n')[0] + " is not in the .shader file";
                                     break;

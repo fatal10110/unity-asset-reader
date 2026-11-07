@@ -327,8 +327,8 @@ class BlobReader {
   }
 }
 
-/** `ShaderSubProgram.Export()`: keywords, then the program in quotes. */
-function subProgramText(program: SubProgram): string {
+/** `ShaderSubProgram.Export()`: keywords, then the program in quotes. Exported for the tests. */
+export function subProgramText(program: SubProgram): string {
   let out = "";
   if (program.keywords.length > 0) {
     out += `Keywords { ${program.keywords.map((k) => `"${k}" `).join("")}}\n`;

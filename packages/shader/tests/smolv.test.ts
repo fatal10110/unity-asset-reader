@@ -12,7 +12,7 @@ import { test } from "node:test";
 import { ClassID, load, type Shader } from "unity-asset-reader";
 
 import { loadFixture, sha256 } from "../../../fixtures/helpers.js";
-import { readPrograms, stageWords } from "../src/convert.js";
+import { readPrograms, stageWords, subProgramText } from "../src/convert.js";
 import { DisassemblyError } from "../src/net.js";
 import { decodeSmolvV1 } from "../src/smolv.js";
 
@@ -164,5 +164,62 @@ test("a 2020.3 stage cut short is AssetStudio's failed-decode error, not a parti
   assert.throws(
     () => stageWords(program.code, offset, size - 1),
     (error) => error instanceof DisassemblyError && error.message === "Unable to decode SMOL-V shader",
+  );
+});
+
+/** SMOL-V's varint: 7 bits a byte, low bits first. */
+function varint(value: number): number[] {
+  const out: number[] = [];
+  for (; value >= 128; value = Math.floor(value / 128)) out.push((value % 128) | 128);
+  out.push(value);
+  return out;
+}
+
+/** An instruction's length-and-opcode varint, as smol-v's `EncodeLen` and `smolv_ReadLengthOp` lay it out. */
+function lengthOp(op: number, words: number): number[] {
+  const length = words - 1; // DecodeLen adds 1 for an op without a bias
+  return varint((op & 0xf) | ((length & 0xf) << 4) | ((op & 0xfff0) << 4) | ((length >> 4) << 20));
+}
+
+/** A stage: the header, then the instruction bytes, decoding to `words` words after the header. */
+function stage(version: number, words: number, body: number[]): Uint8Array {
+  return new Uint8Array([...header(version, 20 + 4 * words), ...body]);
+}
+
+/** The SPIR-V words of a decoded module. */
+function words(bytes: Uint8Array): number[] {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return Array.from({ length: bytes.length / 4 }, (_, i) => view.getUint32(i * 4, true));
+}
+
+test("ops 331 to 366 have op data in encoding 1 and raw words in smol-v's encoding 0", () => {
+  // OpGroupNonUniformElect (333): result type, result (zigzag delta 10 -> 5),
+  // execution scope relative to the result (zigzag 4 -> 2, so 5 - 2 = 3).
+  const v1 = decodeSmolvV1(stage(0x01010000, 4, [...lengthOp(333, 4), 2, 10, 4]));
+  assert.ok(v1);
+  assert.deepEqual(words(v1).slice(5), [(4 << 16) | 333, 2, 5, 3]);
+  // Encoding 0 knows ops up to OpModuleProcessed (330): the operands are raw words.
+  const raw = [2, 0, 0, 0, 5, 0, 0, 0, 3, 0, 0, 0];
+  const v0 = decodeSmolvV1(stage(0x00010000, 4, [...lengthOp(333, 4), ...raw]));
+  assert.ok(v0);
+  assert.deepEqual(words(v0).slice(5), [(4 << 16) | 333, 2, 5, 3]);
+  // Read as encoding 1, those raw bytes are varints and do not decode to 4 words.
+  assert.equal(decodeSmolvV1(stage(0x01010000, 4, [...lengthOp(333, 4), ...raw])), undefined);
+});
+
+test("a version-1 stage that decodes but CSspv cannot disassemble keeps AssetStudio's error line", () => {
+  // Op 5380, which CSspv's grammar does not have, with one raw operand word.
+  const smolv = stage(0x01010000, 2, [...lengthOp(5380, 2), 42, 0, 0, 0]);
+  assert.deepEqual(words(decodeSmolvV1(smolv)!).slice(5), [(2 << 16) | 5380, 42]);
+  // The program: requirements, then one (offset, size) entry and the stage.
+  const code = new Uint8Array(12 + smolv.length);
+  const view = new DataView(code.buffer);
+  view.setInt32(4, 12, true);
+  view.setInt32(8, smolv.length, true);
+  code.set(smolv, 12);
+  const text = subProgramText({ type: SPIRV, keywords: [], localKeywords: undefined, code });
+  assert.match(
+    text,
+    /^"\/\/ hash: [0-9a-f]{8,}\n\/\/ disassembly error The given key '5380' was not present in the dictionary\.\n"$/,
   );
 });
