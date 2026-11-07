@@ -10,7 +10,7 @@ import { test } from "node:test";
 import { reverseRows, sha256 } from "../../fixtures/helpers.js";
 
 interface Entry {
-  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader";
+  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader" | "Sprite";
   input: Record<string, string | number>;
   inputOracle: string;
   png?: { width: number; height: number; rgbaSha256: string };
@@ -20,6 +20,9 @@ interface Entry {
   shader?: { size: number; sha256: string };
   exportError?: string;
   objWithoutBaseVertex?: { size: number; sha256: string };
+  alphaTexture?: string;
+  variantAtlas?: string;
+  verdict?: string;
 }
 
 interface UnityPyGolden {
@@ -57,6 +60,7 @@ const CLASSES: Record<number, Entry["class"]> = {
   48: "Shader",
   49: "TextAsset",
   83: "AudioClip",
+  213: "Sprite",
 };
 const OUTPUT = {
   Texture2D: "png",
@@ -64,9 +68,10 @@ const OUTPUT = {
   AudioClip: "wav",
   TextAsset: "bytes",
   Shader: "shader",
+  Sprite: "png",
 } as const;
 
-/** Every Texture2D, Mesh, Shader, TextAsset and AudioClip the UnityPy goldens list, with its export entry. */
+/** Every Texture2D, Mesh, Shader, TextAsset, AudioClip and Sprite the UnityPy goldens list, with its export entry. */
 function objects() {
   const out = [];
   for (const [source, golden] of Object.entries(sources)) {
@@ -93,7 +98,7 @@ test("the export goldens come from AssetStudio c37af7d through the export harnes
   assert.equal(exports._generator, "scripts/make-export-goldens.py");
 });
 
-test("every Texture2D, Mesh, Shader, TextAsset and AudioClip of the fixtures has an entry, and nothing else", () => {
+test("every Texture2D, Mesh, Shader, TextAsset, AudioClip and Sprite of the fixtures has an entry, and nothing else", () => {
   assert.ok(all.length > 0);
   for (const o of all) {
     assert.ok(o.entry, `${at(o)}: no export golden entry`);
@@ -193,6 +198,26 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("TextAsset"), 32);
   assert.equal(exported("Shader"), 12, "both shaders of the 2019.4 and 2020.3 Android and iOS bundles");
   assert.equal(exported("Texture2D"), 99);
+  assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
+});
+
+test("a verdict sits next to a Sprite golden exactly where decodeSprite differs by design", () => {
+  // fixtures/BUILDING.md section 17: GetImage() ignores an ETC1 split alpha
+  // texture (decodeSprite merges it, #152), and AssetsManager moves a sprite
+  // off its variant atlas (decodeSprite cuts the variant, #153).
+  const verdicts = all.filter((o) => o.entry!.verdict);
+  for (const o of verdicts) {
+    const e = o.entry!;
+    assert.equal(o.cls, "Sprite", at(o));
+    assert.ok(e.png, at(o));
+    assert.equal(/\(#152\)/.test(e.verdict!), e.alphaTexture !== undefined, at(o));
+    assert.equal(/\(#153\)/.test(e.verdict!), e.variantAtlas !== undefined, at(o));
+  }
+  const count = (field: "alphaTexture" | "variantAtlas") =>
+    all.filter((o) => o.entry![field] !== undefined).length;
+  assert.equal(count("alphaTexture"), 17, "the split-alpha bundle's sprites on its ETC1 atlas");
+  assert.equal(count("variantAtlas"), 2, "r_a and r_b of the variant bundle");
+  assert.equal(verdicts.length, 19);
 });
 
 test("hello.txt exports back to the file it was imported from", () => {

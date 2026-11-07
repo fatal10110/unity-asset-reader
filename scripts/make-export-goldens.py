@@ -4,10 +4,12 @@
 AssetStudio (Razviar/assetstudio at REVISION) is the golden oracle for export
 output (plan section 5, R12). This script builds that revision, unmodified,
 from a local clone outside the repository, and runs on every fixture object
-of the five exported classes:
+of the six exported classes:
 
   Texture2D  AssetStudio.CLI  Exporter.ExportTexture2D(item, dir, ImageFormat.Png);
              the PNG it writes is decoded back to RGBA in the harness
+  Sprite     AssetStudio.CLI  Exporter.ExportSprite(item, dir, ImageFormat.Png),
+             Sprite.GetImage(); the PNG decoded back to RGBA the same way
   Mesh       AssetStudio.CLI  Exporter.ExportMesh(item, dir), the .obj file
   AudioClip  AssetStudio.Utility  new AudioClipConverter(clip).ConvertToWav()
   TextAsset  AssetStudio.CLI  Exporter.ExportTextAsset(item, dir), the file it writes
@@ -25,14 +27,21 @@ object's export is recorded only when AssetStudio reports the same input.
 An object gets no golden, but an `exportError` saying why, when AssetStudio
 cannot load or export it, names its TextureFormat differently from UnityPy
 (its enum has an extra R16_Alt at 66), leaves pixels of the decode buffer
-unwritten (checked by exporting over a buffer filled with 0x00, then 0xFF), or
-exports different bytes in two runs. A Shader with Direct3D programs (D3D9,
+unwritten (checked by exporting a Texture2D or Sprite over a buffer filled
+with 0x00, then 0xFF), or exports different bytes in two runs. A Shader with Direct3D programs (D3D9,
 D3D11, D3D11_9x) gets one without being exported: ShaderConverter turns them
 into text with Windows' D3DCompiler or the GUI's native HLSLDecompiler, so the
 text depends on the host, and unity-asset-reader-shader refuses them anyway.
 A Mesh with a submesh baseVertex gets one too: ExportMesh writes its indices
 without the offset, which unity-asset-reader applies (#257); the entry keeps
 that OBJ's size and hash as `objWithoutBaseVertex`.
+
+Two kinds of Sprite get their golden and a `verdict`, where
+unity-asset-reader-texture's decodeSprite differs from GetImage() by design:
+one cut from a texture with an ETC1 split alpha texture (GetImage() never reads
+the alpha texture, decodeSprite merges it, #152), and one whose own
+m_SpriteAtlas is a variant atlas (AssetStudio's AssetsManager moves it to the
+master atlas, decodeSprite cuts the variant, #153).
 
 Everything executable - the extracted AssetStudio tree, the C# harness, the
 NuGet packages and AssetStudio's bundled FMOD library - lives in --project,
@@ -67,9 +76,22 @@ OUTPUT = ROOT / "fixtures" / "assetstudio-export-goldens.json"
 REVISION = "c37af7dfcdafee93e33b5da9f0285c97998d6ae3"
 # git rev-parse c37af7d^{tree}: the extracted source is exactly this tree.
 TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
-TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP = 28, 43, 48, 49, 83
+TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP, SPRITE = 28, 43, 48, 49, 83, 213
 CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", SHADER: "Shader", TEXTASSET: "TextAsset",
-           AUDIOCLIP: "AudioClip"}
+           AUDIOCLIP: "AudioClip", SPRITE: "Sprite"}
+# What a Sprite whose texture has an alpha texture (ETC1 split alpha) records
+# next to its golden: unity-asset-reader differs from GetImage() there on purpose.
+ALPHA_VERDICT = ("GetImage() cuts the texture alone and never reads its alpha texture "
+                 "(SpriteHelper.cs:15-34); unity-asset-reader-texture's decodeSprite merges "
+                 "the alpha texture first (#152), so its alpha channel differs; the golden "
+                 "is compared with a cut of the base texture")
+# What a Sprite whose own m_SpriteAtlas is a variant atlas records next to its golden.
+VARIANT_VERDICT = ("AssetStudio's AssetsManager moves a sprite whose m_SpriteAtlas is a variant "
+                   "atlas to the master atlas that packs it (AssetsManager.cs:1060-1085), so "
+                   "GetImage() cuts the master's full-size texture; unity-asset-reader-texture's "
+                   "decodeSprite follows the sprite's own pointer and cuts the variant, resized "
+                   "as CutImage resizes it (#153); the golden is compared with a cut of the "
+                   "master atlas entry")
 # The output each class's entry holds.
 OUTPUTS = ["png", "obj", "wav", "bytes", "shader"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
@@ -106,6 +128,7 @@ PACKAGE_SHA512 = {
 }
 METHODS = {
     "Texture2D": "AssetStudio.CLI.Exporter.ExportTexture2D(item, dir, ImageFormat.Png)",
+    "Sprite": "AssetStudio.CLI.Exporter.ExportSprite(item, dir, ImageFormat.Png), Sprite.GetImage()",
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
@@ -149,6 +172,40 @@ public static class Program {
         return files[0];
     }
 
+    // Texture2DExtensions.ConvertToImage decodes into a buffer rented from
+    // ArrayPool<byte>.Shared, which may hold old bytes. Export twice, the buffer
+    // first filled with 0x00, then 0xFF: pixels the decoder leaves unwritten show
+    // up as a difference, and get no golden. width x height: the Texture2D decoded.
+    static void ExportPngTwice(Dictionary<string, object> result, string method, int width, int height,
+            string outDir, Func<string, bool> export) {
+        var exports = new List<(byte[] png, byte[] rgba, int width, int height)>();
+        foreach (var fill in new byte[] { 0x00, 0xFF }) {
+            var buffer = ArrayPool<byte>.Shared.Rent(width * height * 4);
+            Array.Fill(buffer, fill);
+            ArrayPool<byte>.Shared.Return(buffer);
+            var dir = Path.Combine(outDir, fill.ToString("X2"));
+            if (!export(dir)) break;
+            var png = File.ReadAllBytes(Single(dir));
+            using var decoded = Image.Load<Rgba32>(png);
+            var rgba = new byte[decoded.Width * decoded.Height * 4];
+            decoded.CopyPixelDataTo(rgba);
+            exports.Add((png, rgba, decoded.Width, decoded.Height));
+        }
+        if (exports.Count < 2) {
+            result["exportError"] = method + " returned false";
+            return;
+        }
+        if (!exports[0].rgba.AsSpan().SequenceEqual(exports[1].rgba)) {
+            result["exportError"] = "undefined pixels: the decoder leaves pixels unwritten, so the PNG holds whatever the pooled buffer held";
+            return;
+        }
+        var (pngBytes, pixels, w, h) = exports[0];
+        result["png"] = new Dictionary<string, object> {
+            ["width"] = w, ["height"] = h, ["rgbaSha256"] = Sha(pixels),
+            ["pngSize"] = pngBytes.Length, ["pngSha256"] = Sha(pngBytes),
+        };
+    }
+
     public static int Main(string[] args) {
         // The GUI exports on an en-US thread; the CLI inherits the host's culture,
         // which would change the OBJ's number format. Pin the GUI's.
@@ -167,6 +224,7 @@ public static class Program {
         var exportMesh = Method("ExportMesh");
         var exportTextAsset = Method("ExportTextAsset");
         var exportShader = Method("ExportShader");
+        var exportSprite = Method("ExportSprite");
         var game = GameManager.GetGame(GameType.Normal);
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
@@ -206,36 +264,36 @@ public static class Program {
                             var image = texture.image_data.GetData() ?? new byte[0];
                             input["imageSize"] = image.Length;
                             input["imageSha256"] = Sha(image);
-                            // Texture2DExtensions.ConvertToImage decodes into a buffer rented
-                            // from ArrayPool<byte>.Shared, which may hold old bytes. Export twice,
-                            // the buffer first filled with 0x00, then 0xFF: pixels the decoder
-                            // leaves unwritten show up as a difference, and get no golden.
-                            var exports = new List<(byte[] png, byte[] rgba, int width, int height)>();
-                            foreach (var fill in new byte[] { 0x00, 0xFF }) {
-                                var buffer = ArrayPool<byte>.Shared.Rent(texture.m_Width * texture.m_Height * 4);
-                                Array.Fill(buffer, fill);
-                                ArrayPool<byte>.Shared.Return(buffer);
-                                var dir = Path.Combine(outDir, fill.ToString("X2"));
-                                if (!(bool)exportTexture2D.Invoke(null, new object[] { item, dir, ImageFormat.Png })) break;
-                                var png = File.ReadAllBytes(Single(dir));
-                                using var decoded = Image.Load<Rgba32>(png);
-                                var rgba = new byte[decoded.Width * decoded.Height * 4];
-                                decoded.CopyPixelDataTo(rgba);
-                                exports.Add((png, rgba, decoded.Width, decoded.Height));
+                            ExportPngTwice(result, "ExportTexture2D", texture.m_Width, texture.m_Height, outDir,
+                                dir => (bool)exportTexture2D.Invoke(null, new object[] { item, dir, ImageFormat.Png }));
+                            break;
+                        }
+                        case Sprite sprite: {
+                            input["name"] = sprite.m_Name;
+                            // GetImage's lookup (SpriteHelper.cs): the atlas entry when the
+                            // atlas loads, else m_RD. Its texture sizes the pooled buffer.
+                            PPtr<Texture2D> texturePtr = null, alphaPtr = null;
+                            if (sprite.m_SpriteAtlas != null && sprite.m_SpriteAtlas.TryGet(out var atlas)) {
+                                if (atlas.m_RenderDataMap.TryGetValue(sprite.m_RenderDataKey, out var entry)) {
+                                    texturePtr = entry.texture;
+                                    alphaPtr = entry.alphaTexture;
+                                }
+                            } else {
+                                texturePtr = sprite.m_RD.texture;
+                                alphaPtr = sprite.m_RD.alphaTexture;
                             }
-                            if (exports.Count < 2) {
-                                result["exportError"] = "ExportTexture2D returned false";
-                                break;
-                            }
-                            if (!exports[0].rgba.AsSpan().SequenceEqual(exports[1].rgba)) {
-                                result["exportError"] = "undefined pixels: the decoder leaves pixels unwritten, so the PNG holds whatever the pooled buffer held";
-                                break;
-                            }
-                            var (pngBytes, pixels, w, h) = exports[0];
-                            result["png"] = new Dictionary<string, object> {
-                                ["width"] = w, ["height"] = h, ["rgbaSha256"] = Sha(pixels),
-                                ["pngSize"] = pngBytes.Length, ["pngSha256"] = Sha(pngBytes),
-                            };
+                            Texture2D source = null, alpha = null;
+                            texturePtr?.TryGet(out source);
+                            alphaPtr?.TryGet(out alpha);
+                            if (alpha != null) result["alphaTexture"] = alpha.m_Name;
+                            // AssetsManager has already moved a sprite whose atlas is a variant
+                            // to its master atlas (AssetsManager.cs:1060-1085): read the
+                            // sprite again for the atlas it names itself.
+                            var own = new Sprite(sprite.reader).m_SpriteAtlas;
+                            if (own != null && own.TryGet(out var ownAtlas) && ownAtlas.m_IsVariant)
+                                result["variantAtlas"] = ownAtlas.m_Name;
+                            ExportPngTwice(result, "ExportSprite", source?.m_Width ?? 0, source?.m_Height ?? 0, outDir,
+                                dir => (bool)exportSprite.Invoke(null, new object[] { item, dir, ImageFormat.Png }));
                             break;
                         }
                         case Mesh mesh: {
@@ -562,9 +620,14 @@ def main() -> None:
             else:
                 entry["inputOracle"] += "; object bytes: UnityPy 1.25.3"
             entry["input"] = actual
-        for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex"]:
+        for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex", "alphaTexture",
+                       "variantAtlas"]:
             if output in result:
                 entry[output] = result[output]
+        verdicts = [text for field, text in [("alphaTexture", ALPHA_VERDICT),
+                                             ("variantAtlas", VARIANT_VERDICT)] if field in entry]
+        if verdicts and "png" in entry:
+            entry["verdict"] = "; ".join(verdicts)
         if ("exportError" in entry) == any(k in entry for k in OUTPUTS):
             raise SystemExit(f"{where}: want an export or an exportError, got {sorted(result)}")
         fixtures.setdefault(key, {}).setdefault(job["file"], {})[job["pathId"]] = entry

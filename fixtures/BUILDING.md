@@ -1786,7 +1786,7 @@ be used as a tight-mask oracle.
 
 ## 17. Export goldens: the AssetStudio harness (#233)
 
-Export output (PNG, OBJ, WAV, TextAsset files, shader text) has its own oracle: AssetStudio
+Export output (Texture2D and Sprite PNGs, OBJ, WAV, TextAsset files, shader text) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -1824,7 +1824,7 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh, Shader, TextAsset and AudioClip of `goldens.json` and
+3. Lists every Texture2D, Mesh, Shader, TextAsset, AudioClip and Sprite of `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
    it loads).
@@ -1832,7 +1832,9 @@ What it does, all inside `<external-harness>`:
    `AssetsManager` (`SpecifyUnityVersion`, the CLI's `--unity_version`, set to
    the editor in the fixture's path, which the version-stripped bundles need),
    then for each object: Texture2D `Exporter.ExportTexture2D(item, dir,
-   ImageFormat.Png)` of `AssetStudio.CLI`, PNG decoded back to RGBA8; Mesh
+   ImageFormat.Png)` of `AssetStudio.CLI`, PNG decoded back to RGBA8; Sprite
+   `Exporter.ExportSprite(item, dir, ImageFormat.Png)`, which writes
+   `Sprite.GetImage()` (#275), PNG decoded back the same way; Mesh
    `Exporter.ExportMesh(item, dir)`, the `.obj` file; AudioClip
    `AudioClipConverter.ConvertToWav()`; TextAsset
    `Exporter.ExportTextAsset(item, dir)`, the file it writes (`m_Script` as
@@ -1860,15 +1862,28 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 | 36 AudioClip (`audio` and `adpcm` bundles, section 11) | 36 WAV | |
 | 32 TextAsset | 32 files | |
 | 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
+| 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
 which call the right `Decode*` method by name, stay the AssetStudio verdict.
-The harness also exports every texture twice, over a decode buffer filled with
-0x00 and then with 0xFF (`ConvertToImage` decodes into a pooled buffer), and
+The harness also exports every texture and sprite twice, over a decode buffer
+filled with 0x00 and then with 0xFF (`ConvertToImage` decodes into a pooled
+buffer; for a sprite, the buffer of the texture `GetImage()` cuts it from), and
 compares the two runs: pixels a decoder leaves unwritten, or output that
 changes between runs, get an `exportError` instead of a golden. On these
 fixtures that only ever hit the misnumbered ASTC_HDR_4x4 (decoded as `R16_Alt`).
+
+`packages/texture/tests/sprite-export.test.ts` compares each Sprite PNG with
+`decodeSprite(..., { tightMesh: true })`, which is `GetImage()`. Where
+unity-asset-reader-texture differs from `GetImage()` by design, the script
+writes a `verdict` next to the golden, and the test compares the golden with
+what `GetImage()` cuts instead and asserts the difference:
+
+| Sprites | `GetImage()` | `decodeSprite` | Compared with the golden |
+| --- | --- | --- | --- |
+| 17 of `split-alpha`, cut from an ETC1 texture with an alpha texture (`alphaTexture` in the entry) | cuts the texture alone, never reads its alpha texture (`SpriteHelper.cs:15-34`) | merges the alpha texture first (#152): same red, green and blue, the alpha texture's red as alpha | `cutSprite` of the base texture alone |
+| `r_a`, `r_b` of `variant`, whose own `m_SpriteAtlas` is the variant atlas `half` (`variantAtlas`) | `AssetsManager` moves the sprite to the master atlas `rect` that packs it (`AssetsManager.cs:1060-1085`), so it cuts the full-size master texture | follows the sprite's own pointer and cuts the variant, resized as `CutImage` resizes it (#153; section 15's `CutImage` of the variant entries is its reference) | `cutSprite` of the master atlas entry |
 
 Checks that need no AssetStudio run, in `scripts/tests/export-goldens.test.ts`:
 every PCM clip exports to `tone.wav` of section 11 to the byte, every `hello`
