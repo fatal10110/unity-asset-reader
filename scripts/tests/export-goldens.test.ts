@@ -164,20 +164,21 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   for (const o of all.filter((x) => x.entry!.exportError)) {
     const { exportError, input } = o.entry!;
     const where = `${at(o)}: ${exportError}`;
-    if (o.source === "modern-goldens.json") {
-      // c37af7d cannot read SerializedFile format 23 (6000.6) at all.
-      assert.match(exportError!, /^AssetStudio did not load the object: /, where);
-    } else if (o.cls === "Shader") {
-      // Not run for Direct3D programs (host-dependent text); c37af7d skips
-      // parsing every 6000+ Shader, so ShaderConverter has no blob or script.
+    if (o.cls === "Shader") {
+      // Not run for Direct3D programs (host-dependent text). A 6000.x Shader
+      // gets the composite oracle (#259), c37af7d's converter, which has no case
+      // for UAR/ShaderFixture's Int property.
       assert.match(
         exportError!,
-        o.fixture.includes("/6000.")
-          ? /^ArgumentNullException: Value cannot be null\. \(Parameter 'bytes'\)$/
-          : /^not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler/,
+        o.fixture.endsWith("/windows")
+          ? /^not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler/
+          : /^ShaderConverter\.ConvertSerializedShader throws ArgumentOutOfRangeException: /,
         where,
       );
       assert.ok(o.fixture.includes("/6000.") || o.fixture.endsWith("/windows"), where);
+    } else if (o.source === "modern-goldens.json") {
+      // c37af7d cannot read SerializedFile format 23 (6000.6) at all.
+      assert.match(exportError!, /^AssetStudio did not load the object: /, where);
     } else if (o.cls === "Mesh") {
       // fixtures/BUILDING.md section 20: ExportMesh leaves out the submesh's
       // baseVertex (#257); the OBJ it wrote is kept beside the verdict.
@@ -205,7 +206,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("Mesh"), 21, "main's triangle; detail and compressed of the mesh bundles");
   assert.equal(exported("AudioClip"), 36, "both clips of every audio and adpcm bundle");
   assert.equal(exported("TextAsset"), 32);
-  assert.equal(exported("Shader"), 12, "both shaders of the 2019.4 and 2020.3 Android and iOS bundles");
+  // Both shaders of the 2019.4 and 2020.3 Android and iOS bundles; the composite's
+  // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259).
+  assert.equal(exported("Shader"), 17);
   assert.equal(exported("Texture2D"), 99);
   assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
   assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");
