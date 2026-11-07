@@ -190,9 +190,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     all.filter((o) => o.cls === cls && !o.entry!.exportError).length;
   assert.equal(exported("Mesh"), 21, "main's triangle; detail and compressed of the mesh bundles");
   assert.equal(exported("AudioClip"), 36, "both clips of every audio and adpcm bundle");
-  assert.equal(exported("TextAsset"), 28);
+  assert.equal(exported("TextAsset"), 32);
   assert.equal(exported("Shader"), 12, "both shaders of the 2019.4 and 2020.3 Android and iOS bundles");
-  assert.equal(exported("Texture2D"), 97);
+  assert.equal(exported("Texture2D"), 99);
 });
 
 test("hello.txt exports back to the file it was imported from", () => {
