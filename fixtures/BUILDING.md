@@ -1786,7 +1786,8 @@ be used as a tight-mask oracle.
 
 ## 17. Export goldens: the AssetStudio harness (#233)
 
-Export output (Texture2D and Sprite PNGs, OBJ, WAV, TextAsset files, shader text) has its own oracle: AssetStudio
+Export output (Texture2D and Sprite PNGs, OBJ, WAV, TextAsset files, shader text, font and
+video files) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -1824,7 +1825,8 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh, Shader, TextAsset, AudioClip and Sprite of `goldens.json` and
+3. Lists every Texture2D, Mesh, Shader, TextAsset, AudioClip, Sprite, Font and VideoClip of
+   `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
    it loads).
@@ -1843,24 +1845,33 @@ What it does, all inside `<external-harness>`:
    programs (D3D9, D3D11, D3D11_9x): ShaderConverter turns those into text
    with Windows' D3DCompiler or the GUI's native HLSLDecompiler, which the
    harness does not ship, so the text would depend on the host, and
-   unity-asset-reader-shader refuses them. The exporters run on en-US, the culture the GUI's export thread sets
+   unity-asset-reader-shader refuses them; Font `Exporter.ExportFont(item, dir)`,
+   `m_FontData` as is, `.otf` when it starts with `OTTO`, else `.ttf` (#277);
+   VideoClip `Exporter.ExportVideoClip(item, dir)`, the video bytes as is,
+   read from the `.resource` node of the same bundle that `m_ExternalResources`
+   names, with the extension of `m_OriginalPath` (#277). The exporters run on
+   en-US, the culture the GUI's export thread sets
    (the CLI would use the host's, which changes the OBJ's numbers).
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
-   the fixture), texture format, size and image data hash, audio data hash,
-   TextAsset script size and hash (from the type tree dump, where there is one).
+   the fixture), texture format, size and image data hash, audio, font and video
+   data size and hash (where `goldens.json` records the raw data), TextAsset
+   script size and hash (from the type tree dump, where there is one).
 
 Each entry in the JSON is keyed like the goldens (fixture, SerializedFile,
 pathId) and holds `input` (the metadata it was matched on) and one of `png`
 (`width`, `height`, `rgbaSha256` of the decoded pixels in the PNG's row order,
 **top row first**, plus the PNG file's own size and hash), `obj`, `wav`,
-`bytes` or `shader` (`size`, `sha256` of the file), or `exportError`:
+`bytes` or `shader` (`size`, `sha256` of the file), `font` or `video` (`size`,
+`sha256` and `extension` of the file), or `exportError`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 27 Mesh (`main` bundles; `mesh` bundles, section 20) | 21 OBJ | 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
 | 36 AudioClip (`audio` and `adpcm` bundles, section 11) | 36 WAV | |
 | 32 TextAsset | 32 files | |
+| 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
+| 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
 | 36 Shader (`shader` bundles, section 18) | 12 `.shader` texts, the 2019.4 and 2020.3 Android and iOS ones | 8 Windows ones of 2019.4 and 2020.3: Direct3D 11, not exported (see step 4). 16 of 6000.3.26f1: `c37af7d` skips parsing every 6000+ Shader, so `ShaderConverter` has neither blob nor script (`ArgumentNullException`). 4 of 6000.6.4f1: SerializedFile format 23 |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
