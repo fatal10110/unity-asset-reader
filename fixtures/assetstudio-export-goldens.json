@@ -11,7 +11,9 @@
     "Mesh": "AssetStudio.CLI.Exporter.ExportMesh(item, dir)",
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
-    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()"
+    "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()",
+    "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
+    "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)"
   },
   "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
   "culture": "en-US",
@@ -641,6 +643,23 @@
     },
     "editor/2019.4.41f2/lz4-notypetree/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1371323451777357266": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "c27cdd1e350687bda34aed1198b7dbbc82a6559d935a85a50b7c1e0e75f335fa",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "8823724225441444264": {
           "class": "Texture2D",
           "input": {
@@ -725,6 +744,27 @@
         }
       }
     },
+    "editor/2019.4.41f2/lz4-notypetree/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "2851217806674877029": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 230,
+            "objectSha256": "d2aab43d66d6fb692a734931142c88bc5a209b53f7d54361d6364c618ace4145",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/lz4/adpcm": {
       "CAB-333a25f4ea19566c1a144e5e562221f1": {
         "-3167796404339944738": {
@@ -799,6 +839,23 @@
     },
     "editor/2019.4.41f2/lz4/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1371323451777357266": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "c27cdd1e350687bda34aed1198b7dbbc82a6559d935a85a50b7c1e0e75f335fa",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "8823724225441444264": {
           "class": "Texture2D",
           "input": {
@@ -879,6 +936,27 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/lz4/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "2851217806674877029": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 230,
+            "objectSha256": "d2aab43d66d6fb692a734931142c88bc5a209b53f7d54361d6364c618ace4145",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }
@@ -3557,6 +3635,23 @@
     },
     "editor/2019.4.41f2/stripped/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1371323451777357266": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "c27cdd1e350687bda34aed1198b7dbbc82a6559d935a85a50b7c1e0e75f335fa",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "8823724225441444264": {
           "class": "Texture2D",
           "input": {
@@ -3573,6 +3668,27 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "ExportTexture2D returned false"
+        }
+      }
+    },
+    "editor/2019.4.41f2/stripped/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "2851217806674877029": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 230,
+            "objectSha256": "d2aab43d66d6fb692a734931142c88bc5a209b53f7d54361d6364c618ace4145",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
+          }
         }
       }
     },
@@ -3819,6 +3935,23 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "ExportTexture2D returned false"
+        },
+        "2885667092910415928": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "ae420fe362e1126f877fb8bdd2a5876373c051ffff1d900919db338a6629fba2",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
         }
       }
     },
@@ -3883,6 +4016,27 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4-notypetree/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "1991461008967169929": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }
@@ -3977,6 +4131,23 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "ExportTexture2D returned false"
+        },
+        "2885667092910415928": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "ae420fe362e1126f877fb8bdd2a5876373c051ffff1d900919db338a6629fba2",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
         }
       }
     },
@@ -4041,6 +4212,27 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/lz4/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "1991461008967169929": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }
@@ -4464,6 +4656,23 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "ExportTexture2D returned false"
+        },
+        "2885667092910415928": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "ae420fe362e1126f877fb8bdd2a5876373c051ffff1d900919db338a6629fba2",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
         }
       }
     },
@@ -4503,6 +4712,27 @@
           "bytes": {
             "size": 58,
             "sha256": "3606049155e66b287de2e2ff7d5c19473df8c3f6ae817c2c67856ff74783ba06"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/stripped/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "1991461008967169929": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }
@@ -5158,6 +5388,23 @@
     },
     "editor/6000.3.25f1/lz4-notypetree/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1768393535352744902": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "1dee4da51e47de5b3ccdac4b5f57eff95202ee1a4464c1f2455e4d3c43c98c7e",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "6576359394872337110": {
           "class": "Texture2D",
           "input": {
@@ -5242,6 +5489,27 @@
         }
       }
     },
+    "editor/6000.3.25f1/lz4-notypetree/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "7395134406774648242": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
+          }
+        }
+      }
+    },
     "editor/6000.3.25f1/lz4/audio": {
       "CAB-d5ae2b5aa3edc0f73b4bb6b1ae125a53": {
         "-8697092545929151112": {
@@ -5280,6 +5548,23 @@
     },
     "editor/6000.3.25f1/lz4/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1768393535352744902": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "1dee4da51e47de5b3ccdac4b5f57eff95202ee1a4464c1f2455e4d3c43c98c7e",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "6576359394872337110": {
           "class": "Texture2D",
           "input": {
@@ -5360,6 +5645,27 @@
             "rgbaSha256": "94f50afb0ca61947eb30f0414889d16d81270cdb4437372060d951a568dd82bc",
             "pngSize": 109,
             "pngSha256": "8384455c4202d051cc57413ad887175377eb7c778afe3d6931f5b4548ee61cdc"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/lz4/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "7395134406774648242": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }
@@ -6332,6 +6638,23 @@
     },
     "editor/6000.3.25f1/stripped/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
+        "1768393535352744902": {
+          "class": "Font",
+          "input": {
+            "classId": 128,
+            "byteSize": 794,
+            "objectSha256": "1dee4da51e47de5b3ccdac4b5f57eff95202ee1a4464c1f2455e4d3c43c98c7e",
+            "name": "glyphs",
+            "dataSize": 672,
+            "dataSha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "font": {
+            "size": 672,
+            "sha256": "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+            "extension": ".ttf"
+          }
+        },
         "6576359394872337110": {
           "class": "Texture2D",
           "input": {
@@ -6387,6 +6710,27 @@
           "bytes": {
             "size": 58,
             "sha256": "3606049155e66b287de2e2ff7d5c19473df8c3f6ae817c2c67856ff74783ba06"
+          }
+        }
+      }
+    },
+    "editor/6000.3.25f1/stripped/video": {
+      "CAB-f4056db44bc36994fffbc89e2912fee2": {
+        "7395134406774648242": {
+          "class": "VideoClip",
+          "input": {
+            "classId": 329,
+            "byteSize": 234,
+            "objectSha256": "8e0c33f911931150b54c25cdf7e339aef1b05e4c19bf658047029acbf7f700e9",
+            "name": "clip",
+            "dataSize": 4860,
+            "dataSha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "video": {
+            "size": 4860,
+            "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+            "extension": ".webm"
           }
         }
       }

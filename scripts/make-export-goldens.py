@@ -4,7 +4,7 @@
 AssetStudio (Razviar/assetstudio at REVISION) is the golden oracle for export
 output (plan section 5, R12). This script builds that revision, unmodified,
 from a local clone outside the repository, and runs on every fixture object
-of the six exported classes:
+of the eight exported classes:
 
   Texture2D  AssetStudio.CLI  Exporter.ExportTexture2D(item, dir, ImageFormat.Png);
              the PNG it writes is decoded back to RGBA in the harness
@@ -16,11 +16,14 @@ of the six exported classes:
   Shader     AssetStudio.CLI  Exporter.ExportShader(item, dir), the .shader file
              ShaderConverter.Convert() writes; not run for a shader with
              Direct3D programs (see below)
+  Font       AssetStudio.CLI  Exporter.ExportFont(item, dir), the .ttf or .otf file
+  VideoClip  AssetStudio.CLI  Exporter.ExportVideoClip(item, dir), the file it writes
+             from the bundle's .resource node, named by m_OriginalPath's extension
 
 UnityPy stays the oracle for what goes in. The objects come from the committed
 UnityPy goldens (goldens.json, modern-goldens.json), each with the input
 metadata recorded there (name, object size, texture format, size and image
-data hash, audio data hash, TextAsset script hash); UnityPy 1.25.3 hashes each object's bytes in the
+data hash, audio, font and video data hash, TextAsset script hash); UnityPy 1.25.3 hashes each object's bytes in the
 fixtures it reads. AssetStudio's AssetsManager loads the same bundle, and an
 object's export is recorded only when AssetStudio reports the same input.
 
@@ -76,9 +79,10 @@ OUTPUT = ROOT / "fixtures" / "assetstudio-export-goldens.json"
 REVISION = "c37af7dfcdafee93e33b5da9f0285c97998d6ae3"
 # git rev-parse c37af7d^{tree}: the extracted source is exactly this tree.
 TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
-TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP, SPRITE = 28, 43, 48, 49, 83, 213
+TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP, FONT, SPRITE, VIDEOCLIP = (
+    28, 43, 48, 49, 83, 128, 213, 329)
 CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", SHADER: "Shader", TEXTASSET: "TextAsset",
-           AUDIOCLIP: "AudioClip", SPRITE: "Sprite"}
+           AUDIOCLIP: "AudioClip", FONT: "Font", SPRITE: "Sprite", VIDEOCLIP: "VideoClip"}
 # What a Sprite whose texture has an alpha texture (ETC1 split alpha) records
 # next to its golden: unity-asset-reader differs from GetImage() there on purpose.
 ALPHA_VERDICT = ("GetImage() cuts the texture alone and never reads its alpha texture "
@@ -93,7 +97,7 @@ VARIANT_VERDICT = ("AssetStudio's AssetsManager moves a sprite whose m_SpriteAtl
                    "as CutImage resizes it (#153); the golden is compared with a cut of the "
                    "master atlas entry")
 # The output each class's entry holds.
-OUTPUTS = ["png", "obj", "wav", "bytes", "shader"]
+OUTPUTS = ["png", "obj", "wav", "bytes", "shader", "font", "video"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
 # extracted tree. FMOD's own license, never committed.
 FMOD = "AssetStudio.GUI/Libraries/x64/fmod.dll"
@@ -133,6 +137,8 @@ METHODS = {
     "AudioClip": "AssetStudio.AudioClipConverter.ConvertToWav()",
     "TextAsset": "AssetStudio.CLI.Exporter.ExportTextAsset(item, dir)",
     "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert()",
+    "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
+    "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)",
 }
 
 HARNESS = r'''using System;
@@ -206,6 +212,20 @@ public static class Program {
         };
     }
 
+    // An exporter that writes one file as is: its size, hash and extension.
+    static void ExportFile(Dictionary<string, object> result, string method, string output, string outDir,
+            Func<bool> export) {
+        if (!export()) {
+            result["exportError"] = method + " returned false";
+            return;
+        }
+        var path = Single(outDir);
+        var bytes = File.ReadAllBytes(path);
+        result[output] = new Dictionary<string, object> {
+            ["size"] = bytes.Length, ["sha256"] = Sha(bytes), ["extension"] = Path.GetExtension(path),
+        };
+    }
+
     public static int Main(string[] args) {
         // The GUI exports on an en-US thread; the CLI inherits the host's culture,
         // which would change the OBJ's number format. Pin the GUI's.
@@ -225,6 +245,8 @@ public static class Program {
         var exportTextAsset = Method("ExportTextAsset");
         var exportShader = Method("ExportShader");
         var exportSprite = Method("ExportSprite");
+        var exportFont = Method("ExportFont");
+        var exportVideoClip = Method("ExportVideoClip");
         var game = GameManager.GetGame(GameType.Normal);
         var results = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
@@ -361,6 +383,27 @@ public static class Program {
                             result["shader"] = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
                             break;
                         }
+                        case Font font: {
+                            input["name"] = font.m_Name;
+                            // null when m_FontData is empty: ExportFont then returns false.
+                            var data = font.m_FontData ?? new byte[0];
+                            input["dataSize"] = data.Length;
+                            input["dataSha256"] = Sha(data);
+                            ExportFile(result, "ExportFont", "font", outDir,
+                                () => (bool)exportFont.Invoke(null, new object[] { item, outDir }));
+                            break;
+                        }
+                        case VideoClip video: {
+                            input["name"] = video.m_Name;
+                            // Inline, or from the m_ExternalResources source (a .resource node
+                            // of the same bundle), as ExportVideoClip reads it.
+                            var data = video.m_VideoData.GetData() ?? new byte[0];
+                            input["dataSize"] = data.Length;
+                            input["dataSha256"] = Sha(data);
+                            ExportFile(result, "ExportVideoClip", "video", outDir,
+                                () => (bool)exportVideoClip.Invoke(null, new object[] { item, outDir }));
+                            break;
+                        }
                         default:
                             result["exportError"] = "AssetStudio read class " + obj.type + " as " + obj.GetType().Name;
                             break;
@@ -434,7 +477,7 @@ def expected_jobs() -> dict[str, list[dict]]:
                                          ["format", "width", "height", "imageSize", "imageSha256"]})
                         expected["formatName"] = TextureFormat(texture["format"]).name
                     raw = serialized.get("rawData", {}).get(path_id)
-                    if class_id == AUDIOCLIP and raw:
+                    if class_id in (AUDIOCLIP, FONT, VIDEOCLIP) and raw:
                         expected.update({"dataSize": raw["size"], "dataSha256": raw["sha256"]})
                     dump = serialized.get("typetrees", {}).get(path_id)
                     if class_id == TEXTASSET and dump:
