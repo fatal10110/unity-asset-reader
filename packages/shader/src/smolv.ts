@@ -9,7 +9,7 @@
 // `decodeSmolvV1` is ported from aras-p/smol-v 6303e979, source/smolv.cpp
 // `smolv::Decode` (MIT, © 2016-2018 Aras Pranckevicius): the encoding
 // version 1 that Unity 2020.3 and later write, which AssetStudio's port
-// predates (plan section 5, revision 2026-11-07, #260).
+// predates (plan section 5, revision 2026-11-07c, #260).
 
 import { DisassemblyError, StreamReader } from "./net.js";
 

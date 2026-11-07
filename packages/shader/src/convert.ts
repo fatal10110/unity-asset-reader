@@ -461,7 +461,7 @@ function snippetText(reader: StreamReader, offset: number, size: number): string
  * byte of its version word; Unity 2019.4) is decoded as AssetStudio's
  * `SmolvDecoder` decodes it; one of version 1 (Unity 2020.3 and later), which
  * that decoder predates, as aras-p/smol-v's `Decode` does (plan section 5,
- * revision 2026-11-07, #260). Exported for the tests.
+ * revision 2026-11-07c, #260). Exported for the tests.
  *
  * @param code the program's code (`m_ProgramCode`)
  * @param offset where the stage starts

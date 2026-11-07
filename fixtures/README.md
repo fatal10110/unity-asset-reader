@@ -421,6 +421,14 @@ sprites (#34).
     once, then sha256 of the RGBA8. For every crop, flip and Rotate180, and
     for the tight images of the 4-vertex meshes, the harness gives the UnityPy
     golden exactly; both editors give the same image for the same sprite.
+  - **Since #275** every 2019.4.41f2 and 6000.3.25f1 fixture Sprite also has
+    AssetStudio's executed `ExportSprite` PNG in
+    `assetstudio-export-goldens.json` (`fixtures/BUILDING.md` section 17),
+    which `sprite-export.test.ts` compares with `decodeSprite`. These hashes
+    stay: they are rows as stored, not the PNG's top-down rows, so none is a
+    duplicate of an export golden, and `sprite.test.ts` (the tight images,
+    `sheet_b Rotate90`, the hand-made triangles) and `sprite-6000-6.test.ts`
+    (the same sprites in a 6000.6 atlas, which has no export golden) read them.
 - **Sprites a Unity 6000.6 atlas holds itself** (`packedSprites` in
   `modern-goldens.json`, #229) have no Sprite objects, which is all UnityPy
   exports. Their goldens are UnityPy's own `get_image_from_sprite`, given a

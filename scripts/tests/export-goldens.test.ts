@@ -10,7 +10,7 @@ import { test } from "node:test";
 import { reverseRows, sha256 } from "../../fixtures/helpers.js";
 
 interface Entry {
-  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader";
+  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader" | "Sprite" | "Font" | "VideoClip";
   input: Record<string, string | number>;
   inputOracle: string;
   png?: { width: number; height: number; rgbaSha256: string };
@@ -18,8 +18,13 @@ interface Entry {
   wav?: { size: number; sha256: string };
   bytes?: { size: number; sha256: string };
   shader?: { size: number; sha256: string };
+  font?: { size: number; sha256: string; extension: string };
+  video?: { size: number; sha256: string; extension: string };
   exportError?: string;
   objWithoutBaseVertex?: { size: number; sha256: string };
+  alphaTexture?: string;
+  variantAtlas?: string;
+  verdict?: string;
 }
 
 interface UnityPyGolden {
@@ -57,6 +62,9 @@ const CLASSES: Record<number, Entry["class"]> = {
   48: "Shader",
   49: "TextAsset",
   83: "AudioClip",
+  128: "Font",
+  213: "Sprite",
+  329: "VideoClip",
 };
 const OUTPUT = {
   Texture2D: "png",
@@ -64,9 +72,15 @@ const OUTPUT = {
   AudioClip: "wav",
   TextAsset: "bytes",
   Shader: "shader",
+  Sprite: "png",
+  Font: "font",
+  VideoClip: "video",
 } as const;
 
-/** Every Texture2D, Mesh, Shader, TextAsset and AudioClip the UnityPy goldens list, with its export entry. */
+/**
+ * Every Texture2D, Mesh, Shader, TextAsset, AudioClip, Sprite, Font and VideoClip the UnityPy
+ * goldens list, with its export entry.
+ */
 function objects() {
   const out = [];
   for (const [source, golden] of Object.entries(sources)) {
@@ -93,7 +107,7 @@ test("the export goldens come from AssetStudio c37af7d through the export harnes
   assert.equal(exports._generator, "scripts/make-export-goldens.py");
 });
 
-test("every Texture2D, Mesh, Shader, TextAsset and AudioClip of the fixtures has an entry, and nothing else", () => {
+test("every exported class's fixture objects have an entry, and nothing else", () => {
   assert.ok(all.length > 0);
   for (const o of all) {
     assert.ok(o.entry, `${at(o)}: no export golden entry`);
@@ -119,7 +133,7 @@ test("each entry carries the UnityPy input it was matched on", () => {
       }
     }
     const raw = o.serialized.rawData?.[o.row.pathId];
-    if (o.cls === "AudioClip" && raw) {
+    if ((o.cls === "AudioClip" || o.cls === "Font" || o.cls === "VideoClip") && raw) {
       assert.equal(input.dataSize, raw.size, where);
       assert.equal(input.dataSha256, raw.sha256, where);
     }
@@ -138,7 +152,7 @@ test("each entry carries the UnityPy input it was matched on", () => {
 test("each entry holds its class's export or an exportError, never both", () => {
   for (const o of all) {
     const e = o.entry!;
-    const outputs = (["png", "obj", "wav", "bytes", "shader"] as const).filter((k) => e[k]);
+    const outputs = (["png", "obj", "wav", "bytes", "shader", "font", "video"] as const).filter((k) => e[k]);
     if (e.exportError) assert.deepEqual(outputs, [], at(o));
     else assert.deepEqual(outputs, [OUTPUT[o.cls]], at(o));
   }
@@ -193,6 +207,28 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("TextAsset"), 32);
   assert.equal(exported("Shader"), 12, "both shaders of the 2019.4 and 2020.3 Android and iOS bundles");
   assert.equal(exported("Texture2D"), 99);
+  assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
+  assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");
+  assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
+});
+
+test("a verdict sits next to a Sprite golden exactly where decodeSprite differs by design", () => {
+  // fixtures/BUILDING.md section 17: GetImage() ignores an ETC1 split alpha
+  // texture (decodeSprite merges it, #152), and AssetsManager moves a sprite
+  // off its variant atlas (decodeSprite cuts the variant, #153).
+  const verdicts = all.filter((o) => o.entry!.verdict);
+  for (const o of verdicts) {
+    const e = o.entry!;
+    assert.equal(o.cls, "Sprite", at(o));
+    assert.ok(e.png, at(o));
+    assert.equal(/\(#152\)/.test(e.verdict!), e.alphaTexture !== undefined, at(o));
+    assert.equal(/\(#153\)/.test(e.verdict!), e.variantAtlas !== undefined, at(o));
+  }
+  const count = (field: "alphaTexture" | "variantAtlas") =>
+    all.filter((o) => o.entry![field] !== undefined).length;
+  assert.equal(count("alphaTexture"), 17, "the split-alpha bundle's sprites on its ETC1 atlas");
+  assert.equal(count("variantAtlas"), 2, "r_a and r_b of the variant bundle");
+  assert.equal(verdicts.length, 19);
 });
 
 test("hello.txt exports back to the file it was imported from", () => {
@@ -220,6 +256,31 @@ test("the PCM clip exports back to the WAV it was imported from", () => {
       { size: 11068, sha256: "8edec60ce5b7c3c12eaec3a6cece2e442b4b12f47c77cbc8857a2be8118c4fac" },
       at(o),
     );
+  }
+});
+
+test("the font and the video clip export back to the files they were imported from", () => {
+  // glyphs.ttf and clip.webm, fixtures/BUILDING.md section 11: ExportFont writes
+  // m_FontData as is, ExportVideoClip the clip's .resource bytes, an oracle check
+  // that needs no AssetStudio.
+  const sources = {
+    Font: {
+      size: 672,
+      sha256: "f69124a81f4347a08c2d0f68bd970fb755d7d6dda8003976b51ad8274e8045ab",
+      extension: ".ttf",
+    },
+    VideoClip: {
+      size: 4860,
+      sha256: "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
+      extension: ".webm",
+    },
+  } as const;
+  for (const cls of ["Font", "VideoClip"] as const) {
+    const objs = all.filter((o) => o.cls === cls);
+    assert.equal(objs.length, 9, cls);
+    for (const o of objs) {
+      assert.deepEqual(o.entry![OUTPUT[cls]], sources[cls], at(o));
+    }
   }
 });
 

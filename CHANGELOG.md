@@ -175,6 +175,11 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 - Sprites follow their texture and atlas pointers with core's `resolveOrThrow`; the errors and
   their messages are unchanged (#255). Needs `unity-asset-reader` 1.3.0.
+- Tests only, no code change: every 2019.4 and 6000.3 fixture Sprite is compared with
+  AssetStudio's executed `ExportSprite` PNG (#275). Split-alpha sprites (whose alpha texture
+  `decodeSprite` merges and AssetStudio ignores) and variant-atlas sprites (which AssetStudio
+  moves to their master atlas) are compared through `cutSprite`, the difference recorded as a
+  verdict next to the golden.
 
 ### 1.2.0 - 2026-10-29
 
