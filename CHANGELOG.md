@@ -351,6 +351,12 @@ First release. Peer: `unity-asset-reader@^1`.
   (as aras-p/smol-v decodes them) and disassembled, where the text used to read
   `// disassembly error Unable to decode SMOL-V shader`. The text of such shaders changes;
   Unity 2019.4 text is unchanged (#260).
+- Shaders that list their variants in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.1.13, 2022.2
+  and later, so every Unity 6 build) are now written instead of refused with
+  `UnsupportedError("shader variant list")`: one `SubProgram` per distinct blob index and
+  program type, without `hw_tierNN`, checked against a composite oracle (UnityPy's type tree in
+  AssetStudio's converter, plan section 5 revision 2026-11-08a). Older shaders are unchanged
+  (#259).
 
 ### 1.0.0 - 2026-10-29
 

@@ -1,8 +1,10 @@
 // shaderToText (#242) against AssetStudio's own shader export: the golden of
 // each fixture Shader is the size and sha256 of the .shader file AssetStudio
 // c37af7d's `Exporter.ExportShader` (`ShaderConverter.Convert()`) wrote for it
-// (fixtures/assetstudio-export-goldens.json, #233, R12). Where AssetStudio
-// wrote nothing, the golden says why, and these tests check that
+// (fixtures/assetstudio-export-goldens.json, #233, R12); for a shader with
+// variants in m_PlayerSubPrograms, which c37af7d does not read, the composite
+// oracle's text (plan section 5, revision 2026-11-08a, #259). Where neither
+// wrote anything, the golden says why, and these tests check that
 // shaderToText refuses the shader instead of writing text nobody checked.
 
 import assert from "node:assert/strict";
@@ -24,6 +26,7 @@ interface ExportEntry {
   class: string;
   shader?: { size: number; sha256: string };
   exportError?: string;
+  oracle?: string;
 }
 
 const GOLDENS = new URL("../../../fixtures/assetstudio-export-goldens.json", import.meta.url);
@@ -57,7 +60,7 @@ const METAL_FS = 24;
 const SPIRV = 25;
 const DX11 = new Set([15, 16, 17, 18, 19, 20, 21, 22]);
 
-/** The program types of every variant `m_SubPrograms` lists, the ones the text holds. */
+/** The program types of every variant `m_SubPrograms` and `m_PlayerSubPrograms` list. */
 function programTypes(shader: Shader): Set<number> {
   const types = new Set<number>();
   for (const subShader of shader.m_ParsedForm.m_SubShaders) {
@@ -72,6 +75,7 @@ function programTypes(shader: Shader): Set<number> {
       ];
       for (const program of programs) {
         for (const sub of program?.m_SubPrograms ?? []) types.add(sub.m_GpuProgramType);
+        for (const sub of program?.m_PlayerSubPrograms?.flat() ?? []) types.add(sub.m_GpuProgramType);
       }
     }
   }
@@ -82,7 +86,7 @@ const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 const at = (s: (typeof SHADERS)[number]): string => `${s.fixture} Shader ${s.pathId}`;
 const WITH_TEXT = SHADERS.filter((s) => s.entry.shader);
 
-test("the export goldens list the 36 fixture Shaders, 12 with AssetStudio's text", () => {
+test("the export goldens list the 36 fixture Shaders, 17 with text, 5 of them the composite's", () => {
   assert.equal(SHADERS.length, 36);
   assert.deepEqual(
     WITH_TEXT.map((s) => s.fixture).sort(),
@@ -93,7 +97,16 @@ test("the export goldens list the 36 fixture Shaders, 12 with AssetStudio's text
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4-notypetree/ios"),
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4/android"),
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4/ios"),
+      "editor/6000.3.26f1/shader/lz4-notypetree/android",
+      "editor/6000.3.26f1/shader/lz4-notypetree/ios",
+      "editor/6000.3.26f1/shader/lz4/android",
+      "editor/6000.3.26f1/shader/lz4/ios",
+      "editor/6000.6.4f1/shader/lz4/android",
     ],
+  );
+  assert.deepEqual(
+    WITH_TEXT.filter((s) => s.entry.oracle).map((s) => s.fixture.split("/")[1]),
+    ["6000.3.26f1", "6000.3.26f1", "6000.3.26f1", "6000.3.26f1", "6000.6.4f1"],
   );
 });
 
@@ -109,7 +122,8 @@ test("the fixtures with text hold GLES 3, GLES 3.1 AEP, Vulkan and Metal program
 });
 
 for (const s of WITH_TEXT) {
-  test(`${at(s)}: shaderToText is byte-identical to AssetStudio's .shader file`, () => {
+  const oracle = s.entry.oracle ? "the composite oracle's text" : "AssetStudio's .shader file";
+  test(`${at(s)}: shaderToText is byte-identical to ${oracle}`, () => {
     const bytes = encode(shaderToText(readShader(s.fixture, s.file, s.pathId)));
     assert.equal(bytes.length, s.entry.shader!.size);
     assert.equal(sha256(bytes), s.entry.shader!.sha256);
@@ -133,15 +147,16 @@ test("2019.4's and 2020.3's Vulkan programs are both disassembled", () => {
 
 for (const s of SHADERS.filter((x) => !x.entry.shader)) {
   const windows = s.fixture.endsWith("/windows");
-  const modern = /\/6000\.[36]\./.test(s.fixture);
-  test(`${at(s)}: no golden (${modern ? "Unity 6000" : "Direct3D"}), and shaderToText refuses it`, () => {
+  const modern = !windows && /\/6000\.[36]\./.test(s.fixture);
+  test(`${at(s)}: no golden (${modern ? "Int property" : "Direct3D"}), and shaderToText refuses it`, () => {
     assert.ok(windows || modern, s.fixture);
     const shader = readShader(s.fixture, s.file, s.pathId);
     if (modern) {
-      // AssetStudio c37af7d skips every 6000+ Shader and cannot load format 23.
+      // The composite oracle runs c37af7d's converter, which has no case for
+      // an Int property (UAR/ShaderFixture's _Count).
       assert.match(
         s.entry.exportError!,
-        /ArgumentNullException|AssetStudio did not load the object/,
+        /^ShaderConverter\.ConvertSerializedShader throws ArgumentOutOfRangeException/,
       );
     } else {
       // ShaderConverter needs Windows' D3DCompiler or HLSLDecompiler for these.
@@ -153,8 +168,10 @@ for (const s of SHADERS.filter((x) => !x.entry.shader)) {
       (error: unknown) =>
         error instanceof UnsupportedError &&
         (modern
-          ? error.kind === "shader variant list" && error.found === "m_PlayerSubPrograms"
-          : error.kind === "shader program type" && error.found === "DX11VertexSM40"),
+          ? error.kind === "shader property type" && error.found === "Int"
+          : (error.kind === "shader program type" && error.found === "DX11VertexSM40") ||
+            // UAR/ShaderFixture of 6000.x: its Int property fails before its programs.
+            (error.kind === "shader property type" && error.found === "Int" && /\/6000\./.test(s.fixture))),
     );
   });
 }

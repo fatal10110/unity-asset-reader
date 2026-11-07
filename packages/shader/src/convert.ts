@@ -121,15 +121,18 @@ const HEADER =
  * (`TextEncoder`) for the file AssetStudio writes.
  *
  * Unity 2019.1 and later, as `obj.read()` reads them. A shader built by Unity
- * 2021.3.10, 2022.1.13, 2022.2 or later usually lists its variants in
- * `m_PlayerSubPrograms`, which AssetStudio's converter does not read: such a
- * shader is refused rather than written without its programs.
+ * 2021.3.10, 2022.1.13, 2022.2 or later lists its variants in
+ * `m_PlayerSubPrograms`, which AssetStudio's converter does not read: each
+ * distinct blob index and program type there is written as one `SubProgram`,
+ * without a `hw_tier`, after the variants of `m_SubPrograms` (plan section 5,
+ * revision 2026-11-08a). Their parameters (`m_ParameterBlobIndices`) are not
+ * written, as AssetStudio writes no `m_Parameters`.
  *
  * @param shader a Shader as `obj.read()` gives it
  * @returns the text
  * @throws {UnsupportedError} for a Direct3D program (DX9, DX10 level 9,
  *   DX11), which AssetStudio turns into text with Windows' D3DCompiler or
- *   HLSLDecompiler; for variants in `m_PlayerSubPrograms`; for a property of
+ *   HLSLDecompiler; for a property of
  *   type `Int` (5, Unity 2021.1+ `Integer`), on which AssetStudio fails too;
  *   for a platform AssetStudio does not know (NaCl, Flash, PSM, or a value it
  *   has no name for)
@@ -140,21 +143,6 @@ const HEADER =
  */
 export function shaderToText(shader: Shader): string {
   const form = shader.m_ParsedForm;
-  for (const subShader of form.m_SubShaders) {
-    for (const pass of subShader.m_Passes) {
-      for (const [, program] of stages(pass)) {
-        const players = program.m_PlayerSubPrograms?.reduce((n, group) => n + group.length, 0);
-        if (players) {
-          throw new UnsupportedError(
-            "shader variant list",
-            "m_PlayerSubPrograms",
-            `${players} variants of pass "${pass.m_State.m_Name}" are listed there, ` +
-              "which AssetStudio's ShaderConverter does not read",
-          );
-        }
-      }
-    }
-  }
   const programs = readPrograms(shader);
   let out = `Shader "${form.m_Name}" {\n`;
   out += propertiesText(form.m_PropInfo.m_Props);
@@ -165,6 +153,58 @@ export function shaderToText(shader: Shader): string {
   if (form.m_CustomEditorName) out += `CustomEditor "${form.m_CustomEditorName}"\n`;
   out += "}";
   return HEADER + out;
+}
+
+/** One variant to write: a blob index, the program type and the hardware tier. */
+type Variant = Pick<SerializedSubProgram, "m_BlobIndex" | "m_GpuProgramType" | "m_ShaderHardwareTier">;
+
+/**
+ * A stage's variants: those of `m_SubPrograms`, then each distinct blob index
+ * and program type of `m_PlayerSubPrograms`, its groups in order, where it
+ * first appears, as one variant of tier 0 (plan section 5, revision
+ * 2026-11-08a). The tier is what `ConvertSerializedSubPrograms` writes as
+ * `hw_tierNN` when a blob index and type has several variants; here each has
+ * one, so no `hw_tier` is written.
+ */
+function variants(program: SerializedProgram): Variant[] {
+  const out: Variant[] = [...program.m_SubPrograms];
+  const seen = new Set<string>();
+  for (const group of program.m_PlayerSubPrograms ?? []) {
+    for (const { m_BlobIndex, m_GpuProgramType } of group) {
+      const key = `${m_BlobIndex} ${m_GpuProgramType}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ m_BlobIndex, m_GpuProgramType, m_ShaderHardwareTier: 0 });
+    }
+  }
+  return out;
+}
+
+/**
+ * For a shader with variants in `m_PlayerSubPrograms`, the blob entries of
+ * each platform the text writes; otherwise `undefined`, every entry. Their
+ * blobs also hold parameter entries (`m_ParameterBlobIndices`), which do not
+ * read as programs.
+ *
+ * @throws {UnsupportedError} for a platform AssetStudio throws on
+ */
+function playerEntries(shader: Shader): Set<number>[] | undefined {
+  const passes = shader.m_ParsedForm.m_SubShaders.flatMap((s) => s.m_Passes);
+  const players = passes.some((pass) =>
+    stages(pass).some(([, program]) => program.m_PlayerSubPrograms?.some((g) => g.length > 0)),
+  );
+  if (!players) return undefined;
+  const wanted = shader.platforms.map(() => new Set<number>());
+  for (const pass of passes) {
+    if (pass.m_Type !== 0) continue;
+    for (const [, program] of stages(pass)) {
+      for (const variant of variants(program)) {
+        const i = shader.platforms.findIndex((p) => usable(p, variant.m_GpuProgramType));
+        if (i >= 0) wanted[i]!.add(variant.m_BlobIndex);
+      }
+    }
+  }
+  return wanted;
 }
 
 /** A pass's program stages, with the name ShaderLab gives each. */
@@ -193,13 +233,15 @@ export interface SubProgram {
 /**
  * Every platform's programs, by blob index: each platform's part of the blob,
  * decompressed, holds a table of entries (offset, length and, from Unity
- * 2019.3, the segment the program is in) and the programs. Exported for the
- * tests.
+ * 2019.3, the segment the program is in) and the programs. For a shader with
+ * variants in `m_PlayerSubPrograms`, only the entries the text writes are
+ * read; the others stay `undefined`. Exported for the tests.
  *
  * @throws {CorruptError} when a platform's blob does not decompress to its
  *   size, or a program's entry or bytes run past the blob
  */
 export function readPrograms(shader: Shader): (SubProgram | undefined)[][] {
+  const wanted = playerEntries(shader);
   // Before 2019.3 each of the three is one value per platform, from 2019.3 a
   // list (the segments); the entries name a segment from 2019.3 on.
   const segmented = shader.offsets.some((o) => Array.isArray(o));
@@ -225,7 +267,7 @@ export function readPrograms(shader: Shader): (SubProgram | undefined)[][] {
       const reader = new BlobReader(bytes);
       if (j === 0) entries = readEntries(reader, segmented);
       entries.forEach((entry, k) => {
-        if (entry.segment !== j) return;
+        if (entry.segment !== j || (wanted && !wanted[i]?.has(k))) return;
         reader.position = entry.offset;
         programs[k] = readSubProgram(reader);
       });
@@ -544,9 +586,10 @@ function passText(
   } else {
     out += stateText(pass.m_State);
     for (const [name, program] of stages(pass)) {
-      if (program.m_SubPrograms.length > 0) {
+      const list = variants(program);
+      if (list.length > 0) {
         out += `Program "${name}" {\n`;
-        out += subProgramsText(program.m_SubPrograms, platforms, programs);
+        out += subProgramsText(list, platforms, programs);
         out += "}\n";
       }
     }
@@ -559,7 +602,7 @@ function passText(
  * program type, each written for the first platform that runs its type.
  */
 function subProgramsText(
-  subPrograms: SerializedSubProgram[],
+  subPrograms: Variant[],
   platforms: number[],
   programs: (SubProgram | undefined)[][],
 ): string {

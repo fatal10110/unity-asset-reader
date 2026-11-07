@@ -42,7 +42,11 @@ As AssetStudio's `ShaderConverter.Convert()` writes it:
 - Per pass: its name, tags and the render state that differs from ShaderLab's defaults (blend,
   color mask, depth, culling, offset, stencil, fog), then a `Program` block per stage (`vp`, `fp`,
   `gp`, `hp`, `dp`, `rtp`) with a `SubProgram "<platform> [hw_tierNN] "` per variant, its
-  keywords, and the program in quotes after a `// hash:` line:
+  keywords, and the program in quotes after a `// hash:` line. A shader built by Unity 2021.3.10,
+  2022.1.13, 2022.2 or later (every Unity 6 build) lists its variants in `m_PlayerSubPrograms`,
+  which AssetStudio's converter does not read: each distinct blob index and program type there
+  gets one `SubProgram "<platform> "`, without `hw_tierNN`, as the composite oracle of the
+  plan's section 5 (revision 2026-11-08a) writes it; their parameters are not written:
   - OpenGL, OpenGL ES and OpenGL Core (`openGL`, `gles`, `gles3`, `glcore`): the GLSL source.
   - Metal (`metal`): the Metal source.
   - Vulkan (`vulkan`): each stage decoded from SMOL-V and disassembled to SPIR-V assembly, as
@@ -61,9 +65,6 @@ As AssetStudio's `ShaderConverter.Convert()` writes it:
 - `UnsupportedError`:
   - a Direct3D program (DX9, DX10 level 9, DX11): AssetStudio turns them into text with
     Windows' D3DCompiler or HLSLDecompiler, which do not run here;
-  - a shader that lists its variants in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.1.13,
-    2022.2 and later, so every Unity 6 build), which AssetStudio's converter does not read:
-    the text would have none of its programs;
   - a property of type `Int` (5, Unity 2021.1's `Integer`), on which AssetStudio fails;
   - a platform AssetStudio does not know (NaCl, Flash, PSM, or a number it has no name for).
 - `CorruptError` when a platform's part of the blob does not decompress to its size, or a
