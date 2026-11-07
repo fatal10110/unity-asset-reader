@@ -39,6 +39,7 @@ export type { SerializedType, TypeTreeNode } from "./serialized/TypeTree.js";
 export { ClassID, classIdName } from "./serialized/ClassID.js";
 export { ObjectReader } from "./serialized/ObjectReader.js";
 export type { PPtr, PPtrResolution } from "./classes/PPtr.js";
+export { resolveOrThrow } from "./resolve.js";
 export { readTypeTree } from "./serialized/TypeTreeReader.js";
 export type { TypeTreeObject, TypeTreeValue } from "./serialized/TypeTreeReader.js";
 export type { Quaternion, Vector3, XForm } from "./serialized/ObjectReader.js";

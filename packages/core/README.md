@@ -399,6 +399,7 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | `ResourceRef` | `{ path, offset, size }`: a byte range of a resource file (a `StreamingInfo`) |
 | `PPtr` | `{ m_FileID, m_PathID }`: a pointer as a type tree holds it |
 | `PPtrResolution` | What `env.resolve` returns: `found` with the object, or why not |
+| `resolveOrThrow(env, pptr, from, what, classId?)` | `env.resolve` for a pointer that must lead somewhere: the object, optionally checked to be of class `classId`, or an error naming the field (`what`): `ResourceNotFoundError` for a file not loaded, `CorruptError` otherwise |
 
 ### Objects
 
