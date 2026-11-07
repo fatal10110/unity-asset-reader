@@ -38,6 +38,10 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 - `formatSingle(value)` and `formatSingleInvariant(value)` write a float32 as .NET 8's
   `float.ToString()` does under en-US and invariant culture. They moved here from the mesh and
   shader packages, which both need them (#261).
+- `formatSingle` and `formatSingleInvariant` are about ten times faster: most floats are
+  settled with doubles, and only the rare float on an end of its interval or halfway between
+  two decimals takes the exact search. The output is unchanged, checked against .NET 8 on 2.7
+  million floats (#252).
 
 ### 1.2.0 - 2026-10-29
 
@@ -265,6 +269,9 @@ First release. Peer: `unity-asset-reader@^1`.
   compression (#253).
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
   is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
+- `meshToObj` writes floats about seven times faster through the next core's `formatSingle`
+  (a 100k-vertex mesh with UV0 and normals: 0.5 s instead of 3.5 s); the output is unchanged
+  (#252).
 
 ### 1.0.0 - 2026-10-29
 
@@ -322,6 +329,8 @@ First release. Peer: `unity-asset-reader@^1`.
 
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
   is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
+- Writing floats is faster through the next core's `formatSingle`; the output is unchanged
+  (#252).
 
 ### 1.0.0 - 2026-10-29
 

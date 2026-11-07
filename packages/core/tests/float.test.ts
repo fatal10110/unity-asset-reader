@@ -1,9 +1,9 @@
 // formatSingle against .NET 8's `float.ToString()` under en-US, the call
 // AssetStudio's OBJ export and ShaderConverter make. The table is .NET's own
 // output for these bit patterns (written by a .NET 8 program outside the repo,
-// as the export goldens are, R2/R12): a sample of the 2.2 million floats
-// src/float.ts was checked on, picked for the edges of the notation and of the
-// round trip.
+// as the export goldens are, R2/R12): a sample of the floats src/float.ts was
+// checked on, picked for the edges of the notation, of the round trip and of
+// its fast path.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -48,6 +48,20 @@ const DOTNET: [string, string][] = [
   ["00000001", "1E-45"], // the smallest subnormal
   ["007fffff", "1.1754942E-38"], // the largest subnormal
   ["00800000", "1.1754944E-38"], // the smallest normal
+  // The double-only path of #252 on its edges: a float on the midpoint of two
+  // shorter decimals (tie to even), the narrow interval below a power of two,
+  // and the ends of the interval.
+  ["007ffee9", "1.1754553E-38"], // 9 digits rounded to 8 land on a midpoint
+  ["01800000", "4.7019774E-38"], // narrow: the nearest is below, the next up is in
+  ["31000000", "1.8626451E-09"],
+  ["3b000000", "0.001953125"],
+  ["46800040", "16384.125"],
+  ["47000080", "32768.5"],
+  ["39800000", "0.00024414062"], // exactly halfway at 11 digits: the even one
+  ["44800100", "1024.0312"], // 1024.03125: the even one
+  ["46800120", "16384.562"],
+  ["4c000004", "33554450"], // on the end, even mantissa: it reads back
+  ["4c000005", "33554452"], // on the end, odd mantissa: it does not
   ["7f800000", "∞"],
   ["ff800000", "-∞"],
   ["7fc00000", "NaN"],
