@@ -13,10 +13,21 @@ test("emits dist/index.mjs, dist/index.cjs and dist/index.d.ts", () => {
   }
 });
 
-test("both entry points export clipCurves and muscleName", async () => {
+test("both entry points export clipCurves, muscleName and sceneToGltf", async () => {
   for (const entry of [await import(dist("index.mjs")), require(dist("index.cjs"))]) {
     assert.equal(typeof entry.clipCurves, "function");
     assert.equal(typeof entry.muscleName, "function");
+    assert.equal(typeof entry.sceneToGltf, "function");
+  }
+});
+
+test("gltf-validator is for the tests only: not a dependency, not in dist", () => {
+  const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.ok(manifest.devDependencies["gltf-validator"]);
+  for (const file of ["index.mjs", "index.cjs", "index.d.ts"]) {
+    const text = readFileSync(dist(file), "utf8");
+    // Names only the validator's code holds (comments here mention the validator).
+    assert.doesNotMatch(text, /gltf[-_]validator|validateBytes|\bdart\b/i, `dist/${file}`);
   }
 });
 

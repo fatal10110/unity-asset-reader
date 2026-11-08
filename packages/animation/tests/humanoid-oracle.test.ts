@@ -24,7 +24,7 @@ const golden = JSON.parse(
   readFileSync(new URL("../../../fixtures/humanoid-unity-goldens.json", import.meta.url), "utf8"),
 ) as { muscleNames: string[]; editors: Record<string, { clips: Record<string, Clip> }> };
 
-/** A clip binds `Left Thumb 1 Stretched` as `LeftHand.Thumb.1 Stretched` (BUILDING.md section 27). */
+/** A clip binds `Left Thumb 1 Stretched` as `LeftHand.Thumb.1 Stretched` (BUILDING.md section 28). */
 const binding = (muscle: string) =>
   muscle.replace(/^(Left|Right) (Thumb|Index|Middle|Ring|Little) /, "$1Hand.$2.");
 

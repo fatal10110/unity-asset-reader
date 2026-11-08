@@ -11,7 +11,7 @@ keys and at the midpoints between them to
 (95 muscles, body position and rotation) and every transform's resulting
 local rotation and position in `fixtures/humanoid-unity-goldens.json`.
 
-The clips' values are the authored curves of fixtures/BUILDING.md (section 27
+The clips' values are the authored curves of fixtures/BUILDING.md (section 28
 `pose`, section 24 `muscle`), evaluated by Unity's `AnimationCurve.Evaluate`;
 nothing passes through an Animator, so neither clip compression nor root
 motion baking is part of the golden. Nothing here runs this library (R12).
@@ -67,7 +67,7 @@ using UnityEngine;
 // transform's local rotation and position.
 public static class HumanoidOracle
 {
-    // fixtures/BUILDING.md section 27: muscle i at key k (times 0, 0.5, 1); never 0.
+    // fixtures/BUILDING.md section 28: muscle i at key k (times 0, 0.5, 1); never 0.
     static float V(int i, int k) { return (i % 2 == 0 ? 1f : -1f) * ((i * 5 + k * 3) % 13 + 1) / 16f; }
 
     static AnimationCurve Keys(params float[] tv)

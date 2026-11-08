@@ -42,7 +42,7 @@ const BONES = [
   "LeftUpperArm", "LeftLowerArm", "LeftHand", "RightShoulder", "RightUpperArm", "RightLowerArm",
   "RightHand",
 ];
-/** BUILDING.md section 27: the `pose` clip's muscle `i` at key `k`. */
+/** BUILDING.md section 28: the `pose` clip's muscle `i` at key `k`. */
 const poseValue = (i: number, k: number) => ((i % 2 === 0 ? 1 : -1) * (((i * 5 + k * 3) % 13) + 1)) / 16;
 
 const clips = () =>
