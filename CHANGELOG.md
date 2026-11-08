@@ -495,6 +495,16 @@ scene readers.
   2020.3 and 6000.3 matches AssetStudio's curves float32 bit for bit. The dense and constant
   curves of a clip with discrete curves (Unity 2022.3.19+, 2023.2.8+, 6000) follow all of the
   streamed ones, where AssetStudio's single `curveCount` would put them past the bindings.
+- `sceneToGltf(env, root, { clips })` writes a GameObject's scene as a binary glTF 2.0 file
+  (#306), with core's `GltfWriter`: its Transform hierarchy as nodes, each SkinnedMeshRenderer's
+  mesh with a skin (joints from `m_Bones`, inverse bind matrices from the bind poses) and its
+  blend shapes as morph targets, MeshRenderer meshes, and the clips' curves (`clipCurves()`) as
+  `CUBICSPLINE` translation, rotation, scale and weights channels from Unity's Hermite keys
+  (stepped keys held, weighted tangents as plain Hermite). Converted to glTF's right-handed space
+  as AssetStudio's `ModelConverter` converts it: the nodes and the values at the keys match its
+  output float32 bit for bit on the Unity 2019.4, 2020.3 and 6000.3 scene fixtures, the skin and
+  morph targets on 2019.4 and 2020.3 (AssetStudio reads no Unity 6000 renderer), and every editor
+  up to 6000.6 exports the same file. Humanoid muscle curves and `m_IsActive` are skipped.
 
 ## texture2ddecoder-wasm
 

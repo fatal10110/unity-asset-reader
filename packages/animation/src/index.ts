@@ -14,6 +14,7 @@ import {
   type TransformCurve,
 } from "./converter.js";
 import { customCurveResolver } from "./custom.js";
+import { writeScene } from "./gltf.js";
 import { CLASS, findTOS, Scene } from "./tos.js";
 
 export type {
@@ -128,4 +129,88 @@ export function clipCurves(env: Env, clip: ObjectReader): ClipCurves {
     ],
     events: data.m_Events,
   };
+}
+
+/** Options of {@link sceneToGltf}. */
+export interface SceneToGltfOptions {
+  /**
+   * The AnimationClips (class 74, objects of the same `env`) to write as glTF
+   * animations, each read with {@link clipCurves}. None by default.
+   */
+  clips?: ObjectReader[];
+}
+
+/**
+ * Write a GameObject's scene as a binary glTF 2.0 file (`.glb`): its
+ * Transform hierarchy as nodes, its renderers' meshes with their skins and
+ * blend shapes, and the clips as animations. AssetStudio exports the same
+ * scene as FBX (`ModelConverter`); the conversion from Unity's left-handed
+ * space is the one it applies and `meshToGltf` (unity-asset-reader-mesh)
+ * applies to the geometry: positions, translations and morph deltas get x
+ * negated, rotations y and z, bind poses are mirrored on both sides, and
+ * triangles reverse their winding.
+ *
+ * - Nodes: the root GameObject's ancestors (each the only child of the one
+ *   above, as ModelConverter keeps them) and its hierarchy by `m_Children`,
+ *   each named after its GameObject with its local position, rotation and
+ *   scale. Inactive GameObjects are written too; glTF has no visibility.
+ * - Meshes: a SkinnedMeshRenderer's mesh, or a MeshRenderer's MeshFilter
+ *   mesh, on the GameObject's node: `POSITION`, `NORMAL` (left out when a
+ *   normal is not unit length), `TEXCOORD_0`, a primitive per submesh with
+ *   triangles. No materials, tangents, colours or other UV channels.
+ * - Skins: a SkinnedMeshRenderer with `m_Bones` gets a skin whose joints are
+ *   the bones' nodes, in `m_Bones` order (the order of the vertices' bone
+ *   indices), and whose inverse bind matrices are the mesh's `m_BindPose`;
+ *   `JOINTS_0` and `WEIGHTS_0` from the mesh's bone weights. A renderer
+ *   without bones writes its mesh unskinned (upstream's fallback to
+ *   `m_BoneNameHashes` is not taken).
+ * - Blend shapes: a morph target per channel, the deltas of its last frame
+ *   (glTF has no in-between frames, so a channel's earlier frames are
+ *   dropped); the node's weights are the renderer's `m_BlendShapeWeights`
+ *   over that frame's full weight (usually 100), so 1 is the full shape.
+ * - Animations: per clip, `translation`, `rotation` (quaternion curves, or
+ *   euler curves converted as `Quaternion.Euler` does, which has no oracle:
+ *   AssetStudio converts with the native FBX SDK), `scale` and blend shape
+ *   `weights` channels on the nodes the curves' paths name, relative to the
+ *   root. Each channel is a `CUBICSPLINE` sampler from Unity's Hermite keys:
+ *   samples at the union of the components' key times, tangents Unity's
+ *   slopes (glTF scales them by the key interval as Unity does); a stepped
+ *   key (infinite slope) holds its value and jumps one float32 step before
+ *   the next key, or makes the whole channel `STEP` when every key is
+ *   stepped; weighted tangents fall back to plain Hermite (the curves carry
+ *   no weights). Skipped, as glTF has no channel for them: humanoid muscle
+ *   curves (until #318), `m_IsActive` and every other float or object
+ *   reference curve, curves whose path names no node, and a clip left
+ *   without channels.
+ *
+ * Isomorphic and sync.
+ *
+ * @param env the loaded files, holding the scene, its meshes and the clips
+ * @param root the scene's root: a GameObject (class 1), or an Animator (95)
+ *   for its GameObject
+ * @param options the clips to animate it with
+ * @returns the `.glb` file's bytes
+ * @throws {TypeError} when `root` is neither, or a clip is not an AnimationClip
+ * @throws {UnsupportedError} when a skin's bones are not one per bind pose or
+ *   not nodes of the hierarchy, a skinned mesh lacks bone weights, or a mesh
+ *   has no positions or triangles or a layout glTF cannot take
+ * @throws {CorruptError} when a mesh's indices, bone indices or blend shapes
+ *   point past its data
+ * @throws {Error} what {@link clipCurves} throws, and when a GameObject of
+ *   the hierarchy has no Transform
+ * @example
+ * const animator = env.objects.find((o) => o.type === 95)!;
+ * const clips = env.objects.filter((o) => o.type === 74);
+ * const glb = sceneToGltf(env, animator, { clips });
+ */
+export function sceneToGltf(
+  env: Env,
+  root: ObjectReader,
+  options: SceneToGltfOptions = {},
+): Uint8Array {
+  const clips = (options.clips ?? []).map((clip) => {
+    const curves = clipCurves(env, clip);
+    return { name: clip.read<AnimationClip>().m_Name, curves };
+  });
+  return writeScene(env, root, clips);
 }
