@@ -82,8 +82,8 @@ for (const sprite of env.assets("Sprite")) sprite.data.rect; // filtered and typ
   `env.assets("Texture2D", "Sprite")` keeps only those types and narrows too. Assets have no
   methods: what you can turn one into is a function that takes it.
 - **`name`, `path` and `data` are read when you first use them, then kept.** `name` is `m_Name`,
-  read only as far as that field (`""` for a class without one, or for a `GameObject` in a bundle
-  without type trees). A `Shader`'s is its parsed form's name (`"UAR/ShaderFixture"`), by
+  read only as far as that field (`""` for a class without one). Without type trees a `GameObject`
+  is named from its header, and `""` where the [GameObject reader](#classes) refuses it. A `Shader`'s is its parsed form's name (`"UAR/ShaderFixture"`), by
   AssetStudio's formula, since Unity leaves its `m_Name` empty; that reads the whole shader. A
   shader the [Shader reader](#classes) refuses or cannot fit keeps its `m_Name`, usually `""`.
   `path` is the first `m_Container` path of any loaded `AssetBundle` that points at the asset, or
