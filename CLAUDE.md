@@ -19,6 +19,7 @@ them.
 | `unity-asset-reader-audio` | `packages/audio/` | in development | AudioClip (FSB5) → WAV, pure TS. Depends on core (peer). |
 | `unity-asset-reader-spine` | `packages/spine/` | in development | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
 | `unity-asset-reader-shader` | `packages/shader/` | in development | Shader inspection text as AssetStudio writes it: GL/Metal source, SPIR-V disassembly. Pure TS. Depends on core (peer). |
+| `unity-asset-reader-animation` | `packages/animation/` | in development | AnimationClip curves as AssetStudio's `.anim` holds them: decoded streamed/dense/constant data, named paths, muscle attributes, events. Pure TS. Depends on core (peer). |
 | `texture2ddecoder-wasm` | `packages/decoder/` | published, stable | WASM bindings (emscripten, C++ submodule `texture2ddecoder/`) decoding BC/ETC/PVRTC/ASTC/ATC/Crunch textures to **BGRA**. Node + browser. |
 
 Dependencies point one way: feature packages → core. Core and `texture2ddecoder-wasm` import

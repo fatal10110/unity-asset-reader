@@ -22,6 +22,7 @@ CommonJS). For `texture2ddecoder-wasm` on its own, see its
 | `unity-asset-reader-mesh` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-audio` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-shader` | Nothing, like `unity-asset-reader`. |
+| `unity-asset-reader-animation` | Nothing, like `unity-asset-reader`. |
 
 None of them needs COOP/COEP headers or `SharedArrayBuffer`: everything is single-threaded. The
 pages work from any static host. They have to be served over HTTP; `file://` does not work.
