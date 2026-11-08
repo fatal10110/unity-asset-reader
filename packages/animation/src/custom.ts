@@ -164,6 +164,7 @@ function constraint(names: string[], type: number, attribute: number): string {
 /**
  * The Transform at `path` below `transform`, by GameObject names (upstream
  * `FindChild`): the first child of each name; `transform` itself for `""`.
+ * A `RectTransform` counts as a Transform, as upstream.
  */
 function findChild(scene: Scene, transform: ObjectReader, path: string): ObjectReader | undefined {
   let current = transform;
