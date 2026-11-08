@@ -364,6 +364,9 @@ First release. Peer: `unity-asset-reader@^1`.
   program type, without `hw_tierNN`, checked against a composite oracle (UnityPy's type tree in
   AssetStudio's converter, plan section 5 revision 2026-11-08a). Older shaders are unchanged
   (#259).
+- Tests: the composite oracle now also checks stages with several keyword variants, repeated
+  across `m_PlayerSubPrograms` groups, byte for byte, on new Unity 6000.3 and 6000.6 fixture
+  bundles (`shader-variants`); the output is unchanged (#283).
 
 ### 1.0.0 - 2026-10-29
 

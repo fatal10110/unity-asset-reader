@@ -157,6 +157,10 @@ def evidence(name, path):
         assert all(m["blendShapes"] == ["smile", "blink"] and m["frames"] == [2, 3]
                    and m["indexFormat"] == 1 for m in meshes)
         return {"meshes": meshes}
+    if "/shader-variants/" in name:
+        assert sorted(s["name"] for s in shaders) == ["UAR/ShaderVariants", "UAR/ShaderVariantsSecond"]
+        assert all(s["platforms"] == [9, 18] for s in shaders)
+        return {"shaders": sorted(shaders, key=lambda s: s["name"])}
     if "/more-plain/" in name:
         assert set(textures) == {"R8", "RG16", "RG32", "RGB48", "RGBA64", "R8_SIGNED",
                                  "RG16_SIGNED", "RGB24_SIGNED", "RGBA32_SIGNED", "R16_SIGNED",
@@ -178,6 +182,8 @@ def main():
         ("shader/lz4", "windows"), ("shader/lz4", "android"),
         # The skinned meshes (#285), typed only; their skins as make-goldens.py.
         ("mesh/lz4", "mesh-skinned"), ("mesh/lz4", "mesh-skinned-compressed"),
+        # The shader with several variants and no Int property (#283), Shader dumped too.
+        ("shader-variants/lz4", "android"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
@@ -191,7 +197,7 @@ def main():
         path = oracle.FIXTURES / name
         # A Shader's dump only where the reader's check needs it, so
         # goldens.json is unchanged.
-        if "/shader/" in name:
+        if "/shader/" in name or "/shader-variants/" in name:
             oracle.DUMPED_CLASSES[48] = "Shader"
         result["fixtures"][name] = oracle.read_fixture(path)
         oracle.DUMPED_CLASSES.pop(48, None)

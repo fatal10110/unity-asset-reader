@@ -86,8 +86,8 @@ const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 const at = (s: (typeof SHADERS)[number]): string => `${s.fixture} Shader ${s.pathId}`;
 const WITH_TEXT = SHADERS.filter((s) => s.entry.shader);
 
-test("the export goldens list the 36 fixture Shaders, 17 with text, 5 of them the composite's", () => {
-  assert.equal(SHADERS.length, 36);
+test("the export goldens list the 42 fixture Shaders, 23 with text, 11 of them the composite's", () => {
+  assert.equal(SHADERS.length, 42);
   assert.deepEqual(
     WITH_TEXT.map((s) => s.fixture).sort(),
     [
@@ -97,16 +97,19 @@ test("the export goldens list the 36 fixture Shaders, 17 with text, 5 of them th
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4-notypetree/ios"),
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4/android"),
       ...Array(2).fill("editor/2020.3.30f1/shader/lz4/ios"),
+      ...Array(2).fill("editor/6000.3.26f1/shader-variants/lz4/android"),
+      ...Array(2).fill("editor/6000.3.26f1/shader-variants/lz4/ios"),
       "editor/6000.3.26f1/shader/lz4-notypetree/android",
       "editor/6000.3.26f1/shader/lz4-notypetree/ios",
       "editor/6000.3.26f1/shader/lz4/android",
       "editor/6000.3.26f1/shader/lz4/ios",
+      ...Array(2).fill("editor/6000.6.4f1/shader-variants/lz4/android"),
       "editor/6000.6.4f1/shader/lz4/android",
     ],
   );
   assert.deepEqual(
     WITH_TEXT.filter((s) => s.entry.oracle).map((s) => s.fixture.split("/")[1]),
-    ["6000.3.26f1", "6000.3.26f1", "6000.3.26f1", "6000.3.26f1", "6000.6.4f1"],
+    [...Array(8).fill("6000.3.26f1"), ...Array(3).fill("6000.6.4f1")],
   );
 });
 

@@ -8198,6 +8198,153 @@
         }
       }
     },
+    "editor/6000.3.26f1/shader-variants/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-5158587723187274552": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4316,
+            "objectSha256": "502356eb1eb12642071d54f91b1d0c5a832743730a708a5c397672b39445d58e",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 12891,
+            "sha256": "2350f9b1599e05c2cb1a066d6f5efaa61a9cf8db6e530372d65075ff33879639",
+            "spirv": {
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
+        },
+        "-5607798724424877821": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 26276,
+            "objectSha256": "73f773715beaa1821a5fab0d71430de5635504de026cda0d368d5bda7d67afad",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 440267,
+            "sha256": "2065e0aef9f0f17937051963775151a217605a15ac7280b00fb11c1de9b98793",
+            "spirv": {
+              "c19bd8ee09ec75a07c02a66a9fb4ebed3bca8b651c917e7178b8ebc17586a71f": {
+                "encoding": 1,
+                "size": 9096,
+                "sha256": "a5276b43c3921c8618bc9aafc95a65b73a96b1c561bfb3df3185419ac03c7442"
+              },
+              "389608ef6469f41ef09b9352a90cd5cab3f438eec08cc6128c2cce66241512f0": {
+                "encoding": 1,
+                "size": 3748,
+                "sha256": "c44d590b845244c41e86c61e00cfa932eb9f540f1ca0fcb2b38e704deb47ada5"
+              },
+              "441554382fea513707bfb462286f7a9566ab92f692b04b4ef56ed86862ec307e": {
+                "encoding": 1,
+                "size": 10892,
+                "sha256": "fb554e533e9c198dbdd20e5f4e1e3313f94e74562569077ee022f76b0e25dfb5"
+              },
+              "818c56d3efbffc79233a06f5cd82b60fc5a5a092b280e295f9e2608ad3eacbc2": {
+                "encoding": 1,
+                "size": 4420,
+                "sha256": "aa2499c30899356fe96c8e9e098de116372367d5eb36ac9e6e2cde7fca346b17"
+              },
+              "b35c99046375e7942334f10e5c68ee3d9b6f49ffccf59fcd97d6005a5982db98": {
+                "encoding": 1,
+                "size": 4264,
+                "sha256": "e7665bea8ecf84595b0e93ccf6e46a04471ee1b3c0399fc319790e6fb552e9b8"
+              },
+              "b8058c73267e13aa4d9b4096f4db2b65516092f84c98867c482d6ddff3ef19e7": {
+                "encoding": 1,
+                "size": 4952,
+                "sha256": "615b2ea51cf678533cc0f34169ff6e99ba77d03955545bf3a02882e394c811e2"
+              },
+              "ac95daa142ecd4421a6d0bd7f53579ebb1a9689d3da15ead5086027d67e8f4af": {
+                "encoding": 1,
+                "size": 4292,
+                "sha256": "7237f40821d809607a86e934f06d5ee227041e62ca177f1fbf317bee1a3bc998"
+              },
+              "88b0a57cc47b96dacebd1602066be957a39e15faf5d7a87d96db89fe1cb48dc8": {
+                "encoding": 1,
+                "size": 4980,
+                "sha256": "e6dcc1bce8bde1a78a3aa2429c39867ece3277f3da06c25b0778710901161d26"
+              },
+              "c225ab9ac6fce4b7f1093e2b2929e9ed5fede29e86eb121e7047c2ce4192bf62": {
+                "encoding": 1,
+                "size": 3564,
+                "sha256": "3c47c8d9e0eb83f919fbf926948ba549fad591b6dc6857ca8d93b2cd48b695d5"
+              },
+              "d65a6571550b459c9b7c712158dee95e3d86ada525dd6aff4e2eabd490f274cc": {
+                "encoding": 1,
+                "size": 2128,
+                "sha256": "4ce2f59b359cf6fe99751562954e448703a89646423ebb4c8d9a142af02105bb"
+              },
+              "3c58366cd72a873b8e2840ce41877c969995988a384c3eb764f36c812dcd821e": {
+                "encoding": 1,
+                "size": 2452,
+                "sha256": "48a9d4afe7e03557406b26eb3380f80c16c39273342674d9d259366e33b3164b"
+              },
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/shader-variants/lz4/ios": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-5158587723187274552": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4072,
+            "objectSha256": "3d9b17d98e692a6d4900cd1ff1a00c4692ba14edc15e0b016d0b206bdd4259c5",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 2845,
+            "sha256": "5638942c111e9806371ac0516c2a4d3f563a2b70bd270d892a8fcff9f4f31706"
+          }
+        },
+        "-5607798724424877821": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 18632,
+            "objectSha256": "f4820b966b4c947d5a8c10549c37b309cbffe82a1d499be87649505c7fa4a9b3",
+            "name": ""
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 56914,
+            "sha256": "ad1fdef383bbac20bf3fdc7fcce9f478d292a98c7b29ca5798579f5674d97167"
+          }
+        }
+      }
+    },
     "editor/6000.3.26f1/shader/lz4-notypetree/android": {
       "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
         "1852339557892238971": {
@@ -8675,6 +8822,119 @@
           },
           "inputOracle": "modern-goldens.json",
           "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/shader-variants/lz4/android": {
+      "CAB-1dc8d26be8722a766953ce9d8a444e8c": {
+        "-43674278510358589": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 26368,
+            "objectSha256": "2335c643a49db66e0040ea570593f6d9ea2057b6fb09def2f946ddcb294b1e55",
+            "name": ""
+          },
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 440267,
+            "sha256": "2065e0aef9f0f17937051963775151a217605a15ac7280b00fb11c1de9b98793",
+            "spirv": {
+              "c19bd8ee09ec75a07c02a66a9fb4ebed3bca8b651c917e7178b8ebc17586a71f": {
+                "encoding": 1,
+                "size": 9096,
+                "sha256": "a5276b43c3921c8618bc9aafc95a65b73a96b1c561bfb3df3185419ac03c7442"
+              },
+              "389608ef6469f41ef09b9352a90cd5cab3f438eec08cc6128c2cce66241512f0": {
+                "encoding": 1,
+                "size": 3748,
+                "sha256": "c44d590b845244c41e86c61e00cfa932eb9f540f1ca0fcb2b38e704deb47ada5"
+              },
+              "441554382fea513707bfb462286f7a9566ab92f692b04b4ef56ed86862ec307e": {
+                "encoding": 1,
+                "size": 10892,
+                "sha256": "fb554e533e9c198dbdd20e5f4e1e3313f94e74562569077ee022f76b0e25dfb5"
+              },
+              "818c56d3efbffc79233a06f5cd82b60fc5a5a092b280e295f9e2608ad3eacbc2": {
+                "encoding": 1,
+                "size": 4420,
+                "sha256": "aa2499c30899356fe96c8e9e098de116372367d5eb36ac9e6e2cde7fca346b17"
+              },
+              "b35c99046375e7942334f10e5c68ee3d9b6f49ffccf59fcd97d6005a5982db98": {
+                "encoding": 1,
+                "size": 4264,
+                "sha256": "e7665bea8ecf84595b0e93ccf6e46a04471ee1b3c0399fc319790e6fb552e9b8"
+              },
+              "b8058c73267e13aa4d9b4096f4db2b65516092f84c98867c482d6ddff3ef19e7": {
+                "encoding": 1,
+                "size": 4952,
+                "sha256": "615b2ea51cf678533cc0f34169ff6e99ba77d03955545bf3a02882e394c811e2"
+              },
+              "ac95daa142ecd4421a6d0bd7f53579ebb1a9689d3da15ead5086027d67e8f4af": {
+                "encoding": 1,
+                "size": 4292,
+                "sha256": "7237f40821d809607a86e934f06d5ee227041e62ca177f1fbf317bee1a3bc998"
+              },
+              "88b0a57cc47b96dacebd1602066be957a39e15faf5d7a87d96db89fe1cb48dc8": {
+                "encoding": 1,
+                "size": 4980,
+                "sha256": "e6dcc1bce8bde1a78a3aa2429c39867ece3277f3da06c25b0778710901161d26"
+              },
+              "c225ab9ac6fce4b7f1093e2b2929e9ed5fede29e86eb121e7047c2ce4192bf62": {
+                "encoding": 1,
+                "size": 3564,
+                "sha256": "3c47c8d9e0eb83f919fbf926948ba549fad591b6dc6857ca8d93b2cd48b695d5"
+              },
+              "d65a6571550b459c9b7c712158dee95e3d86ada525dd6aff4e2eabd490f274cc": {
+                "encoding": 1,
+                "size": 2128,
+                "sha256": "4ce2f59b359cf6fe99751562954e448703a89646423ebb4c8d9a142af02105bb"
+              },
+              "3c58366cd72a873b8e2840ce41877c969995988a384c3eb764f36c812dcd821e": {
+                "encoding": 1,
+                "size": 2452,
+                "sha256": "48a9d4afe7e03557406b26eb3380f80c16c39273342674d9d259366e33b3164b"
+              },
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
+        },
+        "292901623296662536": {
+          "class": "Shader",
+          "input": {
+            "classId": 48,
+            "byteSize": 4300,
+            "objectSha256": "cb4aad3f7e237a7264f9d1beb0b21524768c4b2d7e1b9f7c1505e80c35688e30",
+            "name": ""
+          },
+          "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
+          "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
+          "shader": {
+            "size": 12891,
+            "sha256": "2350f9b1599e05c2cb1a066d6f5efaa61a9cf8db6e530372d65075ff33879639",
+            "spirv": {
+              "c4bd6353dc0aaae1149f200109e48b04eda1eb125303c84d2775084bc40c441c": {
+                "encoding": 1,
+                "size": 2216,
+                "sha256": "8c437d3c9931c92f6e2aade6d59b44da75b68f6972b1458076c76fac13e5fece"
+              },
+              "3c3dd41bb69e7cdad794eebbac7780d400dd492f89e97a75d00247ef76027e88": {
+                "encoding": 1,
+                "size": 676,
+                "sha256": "f54bf53729d21c0a999d7dbaf7a986a5962d702c1d8ba150d6eeaced0426cea9"
+              }
+            }
+          }
         }
       }
     },
