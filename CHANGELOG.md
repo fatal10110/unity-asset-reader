@@ -76,6 +76,26 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   trees, and now also reads one without (it threw `UnsupportedError`). It throws
   `UnsupportedError` for a Unity version before 2019.1 (use `readTypeTree()`), and for a
   6000.2+ controller with entity id parameter defaults, which no Unity version writes.
+- Hand-written readers for `GameObject`, `Transform`, `MeshFilter`, `MeshRenderer` and
+  `SkinnedMeshRenderer` (`readGameObject`, `readTransform`, `readMeshFilter`,
+  `readMeshRenderer`, `readSkinnedMeshRenderer`), Unity 2019.1 to 6000.6 (#305), with their
+  `asset.data` shapes (`GameObjectFields`, `TransformFields`, `MeshFilterFields`,
+  `MeshRendererFields`, `SkinnedMeshRendererFields`, the shared `RendererFields`). Every field
+  Unity writes, as `readTypeTree()` gives it, checked on editor-built bundles from 2019.4,
+  2020.3, 6000.3 and 6000.6, typed and not (new `scene/` fixtures, which also hold the clips
+  and avatars #304 needs, and the animator fixtures' GameObjects and Transforms), and at every
+  layout change from 2019.1 through UnityPy's TPK type trees: past AssetStudio, a
+  GameObject's `m_Tag` and `m_IsActive`, a renderer's `m_SortingLayer`, its ray tracing,
+  small mesh culling, mesh LOD and mask interaction fields (2023.2 to 6000.3), a
+  `MeshRenderer`'s `m_EnlightenVertexStream` (2020.1) and a `SkinnedMeshRenderer`'s
+  `m_RootBone`, `m_AABB` and `m_DirtyAABB`.
+  **Behavior change:** these five classes were `"Other"` in `env.assets()`, with `asset.data`
+  and `obj.read()` the type tree's result. Now `asset.type` is their class name and
+  `asset.data` their friendly shape; `obj.read()` gives the same object as before for a file
+  with type trees, and now also reads one without (it threw `UnsupportedError`). It throws
+  `UnsupportedError` for a Unity version before 2019.1 (use `readTypeTree()`) and for an editor
+  file. `RectTransform` stays `"Other"`, and `asset.name` of a `GameObject` in a bundle without
+  type trees is still `""`.
 
 ### 1.2.0 - 2026-10-29
 
