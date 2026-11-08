@@ -2286,7 +2286,7 @@ forced-flag tests remain the only Rotate90 coverage.
 ## 17. Export goldens: the AssetStudio harness (#233)
 
 Export output (Texture2D and Sprite PNGs, OBJ, WAV, TextAsset files, shader text, font and
-video files) has its own oracle: AssetStudio
+video files, animation curves) has its own oracle: AssetStudio
 itself, the behavior source of truth, at revision
 `c37af7dfcdafee93e33b5da9f0285c97998d6ae3`, executed outside the repository
 (plan section 5, R12). UnityPy stays the oracle for parsing and names the
@@ -2331,7 +2331,7 @@ What it does, all inside `<external-harness>`:
    pinned in the script) to where the GUI ships it, `x64/fmod.dll` next to the
    executable. FMOD is under FMOD's own license; it stays in the external
    directory and is never committed. No FMOD account or download is involved.
-3. Lists every Texture2D, Mesh, Shader, TextAsset, AudioClip, Sprite, Font and VideoClip of
+3. Lists every Texture2D, Mesh, Shader, TextAsset, AnimationClip, AudioClip, Sprite, Font and VideoClip of
    `goldens.json` and
    `modern-goldens.json`, with the input metadata UnityPy recorded for it, and
    copies each bundle into its own folder (AssetStudio scans the folder of what
@@ -2355,7 +2355,16 @@ What it does, all inside `<external-harness>`:
    `m_FontData` as is, `.otf` when it starts with `OTTO`, else `.ttf` (#277);
    VideoClip `Exporter.ExportVideoClip(item, dir)`, the video bytes as is,
    read from the `.resource` node of the same bundle that `m_ExternalResources`
-   names, with the extension of `m_OriginalPath` (#277). The exporters run on
+   names, with the extension of `m_OriginalPath` (#277); AnimationClip
+   `Exporter.ExportAnimationClip(item, dir)` (#304), which calls
+   `AnimationClipExtensions.Convert()`: it decodes `m_MuscleClip`, names the
+   path hashes through `FindTOS` over the loaded files (this bundle's Avatars
+   and Animators), merges the legacy curves into the clip's curve lists and
+   writes those as YAML. The `.anim`'s size and sha256 are a check only; the
+   harness then dumps the clip's curve lists and `m_Events` as Convert() left
+   them, every float as its float32 bits (the YAML is not parsed: .NET 8 under
+   en-US writes an infinite slope as the infinity sign), and the objects of
+   the clip's file AssetStudio failed to read. The exporters run on
    en-US, the culture the GUI's export thread sets
    (the CLI would use the host's, which changes the OBJ's numbers).
    Vulkan programs in SMOL-V encoding version 1 get the hybrid text of step 4b.
@@ -2406,7 +2415,16 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 programs also `spirv`, each stage by the sha256 of its SMOL-V bytes with its
 `encoding` version and the `size` and `sha256` of its SPIR-V, or the `error`
 that stops it), `font` or `video` (`size`,
-`sha256` and `extension` of the file), or `exportError`. A skinned Mesh also
+`sha256` and `extension` of the file), `anim` (`size` and `sha256` of the
+`.anim` file; `curves`, by kind `rotation`, `euler`, `position`, `scale`,
+`float` and `pptr`, each curve's `path`, a float or PPtr curve's `attribute`
+and `classId`, and its `keys`: for a PPtr curve each key's `time` bits and
+`value` pointer, otherwise one hex string, per key its time, then the value's,
+the in slope's and the out slope's components, each float32's bits as 8 hex
+digits; `compressedRotationCurves`, their count, written to the `.anim` as they
+are; `events`, each field of `m_Events`, floats as bits), or `exportError`. An
+AnimationClip entry has `unreadObjects` when AssetStudio failed to read objects
+of its file (by class). A skinned Mesh also
 has `skin`: the `boneWeights` (float32 bits) and `boneIndices` of each vertex
 in c37af7d's `m_Skin`:
 
@@ -2417,6 +2435,7 @@ in c37af7d's `m_Skin`:
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
+| 136 AnimationClip (`animation`, `animator` and `scene` bundles, sections 22 to 24) | 104 curve dumps: every clip of 2019.4, 2020.3 and 6000.3.26f1, typed and not; 2 with a `verdict` (below); and 6000.6.4f1's `legacy` and `dense` without type trees | The other 32 of the 34 in the 6000.6 bundles: with type trees `c37af7d` cannot read format 23; without them it reads the clips without `GenericBinding.metaData` (6000.5), so the bindings come out misread and `Convert()` throws (`ArgumentException`), or the object does not load. The two it exports have no binding or one whose misreading changes nothing, and match |
 | 42 Shader (`shader` and `shader-variants` bundles, section 18) | 23 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 11 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android `shader` bundles, and both shaders of the three `shader-variants` bundles (#283). The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 148 Texture2D | 105 PNG | 29 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
@@ -2440,6 +2459,21 @@ what `GetImage()` cuts instead and asserts the difference:
 | --- | --- | --- | --- |
 | 17 of `split-alpha`, cut from an ETC1 texture with an alpha texture (`alphaTexture` in the entry) | cuts the texture alone, never reads its alpha texture (`SpriteHelper.cs:15-34`) | merges the alpha texture first (#152): same red, green and blue, the alpha texture's red as alpha | `cutSprite` of the base texture alone |
 | `r_a`, `r_b` of `variant`, whose own `m_SpriteAtlas` is the variant atlas `half` (`variantAtlas`) | `AssetsManager` moves the sprite to the master atlas `rect` that packs it (`AssetsManager.cs:1060-1085`), so it cuts the full-size master texture | follows the sprite's own pointer and cuts the variant, resized as `CutImage` resizes it (#153; section 15's `CutImage` of the variant entries is its reference) | `cutSprite` of the master atlas entry |
+
+`packages/animation/tests/goldens.test.ts` compares each AnimationClip's dump
+with `clipCurves()`, float32 bit for bit. The 6000.3.26f1 `scene` bundles'
+`smile` clips, typed and not, have a `verdict`: `c37af7d`'s Renderer reader
+lacks fields Unity 6000 writes and fails on their SkinnedMeshRenderer
+(`unreadObjects`), so `CustomCurveResolver` finds no renderer and writes the
+blend shape attributes as their CRC-32 (`blendShape.42599183`), where
+unity-asset-reader reads the renderer and names them (`blendShape.smile`); the
+test hashes the names back and compares the rest. Every 2019.4 and 2020.3
+`smile` names them as unity-asset-reader does. 6000.6.4f1 has no other oracle:
+`packages/animation/tests/cross-editor.test.ts` holds each of its clips to the
+2019.4 one, as it does the 2020.3 and 6000.3 ones (object references compared
+by the name of the object they reach; the one documented difference is the
+`mixed` clip's 6000.x coefficients, a float32 step off 2019.4's, which change
+one in slope).
 
 Checks that need no AssetStudio run, in `scripts/tests/export-goldens.test.ts`:
 every PCM clip exports to `tone.wav` of section 11 to the byte, every `hello`

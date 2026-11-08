@@ -4,7 +4,7 @@
 AssetStudio (Razviar/assetstudio at REVISION) is the golden oracle for export
 output (plan section 5, R12). This script builds that revision, unmodified,
 from a local clone outside the repository, and runs on every fixture object
-of the eight exported classes:
+of the nine exported classes:
 
   Texture2D  AssetStudio.CLI  Exporter.ExportTexture2D(item, dir, ImageFormat.Png);
              the PNG it writes is decoded back to RGBA in the harness
@@ -22,6 +22,9 @@ of the eight exported classes:
   Font       AssetStudio.CLI  Exporter.ExportFont(item, dir), the .ttf or .otf file
   VideoClip  AssetStudio.CLI  Exporter.ExportVideoClip(item, dir), the file it writes
              from the bundle's .resource node, named by m_OriginalPath's extension
+  AnimationClip  AssetStudio.CLI  Exporter.ExportAnimationClip(item, dir), the .anim
+             file's size and hash, and the curves and events it was written from (see
+             "AnimationClips" below)
 
 UnityPy stays the oracle for what goes in. The objects come from the committed
 UnityPy goldens (goldens.json, modern-goldens.json), each with the input
@@ -93,6 +96,26 @@ ConvertSerializedSubPrograms writes "hw_tierNN" only for a blob index and type
 with several variants; each has one here, so the text has none. These goldens
 carry "oracle": the composite.
 
+AnimationClips (#304): ExportAnimationClip calls AnimationClipExtensions.Convert(),
+which decodes the clip's m_MuscleClip (AnimationClipConverter), names its paths
+through FindTOS over every loaded file (one bundle per job here, so the
+bundle's own Avatars and Animators), merges the legacy curves into the clip's
+curve lists and writes them as YAML. The .anim's size and sha256 are recorded
+as a check only. The values come from the clip itself after the export: the
+harness dumps its m_RotationCurves, m_EulerCurves, m_PositionCurves,
+m_ScaleCurves, m_FloatCurves and m_PPtrCurves, which Convert() replaced by what
+the .anim holds, and its m_Events, every float as its float32 bits. The YAML
+text is not parsed: .NET 8 under en-US writes an infinite slope (a stepped
+segment's) as the infinity sign. A curve's keys are one hex string, per key its
+time, then the value's, the in slope's and the out slope's components, each
+float32's bits as 8 hex digits.
+
+An AnimationClip entry also lists the objects of its file AssetStudio failed
+to read (`unreadObjects`, by class). Where that includes the SkinnedMeshRenderer
+a blend shape curve animates (6000.3: c37af7d's Renderer reader lacks Unity
+6000's fields), AssetStudio leaves the attribute as its CRC-32 and the entry
+gets a `verdict`: unity-asset-reader-animation names it from the mesh.
+
 Two kinds of Sprite get their golden and a `verdict`, where
 unity-asset-reader-texture's decodeSprite differs from GetImage() by design:
 one cut from a texture with an ETC1 split alpha texture (GetImage() never reads
@@ -140,10 +163,11 @@ TREE = "ea35788a6a2d755c8c48ad299ce8e4fcc290c6fa"
 SMOLV_REVISION = "6303e979b59153ee7007fd14e06d3fed8687b64c"
 # git rev-parse 6303e97^{tree}: the source is exactly this tree.
 SMOLV_TREE = "3486b96991f9c886b8fca6817043f571aa48c648"
-TEXTURE2D, MESH, SHADER, TEXTASSET, AUDIOCLIP, FONT, SPRITE, VIDEOCLIP = (
-    28, 43, 48, 49, 83, 128, 213, 329)
+TEXTURE2D, MESH, SHADER, TEXTASSET, ANIMATIONCLIP, AUDIOCLIP, FONT, SPRITE, VIDEOCLIP = (
+    28, 43, 48, 49, 74, 83, 128, 213, 329)
 CLASSES = {TEXTURE2D: "Texture2D", MESH: "Mesh", SHADER: "Shader", TEXTASSET: "TextAsset",
-           AUDIOCLIP: "AudioClip", FONT: "Font", SPRITE: "Sprite", VIDEOCLIP: "VideoClip"}
+           ANIMATIONCLIP: "AnimationClip", AUDIOCLIP: "AudioClip", FONT: "Font",
+           SPRITE: "Sprite", VIDEOCLIP: "VideoClip"}
 # What a Sprite whose texture has an alpha texture (ETC1 split alpha) records
 # next to its golden: unity-asset-reader differs from GetImage() there on purpose.
 ALPHA_VERDICT = ("GetImage() cuts the texture alone and never reads its alpha texture "
@@ -157,8 +181,16 @@ VARIANT_VERDICT = ("AssetStudio's AssetsManager moves a sprite whose m_SpriteAtl
                    "decodeSprite follows the sprite's own pointer and cuts the variant, resized "
                    "as CutImage resizes it (#153); the golden is compared with a cut of the "
                    "master atlas entry")
+# What an AnimationClip records next to its golden when AssetStudio could not read the
+# SkinnedMeshRenderer its blend shape curves animate (#304).
+BLENDSHAPE_VERDICT = ("c37af7d's Renderer reader fails on this file's SkinnedMeshRenderer (it "
+                      "lacks fields Unity 6000 writes; the entry's unreadObjects), so "
+                      "CustomCurveResolver finds no renderer and leaves each blend shape "
+                      "attribute as its CRC-32 (blendShape.<hash>); unity-asset-reader-animation "
+                      "reads the renderer and names it from the mesh's channel (blendShape."
+                      "<name>); the golden is compared with each name replaced by its CRC-32")
 # The output each class's entry holds.
-OUTPUTS = ["png", "obj", "wav", "bytes", "shader", "font", "video"]
+OUTPUTS = ["png", "obj", "wav", "bytes", "shader", "font", "video", "anim"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
 # extracted tree. FMOD's own license, never committed.
 FMOD = "AssetStudio.GUI/Libraries/x64/fmod.dll"
@@ -210,6 +242,9 @@ METHODS = {
               "variants in m_PlayerSubPrograms: " + COMPOSITE,
     "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
     "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)",
+    "AnimationClip": "AssetStudio.CLI.Exporter.ExportAnimationClip(item, dir), "
+                     "AnimationClipExtensions.Convert(); the clip's curve lists and m_Events "
+                     "dumped after it, floats as float32 bits",
 }
 
 HARNESS = r'''using System;
@@ -635,6 +670,60 @@ public static class Program {
         };
     }
 
+    // --- AnimationClips (#304): the curves and events Convert() left in the clip ---
+
+    static string Bits(float f) => ((uint)BitConverter.SingleToInt32Bits(f)).ToString("x8");
+
+    // A curve's keys as one hex string: per key its time, then the value's, the
+    // in slope's and the out slope's components, each float32's bits.
+    static string Keys<T>(List<Keyframe<T>> keys, Func<T, float[]> parts) where T : IYAMLExportable {
+        var sb = new StringBuilder();
+        foreach (var k in keys) {
+            sb.Append(Bits(k.time));
+            foreach (var part in new[] { k.value, k.inSlope, k.outSlope })
+                foreach (var f in parts(part)) sb.Append(Bits(f));
+        }
+        return sb.ToString();
+    }
+
+    static Dictionary<string, object> Ptr(int fileId, long pathId) => new Dictionary<string, object> {
+        ["fileId"] = fileId, ["pathId"] = pathId.ToString(CultureInfo.InvariantCulture),
+    };
+
+    static Dictionary<string, object> Vectors(Vector3Curve c) => new Dictionary<string, object> {
+        ["path"] = c.path, ["keys"] = Keys(c.curve.m_Curve, v => new[] { v.X, v.Y, v.Z }),
+    };
+
+    // What the .anim was written from: Convert() replaced the clip's curve lists.
+    static void DumpClip(AnimationClip clip, Dictionary<string, object> anim) {
+        anim["curves"] = new Dictionary<string, object> {
+            ["rotation"] = clip.m_RotationCurves.Select(c => new Dictionary<string, object> {
+                ["path"] = c.path, ["keys"] = Keys(c.curve.m_Curve, q => new[] { q.X, q.Y, q.Z, q.W }),
+            }).ToList(),
+            ["euler"] = clip.m_EulerCurves.Select(Vectors).ToList(),
+            ["position"] = clip.m_PositionCurves.Select(Vectors).ToList(),
+            ["scale"] = clip.m_ScaleCurves.Select(Vectors).ToList(),
+            ["float"] = clip.m_FloatCurves.Select(c => new Dictionary<string, object> {
+                ["path"] = c.path, ["attribute"] = c.attribute, ["classId"] = (int)c.classID,
+                ["keys"] = Keys(c.curve.m_Curve, f => new[] { f.Value }),
+            }).ToList(),
+            ["pptr"] = clip.m_PPtrCurves.Select(c => new Dictionary<string, object> {
+                ["path"] = c.path, ["attribute"] = c.attribute, ["classId"] = c.classID,
+                ["keys"] = c.curve.Select(k => new Dictionary<string, object> {
+                    ["time"] = Bits(k.time), ["value"] = Ptr(k.value.m_FileID, k.value.m_PathID),
+                }).ToList(),
+            }).ToList(),
+        };
+        // Written to the .anim as they are, not converted: checked to be none.
+        anim["compressedRotationCurves"] = clip.m_CompressedRotationCurves.Count;
+        anim["events"] = clip.m_Events.Select(e => new Dictionary<string, object> {
+            ["time"] = Bits(e.time), ["functionName"] = e.functionName, ["data"] = e.data,
+            ["objectReferenceParameter"] = Ptr(e.objectReferenceParameter.m_FileID, e.objectReferenceParameter.m_PathID),
+            ["floatParameter"] = Bits(e.floatParameter), ["intParameter"] = e.intParameter,
+            ["messageOptions"] = e.messageOptions,
+        }).ToList();
+    }
+
     // An exporter that writes one file as is: its size, hash and extension.
     static void ExportFile(Dictionary<string, object> result, string method, string output, string outDir,
             Func<bool> export) {
@@ -670,6 +759,7 @@ public static class Program {
         var exportSprite = Method("ExportSprite");
         var exportFont = Method("ExportFont");
         var exportVideoClip = Method("ExportVideoClip");
+        var exportAnimationClip = Method("ExportAnimationClip");
         var game = GameManager.GetGame(GameType.Normal);
         // "dump": only the Vulkan stages of each Shader; "export": every export.
         var dump = args[2] == "dump";
@@ -867,6 +957,27 @@ public static class Program {
                             input["dataSha256"] = Sha(data);
                             ExportFile(result, "ExportVideoClip", "video", outDir,
                                 () => (bool)exportVideoClip.Invoke(null, new object[] { item, outDir }));
+                            break;
+                        }
+                        case AnimationClip animationClip: {
+                            input["name"] = animationClip.m_Name;
+                            if (!(bool)exportAnimationClip.Invoke(null, new object[] { item, outDir })) {
+                                result["exportError"] = "ExportAnimationClip returned false";
+                                break;
+                            }
+                            var text = File.ReadAllBytes(Single(outDir));
+                            var anim = new Dictionary<string, object> { ["size"] = text.Length, ["sha256"] = Sha(text) };
+                            DumpClip(animationClip, anim);
+                            result["anim"] = anim;
+                            // The objects of the clip's file AssetStudio failed to read, by
+                            // class: Convert() names paths and attributes from them (#304).
+                            var unread = new SortedDictionary<string, int>(StringComparer.Ordinal);
+                            foreach (var info in animationClip.assetsFile.m_Objects) {
+                                if (animationClip.assetsFile.ObjectsDic.ContainsKey(info.m_PathID)) continue;
+                                var cls = ((ClassIDType)info.classID).ToString();
+                                unread[cls] = unread.GetValueOrDefault(cls) + 1;
+                            }
+                            if (unread.Count > 0) result["unreadObjects"] = unread;
                             break;
                         }
                         default:
@@ -1341,13 +1452,17 @@ def main() -> None:
         if result.get("oracle") == "composite":
             entry["oracle"] = COMPOSITE
         for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex", "alphaTexture",
-                       "variantAtlas", "skin"]:
+                       "variantAtlas", "skin", "unreadObjects"]:
             if output in result:
                 entry[output] = result[output]
         verdicts = [text for field, text in [("alphaTexture", ALPHA_VERDICT),
                                              ("variantAtlas", VARIANT_VERDICT)] if field in entry]
         if verdicts and "png" in entry:
             entry["verdict"] = "; ".join(verdicts)
+        if ("anim" in entry and "SkinnedMeshRenderer" in entry.get("unreadObjects", {})
+                and any(re.fullmatch(r"blendShape\.\d+", c["attribute"])
+                        for c in entry["anim"]["curves"]["float"])):
+            entry["verdict"] = BLENDSHAPE_VERDICT
         if ("exportError" in entry) == any(k in entry for k in OUTPUTS):
             raise SystemExit(f"{where}: want an export or an exportError, got {sorted(result)}")
         fixtures.setdefault(key, {}).setdefault(job["file"], {})[job["pathId"]] = entry
