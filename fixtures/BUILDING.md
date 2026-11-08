@@ -5265,3 +5265,237 @@ TPK layout from 2019.1 to 6000.6 filled. 2019.4.41f2 has none of the renderer
 fields from 2020.1 on, 2020.3.30f1 `m_RayTraceProcedural` and the
 `MeshRenderer`'s `m_EnlightenVertexStream`, and the 6000.x editors every field
 up to 6000.3's `m_MaskInteraction`.
+
+## 27. The `humanoid` bundles and the humanoid oracle (#318)
+
+`humanoid/lz4/humanoid` for **2019.4.41f2**, **2020.3.30f1**, **6000.3.26f1**
+and **6000.6.4f1**: one typed bundle per editor, made from code by an editor
+script, as the input of the humanoid oracle (plan section 5, revision
+2026-11-08d). Each bundle holds:
+
+- `humanoid`, the section 24 prefab (the section 22 T-pose without fingers,
+  22 GameObjects) with an `Animator` on its humanoid Avatar and no controller;
+- `human`, its Avatar, built as in section 24 (`BuildHumanAvatar`, every
+  transform but the root a human bone, twist 0.5);
+- `pose`, a humanoid clip driving every one of the 95 muscles of
+  `HumanTrait.MuscleName`, twists and fingers included, plus `RootT.xyz` and
+  `RootQ.xyzw`, each with three keys at 0, 0.5 and 1 s and no zero value:
+  muscle `i` at key `k` is `(i even ? 1 : -1) * ((5i + 3k) mod 13 + 1) / 16`.
+  The finger muscles move no bone (the humanoid has no fingers), but they are
+  in the clip and in the oracle's inputs. A clip binds a finger muscle as
+  `LeftHand.Thumb.1 Stretched`, not as `HumanTrait.MuscleName`'s
+  `Left Thumb 1 Stretched`, so the script renames those 40.
+
+Each project is a fresh copy named `uar-318-humanoid-<editor version>`,
+holding `ProjectSettings/` and `Packages/` of the section 24 project of the
+same editor and only this file under `Assets/`.
+
+`Assets/Editor/BuildHumanoid.cs`:
+
+```csharp
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEngine;
+
+// The humanoid oracle's input (#318), created from code: the section 24
+// "humanoid" prefab and its humanoid Avatar, and a clip "pose" driving every
+// muscle, RootT and RootQ with three keys each, none of them zero.
+public static class BuildHumanoid
+{
+    const string Dir = "Assets/Fixtures/humanoid";
+
+    // name, parent, local position: a T-pose, root first (section 22).
+    static readonly (string, string, Vector3)[] Bones =
+    {
+        ("humanoid", null, Vector3.zero),
+        ("Hips", "humanoid", new Vector3(0f, 1f, 0f)),
+        ("LeftUpperLeg", "Hips", new Vector3(-0.1f, -0.05f, 0f)),
+        ("LeftLowerLeg", "LeftUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("LeftFoot", "LeftLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("LeftToes", "LeftFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("RightUpperLeg", "Hips", new Vector3(0.1f, -0.05f, 0f)),
+        ("RightLowerLeg", "RightUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("RightFoot", "RightLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("RightToes", "RightFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("Spine", "Hips", new Vector3(0f, 0.1f, 0f)),
+        ("Chest", "Spine", new Vector3(0f, 0.15f, 0f)),
+        ("Neck", "Chest", new Vector3(0f, 0.25f, 0f)),
+        ("Head", "Neck", new Vector3(0f, 0.1f, 0f)),
+        ("LeftShoulder", "Chest", new Vector3(-0.05f, 0.2f, 0f)),
+        ("LeftUpperArm", "LeftShoulder", new Vector3(-0.12f, 0f, 0f)),
+        ("LeftLowerArm", "LeftUpperArm", new Vector3(-0.28f, 0f, 0f)),
+        ("LeftHand", "LeftLowerArm", new Vector3(-0.25f, 0f, 0f)),
+        ("RightShoulder", "Chest", new Vector3(0.05f, 0.2f, 0f)),
+        ("RightUpperArm", "RightShoulder", new Vector3(0.12f, 0f, 0f)),
+        ("RightLowerArm", "RightUpperArm", new Vector3(0.28f, 0f, 0f)),
+        ("RightHand", "RightLowerArm", new Vector3(0.25f, 0f, 0f)),
+    };
+
+    // Muscle i at key k (times 0, 0.5, 1); never 0. scripts/make-humanoid-goldens.py has the same.
+    static float V(int i, int k) { return (i % 2 == 0 ? 1f : -1f) * ((i * 5 + k * 3) % 13 + 1) / 16f; }
+
+    // HumanTrait.MuscleName -> the clip binding: "Left Thumb 1 Stretched" -> "LeftHand.Thumb.1 Stretched".
+    static string Binding(string muscle)
+    {
+        return Regex.Replace(muscle, "^(Left|Right) (Thumb|Index|Middle|Ring|Little) ", "$1Hand.$2.");
+    }
+
+    public static void Build()
+    {
+        Directory.CreateDirectory(Dir);
+
+        var pose = new AnimationClip { name = "pose" };
+        for (int i = 0; i < HumanTrait.MuscleCount; i++)
+            pose.SetCurve("", typeof(Animator), Binding(HumanTrait.MuscleName[i]), Keys(0f, V(i, 0), 0.5f, V(i, 1), 1f, V(i, 2)));
+        pose.SetCurve("", typeof(Animator), "RootT.x", Keys(0f, 0.125f, 0.5f, -0.0625f, 1f, 0.25f));
+        pose.SetCurve("", typeof(Animator), "RootT.y", Keys(0f, 1f, 0.5f, 1.0625f, 1f, 0.9375f));
+        pose.SetCurve("", typeof(Animator), "RootT.z", Keys(0f, -0.125f, 0.5f, 0.25f, 1f, 0.0625f));
+        var q = new[] { Quaternion.Euler(0f, 30f, 0f), Quaternion.Euler(15f, -20f, 10f), Quaternion.Euler(-10f, 45f, 5f) };
+        var axis = new[] { "x", "y", "z", "w" };
+        for (int j = 0; j < 4; j++)
+            pose.SetCurve("", typeof(Animator), "RootQ." + axis[j], Keys(0f, q[0][j], 0.5f, q[1][j], 1f, q[2][j]));
+        AssetDatabase.CreateAsset(pose, Dir + "/pose.anim");
+        Debug.Log("FIXTURE-INFO clip " + pose.name + " legacy=" + pose.legacy + " human=" + pose.humanMotion +
+            " curves=" + AnimationUtility.GetCurveBindings(pose).Length + " muscles=" + HumanTrait.MuscleCount);
+
+        var humanoid = Hierarchy(Bones);
+        var human = BuildHuman(humanoid);
+        humanoid.AddComponent<Animator>().avatar = human;
+        PrefabUtility.SaveAsPrefabAsset(humanoid, Dir + "/humanoid.prefab");
+        Object.DestroyImmediate(humanoid);
+
+        AssetDatabase.SaveAssets();
+        var dir = Path.Combine("Build", "lz4");
+        Directory.CreateDirectory(dir);
+        var build = new AssetBundleBuild
+        {
+            assetBundleName = "humanoid",
+            assetNames = new[] { "humanoid.prefab", "human.asset", "pose.anim" }.Select(x => Dir + "/" + x).ToArray(),
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression,
+            BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: lz4");
+        Debug.Log("FIXTURE-OK humanoid lz4 -> " + dir);
+    }
+
+    static GameObject Hierarchy((string, string, Vector3)[] bones)
+    {
+        var made = new Dictionary<string, Transform>();
+        foreach (var (name, parent, pos) in bones)
+        {
+            var t = new GameObject(name).transform;
+            if (parent != null) t.SetParent(made[parent], false);
+            t.localPosition = pos;
+            made[name] = t;
+        }
+        return made[bones[0].Item1].gameObject;
+    }
+
+    static Avatar BuildHuman(GameObject root)
+    {
+        var all = root.GetComponentsInChildren<Transform>();
+        var desc = new HumanDescription
+        {
+            skeleton = all.Select(t => new SkeletonBone
+            {
+                name = t.name, position = t.localPosition, rotation = t.localRotation, scale = t.localScale,
+            }).ToArray(),
+            // Every bone but the root: the transform names are HumanBodyBones names.
+            human = all.Skip(1).Select(t =>
+            {
+                var b = (HumanBodyBones)System.Enum.Parse(typeof(HumanBodyBones), t.name);
+                return new HumanBone
+                {
+                    boneName = t.name, humanName = HumanTrait.BoneName[(int)b],
+                    limit = new HumanLimit { useDefaultValues = true },
+                };
+            }).ToArray(),
+            upperArmTwist = 0.5f, lowerArmTwist = 0.5f, upperLegTwist = 0.5f, lowerLegTwist = 0.5f,
+            armStretch = 0.05f, legStretch = 0.05f, feetSpacing = 0f, hasTranslationDoF = false,
+        };
+        var avatar = AvatarBuilder.BuildHumanAvatar(root, desc);
+        avatar.name = "human";
+        Debug.Log("FIXTURE-INFO human avatar valid=" + avatar.isValid + " human=" + avatar.isHuman);
+        if (!avatar.isValid || !avatar.isHuman) throw new System.Exception("humanoid avatar refused");
+        AssetDatabase.CreateAsset(avatar, Dir + "/human.asset");
+        return avatar;
+    }
+
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var keys = new Keyframe[tv.Length / 2];
+        for (int i = 0; i < keys.Length; i++) keys[i] = new Keyframe(tv[2 * i], tv[2 * i + 1]);
+        return new AnimationCurve(keys);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildHumanoid.Build` (same
+command as section 2). The log must hold one `FIXTURE-OK humanoid lz4` line
+and these `FIXTURE-INFO` lines:
+
+```
+FIXTURE-INFO clip pose legacy=False human=True curves=102 muscles=95
+FIXTURE-INFO human avatar valid=True human=True
+```
+
+Copy only this file:
+
+```
+Build/lz4/humanoid  ->  fixtures/bundles/editor/<editor version>/humanoid/lz4/humanoid
+```
+
+Then rerun the goldens, `make-modern-goldens.py` first (it lists the
+6000.6.4f1 bundle and checks its counts, its `evidence`); `make-export-goldens.py`
+adds AssetStudio's `ExportAnimationClip` of each bundle's `pose` clip, and
+for 6000.6.4f1's an `exportError`: `c37af7d` fails on its format-23 type
+trees, as on section 24's typed build. No class is new, so
+`make-tpk-trees.py` is not rerun; no other entry changes.
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+### The humanoid oracle
+
+`scripts/make-humanoid-goldens.py` records Unity's muscle-to-bone conversion
+in `fixtures/humanoid-unity-goldens.json`, for two clips: this section's
+`pose` (on this bundle's prefab and Avatar) and section 24's `muscle` (on the
+`scene` bundle's). For each editor it makes a scratch project
+`uar-318-oracle-<editor version>` under `--work`, copying `ProjectSettings/`
+and `Packages/` from `--settings`, writes its C# (`ORACLE_CS` in the script,
+never a `.cs` file in the repository) to `Assets/Editor/HumanoidOracle.cs`,
+copies the committed typed bundles next to it and runs the editor in
+batchmode, without play mode:
+
+```
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod HumanoidOracle.Run -logFile <project>\oracle.log -uarOut <project>\oracle.json -uarBundle-pose <bundle> -uarBundle-muscle <bundle>
+```
+
+`HumanoidOracle.Run` loads each bundle with `AssetBundle.LoadFromFile`,
+instantiates its `humanoid` prefab, and at each key time of the clip and each
+midpoint between neighbouring keys builds a `HumanPose` from the clip's
+authored curves, evaluated by `AnimationCurve.Evaluate`: the 95 muscles (0
+where the clip has no curve), `bodyPosition` from `RootT` (0 where absent),
+`bodyRotation` from `RootQ` normalized (identity where absent). It hands the
+pose to `new HumanPoseHandler(avatar, root).SetHumanPose` and records every
+transform's `localPosition` and `localRotation`, root first, in
+`GetComponentsInChildren` order. No Animator runs, so neither the clip's
+compression nor root motion baking is in the golden; a port checks its own
+curve evaluation against the inputs separately. `bodyPosition` is in
+`HumanPose`'s normalized units (divided by the Avatar's human scale). The
+script writes the editor's float32 values exactly, the sha256 of each bundle
+it read, and the comparison tolerance of plan section 5 (`_tolerance`, 1e-4
+absolute per component; a quaternion matches its negation).
+
+The oracle does not build a bundle, so it may be rerun, and it reproduces the
+golden byte for byte. Through `heavy --lock unity` (it runs the four editors):
+
+```bash
+python3 scripts/make-humanoid-goldens.py --work <scratch dir on the Windows host> --settings '<section 24 project>/uar-305-scene-{version}' --unity 2019.4.41f2=<Unity.exe> --unity 2020.3.30f1=<Unity.exe> --unity 6000.3.26f1=<Unity.exe> --unity 6000.6.4f1=<Unity.exe>
+```

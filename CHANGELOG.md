@@ -484,6 +484,11 @@ scene readers.
   2020.3 and 6000.3 matches AssetStudio's curves float32 bit for bit. The dense and constant
   curves of a clip with discrete curves (Unity 2022.3.19+, 2023.2.8+, 6000) follow all of the
   streamed ones, where AssetStudio's single `curveCount` would put them past the bindings.
+- Oracle for the humanoid muscle-to-bone conversion to come (#318, no API change): Unity's own
+  `HumanPoseHandler.SetHumanPose` poses for the fixture humanoid, every muscle driven, at each
+  clip key and midpoint in all four fixture editors, recorded by
+  `scripts/make-humanoid-goldens.py` in `fixtures/humanoid-unity-goldens.json` (plan revision
+  2026-11-08d).
 
 ## texture2ddecoder-wasm
 

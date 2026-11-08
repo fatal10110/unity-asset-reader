@@ -126,7 +126,7 @@ def evidence(name, path):
         if obj.type.name in ("GameObject", "Transform", "MeshFilter", "MeshRenderer",
                              "SkinnedMeshRenderer", "Mesh"):
             scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
-        if obj.type.name == "AnimationClip" and "/animation/" in name:
+        if obj.type.name == "AnimationClip" and ("/animation/" in name or "/humanoid/" in name):
             tree = obj.read_typetree()
             parts = tree["m_MuscleClip"]["m_Clip"]["data"]
             clips.append({"name": tree["m_Name"], "legacy": tree["m_Legacy"],
@@ -205,6 +205,16 @@ def evidence(name, path):
                              "Avatar": 2}, animation
         assert [mesh["name"] for mesh in meshes] == ["skinned"]
         return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items()))}
+    if "/humanoid/" in name:
+        # The humanoid oracle's input (#318): the "humanoid" prefab (22
+        # GameObjects, an Animator on its humanoid Avatar) and the "pose" clip,
+        # 95 muscles, RootT and RootQ, three keys each.
+        assert scene == {"GameObject": 22, "Transform": 22}, scene
+        assert animation == {"AnimationClip": 1, "Animator": 1, "Avatar": 1}, animation
+        assert [(c["name"], c["legacy"], c["streamed"] + c["dense"]) for c in clips] == [
+            ("pose", False, 102)], clips
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
+                "clips": clips}
     if "/animation/" in name:
         # The animation fixtures (#302): one legacy clip, whose curves stay in
         # the curve arrays, and five Mecanim clips, whose curves land in the
@@ -260,6 +270,8 @@ def main():
         ("animation/lz4", "animation"), ("animation/lz4-notypetree", "animation"),
         # GameObject, Transform, MeshFilter, MeshRenderer, SkinnedMeshRenderer (#305).
         ("scene/lz4", "scene"), ("scene/lz4-notypetree", "scene"),
+        # The humanoid oracle's input (#318): a clip driving every muscle, typed only.
+        ("humanoid/lz4", "humanoid"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
