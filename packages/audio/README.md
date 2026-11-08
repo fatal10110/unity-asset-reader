@@ -38,15 +38,18 @@ sample, a 44-byte header, then the sample frames, interleaved, little-endian.
 |---|---|
 | `PCM16` | 16-bit, the bytes as stored (Unity's PCM compression format) |
 | `PCM8`, `PCM32` | 8-bit and 32-bit, the bytes as stored, unconverted, as Fmod5Sharp and python-fsb5 copy them |
-| `IMAADPCM` (mono, stereo) | 16-bit, decoded |
+| `IMAADPCM` | 16-bit, decoded |
 | `FADPCM` | 16-bit, decoded |
 | `GCADPCM` (mono) | 16-bit, decoded |
 
 Tested on editor-built bundles (with and without type trees, and version-stripped), which convert
 to AssetStudio's WAV byte for byte: the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and
 **6000.3.25f1** bundles, and a mono and a stereo IMAADPCM clip of **2019.4.41f2**, **2020.3.30f1**
-and **6000.3.26f1** bundles. Unity writes whole IMAADPCM frames only, so a partial last frame is
-tested on hand-built banks, as are FADPCM and GCADPCM.
+and **6000.3.26f1** bundles. Also on lz4 bundles of the same three editors, the FSB5 header paths
+Unity writes for other clips: a 37800 Hz clip (frequency chunk), 4-channel clips (channels chunk)
+and 5.1 clips (six channels in the header), PCM16 and IMAADPCM. Unity writes whole IMAADPCM frames
+only, so a partial last frame is tested on hand-built banks, as are FADPCM, GCADPCM, `PCM8` and
+`PCM32`.
 
 ## Not supported
 
@@ -54,7 +57,7 @@ Each of these throws `UnsupportedError`, naming what it found:
 
 - Vorbis ([#241](https://github.com/fatal10110/unity-asset-reader/issues/241)) and every other codec (MPEG, ATRAC9, XMA, VAG, HEVAG,
   Opus, CELT, XWMA, `PCM24`, `PCMFLOAT`).
-- IMAADPCM of more than two channels, GCADPCM of more than one.
+- GCADPCM of more than one channel.
 - An FSB5 header version above 1; a frequency id above 10 with no frequency chunk.
 - Sound that is not an FSB5 bank: an `AudioClip` from before Unity 5.0 holds its file (Ogg,
   MP3, WAV, ...) as it is, in `audioData`.

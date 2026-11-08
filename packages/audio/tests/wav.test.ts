@@ -207,12 +207,24 @@ test("IMAADPCM stereo: two headers, then 4-byte nibble groups per channel in tur
   assert.deepEqual(samples16(wav), [100, -100, 101, -93, 104, -96]);
 });
 
-test("IMAADPCM of more than two channels is refused; short data is corrupt", () => {
+test("IMAADPCM of six channels takes FMOD's multichannel layout; short data is corrupt", () => {
+  // One frame of 6 x 0x24 bytes: six Int16 first samples, six 16-bit step
+  // indices (all 0, step 7), then each channel's 2-byte group in turn.
+  const data = new Uint8Array(6 * 0x24);
+  const first = [100, -200, 300, -400, 500, -600];
+  const view = new DataView(data.buffer);
+  first.forEach((value, ch) => {
+    view.setInt16(2 * ch, value, true);
+    // The low nibble of the channel's first group: ch + 1.
+    data[24 + 2 * ch] = ch + 1;
+  });
   const six = bank({
     codec: Fsb5Codec.IMAADPCM,
-    samples: [{ channelBits: 2, sampleCount: 1, data: new Uint8Array(6 * 0x24) }],
+    samples: [{ channelBits: 2, sampleCount: 2, data }],
   });
-  assert.throws(() => fsb5ToWav(six), unsupported("IMAADPCM channel count", 6));
+  // Step 7: nibble 1 -> +1, 2 -> +3, 3 -> +4, 4 -> +7, 5 -> +8, 6 -> +10.
+  const second = [101, -197, 304, -393, 508, -590];
+  assert.deepEqual(samples16(fsb5ToWav(six)), [...first, ...second]);
   const short = single(Fsb5Codec.IMAADPCM, { sampleCount: 65, data: new Uint8Array(0x24) });
   assert.throws(() => fsb5ToWav(short), /IMAADPCM sample of 65 frames needs 72 bytes of data but has 64/);
 });

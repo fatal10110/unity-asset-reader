@@ -7828,6 +7828,454 @@
         }
       ]
     },
+    "editor/2019.4.41f2/lz4/audiohdr": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "sha256": "4ad21feccb750dac4315710815d6245b96ddf41b72b438ff1ad3282892ffff12",
+          "size": 5400
+        },
+        "CAB-f96da1a3ac0fe779f4306341e6446bda.resource": {
+          "sha256": "f1bcfe45e109c581b5bc009c59a677d68978984eefc9671ad4ff8244ff0dcaeb",
+          "size": 111392
+        }
+      },
+      "objects": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": [
+          {
+            "pathId": "-8122121886038081603",
+            "classId": 83,
+            "byteSize": 164
+          },
+          {
+            "pathId": "-8383618252683881118",
+            "classId": 83,
+            "byteSize": 164
+          },
+          {
+            "pathId": "-8509842910972635506",
+            "classId": 83,
+            "byteSize": 160
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 468
+          },
+          {
+            "pathId": "2165756370926172543",
+            "classId": 83,
+            "byteSize": 168
+          },
+          {
+            "pathId": "2532760248045659024",
+            "classId": 83,
+            "byteSize": 168
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 83,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "b23449465e3763dd19335a88ea09ae99",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AudioClip", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_LoadType", 4, 0],
+                [1, "int", "m_Channels", 4, 0],
+                [1, "int", "m_Frequency", 4, 0],
+                [1, "int", "m_BitsPerSample", 4, 0],
+                [1, "float", "m_Length", 4, 0],
+                [1, "bool", "m_IsTrackerFormat", 1, 0],
+                [1, "bool", "m_Ambisonic", 1, 16384],
+                [1, "int", "m_SubsoundIndex", 4, 0],
+                [1, "bool", "m_PreloadAudioData", 1, 0],
+                [1, "bool", "m_LoadInBackground", 1, 0],
+                [1, "bool", "m_Legacy3D", 1, 16384],
+                [1, "StreamedResource", "m_Resource", -1, 32768],
+                [2, "string", "m_Source", -1, 32769],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1],
+                [2, "UInt64", "m_Offset", 8, 1],
+                [2, "UInt64", "m_Size", 8, 1],
+                [1, "int", "m_CompressionFormat", 4, 16384]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-8122121886038081603": {
+              "value": {
+                "m_Name": "surround-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "41344",
+                  "m_Size": "48192"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "-8383618252683881118": {
+              "value": {
+                "m_Name": "quad-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "32160",
+                  "m_Size": "9184"
+                },
+                "m_CompressionFormat": 2
+              }
+            },
+            "-8509842910972635506": {
+              "value": {
+                "m_Name": "quad-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "0",
+                  "m_Size": "32160"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "audiohdr",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "2532760248045659024"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8122121886038081603"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8509842910972635506"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "2165756370926172543"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8383618252683881118"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/audiohdr/mono37800-pcm.wav",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "2165756370926172543"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-adpcm.wav",
+                    {
+                      "preloadIndex": 4,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-8383618252683881118"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-pcm.wav",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-8509842910972635506"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-adpcm.wav",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "2532760248045659024"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-pcm.wav",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-8122121886038081603"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "audiohdr",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "2165756370926172543": {
+              "value": {
+                "m_Name": "mono37800-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 1,
+                "m_Frequency": 37800,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3dd8b836",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "89536",
+                  "m_Size": "8128"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "2532760248045659024": {
+              "value": {
+                "m_Name": "surround-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "97664",
+                  "m_Size": "13728"
+                },
+                "m_CompressionFormat": 2
+              }
+            }
+          },
+          "names": {
+            "-8122121886038081603": "surround-pcm",
+            "-8383618252683881118": "quad-adpcm",
+            "-8509842910972635506": "quad-pcm",
+            "1": "audiohdr",
+            "2165756370926172543": "mono37800-pcm",
+            "2532760248045659024": "surround-adpcm"
+          },
+          "rawData": {
+            "-8122121886038081603": {
+              "classId": 83,
+              "name": "surround-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 48192,
+              "sha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+            },
+            "-8383618252683881118": {
+              "classId": 83,
+              "name": "quad-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 9184,
+              "sha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+            },
+            "-8509842910972635506": {
+              "classId": 83,
+              "name": "quad-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 32160,
+              "sha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+            },
+            "2165756370926172543": {
+              "classId": 83,
+              "name": "mono37800-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 8128,
+              "sha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+            },
+            "2532760248045659024": {
+              "classId": 83,
+              "name": "surround-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 13728,
+              "sha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/audiohdr/mono37800-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "2165756370926172543"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-8383618252683881118"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-8509842910972635506"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "2532760248045659024"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-8122121886038081603"
+        }
+      ]
+    },
     "editor/2019.4.41f2/lz4/font": {
       "signature": "UnityFS",
       "formatVersion": 7,
@@ -52448,6 +52896,454 @@
         }
       ]
     },
+    "editor/2020.3.30f1/lz4/audiohdr": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2020.3.30f1",
+      "files": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "sha256": "58b5efa5c43f5e9f4092e9e466bf7b24e3e5de2a9a0ebdeb8f01862b86febc07",
+          "size": 5400
+        },
+        "CAB-f96da1a3ac0fe779f4306341e6446bda.resource": {
+          "sha256": "d96795988d8619f1c789e25f1560c1aba0678225176d6686c68364bc6bf792d9",
+          "size": 111392
+        }
+      },
+      "objects": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": [
+          {
+            "pathId": "-2405115209147083544",
+            "classId": 83,
+            "byteSize": 164
+          },
+          {
+            "pathId": "-2793825881307328923",
+            "classId": 83,
+            "byteSize": 168
+          },
+          {
+            "pathId": "-5534239237589278531",
+            "classId": 83,
+            "byteSize": 164
+          },
+          {
+            "pathId": "-8646877544363165655",
+            "classId": 83,
+            "byteSize": 168
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 468
+          },
+          {
+            "pathId": "1963493556990142968",
+            "classId": 83,
+            "byteSize": 160
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "formatVersion": 22,
+          "unityVersion": "2020.3.30f1",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 83,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "57a6370a001d5449abd37c2184ec5138",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AudioClip", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_LoadType", 4, 0],
+                [1, "int", "m_Channels", 4, 0],
+                [1, "int", "m_Frequency", 4, 0],
+                [1, "int", "m_BitsPerSample", 4, 0],
+                [1, "float", "m_Length", 4, 0],
+                [1, "bool", "m_IsTrackerFormat", 1, 0],
+                [1, "bool", "m_Ambisonic", 1, 16384],
+                [1, "int", "m_SubsoundIndex", 4, 0],
+                [1, "bool", "m_PreloadAudioData", 1, 0],
+                [1, "bool", "m_LoadInBackground", 1, 0],
+                [1, "bool", "m_Legacy3D", 1, 16384],
+                [1, "StreamedResource", "m_Resource", -1, 32768],
+                [2, "string", "m_Source", -1, 32769],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1],
+                [2, "FileSize", "m_Offset", 8, 1],
+                [2, "UInt64", "m_Size", 8, 1],
+                [1, "int", "m_CompressionFormat", 4, 16384]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-2405115209147083544": {
+              "value": {
+                "m_Name": "quad-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "70048",
+                  "m_Size": "9184"
+                },
+                "m_CompressionFormat": 2
+              }
+            },
+            "-2793825881307328923": {
+              "value": {
+                "m_Name": "mono37800-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 1,
+                "m_Frequency": 37800,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3dd8b836",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "61920",
+                  "m_Size": "8128"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "-5534239237589278531": {
+              "value": {
+                "m_Name": "surround-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "13728",
+                  "m_Size": "48192"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "-8646877544363165655": {
+              "value": {
+                "m_Name": "surround-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "0",
+                  "m_Size": "13728"
+                },
+                "m_CompressionFormat": 2
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "audiohdr",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8646877544363165655"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2405115209147083544"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "1963493556990142968"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2793825881307328923"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5534239237589278531"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/audiohdr/mono37800-pcm.wav",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-2793825881307328923"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-adpcm.wav",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-2405115209147083544"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-pcm.wav",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "1963493556990142968"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-adpcm.wav",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-8646877544363165655"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-pcm.wav",
+                    {
+                      "preloadIndex": 4,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-5534239237589278531"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "audiohdr",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "1963493556990142968": {
+              "value": {
+                "m_Name": "quad-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": true,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "79232",
+                  "m_Size": "32160"
+                },
+                "m_CompressionFormat": 0
+              }
+            }
+          },
+          "names": {
+            "-2405115209147083544": "quad-adpcm",
+            "-2793825881307328923": "mono37800-pcm",
+            "-5534239237589278531": "surround-pcm",
+            "-8646877544363165655": "surround-adpcm",
+            "1": "audiohdr",
+            "1963493556990142968": "quad-pcm"
+          },
+          "rawData": {
+            "-2405115209147083544": {
+              "classId": 83,
+              "name": "quad-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 9184,
+              "sha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+            },
+            "-2793825881307328923": {
+              "classId": 83,
+              "name": "mono37800-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 8128,
+              "sha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+            },
+            "-5534239237589278531": {
+              "classId": 83,
+              "name": "surround-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 48192,
+              "sha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+            },
+            "-8646877544363165655": {
+              "classId": 83,
+              "name": "surround-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 13728,
+              "sha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+            },
+            "1963493556990142968": {
+              "classId": 83,
+              "name": "quad-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 32160,
+              "sha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/audiohdr/mono37800-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-2793825881307328923"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-2405115209147083544"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "1963493556990142968"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-8646877544363165655"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-5534239237589278531"
+        }
+      ]
+    },
     "editor/2020.3.30f1/lz4/font": {
       "signature": "UnityFS",
       "formatVersion": 7,
@@ -92439,6 +93335,454 @@
           "path": "assets/fixtures/adpcm/tone-adpcm.wav",
           "file": "CAB-333a25f4ea19566c1a144e5e562221f1",
           "pathId": "5347681364058335587"
+        }
+      ]
+    },
+    "editor/6000.3.26f1/lz4/audiohdr": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.3.26f1",
+      "files": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "sha256": "c68db2df8b88c30412fe9f08610590616f65421eba9582011781c515a982f13b",
+          "size": 4740
+        },
+        "CAB-f96da1a3ac0fe779f4306341e6446bda.resource": {
+          "sha256": "61315f112a2cbb1ef2decc1db9e0473a4ad3ba7fe2c71400fbad8c89faee4fc2",
+          "size": 111392
+        }
+      },
+      "objects": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": [
+          {
+            "pathId": "-5892188951707943365",
+            "classId": 83,
+            "byteSize": 168
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 468
+          },
+          {
+            "pathId": "1402354457679396384",
+            "classId": 83,
+            "byteSize": 160
+          },
+          {
+            "pathId": "1771165743573361443",
+            "classId": 83,
+            "byteSize": 168
+          },
+          {
+            "pathId": "7655883280247509112",
+            "classId": 83,
+            "byteSize": 164
+          },
+          {
+            "pathId": "8505327954294842418",
+            "classId": 83,
+            "byteSize": 164
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+          "formatVersion": 22,
+          "unityVersion": "6000.3.26f1",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 83,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "57a6370a001d5449abd37c2184ec5138",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AudioClip", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_LoadType", 4, 0],
+                [1, "int", "m_Channels", 4, 0],
+                [1, "int", "m_Frequency", 4, 0],
+                [1, "int", "m_BitsPerSample", 4, 0],
+                [1, "float", "m_Length", 4, 0],
+                [1, "bool", "m_IsTrackerFormat", 1, 0],
+                [1, "bool", "m_Ambisonic", 1, 16384],
+                [1, "int", "m_SubsoundIndex", 4, 0],
+                [1, "bool", "m_PreloadAudioData", 1, 0],
+                [1, "bool", "m_LoadInBackground", 1, 0],
+                [1, "bool", "m_Legacy3D", 1, 16384],
+                [1, "StreamedResource", "m_Resource", -1, 32768],
+                [2, "string", "m_Source", -1, 32769],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1],
+                [2, "FileSize", "m_Offset", 8, 1],
+                [2, "UInt64", "m_Size", 8, 1],
+                [1, "int", "m_CompressionFormat", 4, 16384]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-5892188951707943365": {
+              "value": {
+                "m_Name": "mono37800-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 1,
+                "m_Frequency": 37800,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3dd8b836",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": false,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "0",
+                  "m_Size": "8128"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "audiohdr",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8505327954294842418"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5892188951707943365"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "1402354457679396384"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "1771165743573361443"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "7655883280247509112"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/audiohdr/mono37800-pcm.wav",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-5892188951707943365"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-adpcm.wav",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "8505327954294842418"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/quad-pcm.wav",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "1402354457679396384"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-adpcm.wav",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "1771165743573361443"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/audiohdr/surround-pcm.wav",
+                    {
+                      "preloadIndex": 4,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "7655883280247509112"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "audiohdr",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "1402354457679396384": {
+              "value": {
+                "m_Name": "quad-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": false,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "8128",
+                  "m_Size": "32160"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "1771165743573361443": {
+              "value": {
+                "m_Name": "surround-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": false,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "40288",
+                  "m_Size": "13728"
+                },
+                "m_CompressionFormat": 2
+              }
+            },
+            "7655883280247509112": {
+              "value": {
+                "m_Name": "surround-pcm",
+                "m_LoadType": 0,
+                "m_Channels": 6,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e39c278",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": false,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "54016",
+                  "m_Size": "48192"
+                },
+                "m_CompressionFormat": 0
+              }
+            },
+            "8505327954294842418": {
+              "value": {
+                "m_Name": "quad-adpcm",
+                "m_LoadType": 0,
+                "m_Channels": 4,
+                "m_Frequency": 22050,
+                "m_BitsPerSample": 16,
+                "m_Length": "f32:3e3b3ee7",
+                "m_IsTrackerFormat": false,
+                "m_Ambisonic": false,
+                "m_SubsoundIndex": 0,
+                "m_PreloadAudioData": false,
+                "m_LoadInBackground": false,
+                "m_Legacy3D": true,
+                "m_Resource": {
+                  "m_Source": "archive:/CAB-f96da1a3ac0fe779f4306341e6446bda/CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+                  "m_Offset": "102208",
+                  "m_Size": "9184"
+                },
+                "m_CompressionFormat": 2
+              }
+            }
+          },
+          "names": {
+            "-5892188951707943365": "mono37800-pcm",
+            "1": "audiohdr",
+            "1402354457679396384": "quad-pcm",
+            "1771165743573361443": "surround-adpcm",
+            "7655883280247509112": "surround-pcm",
+            "8505327954294842418": "quad-adpcm"
+          },
+          "rawData": {
+            "-5892188951707943365": {
+              "classId": 83,
+              "name": "mono37800-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 8128,
+              "sha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+            },
+            "1402354457679396384": {
+              "classId": 83,
+              "name": "quad-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 32160,
+              "sha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+            },
+            "1771165743573361443": {
+              "classId": 83,
+              "name": "surround-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 13728,
+              "sha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+            },
+            "7655883280247509112": {
+              "classId": 83,
+              "name": "surround-pcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 48192,
+              "sha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+            },
+            "8505327954294842418": {
+              "classId": 83,
+              "name": "quad-adpcm",
+              "source": "CAB-f96da1a3ac0fe779f4306341e6446bda.resource",
+              "size": 9184,
+              "sha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/audiohdr/mono37800-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "-5892188951707943365"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "8505327954294842418"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/quad-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "1402354457679396384"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-adpcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "1771165743573361443"
+        },
+        {
+          "path": "assets/fixtures/audiohdr/surround-pcm.wav",
+          "file": "CAB-f96da1a3ac0fe779f4306341e6446bda",
+          "pathId": "7655883280247509112"
         }
       ]
     },

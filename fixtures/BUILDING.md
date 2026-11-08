@@ -858,7 +858,8 @@ Three more bundles per editor, `audio`, `font` and `video`, built with
 into the variant folders of sections 3 and 7 next to the bundles already there;
 the manifest bundle of this build is not copied. A fourth bundle, `adpcm`, came
 later from projects of its own, with 6000.3.26f1 in place of 6000.3.25f1 (see
-[ADPCM clips](#adpcm-clips-251)).
+[ADPCM clips](#adpcm-clips-251)), and a fifth, `audiohdr`, lz4 only, for the
+FSB5 header paths of other clips (see [Header paths](#header-paths-289)).
 
 | Bundle | Objects | Where the bytes are |
 |---|---|---|
@@ -866,6 +867,7 @@ later from projects of its own, with 6000.3.26f1 in place of 6000.3.25f1 (see
 | `font` | one Font (dynamic, font data included), with the Material and the 0x0 "Font Texture" the importer makes | the TrueType file, inline in `m_FontData` |
 | `video` | one VideoClip, imported without transcoding | the WebM file as it went in, in the bundle's `.resource` node |
 | `adpcm` | two IMA ADPCM AudioClips: `tone-adpcm` (mono) and `stereo-adpcm` | an FSB5 bank each, in the bundle's `.resource` node |
+| `audiohdr` | five AudioClips: `mono37800-pcm`, `quad-pcm`, `quad-adpcm`, `surround-pcm` and `surround-adpcm` | an FSB5 bank each, in the bundle's `.resource` node |
 
 The dynamic font's "Font Texture" has no image data at all (0x0, no `.resS`),
 so it gets no texture golden; see [`README.md`](README.md#oracle-notes).
@@ -1137,6 +1139,164 @@ clips cannot reach stay covered by the hand-built banks only: a partial last
 frame, since Unity writes none, and a step index byte above 88 (read as u8 and
 clamped to 88, where vgmstream reads it signed), since Unity's encoder writes
 only 0 to 88.
+
+### Header paths (#289)
+
+The `audiohdr` bundle holds five AudioClips whose FSB5 sample headers take
+paths the `audio` and `adpcm` clips do not: a `FREQUENCY` chunk, a `CHANNELS`
+chunk and the six-channel value of the header's channel bits, each read by
+`readFsb5()` and checked against AssetStudio's WAV
+(`packages/audio/tests/header-fixtures.test.ts`). Editors: 2019.4.41f2,
+2020.3.30f1 and 6000.3.26f1, `lz4` only (the issue's choice; the header does
+not depend on the type tree), so 3 files, about 170 KB.
+
+A probe came first, in a 6000.3.26f1 project (`uar-289-probe-6000.3.26f1`)
+holding eight clips: the five below and `mono12000-pcm`, `mono12000-adpcm` and
+`mono37800-adpcm`, built once into one `lz4` bundle and read with UnityPy
+1.25.3. What Unity writes, `Preserve Sample Rate`, `DecompressOnLoad`, every
+bank FSB5 version 1 with one sample:
+
+| Clip | Codec | Header | Kept |
+|---|---|---|---|
+| `mono12000-pcm`, `mono12000-adpcm` | PCM16, IMAADPCM | frequency id 3, no chunk: 12000 Hz is in FMOD's id table | no, the id table is reached already |
+| `mono37800-pcm` | PCM16 | frequency id 0 and a `FREQUENCY` chunk of 37800 | yes |
+| `mono37800-adpcm` | IMAADPCM | the same header as `mono37800-pcm` | no, nothing new |
+| `quad-pcm`, `quad-adpcm` | PCM16, IMAADPCM | channel bits 0 (mono) and a `CHANNELS` chunk of 4 | yes |
+| `surround-pcm`, `surround-adpcm` | PCM16, IMAADPCM | channel bits 2 (6 channels), no chunk | yes |
+
+So Unity writes a `FREQUENCY` chunk only for a rate outside the id table, a
+`CHANNELS` chunk only for a channel count other than 1, 2, 6 or 8, and no other
+chunk for PCM16 or IMAADPCM. The three editors write the same headers.
+
+IMA ADPCM of four and six channels is not laid out as mono and stereo are
+(each channel's 4-byte header, then 4-byte groups taking turns between the
+channels). A frame is still 0x24 bytes per channel, but it holds first every
+channel's `Int16` first sample, then every channel's step index as a 16-bit
+word, then 2-byte groups of 4 nibbles taking turns between the channels.
+Fmod5Sharp refuses more than two channels; this layout is read off the bytes
+and FMOD's decode, and `decodeImaAdpcm()` follows it. AssetStudio's WAV for
+every clip is FMOD's decode,
+4000 frames for PCM16 and 4032 (63 whole IMA ADPCM frames) for IMAADPCM, and
+`fsb5ToWav()` equals it byte for byte. What Unity does not write for these
+clips stays on the hand-built banks: FADPCM, GCADPCM, `PCM8` and `PCM32`, a
+partial last IMA ADPCM frame, a step index above 88, and a `CHANNELS` chunk
+before a `DSPCOEFF` one.
+
+| File | Bytes | sha256 |
+|---|---|---|
+| `mono37800-pcm.wav` | 8044 | `4ae80bf7d99019c8f6501cb5cfa12274ea122fe93cf2f6b0155251a05af0d7ba` |
+| `quad-pcm.wav` | 32044 | `3dfca246a3cdc242df9da8771cc87b380710298822b786c0212a15d943a3ea89` |
+| `quad-adpcm.wav` | 32044 | `3dfca246a3cdc242df9da8771cc87b380710298822b786c0212a15d943a3ea89` |
+| `surround-pcm.wav` | 48044 | `4cfd28eed6cf47512117999d4bf9ac7758414f01a5f66deff1b91f6a6a43f4b1` |
+| `surround-adpcm.wav` | 48044 | `4cfd28eed6cf47512117999d4bf9ac7758414f01a5f66deff1b91f6a6a43f4b1` |
+
+Each WAV is 4000 frames of 16-bit sines, channel `k` at 440 + 110 `k` Hz and
+amplitude 12000 - 1500 `k`, so a channel swap or mix shows; a `-pcm` and an
+`-adpcm` WAV of the same layout are the same bytes. They are byte-exact from
+`gen_audiohdr.py` with Python 3.12 (standard library only):
+
+```bash
+python3 gen_audiohdr.py <project>/Assets/Fixtures/audiohdr
+```
+
+The probe passed the eight names as arguments.
+
+`gen_audiohdr.py`:
+
+```python
+import hashlib, math, pathlib, struct, sys, wave
+
+out = pathlib.Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
+# Without names: the five clips the bundles hold (section 11, "Header paths").
+names = sys.argv[2:] or ["mono37800-pcm", "quad-pcm", "quad-adpcm", "surround-pcm", "surround-adpcm"]
+FRAMES = 4000
+
+# name -> (rate, channel count); channel k is a sine of 440 + 110 k Hz at
+# amplitude 12000 - 1500 k, so a channel swap or mix shows in the output.
+CLIPS = {
+    "mono12000": (12000, 1),
+    "mono37800": (37800, 1),
+    "quad": (22050, 4),
+    "surround": (22050, 6),
+}
+
+def frames(rate, channels):
+    return b"".join(
+        struct.pack("<%dh" % channels, *(
+            round((12000 - 1500 * k) * math.sin(2 * math.pi * (440 + 110 * k) * i / rate))
+            for k in range(channels)))
+        for i in range(FRAMES))
+
+for name in names:
+    rate, channels = CLIPS[name.rsplit("-", 1)[0]]
+    with wave.open(str(out / (name + ".wav")), "wb") as w:
+        w.setnchannels(channels); w.setsampwidth(2); w.setframerate(rate)
+        w.writeframes(frames(rate, channels))
+    data = (out / (name + ".wav")).read_bytes()
+    print(name + ".wav", len(data), hashlib.sha256(data).hexdigest())
+```
+
+Create a project per editor named `uar-289-audio-<editor version>`, with
+`ProjectSettings/` and `Packages/` copied from the `uar-251-adpcm-<editor
+version>` project above, and only the five WAVs and this file under `Assets/`.
+
+`Assets/Editor/BuildAudioHdr.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// AudioClips for the FSB5 header paths of #289: an odd sample rate and more
+// than two channels, PCM and IMA ADPCM, from generated WAVs.
+public static class BuildAudioHdr
+{
+    const string Dir = "Assets/Fixtures/audiohdr";
+
+    public static void Build()
+    {
+        var paths = Directory.GetFiles(Dir, "*.wav");
+        System.Array.Sort(paths, System.StringComparer.Ordinal);
+        for (int i = 0; i < paths.Length; i++)
+        {
+            paths[i] = paths[i].Replace('\\', '/');
+            Audio(paths[i]);
+        }
+        var builds = new[] {
+            new AssetBundleBuild { assetBundleName = "audiohdr", assetNames = paths },
+        };
+        var dir = Path.Combine("Build", "audiohdr-lz4");
+        Directory.CreateDirectory(dir);
+        var m = BuildPipeline.BuildAssetBundles(dir, builds,
+            BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: audiohdr lz4");
+        Debug.Log("FIXTURE-OK audiohdr lz4 -> " + dir);
+    }
+
+    static void Audio(string path)
+    {
+        var imp = (AudioImporter)AssetImporter.GetAtPath(path);
+        var s = imp.defaultSampleSettings;
+        s.compressionFormat = path.EndsWith("-adpcm.wav")
+            ? AudioCompressionFormat.ADPCM : AudioCompressionFormat.PCM;
+        s.loadType = AudioClipLoadType.DecompressOnLoad;
+        s.sampleRateSetting = AudioSampleRateSetting.PreserveSampleRate;
+        imp.defaultSampleSettings = s;
+        imp.forceToMono = false;
+        imp.SaveAndReimport();
+        var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+        Debug.Log("FIXTURE-CLIP " + path + " " + clip.channels + " ch " + clip.frequency
+            + " Hz " + clip.samples + " frames");
+    }
+}
+```
+
+Build with `-executeMethod BuildAudioHdr.Build` (same command as section 2),
+once per project. The log must hold one `FIXTURE-OK audiohdr lz4` line and a
+`FIXTURE-CLIP` line per clip with its channels, rate and frames. Copy only
+`Build/audiohdr-lz4/audiohdr` to `fixtures/bundles/editor/<editor
+version>/lz4/`. Then rerun `make-goldens.py` and `make-export-goldens.py`
+(section 17).
 
 ## 12. The `sprite` bundles (#34)
 
@@ -2110,7 +2270,7 @@ in c37af7d's `m_Skin`:
 | Objects | Golden | Why not |
 | --- | --- | --- |
 | 37 Mesh (`main` bundles; `mesh` bundles, section 20) | 29 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 2 in the 6000.6 `mesh-skinned` bundles: `c37af7d` cannot read SerializedFile format 23 at all. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
-| 36 AudioClip (`audio` and `adpcm` bundles, section 11) | 36 WAV | |
+| 51 AudioClip (`audio`, `adpcm` and `audiohdr` bundles, section 11) | 51 WAV | |
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |

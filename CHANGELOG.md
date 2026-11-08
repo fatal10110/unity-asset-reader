@@ -318,6 +318,12 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 - The IMAADPCM decode is checked against editor-built clips: a mono and a stereo clip of
   2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 bundles convert to AssetStudio's WAV byte for byte
   (#251).
+- IMAADPCM of more than two channels converts to WAV instead of throwing `UnsupportedError`,
+  in FMOD's layout for it (first samples, then step indices, then 2-byte nibble groups per
+  channel in turn), which Fmod5Sharp does not decode. Checked with editor-built clips of
+  2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 that reach the FSB5 header paths Unity writes besides
+  the plain one: a 37800 Hz clip (frequency chunk), 4-channel (channels chunk) and 5.1 clips,
+  PCM16 and IMAADPCM, each converting to AssetStudio's WAV byte for byte (#289).
 
 ### 1.0.0 - 2026-10-29
 

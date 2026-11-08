@@ -39,9 +39,9 @@ for (const name of FIXTURES) {
   test(`${name}: readAudioClip equals the golden dump, read() the golden audio bytes`, () => {
     const tree = goldenTree(name, ClassID.AudioClip);
     const objects = objectsOf(name, ClassID.AudioClip);
-    // A PCM clip and a Vorbis one, or the mono and stereo ADPCM clips
-    // (fixtures/BUILDING.md section 11).
-    assert.equal(objects.length, 2);
+    // A PCM clip and a Vorbis one, the mono and stereo ADPCM clips, or the five
+    // header-path clips of an audiohdr bundle (fixtures/BUILDING.md section 11).
+    assert.equal(objects.length, name.endsWith("/audiohdr") ? 5 : 2);
     for (const { env, reader, dump, enableTypeTree } of objects) {
       assert.ok(dump, `no golden dump for AudioClip ${reader.pathId}`);
       const clip = readAudioClip(reader);
