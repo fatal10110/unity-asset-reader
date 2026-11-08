@@ -407,6 +407,41 @@ test("accessor data glTF cannot hold throws UnsupportedError", () => {
   assert.throws(() => gltf.addAccessor({ data: clamped, type: "VEC4" }), {
     message: /Uint8ClampedArray/,
   });
+  assert.throws(
+    () => gltf.addAccessor({ data: new Float32Array(4), type: "VEC4", normalized: true }),
+    { message: /32-bit components.*only 8- and 16-bit integer components/ },
+  );
+  // Vertex attributes are 4-byte aligned: 3-byte and 6-byte elements need padding.
+  assert.throws(
+    () => gltf.addAccessor({ data: new Uint8Array(6), type: "VEC3", target: "ARRAY_BUFFER" }),
+    { message: /VEC3 of 8-bit components, 3 bytes.*multiple of 4 bytes/ },
+  );
+  assert.throws(
+    () => gltf.addAccessor({ data: new Int16Array(3), type: "VEC3", target: "ARRAY_BUFFER" }),
+    { message: /VEC3 of 16-bit components, 6 bytes/ },
+  );
+  // 4-byte elements, and index data, are fine.
+  gltf.addAccessor({ data: new Uint8Array(8), type: "VEC4", target: "ARRAY_BUFFER" });
+  gltf.addAccessor({ data: new Uint16Array(3), type: "SCALAR", target: "ELEMENT_ARRAY_BUFFER" });
+});
+
+test("a rotation channel of normalized 16-bit quaternions is valid", async () => {
+  const gltf = new GltfWriter("normalized");
+  const node = gltf.addNode({ name: "spun" });
+  gltf.addScene([node]);
+  const input = gltf.addAccessor({ data: new Float32Array([0, 1]), type: "SCALAR", bounds: true });
+  const output = gltf.addAccessor({
+    data: new Int16Array([0, 0, 0, 32767, 0, 0, 23170, 23170]),
+    type: "VEC4",
+    normalized: true,
+  });
+  gltf.addAnimation({
+    channels: [{ sampler: 0, target: { node, path: "rotation" } }],
+    samplers: [{ input, output }],
+  });
+  const glb = gltf.toGlb();
+  await assertValid(glb);
+  assert.deepEqual(readGlb(glb).json.accessors[output].normalized, true);
 });
 
 test("a file breaking a glTF rule throws UnsupportedError from toGlb()", () => {
@@ -499,17 +534,84 @@ test("a file breaking a glTF rule throws UnsupportedError from toGlb()", () => {
     [
       "a LINEAR output not one per keyframe",
       (g) => animate(g, "LINEAR", 2, 9),
-      /sampler 0 output: 3 values for 2 keyframes \(one per keyframe and target\)/,
+      /channel 0 scale output: 3 values for 2 keyframes \(one per keyframe, 2\)/,
+    ],
+    [
+      "a TRS output of a multiple of the keyframes",
+      (g) => animate(g, "LINEAR", 2, 12),
+      /channel 0 scale output: 4 values for 2 keyframes \(one per keyframe, 2\)/,
     ],
     [
       "a CUBICSPLINE output not 3 per keyframe",
-      (g) => animate(g, "CUBICSPLINE", 2, 6),
-      /sampler 0 output: 2 values for 2 keyframes \(3 per keyframe/,
+      (g) => animate(g, "CUBICSPLINE", 2, 12),
+      /channel 0 scale output: 4 values for 2 keyframes \(3 times one per keyframe .*, 6\)/,
     ],
     [
       "a CUBICSPLINE sampler with one keyframe",
       (g) => animate(g, "CUBICSPLINE", 1, 9),
-      /sampler 0 output: 3 values for 1 keyframes \(.*at least 2 keyframes\)/,
+      /sampler 0 input: 1 keyframes \(CUBICSPLINE needs 2\)/,
+    ],
+    [
+      "a weights output not one per keyframe and morph target",
+      (g, a) => {
+        const targets = [{ POSITION: a.POSITION }, { POSITION: a.POSITION }];
+        g.addMesh({ primitives: [{ attributes: { POSITION: a.POSITION }, targets }] });
+        g.addNode({ mesh: 0 });
+        const weights = g.addAccessor({ data: new Float32Array(2), type: "SCALAR" });
+        channel(g, "weights", weights);
+      },
+      /channel 0 weights output: 2 values for 2 keyframes \(2 \(one per morph target\) per keyframe, 4\)/,
+    ],
+    [
+      "a weights channel on a mesh without morph targets",
+      (g, a) => {
+        g.addMesh({ primitives: [{ attributes: { POSITION: a.POSITION } }] });
+        g.addNode({ mesh: 0 });
+        channel(g, "weights", g.addAccessor({ data: new Float32Array(2), type: "SCALAR" }));
+      },
+      /channel 0 node: 0 \(a weights channel needs a node whose mesh has morph targets\)/,
+    ],
+    [
+      "a rotation output of VEC3",
+      (g) => {
+        g.addNode({});
+        channel(g, "rotation", a(g, 6));
+      },
+      /channel 0 rotation output: VEC3 \(rotation takes VEC4\)/,
+    ],
+    [
+      "a translation output of normalized integers",
+      (g) => {
+        g.addNode({});
+        const shorts = new Int16Array(6);
+        channel(g, "translation", g.addAccessor({ data: shorts, type: "VEC3", normalized: true }));
+      },
+      /channel 0 translation output: component type 5122 \(translation takes FLOAT\)/,
+    ],
+    [
+      "a rotation output of integers not normalized",
+      (g) => {
+        g.addNode({});
+        channel(g, "rotation", g.addAccessor({ data: new Int16Array(8), type: "VEC4" }));
+      },
+      /rotation output: component type 5122 \(rotation takes FLOAT or normalized/,
+    ],
+    [
+      "sampler input not FLOAT",
+      (g) => {
+        const t = g.addAccessor({ data: new Uint16Array([0, 1]), type: "SCALAR", bounds: true });
+        g.addNode({});
+        g.addAnimation({
+          channels: [{ sampler: 0, target: { node: 0, path: "scale" } }],
+          samplers: [{ input: t, output: a(g, 6) }],
+        });
+      },
+      /sampler 0 input: accessor 2 \(keyframe times are FLOAT SCALAR\)/,
+    ],
+    [
+      "node weights without a mesh",
+      (g) => g.addNode({ weights: [1] }),
+      /node 0 weights: 1 \(a node with weights needs a mesh\)/,
     ],
     [
       "an animation without samplers",
@@ -537,6 +639,19 @@ test("a file breaking a glTF rule throws UnsupportedError from toGlb()", () => {
 /** A VEC3 float accessor of `floats` components (zeros). */
 function a(gltf: GltfWriter, floats: number): number {
   return gltf.addAccessor({ data: new Float32Array(floats), type: "VEC3" });
+}
+
+/** An animation of node 0's `path` from `output`, over 2 LINEAR keyframes. */
+function channel(
+  gltf: GltfWriter,
+  path: "translation" | "rotation" | "scale" | "weights",
+  output: number,
+): void {
+  const input = gltf.addAccessor({ data: new Float32Array([0, 1]), type: "SCALAR", bounds: true });
+  gltf.addAnimation({
+    channels: [{ sampler: 0, target: { node: 0, path } }],
+    samplers: [{ input, output }],
+  });
 }
 
 /** An animation of one scale sampler: `keys` keyframes, `floats` output components. */

@@ -19,6 +19,17 @@ const TARGETS = { ARRAY_BUFFER: 34962, ELEMENT_ARRAY_BUFFER: 34963 } as const;
 // Components per element of each accessor type.
 const WIDTHS = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 } as const;
 
+// Component type FLOAT (glTF 2.0 spec, accessor.componentType).
+const FLOAT = 5126;
+
+// The output type of each animation channel path (glTF 2.0 spec, Animations).
+const PATH_TYPES = {
+  translation: "VEC3",
+  rotation: "VEC4",
+  scale: "VEC3",
+  weights: "SCALAR",
+} as const;
+
 // The GLB container (glTF 2.0 spec, GLB File Format): "glTF", version 2, chunks "JSON" and "BIN\0".
 const GLB_MAGIC = 0x46546c67;
 const CHUNK_JSON = 0x4e4f534a;
@@ -52,7 +63,10 @@ export interface GltfAccessor {
    * other data (inverse bind matrices, animation keyframes).
    */
   target?: "ARRAY_BUFFER" | "ELEMENT_ARRAY_BUFFER";
-  /** Integer components stand for 0 to 1 (or -1 to 1), as `WEIGHTS_0` or `COLOR_0` may. */
+  /**
+   * 8- or 16-bit integer components stand for 0 to 1 (or -1 to 1), as
+   * `WEIGHTS_0` or `COLOR_0` may.
+   */
   normalized?: boolean;
   /**
    * Write the per-component `min` and `max`, which glTF requires of `POSITION`
@@ -106,14 +120,19 @@ export interface GltfSkin {
 
 /** One keyframe sampler of a {@link GltfAnimation}. Values are accessor indices. */
 export interface GltfAnimationSampler {
-  /** Keyframe times in seconds: SCALAR floats, strictly increasing, written with `bounds`. */
+  /** Keyframe times in seconds: FLOAT SCALAR, strictly increasing, written with `bounds`. */
   input: number;
   /**
    * `LINEAR` (the default) and `STEP` take one output value per keyframe;
    * `CUBICSPLINE` three (in-tangent, value, out-tangent) and at least 2 keyframes.
    */
   interpolation?: "LINEAR" | "STEP" | "CUBICSPLINE";
-  /** The values: VEC3 translation or scale, VEC4 rotation, SCALAR weights (per morph target). */
+  /**
+   * The values, as many per keyframe as the channel's path takes: one FLOAT
+   * VEC3 for translation or scale, one VEC4 for rotation, one SCALAR per
+   * morph target of the node's mesh for weights. Rotation and weights may
+   * also be normalized 8- or 16-bit integers.
+   */
   output: number;
 }
 
@@ -192,7 +211,10 @@ export class GltfWriter {
    * @returns the accessor's index
    * @throws {UnsupportedError} when `data` holds no element or not a whole
    *   number of them, is not one of the {@link GltfComponentArray} classes, or
-   *   holds a NaN or infinite float
+   *   holds a NaN or infinite float; when `normalized` is set on float or
+   *   32-bit components; when an `ARRAY_BUFFER` element is not a multiple of
+   *   4 bytes (glTF aligns vertex attributes to 4 bytes, so a VEC3 of 8-bit
+   *   or 16-bit components, for one, needs padding this writer does not add)
    */
   addAccessor(accessor: GltfAccessor): number {
     const { data, type } = accessor;
@@ -210,7 +232,7 @@ export class GltfWriter {
     let componentType: number;
     let set: (at: number, value: number, littleEndian: boolean) => void;
     if (data instanceof Float32Array) {
-      componentType = 5126;
+      componentType = FLOAT;
       set = view.setFloat32;
       const bad = data.findIndex((value) => !Number.isFinite(value));
       if (bad >= 0) {
@@ -243,6 +265,20 @@ export class GltfWriter {
       );
     }
     const size = data.BYTES_PER_ELEMENT;
+    if (accessor.normalized && size > 2) {
+      throw new UnsupportedError(
+        "glTF accessor normalized",
+        `${size * 8}-bit components`,
+        "only 8- and 16-bit integer components can be normalized",
+      );
+    }
+    if (accessor.target === "ARRAY_BUFFER" && (width * size) % 4 !== 0) {
+      throw new UnsupportedError(
+        "glTF accessor alignment",
+        `${type} of ${size * 8}-bit components, ${width * size} bytes`,
+        "an ARRAY_BUFFER element needs a multiple of 4 bytes",
+      );
+    }
     for (let i = 0; i < data.length; i++) set.call(view, i * size, data[i]!, true);
 
     this.accessors.push({
@@ -295,11 +331,14 @@ export class GltfWriter {
    *   2.0 spec: an index past what was added; an empty list (primitives,
    *   joints, channels, samplers, scene nodes); a node skin without a mesh;
    *   morph target counts differing between a mesh's primitives, or from the
-   *   length of its or its node's `weights`; a skin whose inverse bind
-   *   matrices are not one per joint; an animation sampler whose input is not
-   *   written with `bounds`, or whose output count does not fit its input's
-   *   (a multiple of it, of 3 times it for `CUBICSPLINE`, which needs 2
-   *   keyframes); a NaN or infinite TRS or weight
+   *   length of its or its node's `weights`; node `weights` without a mesh;
+   *   a skin whose inverse bind matrices are not one per joint; an animation
+   *   sampler whose input is not FLOAT SCALAR written with `bounds`, or a
+   *   `CUBICSPLINE` one with fewer than 2 keyframes; a channel whose sampler
+   *   output does not fit its path (see {@link GltfAnimationSampler.output}):
+   *   the wrong type or component type, or not exactly that many values per
+   *   keyframe (3 times as many for `CUBICSPLINE`); a weights channel on a
+   *   node whose mesh has no morph targets; a NaN or infinite TRS or weight
    */
   toGlb(): Uint8Array {
     this.check();
@@ -436,6 +475,9 @@ export class GltfWriter {
       for (const key of ["translation", "rotation", "scale", "weights"] as const) {
         finite(`${where} ${key}`, n[key]);
       }
+      if (n.weights && n.mesh === undefined) {
+        fail(`${where} weights`, `${n.weights.length}`, "a node with weights needs a mesh");
+      }
       const mesh = n.mesh === undefined ? undefined : this.meshes[n.mesh];
       if (n.weights && mesh && n.weights.length !== targetCount(mesh, `mesh ${n.mesh}`)) {
         fail(`${where} weights`, `${n.weights.length}`, `one per morph target of mesh ${n.mesh}`);
@@ -459,27 +501,67 @@ export class GltfWriter {
       const where = `animation ${i}`;
       nonEmpty(`${where} channels`, a.channels);
       nonEmpty(`${where} samplers`, a.samplers);
-      a.channels.forEach((c, k) => {
-        ref(`${where} channel ${k} sampler`, c.sampler, a.samplers.length, "samplers");
-        ref(`${where} channel ${k} node`, c.target.node, this.nodes.length, "nodes");
-      });
       a.samplers.forEach((s, k) => {
         accessor(`${where} sampler ${k} input`, s.input);
         accessor(`${where} sampler ${k} output`, s.output);
         const input = this.accessors[s.input]!;
-        const output = this.accessors[s.output]!.count;
+        if (input.componentType !== FLOAT || input.type !== "SCALAR") {
+          fail(
+            `${where} sampler ${k} input`,
+            `accessor ${s.input}`,
+            "keyframe times are FLOAT SCALAR",
+          );
+        }
         if (!input.min) {
           fail(`${where} sampler ${k} input`, `accessor ${s.input}`, "written without bounds");
         }
-        const cubic = s.interpolation === "CUBICSPLINE";
-        const per = cubic ? 3 * input.count : input.count;
-        if (output % per !== 0 || (cubic && input.count < 2)) {
+        if (s.interpolation === "CUBICSPLINE" && input.count < 2) {
+          fail(`${where} sampler ${k} input`, `${input.count} keyframes`, "CUBICSPLINE needs 2");
+        }
+      });
+      a.channels.forEach((c, k) => {
+        ref(`${where} channel ${k} sampler`, c.sampler, a.samplers.length, "samplers");
+        ref(`${where} channel ${k} node`, c.target.node, this.nodes.length, "nodes");
+        const { path } = c.target;
+        const s = a.samplers[c.sampler]!;
+        const input = this.accessors[s.input]!;
+        const output = this.accessors[s.output]!;
+        const at = `${where} channel ${k} ${path} output`;
+        let per = 1;
+        if (path === "weights") {
+          const node = this.nodes[c.target.node]!;
+          const mesh = node.mesh === undefined ? undefined : this.meshes[node.mesh];
+          per = mesh ? targetCount(mesh, `mesh ${node.mesh}`) : 0;
+          if (per === 0) {
+            fail(
+              `${where} channel ${k} node`,
+              String(c.target.node),
+              "a weights channel needs a node whose mesh has morph targets",
+            );
+          }
+        }
+        const type = PATH_TYPES[path];
+        if (output.type !== type) fail(at, output.type, `${path} takes ${type}`);
+        const float = output.componentType === FLOAT;
+        if (!float && (path === "translation" || path === "scale" || !output.normalized)) {
           fail(
-            `${where} sampler ${k} output`,
-            `${output} values for ${input.count} keyframes`,
+            at,
+            `component type ${output.componentType}`,
+            path === "translation" || path === "scale"
+              ? `${path} takes FLOAT`
+              : `${path} takes FLOAT or normalized 8- or 16-bit integers`,
+          );
+        }
+        const cubic = s.interpolation === "CUBICSPLINE";
+        const expected = input.count * per * (cubic ? 3 : 1);
+        if (output.count !== expected) {
+          const each = per > 1 ? `${per} (one per morph target)` : "one";
+          fail(
+            at,
+            `${output.count} values for ${input.count} keyframes`,
             cubic
-              ? "3 per keyframe and target, at least 2 keyframes"
-              : "one per keyframe and target",
+              ? `3 times ${each} per keyframe (in-tangent, value, out-tangent), ${expected}`
+              : `${each} per keyframe, ${expected}`,
           );
         }
       });
