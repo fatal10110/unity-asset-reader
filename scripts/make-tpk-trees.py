@@ -13,7 +13,7 @@ Output: fixtures/tpk-trees.json, `classes[<class id>][<first version>]`, each
 tree in pre-order as `[level, type, name, byteSize, metaFlag]` (the goldens'
 node form). Run with the oracle venv:
 
-    .venv-oracle/bin/python scripts/make-tpk-trees.py 43
+    .venv-oracle/bin/python scripts/make-tpk-trees.py 43 90 91 95 221
 """
 import json
 import pathlib
@@ -44,6 +44,11 @@ def nodes(tree, root):
     return out
 
 
+def release(version):
+    """`2020.3.43f1`: TPK's UnityVersion str() drops the patch, which merges patch backports."""
+    return f"{version.major}.{version.minor}.{version.build}{version.type.name}{version.type_number}"
+
+
 def main(class_ids):
     tree = get_typetree()
     classes = {}
@@ -56,7 +61,7 @@ def main(class_ids):
         # The last tree that starts at or before the floor holds at the floor.
         start = max(i for i, (v, _) in enumerate(trees) if (v.major, v.minor) <= FLOOR)
         classes[str(class_id)] = {
-            str(version): nodes(tree, info.ReleaseRootNode) for version, info in trees[start:]
+            release(version): nodes(tree, info.ReleaseRootNode) for version, info in trees[start:]
         }
     data = {
         "_oracle": f"UnityPy {UnityPy.__version__} (TPK)",
