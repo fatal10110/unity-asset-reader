@@ -49,7 +49,8 @@ and **6000.3.26f1** bundles. Also on lz4 bundles of the same three editors, the 
 Unity writes for other clips: a 37800 Hz clip (frequency chunk), 4-channel clips (channels chunk)
 and 5.1 clips (six channels in the header), PCM16 and IMAADPCM. Unity writes whole IMAADPCM frames
 only, so a partial last frame is tested on hand-built banks, as are FADPCM, GCADPCM, `PCM8` and
-`PCM32`.
+`PCM32`: Unity writes `PCM16` for 8-bit, 24-bit, 32-bit integer and 32-bit float source WAVs alike
+(checked on the same three editors).
 
 ## Not supported
 
