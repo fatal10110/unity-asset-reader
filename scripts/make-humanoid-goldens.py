@@ -2,7 +2,7 @@
 """Record Unity's humanoid muscle-to-bone conversion as goldens (#318).
 
 For the humanoid muscle-to-bone conversion only, the oracle is the Unity editor
-(plan section 5, revision 2026-11-08d). In each fixture editor this script
+(plan section 5, revision 2026-11-08e). In each fixture editor this script
 opens a scratch project outside the repository, loads the COMMITTED typed
 bundles with `AssetBundle.LoadFromFile`, instantiates their `humanoid` prefab
 and, for each humanoid fixture clip, feeds the clip's muscle values at its

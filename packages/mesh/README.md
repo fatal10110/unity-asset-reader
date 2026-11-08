@@ -54,7 +54,9 @@ none of them.
 ## What the glTF holds
 
 AssetStudio exports models as FBX, not glTF, so `meshToGltf()` follows no upstream; its geometry
-is the OBJ's, and the tests check it against `meshToObj()` and the Khronos glTF validator.
+is the OBJ's, and the tests check it against `meshToObj()` and the Khronos glTF validator. The
+file is written with `unity-asset-reader`'s `GltfWriter`, which builds nodes, skins, morph
+targets and animations too; this package writes none of those yet.
 
 - One `.glb` file (glTF 2.0, binary): one scene, one node and one mesh, each named after the
   `Mesh`, its data in the file's own binary chunk.

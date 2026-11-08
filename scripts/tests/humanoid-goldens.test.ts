@@ -1,6 +1,6 @@
 // The humanoid oracle's golden (#318): Unity's HumanPoseHandler.SetHumanPose
 // results, recorded by scripts/make-humanoid-goldens.py (plan section 5,
-// revision 2026-11-08d). Checks its shape and that it was made from the
+// revision 2026-11-08e). Checks its shape and that it was made from the
 // committed bundles and the authored clip values of fixtures/BUILDING.md.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";

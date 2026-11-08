@@ -5271,7 +5271,7 @@ up to 6000.3's `m_MaskInteraction`.
 `humanoid/lz4/humanoid` for **2019.4.41f2**, **2020.3.30f1**, **6000.3.26f1**
 and **6000.6.4f1**: one typed bundle per editor, made from code by an editor
 script, as the input of the humanoid oracle (plan section 5, revision
-2026-11-08d). Each bundle holds:
+2026-11-08e). Each bundle holds:
 
 - `humanoid`, the section 24 prefab (the section 22 T-pose without fingers,
   22 GameObjects) with an `Animator` on its humanoid Avatar and no controller;
