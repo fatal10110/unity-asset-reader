@@ -5212,7 +5212,9 @@ bundles' entries gain their GameObjects' and Transforms' dumps; no other entry
 changes. `make-modern-goldens.py` checks the 6000.6 bundles' counts (its
 `evidence`). `make-tpk-trees.py` adds the five classes' trees (it rewrites
 the whole file, so every class id is passed), and `make-export-goldens.py`
-adds the `skinned` Mesh of each bundle.
+adds the `skinned` Mesh of each bundle: AssetStudio's OBJ and skin for all but
+6000.6.4f1's typed build, whose format-23 type trees c37af7d fails on (it
+reads the build without them).
 
 ```bash
 <modern-oracle>/bin/python scripts/make-modern-goldens.py

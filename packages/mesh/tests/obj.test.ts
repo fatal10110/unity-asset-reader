@@ -54,15 +54,16 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 
-test("the export goldens have an OBJ for 29 of the 37 fixture Meshes", () => {
+test("the export goldens have an OBJ for 36 of the 45 fixture Meshes", () => {
   // Each main bundle's triangle, detail and compressed (fixtures/BUILDING.md
-  // section 20), skinned and skinned-compressed (#285); the six basevertex
-  // meshes have none (#257), nor the two 6000.6 skinned ones, which c37af7d
-  // cannot read (format 23).
-  assert.equal(ALL.length, 37);
-  assert.equal(MESHES.length, 29);
+  // section 20), skinned and skinned-compressed (#285), the scene bundles'
+  // skinned mesh (#305, section 24); the six basevertex meshes have none
+  // (#257), nor the three 6000.6 typed skinned ones, whose format-23 type
+  // trees c37af7d cannot read (it reads the scene build without them).
+  assert.equal(ALL.length, 45);
+  assert.equal(MESHES.length, 36);
   const without = ALL.filter(({ entry }) => !entry.obj);
-  assert.equal(without.length, 8);
+  assert.equal(without.length, 9);
   for (const { fixture, entry } of without) {
     assert.match(
       entry.exportError!,
