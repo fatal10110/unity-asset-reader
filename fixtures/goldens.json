@@ -28618,6 +28618,329 @@
         }
       ]
     },
+    "editor/2019.4.41f2/signed-eac/android": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2019.4.41f2",
+      "files": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "sha256": "4414b10c6c764b773767453785be68edb0e91d2b44163c38a7632d5508100e8d",
+          "size": 5336
+        }
+      },
+      "objects": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": [
+          {
+            "pathId": "-8189961022302785183",
+            "classId": 28,
+            "byteSize": 624
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 248
+          },
+          {
+            "pathId": "2452150551095139037",
+            "classId": 28,
+            "byteSize": 368
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "formatVersion": 21,
+          "unityVersion": "2019.4.41f2",
+          "targetPlatform": 13,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "512dc6156c2d621c9f03b4db6490f569",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ForcedFallbackFormat", 4, 0],
+                [1, "bool", "m_DownscaleFallback", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IgnoreMasterTextureLimit", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 1],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "unsigned int", "offset", 4, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-8189961022302785183": {
+              "value": {
+                "m_Name": "44_EAC_RG_SIGNED",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 512,
+                "m_TextureFormat": 44,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_IsPreProcessed": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 0,
+                "image data": "hex:8628249924b6dfff972062f62f62f62fa525000924b6dfff972062f62f62f62fc625000924b6dfff972062f62f62f62fef126db249b6dfff972062f62f62f62f10126db249b6dfff972062f62f62f62f3a256db249000924972062f62f62f62f5b256db249000924972062f62f62f62f7c256db249000924972062f62f62f62f8628249924b6dfffde2266f66f66f66fa525000924b6dfffde2266f66f66f66fc625000924b6dfffde2266f66f66f66fef126db249b6dfffde2266f66f66f66f10126db249b6dfffde2266f66f66f66f3a256db249000924de2266f66f66f66f5b256db249000924de2266f66f66f66f7c256db249000924de2266f66f66f66f8628249924b6dfff232266f66f66f66fa525000924b6dfff232266f66f66f66fc625000924b6dfff232266f66f66f66fef126db249b6dfff232266f66f66f66f10126db249b6dfff232266f66f66f66f3a256db249000924232266f66f66f66f5b256db249000924232266f66f66f66f7c256db249000924232266f66f66f66f8425000924b6dfff6a20667667667667a525000924b6dfff6a20667667667667c625000924b6dfff6a20667667667667ef126db249b6dfff6a2066766766766710126db249b6dfff6a206676676676673a256db2490009246a206676676676675b256db2490009246a206676676676677c256db2490009246a20667667667667",
+                "m_StreamData": {
+                  "offset": 0,
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "android",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8189961022302785183"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "2452150551095139037"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "2452150551095139037"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-8189961022302785183"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "android",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "2452150551095139037": {
+              "value": {
+                "m_Name": "42_EAC_R_SIGNED",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 256,
+                "m_TextureFormat": 42,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_IsPreProcessed": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 0,
+                "image data": "hex:8628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db249000924",
+                "m_StreamData": {
+                  "offset": 0,
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            }
+          },
+          "names": {
+            "-8189961022302785183": "44_EAC_RG_SIGNED",
+            "1": "android",
+            "2452150551095139037": "42_EAC_R_SIGNED"
+          },
+          "textures": {
+            "-8189961022302785183": {
+              "name": "44_EAC_RG_SIGNED",
+              "format": 44,
+              "width": 32,
+              "height": 16,
+              "imageSize": 512,
+              "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b",
+              "rgbaSha256": "aef9e65dc7d57984e67c3e31730c847ef6874d3cef729f1942fcbe555a1d1e6c"
+            },
+            "2452150551095139037": {
+              "name": "42_EAC_R_SIGNED",
+              "format": 42,
+              "width": 32,
+              "height": 16,
+              "imageSize": 256,
+              "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49",
+              "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "2452150551095139037"
+        },
+        {
+          "path": "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "-8189961022302785183"
+        }
+      ]
+    },
     "editor/2019.4.41f2/spine/lz4-notypetree/skeletons": {
       "signature": "UnityFS",
       "formatVersion": 7,
@@ -67755,6 +68078,341 @@
           "path": "assets/fixtures/shader/uar-second.shader",
           "file": "CAB-1dc8d26be8722a766953ce9d8a444e8c",
           "pathId": "8824481709471347674"
+        }
+      ]
+    },
+    "editor/2020.3.30f1/signed-eac/android": {
+      "signature": "UnityFS",
+      "formatVersion": 7,
+      "unityVersion": "5.x.x",
+      "unityRevision": "2020.3.30f1",
+      "files": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "sha256": "1df3c90d607a1f8a17b9bca99297f8be966442aae95ee620d522551b23e08a42",
+          "size": 5476
+        }
+      },
+      "objects": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": [
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 248
+          },
+          {
+            "pathId": "5037857617709236087",
+            "classId": 28,
+            "byteSize": 636
+          },
+          {
+            "pathId": "7997057137500425309",
+            "classId": 28,
+            "byteSize": 380
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "formatVersion": 22,
+          "unityVersion": "2020.3.30f1",
+          "targetPlatform": 13,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "0d08414cfd5bdb0d22792011bda9ab26",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "int", "m_ForcedFallbackFormat", 4, 0],
+                [1, "bool", "m_DownscaleFallback", 1, 0],
+                [1, "bool", "m_IsAlphaChannelOptional", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "unsigned int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_MipsStripped", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_IgnoreMasterTextureLimit", 1, 0],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "vector", "m_PlatformBlob", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 1],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "UInt64", "offset", 8, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "1": {
+              "value": {
+                "m_Name": "android",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "5037857617709236087"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "7997057137500425309"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "7997057137500425309"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "5037857617709236087"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "android",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "5037857617709236087": {
+              "value": {
+                "m_Name": "44_EAC_RG_SIGNED",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 512,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 44,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 0,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:8628249924b6dfff972062f62f62f62fa525000924b6dfff972062f62f62f62fc625000924b6dfff972062f62f62f62fef126db249b6dfff972062f62f62f62f10126db249b6dfff972062f62f62f62f3a256db249000924972062f62f62f62f5b256db249000924972062f62f62f62f7c256db249000924972062f62f62f62f8628249924b6dfffde2266f66f66f66fa525000924b6dfffde2266f66f66f66fc625000924b6dfffde2266f66f66f66fef126db249b6dfffde2266f66f66f66f10126db249b6dfffde2266f66f66f66f3a256db249000924de2266f66f66f66f5b256db249000924de2266f66f66f66f7c256db249000924de2266f66f66f66f8628249924b6dfff232266f66f66f66fa525000924b6dfff232266f66f66f66fc625000924b6dfff232266f66f66f66fef126db249b6dfff232266f66f66f66f10126db249b6dfff232266f66f66f66f3a256db249000924232266f66f66f66f5b256db249000924232266f66f66f66f7c256db249000924232266f66f66f66f8425000924b6dfff6a20667667667667a525000924b6dfff6a20667667667667c625000924b6dfff6a20667667667667ef126db249b6dfff6a2066766766766710126db249b6dfff6a206676676676673a256db2490009246a206676676676675b256db2490009246a206676676676677c256db2490009246a20667667667667",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "7997057137500425309": {
+              "value": {
+                "m_Name": "42_EAC_R_SIGNED",
+                "m_ForcedFallbackFormat": 4,
+                "m_DownscaleFallback": false,
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 256,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 42,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMasterTextureLimit": false,
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 0,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:8628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db249000924",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            }
+          },
+          "names": {
+            "1": "android",
+            "5037857617709236087": "44_EAC_RG_SIGNED",
+            "7997057137500425309": "42_EAC_R_SIGNED"
+          },
+          "textures": {
+            "5037857617709236087": {
+              "name": "44_EAC_RG_SIGNED",
+              "format": 44,
+              "width": 32,
+              "height": 16,
+              "imageSize": 512,
+              "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b",
+              "rgbaSha256": "aef9e65dc7d57984e67c3e31730c847ef6874d3cef729f1942fcbe555a1d1e6c"
+            },
+            "7997057137500425309": {
+              "name": "42_EAC_R_SIGNED",
+              "format": 42,
+              "width": 32,
+              "height": 16,
+              "imageSize": 256,
+              "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49",
+              "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "7997057137500425309"
+        },
+        {
+          "path": "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "5037857617709236087"
         }
       ]
     },
@@ -108843,6 +109501,341 @@
           "path": "assets/fixtures/shader/uar-second.shader",
           "file": "CAB-1dc8d26be8722a766953ce9d8a444e8c",
           "pathId": "8472761294463186102"
+        }
+      ]
+    },
+    "editor/6000.3.26f1/signed-eac/android": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.3.26f1",
+      "files": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "sha256": "6c7c8307be9ca5be3be62ec7448b50cc2e85d9f1cc25e57f5d2b0ad2ce3861ca",
+          "size": 5536
+        }
+      },
+      "objects": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": [
+          {
+            "pathId": "-4300357251172282118",
+            "classId": 28,
+            "byteSize": 384
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 248
+          },
+          {
+            "pathId": "8275919650330547958",
+            "classId": 28,
+            "byteSize": 640
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "formatVersion": 22,
+          "unityVersion": "6000.3.26f1",
+          "targetPlatform": 13,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "b55819307006ed40e7e0f5f45a50c015",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "bool", "m_IsAlphaChannelOptional", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "unsigned int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_MipsStripped", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_IgnoreMipmapLimit", 1, 16384],
+                [1, "string", "m_MipmapLimitGroupName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "vector", "m_PlatformBlob", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 1],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "UInt64", "offset", 8, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 1],
+                [4, "char", "data", 1, 1]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 540673],
+                [3, "int", "size", 4, 524289],
+                [3, "char", "data", 1, 524289],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 1],
+                [3, "char", "data", 1, 1],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 1],
+                [5, "char", "data", 1, 1],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 1],
+                [6, "char", "data", 1, 1]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-4300357251172282118": {
+              "value": {
+                "m_Name": "42_EAC_R_SIGNED",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 256,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 42,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:8628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db2490009248628249924b6dfffa525000924b6dfffc625000924b6dfffef126db249b6dfff10126db249b6dfff3a256db2490009245b256db2490009247c256db249000924",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "android",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8275919650330547958"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4300357251172282118"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-4300357251172282118"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "8275919650330547958"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "android",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "8275919650330547958": {
+              "value": {
+                "m_Name": "44_EAC_RG_SIGNED",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 512,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 44,
+                "m_MipCount": 1,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:8628249924b6dfff972062f62f62f62fa525000924b6dfff972062f62f62f62fc625000924b6dfff972062f62f62f62fef126db249b6dfff972062f62f62f62f10126db249b6dfff972062f62f62f62f3a256db249000924972062f62f62f62f5b256db249000924972062f62f62f62f7c256db249000924972062f62f62f62f8628249924b6dfffde2266f66f66f66fa525000924b6dfffde2266f66f66f66fc625000924b6dfffde2266f66f66f66fef126db249b6dfffde2266f66f66f66f10126db249b6dfffde2266f66f66f66f3a256db249000924de2266f66f66f66f5b256db249000924de2266f66f66f66f7c256db249000924de2266f66f66f66f8628249924b6dfff232266f66f66f66fa525000924b6dfff232266f66f66f66fc625000924b6dfff232266f66f66f66fef126db249b6dfff232266f66f66f66f10126db249b6dfff232266f66f66f66f3a256db249000924232266f66f66f66f5b256db249000924232266f66f66f66f7c256db249000924232266f66f66f66f8425000924b6dfff6a20667667667667a525000924b6dfff6a20667667667667c625000924b6dfff6a20667667667667ef126db249b6dfff6a2066766766766710126db249b6dfff6a206676676676673a256db2490009246a206676676676675b256db2490009246a206676676676677c256db2490009246a20667667667667",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            }
+          },
+          "names": {
+            "-4300357251172282118": "42_EAC_R_SIGNED",
+            "1": "android",
+            "8275919650330547958": "44_EAC_RG_SIGNED"
+          },
+          "textures": {
+            "-4300357251172282118": {
+              "name": "42_EAC_R_SIGNED",
+              "format": 42,
+              "width": 32,
+              "height": 16,
+              "imageSize": 256,
+              "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49",
+              "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9"
+            },
+            "8275919650330547958": {
+              "name": "44_EAC_RG_SIGNED",
+              "format": 44,
+              "width": 32,
+              "height": 16,
+              "imageSize": 512,
+              "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b",
+              "rgbaSha256": "aef9e65dc7d57984e67c3e31730c847ef6874d3cef729f1942fcbe555a1d1e6c"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/signed-eac/42_eac_r_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "-4300357251172282118"
+        },
+        {
+          "path": "assets/fixtures/signed-eac/44_eac_rg_signed.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "8275919650330547958"
         }
       ]
     },

@@ -64,9 +64,15 @@ the editor and kept inline ([`BUILDING.md`](BUILDING.md) sections 8 and 9):
 | `2019.4.41f2/block/ios` | iOS | PVRTC_RGB2, PVRTC_RGBA2, PVRTC_RGB4, PVRTC_RGBA4 |
 
 Unity 6 no longer compresses PVRTC, hence the 2019.4 bundle. No fixture editor
-writes ATC (its `TextureFormat` no longer has it) or signed EAC (the editor
-refuses it), and every one of them writes Unity's own Crunch (2017.3+), not the
-original: those are covered without a fixture (see Oracle notes).
+writes ATC (its `TextureFormat` no longer has it), and every one of them writes
+Unity's own Crunch (2017.3+), not the original: those are covered without a
+fixture (see Oracle notes).
+
+The importer never compresses to signed EAC, but the `Texture2D` constructor
+accepts it: `signed-eac/android` (lz4, Android) of 2019.4.41f2, 2020.3.30f1,
+6000.3.26f1 and 6000.6.4f1 each hold one 32x16 `EAC_R_SIGNED` and one
+`EAC_RG_SIGNED` Texture2D an editor script made from etc2comp's blocks, image
+data inline ([`BUILDING.md`](BUILDING.md) section 21, #288).
 
 6000.3.25f1 and 2020.3.30f1 also have `stripped/lz4` and `stripped/uncompressed`
 (#104): the `hello.txt` TextAsset built with `AssetBundleStripUnityVersion`, so
@@ -278,8 +284,9 @@ sprites (#34).
   (UnityPy's LDR `astc-encoder` gives its magenta error colour for every
   block). The tests check those against AssetStudio's hashes below; BC4 also
   against the golden, through the one-to-one red to grayscale map.
-- **Synthetic goldens** (`synthetic` in `goldens.json`, #32). ATC and signed EAC
-  have no fixture, so `make-goldens.py` hands UnityPy's `parse_image_data`
+- **Synthetic goldens** (`synthetic` in `goldens.json`, #32). ATC has no
+  fixture, and signed EAC had none before #288 (its synthetic goldens stay), so
+  `make-goldens.py` hands UnityPy's `parse_image_data`
   generated block data instead: `sha256("<name>/0") + sha256("<name>/1") + ...`
   cut to the size of a 16x8 image (`syntheticBytes` in `helpers.ts` makes the
   same bytes, and the golden records their hash). Any bytes are valid ATC and

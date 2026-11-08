@@ -130,6 +130,10 @@ def evidence(name, path):
             assert (texture.m_Width, texture.m_Height) == (8, 5)
             assert raw == bytes((k * 37 + 11) & 255 for k in range(len(raw)))
             textures.append(texture.m_Name)
+        if obj.type.name == "Texture2D" and "/signed-eac/" in name:
+            texture = obj.read()
+            assert (texture.m_Width, texture.m_Height) == (32, 16)
+            textures.append(texture.m_Name)
         if obj.type.name == "SpriteAtlas":
             tree = obj.read_typetree()
             assert "m_PackedSprites" not in tree
@@ -161,6 +165,11 @@ def evidence(name, path):
         assert sorted(s["name"] for s in shaders) == ["UAR/ShaderVariants", "UAR/ShaderVariantsSecond"]
         assert all(s["platforms"] == [9, 18] for s in shaders)
         return {"shaders": sorted(shaders, key=lambda s: s["name"])}
+    if "/signed-eac/" in name:
+        # The signed EAC textures (#288); their bytes are checked against the
+        # etc2comp payloads by packages/texture/tests/signed-eac.test.ts.
+        assert sorted(textures) == ["42_EAC_R_SIGNED", "44_EAC_RG_SIGNED"]
+        return {"textures": sorted(textures)}
     if "/more-plain/" in name:
         assert set(textures) == {"R8", "RG16", "RG32", "RGB48", "RGBA64", "R8_SIGNED",
                                  "RG16_SIGNED", "RGB24_SIGNED", "RGBA32_SIGNED", "R16_SIGNED",
@@ -184,6 +193,8 @@ def main():
         ("mesh/lz4", "mesh-skinned"), ("mesh/lz4", "mesh-skinned-compressed"),
         # The shader with several variants and no Int property (#283), Shader dumped too.
         ("shader-variants/lz4", "android"),
+        # Signed EAC textures made by an editor script from etc2comp blocks (#288).
+        ("signed-eac", "android"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

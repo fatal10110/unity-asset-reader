@@ -185,6 +185,9 @@ First release. The core: isomorphic, synchronous, no WASM.
   `decodeSprite` merges and AssetStudio ignores) and variant-atlas sprites (which AssetStudio
   moves to their master atlas) are compared through `cutSprite`, the difference recorded as a
   verdict next to the golden.
+- Tests only, no code change: `EAC_R_SIGNED` and `EAC_RG_SIGNED` are decoded from editor-built
+  fixtures (2019.4, 2020.3, 6000.3, 6000.6), made by an editor script from etc2comp's blocks,
+  and compared with UnityPy's RGBA and AssetStudio's `ExportTexture2D` PNG (#288).
 
 ### 1.2.0 - 2026-10-29
 
