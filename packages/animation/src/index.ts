@@ -58,8 +58,9 @@ function union<T>(converted: T[], legacy: T[], id: (curve: T) => string): T[] {
  *
  * A Mecanim clip's `m_MuscleClip` is decoded as upstream's
  * `AnimationClipConverter` does ({@link convertMuscleClip}): its bindings'
- * path hashes are named from the loaded Avatars and the Animators that play
- * the clip (upstream `FindTOS`), and stay `path_<hash>` where none names them;
+ * path hashes are named from the loaded Avatars, the Animators that play the
+ * clip and the legacy Animation components that list it (upstream `FindTOS`),
+ * and stay `path_<hash>` where none names them;
  * humanoid curves are named muscle attributes (`RootT.y`, `Spine Front-Back`)
  * on path `""`, not converted to bones. The legacy curve arrays follow, each
  * curve unless a decoded one has its path (and for a float curve its
@@ -70,7 +71,7 @@ function union<T>(converted: T[], legacy: T[], id: (curve: T) => string): T[] {
  * Isomorphic and sync. Each call reads what it needs from `env` again.
  *
  * @param env the loaded files; upstream searches all of them for the clip's
- *   Avatar and Animator, so load the bundle that holds them too
+ *   Avatar, Animator or Animation, so load the bundle that holds them too
  * @param clip the clip's object, one of `env.objects`
  * @returns plain data: numbers are float32 values, as upstream computes them
  * @throws {TypeError} when `clip` is not an `AnimationClip` (class 74)

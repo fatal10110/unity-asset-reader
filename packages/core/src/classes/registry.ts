@@ -9,6 +9,7 @@ import { ClassID } from "../serialized/ClassID.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
 import { baseName } from "../serialized/SerializedFile.js";
 import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
+import { readAnimation, type Animation } from "./AnimationComponent.js";
 import { readAnimationClip, type AnimationClip } from "./AnimationClip.js";
 import { readAnimator, type Animator } from "./Animator.js";
 import { readAnimatorController, type AnimatorController } from "./AnimatorController.js";
@@ -42,6 +43,7 @@ import { readMovieTexture, type MovieTexture } from "./MovieTexture.js";
 import { readVideoClipData, type VideoClipData } from "./VideoClip.js";
 import {
   toAnimationClipFields,
+  toAnimationFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -67,6 +69,7 @@ import {
   toVideoClipFields,
   type AnimationClipFields,
   type AnimatorControllerFields,
+  type AnimationFields,
   type AnimatorFields,
   type AnimatorOverrideControllerFields,
   type AssetBundleFields,
@@ -153,6 +156,7 @@ export interface ObjectDataMap {
   Avatar: Avatar;
   AnimatorController: AnimatorController;
   Animator: Animator;
+  Animation: Animation;
   AnimatorOverrideController: AnimatorOverrideController;
   AnimationClip: AnimationClip;
   GameObject: GameObject;
@@ -186,6 +190,7 @@ export interface AssetDataMap {
   Avatar: AvatarFields;
   AnimatorController: AnimatorControllerFields;
   Animator: AnimatorFields;
+  Animation: AnimationFields;
   AnimatorOverrideController: AnimatorOverrideControllerFields;
   AnimationClip: AnimationClipFields;
   GameObject: GameObjectFields;
@@ -240,6 +245,7 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   Avatar: readAvatar,
   AnimatorController: readAnimatorController,
   Animator: readAnimator,
+  Animation: readAnimation,
   AnimatorOverrideController: readAnimatorOverrideController,
   AnimationClip: readAnimationClip,
   GameObject: readGameObject,
@@ -324,6 +330,7 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   Avatar: toAvatarFields,
   AnimatorController: toAnimatorControllerFields,
   Animator: toAnimatorFields,
+  Animation: toAnimationFields,
   AnimatorOverrideController: toAnimatorOverrideControllerFields,
   AnimationClip: toAnimationClipFields,
   GameObject: toGameObjectFields,

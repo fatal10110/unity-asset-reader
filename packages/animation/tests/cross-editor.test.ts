@@ -1,7 +1,7 @@
 // Each fixture clip converts to the same curves under every editor that built it
 // (#304): 2019.4, 2020.3, 6000.3 and 6000.6, typed and not. AssetStudio c37af7d
 // cannot read 6000.6 (format 23), so this is its only check against the oracle's
-// algorithm (fixtures/BUILDING.md sections 22 to 24 build the same clips each time).
+// algorithm (fixtures/BUILDING.md sections 22 to 25 build the same clips each time).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Env, ObjectReader, PPtr } from "unity-asset-reader";
@@ -9,7 +9,7 @@ import { clipCurves } from "../src/index.js";
 import { fixtureEnv } from "./helpers.js";
 
 const EDITORS = ["2019.4.41f2", "2020.3.30f1", "6000.3.26f1", "6000.6.4f1"];
-const SETS = ["animation", "animator", "scene"];
+const SETS = ["animation", "animator", "scene", "legacy-animation"];
 
 /**
  * The differences the editors' own data has, by clip, editor prefix and leaf:
@@ -86,5 +86,5 @@ test("every fixture clip has the same curves under 2019.4, 2020.3, 6000.3 and 60
       }
     }
   }
-  assert.equal(compared, 17 * EDITORS.length * 2);
+  assert.equal(compared, 19 * EDITORS.length * 2);
 });

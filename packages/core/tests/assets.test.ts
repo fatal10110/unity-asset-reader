@@ -36,6 +36,7 @@ const KNOWN = new Set([
   "Animator",
   "AnimatorOverrideController",
   "AnimationClip",
+  "Animation",
   "GameObject",
   "Transform",
   "MeshFilter",

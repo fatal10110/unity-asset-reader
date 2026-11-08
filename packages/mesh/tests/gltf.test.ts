@@ -210,9 +210,10 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
   return reader.read<MeshData>();
 }
 
-test("there are 45 fixture Meshes", () => {
-  // With the scene bundles' skinned mesh, typed and not, in four editors (#305).
-  assert.equal(MESHES.length, 45);
+test("there are 53 fixture Meshes", () => {
+  // With the scene bundles' skinned mesh (#305) and the legacy-animation
+  // bundles' quad (#314), typed and not, in four editors.
+  assert.equal(MESHES.length, 53);
 });
 
 for (const { fixture, file, pathId } of MESHES) {
