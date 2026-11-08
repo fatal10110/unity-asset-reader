@@ -114,7 +114,8 @@ Full JSDoc is in the bundled `index.d.ts`.
 
 - [AssetStudio](https://github.com/Razviar/assetstudio) (MIT, © Perfare, RazTools, Razviar):
   `meshToObj()` is hand-ported from `ExportMesh` in its `AssetStudio.CLI/Exporter.cs`, and its
-  output is tested against AssetStudio's own OBJ files.
+  output is tested against AssetStudio's own OBJ files, from meshes built by Unity 2019.4, 2020.3
+  and 6000.3, a skinned one with blend shapes, tangents, colours and two UV channels among them.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
 and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).

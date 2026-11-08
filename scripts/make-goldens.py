@@ -16,8 +16,10 @@ Per fixture (keyed by its path under fixtures/bundles/):
                 MovieTexture, `rawData`: the sha256 of the bytes each carries,
                 inline or read out of its resource file  (#41); and for a file
                 holding a Sprite, `sprites`: UnityPy's sprite image, rows as
-                stored, cropped only and with its mesh  (#34); and for every
-                file, `names`: each object's `peek_name()`  (#183)
+                stored, cropped only and with its mesh  (#34); for a file
+                holding a skinned Mesh, `skins`: UnityPy MeshHelper's decoded
+                bone weights (float32 bits) and bone indices  (#285); and for
+                every file, `names`: each object's `peek_name()`  (#183)
   container   - for a fixture holding SerializedFiles: UnityPy's `env.container`,
                 every AssetBundle's m_Container entry in order, as the path and
                 the object it resolves to  (#183)
@@ -56,6 +58,8 @@ from UnityPy.enums import BuildTarget, SpritePackingMode, SpritePackingRotation,
 from UnityPy.export import SpriteHelper
 from UnityPy.export.Texture2DConverter import get_image_from_texture2d, parse_image_data
 from UnityPy.helpers import TextureSwizzler
+from UnityPy.helpers.MeshHelper import MeshHandler
+from UnityPy.helpers.PackedBitVector import unpack_ints
 from UnityPy.helpers.ResourceReader import get_resource_data
 from UnityPy.helpers.TypeTreeHelper import (
     TypeTreeConfig,
@@ -109,6 +113,7 @@ REGISTRY_V1_TERMINUS = (
 )
 REGISTRY_V1_TERMINUS_TYPE = ("Terminus", "UnityEngine.DMAT", "FAKE_ASM")
 TEXTURE2D = 28
+MESH = 43
 SPRITE = 213
 # The fixture sprite whose crop is also turned every way a packer can turn it
 # (#34), since no editor packer here writes Rotate90; see sprite_golden().
@@ -453,6 +458,89 @@ def serialized_golden(name: str, sf) -> dict:
         # Likewise only files holding a Sprite (#34).
         if sprites:
             out["sprites"] = sprites
+        skins = {}
+        for obj in sorted(sf.objects.values(), key=lambda o: str(o.path_id)):
+            if obj.class_id == MESH:
+                skin = skin_golden(name, obj)
+                if skin:
+                    skins[str(obj.path_id)] = skin
+        # Likewise only files holding a skinned Mesh (#285).
+        if skins:
+            out["skins"] = skins
+    return out
+
+
+SKIN_DERIVED_NOTE = (
+    "UnityPy's MeshHelper.decompress_compressed_mesh derives the fourth bone weight of a vertex "
+    "whose three stored weights add up to less than 31 as `1 - sum`, with sum in 31sts, so "
+    "boneWeights holds that (wrong) value at each derivedWeights vertex. AssetStudio "
+    "(Classes/Mesh.cs, DecompressCompressedMesh) derives (31 - sum) / 31.0f. Verdict: AssetStudio "
+    "(plan section 6); the executed c37af7d m_Skin is in assetstudio-export-goldens.json (skin), "
+    "and storedWeights gives the 31sts UnityPy unpacked. Every other weight and index is "
+    "UnityPy's (#285)."
+)
+
+
+def f32(value) -> str:
+    """A float as its float32 bit pattern, the plan section 5 normalization."""
+    return "f32:" + struct.pack(">f", value).hex()
+
+
+def skin_golden(name: str, obj) -> dict | None:
+    """UnityPy MeshHelper's skin of a Mesh with bone weights, else None (#285).
+
+    `boneWeights` (float32 bits) and `boneIndices` per vertex, four each, from
+    the vertex data or from `m_CompressedMesh`. A vertex with fewer than four
+    influences has zeros after them (MeshHelper starts from zeros and a vertex
+    channel narrower than four is padded so). The fixture's intent is checked
+    here: vertices with 2, 3 and 4 influences, and for a compressed mesh
+    `m_Weights` not empty. For a compressed mesh `derivedWeights` lists each
+    vertex whose fourth weight UnityPy derives (see SKIN_DERIVED_NOTE).
+    """
+    tree = obj.read_typetree()
+    packed = tree["m_CompressedMesh"]["m_Weights"]["m_NumItems"]
+    channels = tree["m_VertexData"]["m_Channels"]
+    plain = len(channels) > 13 and channels[12]["dimension"] > 0
+    if not packed and not plain:
+        return None
+    where = f"{name} Mesh {tree['m_Name']} pathId {obj.path_id}"
+    if tree["m_Name"].endswith("-compressed") and not packed:
+        raise SystemExit(f"{where}: m_CompressedMesh.m_Weights.m_NumItems is 0")
+    mesh = obj.read()
+    handler = MeshHandler(mesh)
+    handler.process()
+    weights, bones = handler.m_BoneWeights, handler.m_BoneIndices
+    count = handler.m_VertexCount
+    if not weights or not bones or len(weights) != count or len(bones) != count:
+        raise SystemExit(f"{where}: MeshHelper gave no skin for its {count} vertices")
+    pad = lambda row: list(row) + [0] * (4 - len(row))  # noqa: E731
+    out = {
+        "source": "m_CompressedMesh" if packed else "m_VertexData",
+        "boneWeights": [[f32(w) for w in pad(row)] for row in weights],
+        "boneIndices": [[int(b) for b in pad(row)] for row in bones],
+    }
+    influences = sorted({sum(1 for w in row if w != 0) for row in weights})
+    for n in (2, 3, 4):
+        if n not in influences:
+            raise SystemExit(f"{where}: no vertex with {n} bone influences ({influences})")
+    if packed:
+        # MeshHelper's own walk over the 31sts it unpacks, to name the
+        # vertices whose fourth weight it derives.
+        derived = []
+        vertex, stored = 0, []
+        for weight in unpack_ints(mesh.m_CompressedMesh.m_Weights):
+            stored.append(int(weight))
+            if sum(stored) < 31 and len(stored) < 3:
+                continue
+            if sum(stored) < 31:
+                if weights[vertex][3] != 1 - sum(stored):
+                    raise SystemExit(f"{where}: vertex {vertex}: UnityPy's fourth weight is not 1 - sum")
+                derived.append({"vertex": vertex, "storedWeights": stored})
+            vertex, stored = vertex + 1, []
+        if not derived:
+            raise SystemExit(f"{where}: no vertex with a derived fourth weight")
+        out["derivedWeights"] = derived
+        out["oracleNote"] = SKIN_DERIVED_NOTE
     return out
 
 

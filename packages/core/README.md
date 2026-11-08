@@ -293,6 +293,7 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
 | **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
 | **Tested** `Shader` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: DX11, GLES3 and Vulkan builds, and Metal from 2020.3 and 6000.3, against `readTypeTree()`; every Shader layout from 2019.1 to 6000.6 against UnityPy's reading of a synthetic object |
+| **Tested** `Mesh` skin and blend shapes | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a mesh with up to four bone influences per vertex and two blend shapes, plain and compressed (not 2020.3), against UnityPy's decoded skin and AssetStudio's (not 6000.6), and `readTypeTree()` |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 

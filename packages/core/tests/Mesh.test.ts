@@ -1,4 +1,4 @@
-// Mesh (#235): the hardcoded reader against readTypeTree() on the 27 fixture
+// Mesh (#235): the hardcoded reader against readTypeTree() on the 35 fixture
 // Mesh objects and on hand-built layouts at every version gate of Unity's
 // type trees, read through those trees themselves (`fixtures/tpk-trees.json`,
 // UnityPy's TPK data), and the decoding of upstream's `ProcessData` on hand-built
@@ -34,19 +34,21 @@ function withNumberOffset(tree: Record<string, unknown>): Record<string, unknown
   return { ...tree, m_StreamData: { ...stream, offset: Number(stream.offset) } };
 }
 
-// --- the 27 fixture Meshes ------------------------------------------------------------
+// --- the 35 fixture Meshes ------------------------------------------------------------
 
 const FIXTURES = fixturesWith(ClassID.Mesh);
 
-test("the fixtures hold 27 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
+test("the fixtures hold 35 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
   const count = FIXTURES.flatMap((name) =>
     Object.values(golden(name).objects).flatMap((objs) =>
       objs.filter((o) => o.classId === ClassID.Mesh),
     ),
   ).length;
   // A triangle in each main bundle; detail and basevertex, typed and not, and
-  // compressed, typed only (fixtures/BUILDING.md section 20; #253, #257).
-  assert.equal(count, 12 + 3 * 2 * 2 + 3);
+  // compressed, typed only (fixtures/BUILDING.md section 20; #253, #257);
+  // skinned, typed and not, and skinned-compressed, typed only and not from
+  // 2020.3 (#285, MeshSkinned.test.ts).
+  assert.equal(count, 12 + 3 * 2 * 2 + 3 + 3 * 2 + 2);
   for (const editor of ["2019.4.41f2", "2020.3.30f1", "6000.3.25f1"]) {
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4/main`), editor);
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4-notypetree/main`), editor);
@@ -109,7 +111,7 @@ for (const name of FIXTURES) {
 // --- the mesh bundles (#253, #257) -------------------------------------------------------
 
 const MESH_EDITORS = ["2019.4.41f2", "2020.3.30f1", "6000.3.26f1"];
-const MESH_BUNDLES = FIXTURES.filter((name) => name.includes("/mesh/"));
+const MESH_BUNDLES = FIXTURES.filter((name) => /\/mesh\/[^/]+\/mesh(-compressed)?$/.test(name));
 
 /** The fixture Mesh named `name` in a mesh bundle, decoded. */
 function meshNamed(fixture: string, name: string): MeshData {

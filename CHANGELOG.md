@@ -46,6 +46,11 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   the object, checked to be of class `classId` when given, or an error naming the field:
   `ResourceNotFoundError` for a file that is not loaded, `CorruptError` for a null or dangling
   pointer or the wrong class. The texture and spine packages had a copy each (#255).
+- `obj.read()` of a `Mesh` is checked against editor-built skinned meshes from 2019.4, 2020.3,
+  6000.3 and 6000.6, plain and compressed (#285): `skin` against UnityPy's and AssetStudio's
+  decoding, `m_Shapes` (two blend shapes) against `readTypeTree()`. For a compressed vertex
+  whose fourth weight Unity leaves out, the reader agrees with AssetStudio, `(31 - sum) / 31`;
+  UnityPy gets it wrong. No code change.
 
 ### 1.2.0 - 2026-10-29
 
@@ -286,6 +291,8 @@ First release. Peer: `unity-asset-reader@^1`.
 - `meshToObj` writes floats about seven times faster through the next core's `formatSingle`
   (a 100k-vertex mesh with UV0 and normals: 0.5 s instead of 3.5 s); the output is unchanged
   (#252).
+- The OBJ equals AssetStudio's for skinned fixture meshes with two blend shapes, tangents,
+  colours, UV0 and UV1 and 32-bit indices, plain and compressed (#285). No code change.
 
 ### 1.0.0 - 2026-10-29
 

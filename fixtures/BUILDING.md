@@ -1907,11 +1907,13 @@ pathId) and holds `input` (the metadata it was matched on) and one of `png`
 programs also `spirv`, each stage by the sha256 of its SMOL-V bytes with its
 `encoding` version and the `size` and `sha256` of its SPIR-V, or the `error`
 that stops it), `font` or `video` (`size`,
-`sha256` and `extension` of the file), or `exportError`:
+`sha256` and `extension` of the file), or `exportError`. A skinned Mesh also
+has `skin`: the `boneWeights` (float32 bits) and `boneIndices` of each vertex
+in c37af7d's `m_Skin`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
-| 27 Mesh (`main` bundles; `mesh` bundles, section 20) | 21 OBJ | 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
+| 37 Mesh (`main` bundles; `mesh` bundles, section 20) | 29 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 2 in the 6000.6 `mesh-skinned` bundles: `c37af7d` cannot read SerializedFile format 23 at all. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
 | 36 AudioClip (`audio` and `adpcm` bundles, section 11) | 36 WAV | |
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
@@ -2879,13 +2881,14 @@ then rerun `make-goldens.py` (it dumps the MonoBehaviours', Materials',
 TextAssets' and Texture2Ds' type trees) and `make-export-goldens.py`
 (section 17: each TextAsset's file and each page's PNG).
 
-## 20. The `mesh` bundles (#253, #257)
+## 20. The `mesh` bundles (#253, #257, #285)
 
 Three meshes made from code, in their own bundles beside the existing ones, so
 the `main` bundles and their goldens stay as they are. Editors: 2019.4.41f2,
 2020.3.30f1 and 6000.3.26f1 (6000.3.25f1 is no longer installed, as in section
 18). Formats 21 and 22 only: AssetStudio `c37af7d` cannot read format 23
-(6000.6), so a 6000.6 mesh would have no OBJ golden.
+(6000.6), so a 6000.6 mesh would have no OBJ golden. The skinned meshes at the
+end of this section (#285) are built by 6000.6.4f1 too.
 
 - `detail`: 8 vertices with UV0 and normals. Its positions include a negative
   zero, values below 1e-4 and at or above 1e9 (written in scientific notation)
@@ -3057,3 +3060,252 @@ writes `f 3/3/3 2/2/2 1/1/1`. unity-asset-reader adds the offset and writes
 `exportError` and keeps AssetStudio's OBJ as `objWithoutBaseVertex`.
 `packages/mesh/tests/obj.test.ts` checks that `meshToObj`, given the same mesh
 with the offset taken off its indices, writes exactly that file.
+
+### The skinned meshes (#285)
+
+Two more meshes made from code, in bundles of their own (`mesh-skinned`,
+`mesh-skinned-compressed`), so the bundles above stay as they are. Editors:
+2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1, whose Mesh layout differs
+(no `m_MeshUsageFlags`, `m_PreBake*` fields; blend shapes still in `m_Shapes`).
+
+- `skinned`: 8 vertices with tangents, Color32 colours, UV0 and UV1, and
+  32-bit indices (`IndexFormat.UInt32`), six triangles. Its skin goes through
+  `mesh.boneWeights`, at most four influences, so the weights stay in the
+  vertex data's weight channel (`SetBoneWeights` with more than four would
+  write `m_VariableBoneCountWeights`, which UnityPy ignores and the reader
+  refuses). The vertices have 1, 2, 2, 3, 3, 4, 4 and 4 influences over five
+  bones, with five `bindposes`. Two blend shapes, `smile` (frames at 50 and 100,
+  moving vertices 4 to 7) and `blink` (25, 50 and 100, vertices 0 to 3), each
+  frame with vertex, normal and tangent deltas. The build log has a
+  `FIXTURE-INFO skinned bonesPerVertex=1,2,2,3,3,4,4,4 shapes=2
+  indexFormat=UInt32` line.
+- `skinned-compressed`: the same data with `MeshUtility.SetMeshCompression(Medium)`.
+  Its vertices, skin, tangents, colours and both UV channels (`m_UVInfo` 85)
+  move to `m_CompressedMesh`. Three of its 4-influence vertices store three
+  weights that add up to less than 31, so the fourth is derived (see below).
+
+Not built: `skinned-compressed` from 2020.3.30f1. That editor saves a Mesh with
+bone weights uncompressed whatever `SetMeshCompression` set: a probe project
+(the script below with each channel left out in turn) logged
+`GetMeshCompression` Medium after the call and Off after `CreateAsset` and
+`SaveAssets` for every variant with bone weights, Medium for those without;
+setting it again after `CreateAsset` changed nothing. Its build of
+`mesh-skinned-compressed` holds `m_MeshCompression` 0 and plain vertex data, so
+it is not committed.
+
+Create a project per editor named `uar-285-skinned-mesh-<editor version>`,
+with `ProjectSettings/` and `Packages/` copied from the section's
+`uar-253-mesh-<editor version>` projects (6000.6.4f1: from the 6000.6 shader
+project of section 18), and only this file under `Assets/`.
+
+`Assets/Editor/BuildSkinnedMeshes.cs`:
+
+```csharp
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// The skinned mesh fixtures (#285), created from code and built once per
+// variant: "skinned" (8 vertices with 1, 2, 3 and 4 bone influences out of 5
+// bones, bindposes, two blend shapes of two and three frames with vertex,
+// normal and tangent deltas, tangents, Color32 colors, UV0 and UV1, 32-bit
+// indices) and "skinned-compressed" (the same data with mesh compression on,
+// in a bundle of its own).
+public static class BuildSkinnedMeshes
+{
+    const string Dir = "Assets/Fixtures/skinned";
+
+    public static void Build()
+    {
+        // Keep every vertex channel: no renderer uses these meshes.
+        PlayerSettings.stripUnusedMeshComponents = false;
+        Directory.CreateDirectory(Dir);
+        Save(Skinned("skinned"), "skinned");
+        var compressed = Skinned("skinned-compressed");
+        MeshUtility.SetMeshCompression(compressed, ModelImporterMeshCompression.Medium);
+        Save(compressed, "skinned-compressed");
+        AssetDatabase.SaveAssets();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static BoneWeight Weight(params float[] pairs)
+    {
+        // pairs: bone index, weight, bone index, weight, ... (heaviest first)
+        var w = new BoneWeight();
+        int n = pairs.Length / 2;
+        if (n > 0) { w.boneIndex0 = (int)pairs[0]; w.weight0 = pairs[1]; }
+        if (n > 1) { w.boneIndex1 = (int)pairs[2]; w.weight1 = pairs[3]; }
+        if (n > 2) { w.boneIndex2 = (int)pairs[4]; w.weight2 = pairs[5]; }
+        if (n > 3) { w.boneIndex3 = (int)pairs[6]; w.weight3 = pairs[7]; }
+        return w;
+    }
+
+    static Mesh Skinned(string name)
+    {
+        var mesh = new Mesh { name = name };
+        mesh.indexFormat = IndexFormat.UInt32;
+        mesh.vertices = new[]
+        {
+            new Vector3(0f, 0f, 0f),
+            new Vector3(1f, 0f, 0.125f),
+            new Vector3(0f, 1f, -0.25f),
+            new Vector3(1f, 1f, 0.5f),
+            new Vector3(0f, 2f, 0.75f),
+            new Vector3(1f, 2f, -0.5f),
+            new Vector3(0.25f, 3f, 0f),
+            new Vector3(1.5f, 3f, 0.375f),
+        };
+        mesh.normals = new[]
+        {
+            new Vector3(0f, 0f, -1f),
+            new Vector3(0.6f, 0f, -0.8f),
+            new Vector3(0f, 0.6f, -0.8f),
+            new Vector3(0f, 1f, 0f),
+            new Vector3(-0.8f, 0f, -0.6f),
+            new Vector3(1f, 0f, 0f),
+            new Vector3(0f, -0.8f, -0.6f),
+            new Vector3(0f, 0f, 1f),
+        };
+        mesh.tangents = new[]
+        {
+            new Vector4(1f, 0f, 0f, 1f),
+            new Vector4(0.8f, 0f, 0.6f, 1f),
+            new Vector4(1f, 0f, 0f, -1f),
+            new Vector4(0f, 0f, 1f, 1f),
+            new Vector4(0.6f, 0f, -0.8f, -1f),
+            new Vector4(0f, 1f, 0f, 1f),
+            new Vector4(1f, 0f, 0f, 1f),
+            new Vector4(0f, 1f, 0f, -1f),
+        };
+        mesh.colors32 = new[]
+        {
+            new Color32(255, 0, 0, 255),
+            new Color32(0, 255, 0, 255),
+            new Color32(0, 0, 255, 255),
+            new Color32(255, 255, 0, 128),
+            new Color32(0, 255, 255, 64),
+            new Color32(255, 0, 255, 0),
+            new Color32(12, 34, 56, 78),
+            new Color32(200, 150, 100, 50),
+        };
+        mesh.uv = new[]
+        {
+            new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0.25f), new Vector2(1f, 0.25f),
+            new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0.125f, 0.75f), new Vector2(0.875f, 1f),
+        };
+        mesh.uv2 = new[]
+        {
+            new Vector2(0.5f, 0.5f), new Vector2(0.75f, 0.5f), new Vector2(0.5f, 0.625f), new Vector2(0.75f, 0.625f),
+            new Vector2(0.5f, 0.75f), new Vector2(0.75f, 0.75f), new Vector2(0.5f, 0.875f), new Vector2(0.75f, 1f),
+        };
+        mesh.triangles = new[] { 0, 2, 1, 1, 2, 3, 2, 4, 3, 3, 4, 5, 4, 6, 5, 5, 6, 7 };
+        mesh.boneWeights = new[]
+        {
+            Weight(0, 1f),
+            Weight(1, 0.75f, 0, 0.25f),
+            Weight(2, 0.5f, 1, 0.5f),
+            Weight(3, 0.5f, 2, 0.3f, 1, 0.2f),
+            Weight(4, 0.6f, 2, 0.25f, 3, 0.15f),
+            Weight(3, 0.4f, 2, 0.3f, 1, 0.2f, 0, 0.1f),
+            Weight(1, 0.35f, 0, 0.3f, 4, 0.2f, 2, 0.15f),
+            Weight(4, 0.7f, 3, 0.1f, 0, 0.1f, 1, 0.1f),
+        };
+        mesh.bindposes = Enumerable.Range(0, 5)
+            .Select(i => Matrix4x4.TRS(new Vector3(0f, -0.75f * i, 0.1f * i),
+                Quaternion.Euler(0f, 0f, 15f * i), Vector3.one).inverse)
+            .ToArray();
+        // "smile": two frames moving vertices 4..7; "blink": three frames moving 0..3.
+        AddShape(mesh, "smile", new[] { 50f, 100f }, 4);
+        AddShape(mesh, "blink", new[] { 25f, 50f, 100f }, 0);
+        var per = mesh.GetBonesPerVertex();
+        Debug.Log("FIXTURE-INFO " + name + " bonesPerVertex=" + string.Join(",", per.ToArray()) +
+            " shapes=" + mesh.blendShapeCount + " indexFormat=" + mesh.indexFormat);
+        return mesh;
+    }
+
+    static void AddShape(Mesh mesh, string shape, float[] weights, int first)
+    {
+        for (int f = 0; f < weights.Length; f++)
+        {
+            var dv = new Vector3[8];
+            var dn = new Vector3[8];
+            var dt = new Vector3[8];
+            float k = (f + 1) / (float)weights.Length;
+            for (int v = first; v < first + 4; v++)
+            {
+                dv[v] = new Vector3(0.125f * k, 0.25f * k * (v - first + 1), -0.0625f * k);
+                dn[v] = new Vector3(0f, 0.5f * k, -0.25f * k);
+                dt[v] = new Vector3(-0.25f * k, 0f, 0.125f * (v - first + 1));
+            }
+            mesh.AddBlendShapeFrame(shape, weights[f], dv, dn, dt);
+        }
+    }
+
+    static void Save(Mesh mesh, string name)
+    {
+        AssetDatabase.CreateAsset(mesh, Dir + "/" + name + ".asset");
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", "skinned-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "mesh-skinned", assetNames = new[] { Dir + "/skinned.asset" } },
+            new AssetBundleBuild { assetBundleName = "mesh-skinned-compressed", assetNames = new[] { Dir + "/skinned-compressed.asset" } },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: skinned " + name);
+        Debug.Log("FIXTURE-OK skinned " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildSkinnedMeshes.Build` (same
+command as section 2). The log must hold two `FIXTURE-OK skinned` lines. Copy
+only these files:
+
+```
+Build/skinned-lz4/mesh-skinned               ->  fixtures/bundles/editor/<editor version>/mesh/lz4/mesh-skinned
+Build/skinned-lz4/mesh-skinned-compressed    ->  fixtures/bundles/editor/<editor version>/mesh/lz4/mesh-skinned-compressed   (not 2020.3.30f1)
+Build/skinned-lz4-notypetree/mesh-skinned    ->  fixtures/bundles/editor/<editor version>/mesh/lz4-notypetree/mesh-skinned   (not 6000.6.4f1)
+```
+
+As above, the compressed mesh's build without type trees is not committed
+(the two builds quantize differently). 6000.6.4f1's build without type trees
+is not either: format 23 has no UnityPy 1.25.3 golden, and its typed twin is
+in `modern-goldens.json`.
+
+Then rerun the goldens:
+
+```bash
+.venv-oracle/bin/python scripts/make-goldens.py
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+`make-goldens.py` (and `make-modern-goldens.py` for 6000.6, through the same
+code) records, for each skinned Mesh, UnityPy MeshHelper's decoded skin under
+`skins`: four bone weights (float32 bits) and bone indices per vertex. It
+fails unless the mesh has vertices with 2, 3 and 4 influences and, for the
+compressed one, `m_CompressedMesh.m_Weights.m_NumItems` above 0 and a derived
+fourth weight.
+
+Plan section 6, the oracle is wrong: for a vertex whose three stored weights
+add up to less than 31 (31sts), UnityPy's `decompress_compressed_mesh` sets the
+fourth weight to `1 - sum` (for stored weights 12, 9 and 6: -26), where
+AssetStudio's `DecompressCompressedMesh` (`Classes/Mesh.cs`) sets
+`(31 - sum) / 31.0f` (4/31). The golden keeps UnityPy's value and lists those
+vertices under `derivedWeights`, with the 31sts it unpacked, and an
+`oracleNote` with the verdict: AssetStudio. `make-export-goldens.py` records
+the `m_Skin` c37af7d's Mesh reader decodes for every skinned Mesh it reads
+(`skin`, formats 21 and 22), and an OBJ as for the meshes above. 6000.6 has
+neither (c37af7d cannot read format 23); there the derived weight is checked
+against AssetStudio's formula on the 31sts UnityPy unpacked.
+`packages/core/tests/MeshSkinned.test.ts` checks `read()`'s skin against both,
+`m_Shapes` against UnityPy's type-tree dump, and the source values above.
