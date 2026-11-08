@@ -462,6 +462,25 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
   `.shader` file byte for byte. Direct3D programs, variants listed in `m_PlayerSubPrograms`
   (2021.3.10+, 2022.2+, Unity 6), and `Int` properties throw `UnsupportedError`.
 
+## unity-asset-reader-animation
+
+### 1.0.0 - Unreleased
+
+First release (version 0.0.0 until then: plan revision 2026-11-08c). Peer:
+`unity-asset-reader@^1.3.0`, the first core with the `AnimationClip`, `Avatar`, `Animator` and
+scene readers.
+
+- `clipCurves(env, clip)` decodes an `AnimationClip` into the curves AssetStudio's `.anim` export
+  holds (#304): rotation, euler, position, scale, float and object reference curves, each with
+  its path (and attribute and class id) and keyframes (time, value, in and out slope), and the
+  clip's events. A Mecanim clip's streamed, dense and constant data is decoded as AssetStudio's
+  `AnimationClipConverter` does, its path hashes named from the loaded Avatars and Animators,
+  humanoid curves as muscle attributes; legacy curves are merged as `Convert()` merges them.
+  Pure TypeScript, sync, browser-safe, no dependencies. Every fixture clip of Unity 2019.4,
+  2020.3 and 6000.3 matches AssetStudio's curves float32 bit for bit. The dense and constant
+  curves of a clip with discrete curves (Unity 2022.3.19+, 2023.2.8+, 6000) follow all of the
+  streamed ones, where AssetStudio's single `curveCount` would put them past the bindings.
+
 ## texture2ddecoder-wasm
 
 ### 1.2.6 - 2026-10-16
