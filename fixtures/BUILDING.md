@@ -3966,3 +3966,474 @@ textures (the UnityPy hash is of Unity's stored row order, bottom row first,
 the PNG's of top row first), so no golden has an `oracleNote`. AssetStudio
 c37af7d cannot read the 6000.6 bundle (format 23), so it has UnityPy's golden
 only. The synthetic signed EAC goldens of `make-goldens.py` stay.
+
+## 22. The `animator` bundles (#303)
+
+`animator/{lz4,lz4-notypetree}/animator` for **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**: one bundle per editor and kind, made from
+code by an editor script, for the `Avatar`, `AnimatorController`, `Animator`
+and `AnimatorOverrideController` readers. Each bundle holds:
+
+- two prefabs, each a generated hierarchy with an `Animator`: `humanoid` (28
+  transforms in a T-pose, its humanoid avatar and the controller, culling mode
+  1, update mode 1, root motion, stabilize feet) and `generic` (four
+  transforms, its generic avatar and the override controller, culling mode 2,
+  update mode 2, linear velocity blending);
+- `human`, a humanoid `Avatar` from `AvatarBuilder.BuildHumanAvatar` and a
+  `HumanDescription` of the generated hierarchy: 27 human bones (two left
+  fingers of three bones each), one with limits of its own (`m_Modified`),
+  translation DoF on. No model import: the editor accepts it in all four
+  editors (`FIXTURE-INFO human avatar valid=True human=True`);
+- `generic`, a generic `Avatar` from `AvatarBuilder.BuildGenericAvatar` with
+  `Body` as the root motion bone;
+- `controller`, an `AnimatorController` built with `UnityEditor.Animations`:
+  a parameter of each type (float, int, bool, trigger) with defaults; a base
+  layer with states, a 1D blend tree with a nested 1D tree, a freeform
+  directional and a freeform cartesian 2D tree, a direct tree, transitions
+  with conditions of every mode, an any-state transition, entry and exit
+  transitions, a sub-state machine (selector states) and a
+  `StateMachineBehaviour` on a state and on the sub-state machine; a second
+  layer, additive, weight 0.5, IK pass, masked by an `AvatarMask` with
+  transforms and humanoid body parts off (`m_SkeletonMask`, `m_BodyMask`);
+- `override`, an `AnimatorOverrideController` of `controller` that overrides
+  two of its seven clips;
+- the eight clips (`idle`, `walk`, ...: one linear `localPosition.y` curve
+  each; their reader is #302's), the two `FixtureBehaviour` MonoBehaviours and
+  their MonoScript.
+
+The traps of building a controller from code: blend trees and state
+machines must be sub-assets of the controller (`CreateBlendTreeInController`,
+`CreateBlendTreeChild`, `AddStateMachine`, `AddLayer` and `AddTransition` add
+them, a `new BlendTree()` would not); `controller.layers` returns copies, so
+a layer edit is written back with `controller.layers = layers`; and
+`AssetDatabase.SaveAssets()` runs before the build.
+
+Each project is a fresh copy named `uar-303-animator-<editor version>`,
+holding `ProjectSettings/` and `Packages/` of the section 21 project of the
+same editor and only these two files under `Assets/`.
+
+`Assets/Scripts/FixtureBehaviour.cs` (a runtime script, so the behaviour is
+a MonoBehaviour in the bundle):
+
+```csharp
+using UnityEngine;
+
+// A StateMachineBehaviour for the animator fixtures (#303), so the controller's
+// m_StateMachineBehaviours and its behaviour ranges are not empty.
+public class FixtureBehaviour : StateMachineBehaviour
+{
+    public float weight = 0.5f;
+}
+```
+
+`Assets/Editor/BuildAnimator.cs`:
+
+```csharp
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
+using UnityEngine;
+
+// The animator fixtures (#303), created from code: a humanoid and a generic
+// hierarchy, each a prefab with an Animator; a humanoid Avatar
+// (AvatarBuilder.BuildHumanAvatar) and a generic one (BuildGenericAvatar); an
+// AnimatorController with two layers, an AvatarMask, states, a sub-state
+// machine, transitions with conditions, 1D, nested, 2D and direct blend trees,
+// a parameter of each type and StateMachineBehaviours; and an
+// AnimatorOverrideController. The clips are simple generated ones.
+public static class BuildAnimator
+{
+    const string Dir = "Assets/Fixtures/animator";
+
+    // name, parent, local position: a T-pose, root first.
+    static readonly (string, string, Vector3)[] Bones =
+    {
+        ("humanoid", null, Vector3.zero),
+        ("Hips", "humanoid", new Vector3(0f, 1f, 0f)),
+        ("LeftUpperLeg", "Hips", new Vector3(-0.1f, -0.05f, 0f)),
+        ("LeftLowerLeg", "LeftUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("LeftFoot", "LeftLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("LeftToes", "LeftFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("RightUpperLeg", "Hips", new Vector3(0.1f, -0.05f, 0f)),
+        ("RightLowerLeg", "RightUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("RightFoot", "RightLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("RightToes", "RightFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("Spine", "Hips", new Vector3(0f, 0.1f, 0f)),
+        ("Chest", "Spine", new Vector3(0f, 0.15f, 0f)),
+        ("Neck", "Chest", new Vector3(0f, 0.25f, 0f)),
+        ("Head", "Neck", new Vector3(0f, 0.1f, 0f)),
+        ("LeftShoulder", "Chest", new Vector3(-0.05f, 0.2f, 0f)),
+        ("LeftUpperArm", "LeftShoulder", new Vector3(-0.12f, 0f, 0f)),
+        ("LeftLowerArm", "LeftUpperArm", new Vector3(-0.28f, 0f, 0f)),
+        ("LeftHand", "LeftLowerArm", new Vector3(-0.25f, 0f, 0f)),
+        ("LeftThumbProximal", "LeftHand", new Vector3(-0.03f, 0f, 0.03f)),
+        ("LeftThumbIntermediate", "LeftThumbProximal", new Vector3(-0.03f, 0f, 0.01f)),
+        ("LeftThumbDistal", "LeftThumbIntermediate", new Vector3(-0.02f, 0f, 0.01f)),
+        ("LeftIndexProximal", "LeftHand", new Vector3(-0.08f, 0f, 0.02f)),
+        ("LeftIndexIntermediate", "LeftIndexProximal", new Vector3(-0.03f, 0f, 0f)),
+        ("LeftIndexDistal", "LeftIndexIntermediate", new Vector3(-0.02f, 0f, 0f)),
+        ("RightShoulder", "Chest", new Vector3(0.05f, 0.2f, 0f)),
+        ("RightUpperArm", "RightShoulder", new Vector3(0.12f, 0f, 0f)),
+        ("RightLowerArm", "RightUpperArm", new Vector3(0.28f, 0f, 0f)),
+        ("RightHand", "RightLowerArm", new Vector3(0.25f, 0f, 0f)),
+    };
+
+    // Transform name -> HumanBodyBones: every name above but the root and the
+    // finger names, whose human names have spaces ("Left Thumb Proximal").
+    static readonly HumanBodyBones[] Human =
+    {
+        HumanBodyBones.Hips, HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg,
+        HumanBodyBones.LeftFoot, HumanBodyBones.LeftToes, HumanBodyBones.RightUpperLeg,
+        HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, HumanBodyBones.RightToes,
+        HumanBodyBones.Spine, HumanBodyBones.Chest, HumanBodyBones.Neck, HumanBodyBones.Head,
+        HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm,
+        HumanBodyBones.LeftHand, HumanBodyBones.LeftThumbProximal,
+        HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.LeftThumbDistal,
+        HumanBodyBones.LeftIndexProximal, HumanBodyBones.LeftIndexIntermediate,
+        HumanBodyBones.LeftIndexDistal, HumanBodyBones.RightShoulder,
+        HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand,
+    };
+
+    public static void Build()
+    {
+        Directory.CreateDirectory(Dir);
+        var clips = new[] { "idle", "walk", "run", "left", "right", "jump", "wave", "override" }
+            .Select(MakeClip).ToDictionary(c => c.name);
+
+        var humanoid = Hierarchy(Bones);
+        var human = BuildHuman(humanoid);
+        var generic = Hierarchy(new (string, string, Vector3)[]
+        {
+            ("generic", null, Vector3.zero),
+            ("Body", "generic", new Vector3(0f, 0.5f, 0f)),
+            ("Arm", "Body", new Vector3(0.25f, 0.25f, 0f)),
+            ("Tip", "Arm", new Vector3(0.25f, 0f, 0.5f)),
+        });
+        var genericAvatar = AvatarBuilder.BuildGenericAvatar(generic, "Body");
+        genericAvatar.name = "generic";
+        AssetDatabase.CreateAsset(genericAvatar, Dir + "/generic.asset");
+        Debug.Log("FIXTURE-INFO generic avatar valid=" + genericAvatar.isValid + " human=" + genericAvatar.isHuman);
+
+        var mask = new AvatarMask { name = "upper" };
+        mask.AddTransformPath(humanoid.transform, true);
+        for (int i = 0; i < mask.transformCount; i++)
+            mask.SetTransformActive(i, !mask.GetTransformPath(i).Contains("Leg") && !mask.GetTransformPath(i).Contains("Foot"));
+        mask.SetHumanoidBodyPartActive(AvatarMaskBodyPart.LeftLeg, false);
+        mask.SetHumanoidBodyPartActive(AvatarMaskBodyPart.RightLeg, false);
+        mask.SetHumanoidBodyPartActive(AvatarMaskBodyPart.Root, false);
+        AssetDatabase.CreateAsset(mask, Dir + "/upper.mask");
+
+        var controller = MakeController(clips, mask);
+        var aoc = new AnimatorOverrideController(controller) { name = "override" };
+        var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
+        aoc.GetOverrides(overrides);
+        for (int i = 0; i < overrides.Count; i++)
+        {
+            var name = overrides[i].Key.name;
+            if (name == "walk") overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[i].Key, clips["override"]);
+            if (name == "jump") overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(overrides[i].Key, clips["run"]);
+        }
+        aoc.ApplyOverrides(overrides);
+        AssetDatabase.CreateAsset(aoc, Dir + "/override.overrideController");
+        Debug.Log("FIXTURE-INFO override clips=" + overrides.Count);
+
+        var a = humanoid.AddComponent<Animator>();
+        a.avatar = human;
+        a.runtimeAnimatorController = controller;
+        a.applyRootMotion = true;
+        a.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+        // 1: AnimatePhysics, named Fixed from 2023.1 (the old name does not compile in 6000).
+        a.updateMode = (AnimatorUpdateMode)1;
+        a.stabilizeFeet = true;
+        var g = generic.AddComponent<Animator>();
+        g.avatar = genericAvatar;
+        g.runtimeAnimatorController = aoc;
+        g.cullingMode = AnimatorCullingMode.CullCompletely;
+        g.updateMode = AnimatorUpdateMode.UnscaledTime;
+        g.linearVelocityBlending = true;
+        PrefabUtility.SaveAsPrefabAsset(humanoid, Dir + "/humanoid.prefab");
+        PrefabUtility.SaveAsPrefabAsset(generic, Dir + "/generic.prefab");
+        Object.DestroyImmediate(humanoid);
+        Object.DestroyImmediate(generic);
+
+        AssetDatabase.SaveAssets();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static GameObject Hierarchy((string, string, Vector3)[] bones)
+    {
+        var made = new Dictionary<string, Transform>();
+        foreach (var (name, parent, pos) in bones)
+        {
+            var t = new GameObject(name).transform;
+            if (parent != null) t.SetParent(made[parent], false);
+            t.localPosition = pos;
+            made[name] = t;
+        }
+        return made[bones[0].Item1].gameObject;
+    }
+
+    static Avatar BuildHuman(GameObject root)
+    {
+        var all = root.GetComponentsInChildren<Transform>();
+        var desc = new HumanDescription
+        {
+            skeleton = all.Select(t => new SkeletonBone
+            {
+                name = t.name, position = t.localPosition, rotation = t.localRotation, scale = t.localScale,
+            }).ToArray(),
+            human = Human.Select(b => new HumanBone
+            {
+                boneName = b.ToString(),
+                humanName = HumanTrait.BoneName[(int)b],
+                limit = new HumanLimit { useDefaultValues = true },
+            }).ToArray(),
+            upperArmTwist = 0.5f, lowerArmTwist = 0.5f, upperLegTwist = 0.5f, lowerLegTwist = 0.5f,
+            armStretch = 0.05f, legStretch = 0.05f, feetSpacing = 0.125f, hasTranslationDoF = true,
+        };
+        // One bone with its own limits, so a SkeletonBoneLimit is m_Modified.
+        var h = desc.human;
+        h[14].limit = new HumanLimit
+        {
+            useDefaultValues = false, min = new Vector3(-60f, -80f, -90f), max = new Vector3(60f, 80f, 45f),
+            center = new Vector3(0f, 5f, 0f), axisLength = 0.25f,
+        };
+        desc.human = h;
+        var avatar = AvatarBuilder.BuildHumanAvatar(root, desc);
+        avatar.name = "human";
+        Debug.Log("FIXTURE-INFO human avatar valid=" + avatar.isValid + " human=" + avatar.isHuman);
+        if (!avatar.isValid || !avatar.isHuman) throw new System.Exception("humanoid avatar refused");
+        AssetDatabase.CreateAsset(avatar, Dir + "/human.asset");
+        return avatar;
+    }
+
+    static AnimationClip MakeClip(string name)
+    {
+        var clip = new AnimationClip { name = name };
+        clip.SetCurve("", typeof(Transform), "localPosition.y", AnimationCurve.Linear(0f, 0f, 1f, name.Length * 0.125f));
+        AssetDatabase.CreateAsset(clip, Dir + "/" + name + ".anim");
+        return clip;
+    }
+
+    static AnimatorController MakeController(Dictionary<string, AnimationClip> clips, AvatarMask mask)
+    {
+        var c = AnimatorController.CreateAnimatorControllerAtPath(Dir + "/controller.controller");
+        c.AddParameter("speed", AnimatorControllerParameterType.Float);
+        c.AddParameter("dirX", AnimatorControllerParameterType.Float);
+        c.AddParameter("dirY", AnimatorControllerParameterType.Float);
+        c.AddParameter("count", AnimatorControllerParameterType.Int);
+        c.AddParameter("grounded", AnimatorControllerParameterType.Bool);
+        c.AddParameter("jump", AnimatorControllerParameterType.Trigger);
+        var ps = c.parameters;
+        ps[0].defaultFloat = 0.25f;
+        ps[3].defaultInt = 3;
+        ps[4].defaultBool = true;
+        c.parameters = ps;
+
+        var sm = c.layers[0].stateMachine;
+        var idle = sm.AddState("idle");
+        idle.motion = clips["idle"];
+        idle.tag = "rest";
+        idle.speed = 1.5f;
+        idle.cycleOffset = 0.25f;
+        idle.iKOnFeet = true;
+        idle.mirror = true;
+        idle.writeDefaultValues = false;
+        idle.speedParameterActive = true;
+        idle.speedParameter = "speed";
+        idle.AddStateMachineBehaviour<FixtureBehaviour>();
+        sm.defaultState = idle;
+
+        // 1D blend tree on speed, with a nested 1D tree as its third child.
+        var loco = c.CreateBlendTreeInController("locomotion", out var tree1d, 0);
+        tree1d.blendParameter = "speed";
+        tree1d.useAutomaticThresholds = false;
+        tree1d.AddChild(clips["walk"], 0f);
+        tree1d.AddChild(clips["run"], 1f);
+        var nested = tree1d.CreateBlendTreeChild(2f);
+        nested.name = "nested";
+        nested.blendParameter = "dirX";
+        nested.AddChild(clips["left"], -1f);
+        nested.AddChild(clips["right"], 1f);
+
+        // Freeform directional 2D on dirX, dirY.
+        var strafe = c.CreateBlendTreeInController("strafe", out var tree2d, 0);
+        tree2d.blendType = BlendTreeType.FreeformDirectional2D;
+        tree2d.blendParameter = "dirX";
+        tree2d.blendParameterY = "dirY";
+        tree2d.AddChild(clips["idle"], Vector2.zero);
+        tree2d.AddChild(clips["left"], new Vector2(-1f, 0f));
+        tree2d.AddChild(clips["right"], new Vector2(1f, 0f));
+        tree2d.AddChild(clips["walk"], new Vector2(0f, 1f));
+        tree2d.AddChild(clips["run"], new Vector2(0f, 2f));
+
+        // Freeform cartesian 2D and a direct tree.
+        var aim = c.CreateBlendTreeInController("aim", out var cart, 0);
+        cart.blendType = BlendTreeType.FreeformCartesian2D;
+        cart.blendParameter = "dirX";
+        cart.blendParameterY = "dirY";
+        cart.AddChild(clips["left"], new Vector2(-1f, -1f));
+        cart.AddChild(clips["right"], new Vector2(1f, -1f));
+        cart.AddChild(clips["wave"], new Vector2(0f, 1f));
+        var direct = c.CreateBlendTreeInController("direct", out var dtree, 0);
+        dtree.blendType = BlendTreeType.Direct;
+        dtree.AddChild(clips["walk"]);
+        dtree.AddChild(clips["wave"]);
+        var children = dtree.children;
+        children[0].directBlendParameter = "speed";
+        children[1].directBlendParameter = "dirY";
+        dtree.children = children;
+
+        var jump = sm.AddState("jump");
+        jump.motion = clips["jump"];
+
+        var t = idle.AddTransition(loco);
+        t.AddCondition(AnimatorConditionMode.Greater, 0.1f, "speed");
+        t.hasExitTime = false;
+        t.duration = 0.2f;
+        t.interruptionSource = TransitionInterruptionSource.Destination;
+        t.orderedInterruption = false;
+        t = loco.AddTransition(idle);
+        t.AddCondition(AnimatorConditionMode.Less, 0.1f, "speed");
+        t.hasExitTime = true;
+        t.exitTime = 0.75f;
+        t.hasFixedDuration = false;
+        t.offset = 0.125f;
+        t = idle.AddTransition(strafe);
+        t.AddCondition(AnimatorConditionMode.If, 0f, "grounded");
+        t.AddCondition(AnimatorConditionMode.Equals, 2f, "count");
+        t = strafe.AddTransition(aim);
+        t.AddCondition(AnimatorConditionMode.IfNot, 0f, "grounded");
+        t.AddCondition(AnimatorConditionMode.NotEqual, 1f, "count");
+        t = aim.AddTransition(direct);
+        t.AddCondition(AnimatorConditionMode.Greater, 4f, "count");
+        t = direct.AddTransition(idle);
+        t.AddCondition(AnimatorConditionMode.Less, 1f, "count");
+        var any = sm.AddAnyStateTransition(jump);
+        any.AddCondition(AnimatorConditionMode.If, 0f, "jump");
+        any.canTransitionToSelf = false;
+        jump.AddExitTransition().hasExitTime = true;
+
+        // A sub-state machine: entry, exit and behaviour of its own.
+        var sub = sm.AddStateMachine("sub");
+        var inner = sub.AddState("inner");
+        inner.motion = clips["wave"];
+        var inner2 = sub.AddState("inner2");
+        inner2.motion = clips["left"];
+        sub.defaultState = inner;
+        var entry = sub.AddEntryTransition(inner2);
+        entry.AddCondition(AnimatorConditionMode.Greater, 0.5f, "dirY");
+        inner.AddExitTransition().hasExitTime = true;
+        inner2.AddExitTransition().hasExitTime = true;
+        sub.AddStateMachineBehaviour<FixtureBehaviour>();
+        idle.AddTransition(sub).AddCondition(AnimatorConditionMode.Less, -0.5f, "dirY");
+        sm.AddEntryTransition(strafe).AddCondition(AnimatorConditionMode.Greater, 5f, "count");
+
+        // The second layer: masked, additive, IK, its own states.
+        c.AddLayer("upper");
+        var layers = c.layers;
+        layers[1].avatarMask = mask;
+        layers[1].blendingMode = AnimatorLayerBlendingMode.Additive;
+        layers[1].defaultWeight = 0.5f;
+        layers[1].iKPass = true;
+        var sm1 = layers[1].stateMachine;
+        var rest = sm1.AddState("rest");
+        var wave = sm1.AddState("wave");
+        wave.motion = clips["wave"];
+        rest.AddTransition(wave).AddCondition(AnimatorConditionMode.If, 0f, "jump");
+        wave.AddTransition(rest).hasExitTime = true;
+        sm1.defaultState = rest;
+        c.layers = layers;
+        EditorUtility.SetDirty(c);
+        Debug.Log("FIXTURE-INFO controller layers=" + c.layers.Length + " params=" + c.parameters.Length +
+            " clips=" + c.animationClips.Length);
+        return c;
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", name);
+        Directory.CreateDirectory(dir);
+        var assets = new[] { "humanoid.prefab", "generic.prefab", "controller.controller",
+            "override.overrideController", "human.asset", "generic.asset" };
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "animator", assetNames = assets.Select(a => Dir + "/" + a).ToArray() },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: " + name);
+        Debug.Log("FIXTURE-OK animator " + name + " -> " + dir);
+    }
+}
+```
+
+The 2019.4.41f2 and 2020.3.30f1 builds ran this script with
+`a.updateMode = AnimatorUpdateMode.AnimatePhysics;`, the same value 1: Unity
+6000 names it `Fixed` and refuses the old name at compile time, so the 6000.x
+projects failed to compile once, before any build, and ran the text above.
+
+Build each project once, with `-executeMethod BuildAnimator.Build` (same
+command as section 2). The log must hold two `FIXTURE-OK animator` lines
+(`lz4`, `lz4-notypetree`) and these `FIXTURE-INFO` lines:
+
+```
+FIXTURE-INFO human avatar valid=True human=True
+FIXTURE-INFO generic avatar valid=True human=False
+FIXTURE-INFO controller layers=2 params=6 clips=19
+FIXTURE-INFO override clips=7
+```
+
+Copy only these files:
+
+```
+Build/lz4/animator               ->  fixtures/bundles/editor/<editor version>/animator/lz4/animator
+Build/lz4-notypetree/animator    ->  fixtures/bundles/editor/<editor version>/animator/lz4-notypetree/animator
+```
+
+6000.6.4f1's build without type trees is committed too: UnityPy 1.25.4 reads
+it through its own TPK trees, so it is in `modern-goldens.json` with its
+typed twin (format 23 has no UnityPy 1.25.3 golden).
+
+Then rerun the goldens, `make-modern-goldens.py` first: `make-goldens.py`
+leaves out the fixtures `modern-goldens.json` lists, and UnityPy 1.25.3
+cannot read the 6000.6 bundles. Both dump the four classes
+(`DUMPED_CLASSES` 90, 91, 95 and 221); no older fixture holds one, so no
+other golden changes.
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221
+```
+
+`make-tpk-trees.py` writes Unity's player trees of the classes from 2019.1,
+`fixtures/tpk-trees.json`: AnimationClip (74) for the HumanPose struct the
+readers share, and the four classes. Its keys keep the patch release
+(`2020.3.43f1`): the Animator's 2023.1 fields came to 2020.3, 2021.3, 2022.1
+and 2022.2 in patch releases, which UnityPy's version string, without the
+patch, merged. Every fixture object's type tree of the four classes equals
+the TPK tree of its version, node for node (flags included).
+
+What the fixtures leave to the TPK layouts of `packages/core/tests/Animator.test.ts`,
+which fill every array:
+
+- arrays no fixture object fills: the avatars' `m_AvatarSkeleton.m_AxesArray`,
+  `m_RootMotionSkeleton.m_AxesArray` and `m_RootMotionSkeletonPose.m_X`, and
+  the controller's `m_PositionValues`, `m_QuaternionValues`, `m_ScaleValues`
+  (no parameter is a transform) and, in 6000.3 and 6000.6, `m_EntityIdValues`.
+  An `EntityId` node has no children (4 bytes to 6000.4, 8 from 6000.5), so
+  `readTypeTree()` reads it as `{}` of 0 bytes; the fixtures' vectors are
+  empty, and the reader refuses a non-empty one;
+- the Animator layouts of the patch releases no fixture editor is
+  (2020.3.43 and 46, 2021.3.16 and 20, 2022.1.24, 2022.2.9) and the 6000.4
+  controller field `m_EvaluateTransitionsOnStart`. The 2020.3.30f1 Animator
+  predates the 2020.3 backports; the 6000.x ones have every 2023.1 field.
+
+A build without type trees writes the generic avatar's `m_TOS` (a map) in
+another order than its typed twin; the test compares the stripped objects
+with `readTypeTree()` through the TPK tree of their version, and with the
+twin with `m_TOS` sorted.
