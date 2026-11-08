@@ -31,6 +31,14 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- A hand-written `AnimationClip` reader (`readAnimationClip`), Unity 2019.1 to 6000.6 (#302),
+  with its `asset.data` shape (`toAnimationClipFields`, `AnimationClipFields`). It returns the
+  curves raw: a legacy clip's curve arrays, a Mecanim clip's streamed words, dense samples and
+  constants, its bindings and its events; it decodes no curve. Beyond AssetStudio it reads
+  what Unity's own type trees add: `GenericBinding`'s `isSerializeReferenceCurve` (2022.2) and
+  `metaData` (6000.5), and `StreamedClip`'s `curveCount` split into two `UInt16`s with
+  `discreteCurveCount` (2022.3.19, 2023.2.8 and 2023.3 on, not 2023.1). New fixtures
+  (`animation/`) for 2019.4, 2020.3, 6000.3 and 6000.6.
 - `MeshData.indices` adds each submesh's `baseVertex` to its indices, so they point into
   `vertices` as Unity draws them (#257). AssetStudio and UnityPy leave it out; every fixture
   mesh but the new `basevertex` one has a `baseVertex` of 0 and decodes as before. An index the
