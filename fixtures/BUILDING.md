@@ -4425,9 +4425,10 @@ which fill every array:
   `m_RootMotionSkeleton.m_AxesArray` and `m_RootMotionSkeletonPose.m_X`, and
   the controller's `m_PositionValues`, `m_QuaternionValues`, `m_ScaleValues`
   (no parameter is a transform) and, in 6000.3 and 6000.6, `m_EntityIdValues`.
-  An `EntityId` node has no children (4 bytes to 6000.4, 8 from 6000.5), so
-  `readTypeTree()` reads it as `{}` of 0 bytes; the fixtures' vectors are
-  empty, and the reader refuses a non-empty one;
+  An `EntityId` node has no children (4 bytes to 6000.4, 8 from 6000.5);
+  `readTypeTree()` and the reader read it by that size, an `Int32` or a
+  `UInt64` (#307, `packages/core/tests/EntityId.test.ts`), where UnityPy
+  reads `{}` of 0 bytes; the fixtures' vectors are empty;
 - the Animator layouts of the patch releases no fixture editor is
   (2020.3.43 and 46, 2021.3.16 and 20, 2022.1.24, 2022.2.9). The 2020.3.30f1
   Animator predates the 2020.3 backports; the 6000.x ones have every 2023.1

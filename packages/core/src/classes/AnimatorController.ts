@@ -1,9 +1,7 @@
 // Ported from AssetStudio/Classes/AnimatorController.cs (MIT, © Perfare / RazTools / Razviar)
 
-import { UnsupportedError } from "../errors.js";
 import type { ObjectReader, Vector3 } from "../serialized/ObjectReader.js";
 import type { UnityVersion } from "../serialized/SerializedFile.js";
-import { readCount } from "../serialized/TypeTree.js";
 import {
   animationLayoutVersion,
   readBool,
@@ -187,10 +185,10 @@ export interface ValueArray {
   m_IntValues: number[];
   m_BoolValues: boolean[];
   /**
-   * Unity 6000.2 and later. Always empty here: the reader refuses an object
-   * with entity ids (see {@link readAnimatorController}).
+   * Unity 6000.2 and later. Each an `EntityId`: an `Int32` in 6000.2 to 6000.4,
+   * a `UInt64` (`bigint`) from 6000.5 (see {@link readAnimatorController}).
    */
-  m_EntityIdValues?: never[];
+  m_EntityIdValues?: number[] | bigint[];
 }
 
 /** The runtime form of a controller (Unity's `ControllerConstant`). */
@@ -261,9 +259,10 @@ export interface AnimatorController extends NamedObject {
  *
  * An `EntityId` is 4 bytes in Unity 6000.2 to 6000.4 and 8 from 6000.5 (TPK),
  * and its type tree node has no children, so neither TPK nor the object's own
- * type tree says what it holds; no controller of Unity's writes one (a
- * parameter is a float, an int or a bool). A non-empty `m_EntityIdValues` is
- * refused rather than guessed (R9).
+ * type tree names its members. It is read as Unity's API gives it, as
+ * `readTypeTree()` reads it: an `Int32` (the instance id it replaces) to
+ * 6000.4, a `UInt64` (`EntityId.ToULong`) from 6000.5. No controller of
+ * Unity's writes one (a parameter is a float, an int or a bool).
  *
  * ponytail: the gates compare release numbers only (see `atLeast`); a
  * pre-release before the one TPK records (6000.2.0b2, 6000.4.0a2) fails the
@@ -274,8 +273,7 @@ export interface AnimatorController extends NamedObject {
  *   `unityVersion` as `found`: before 2019.1, for an unknown version unless
  *   the format is 18 to 21, and in those formats when the fields after
  *   `m_Name` do not fit 2019's layout. Of kind `"build target"` for an editor
- *   file (`BuildTarget.NoTarget`). Of kind `"EntityId values"` when
- *   `m_EntityIdValues` is not empty
+ *   file (`BuildTarget.NoTarget`)
  * @throws {CorruptError} when the object ends early, a count or string length
  *   is negative or runs past its end, or bytes are left over after the last
  *   field, with the version known; with it unknown, only inside `m_Name`
@@ -528,16 +526,10 @@ function readValueArray(reader: ObjectReader, version: UnityVersion): ValueArray
   reader.align();
   // 6000.2+ (TPK; upstream does not read it).
   if (atLeast(version, 6000, 2)) {
-    const count = readCount(reader, `${OWNER} ${reader.pathId} m_EntityIdValues`);
-    if (count !== 0) {
-      throw new UnsupportedError(
-        "EntityId values",
-        String(count),
-        `object ${reader.pathId}: m_EntityIdValues holds ${count} entity ids, whose layout ` +
-          "no type tree gives",
-      );
-    }
-    values.m_EntityIdValues = [];
+    // 6000.5+: 8 bytes, Unity's raw UInt64; before, the Int32 instance id (TPK).
+    values.m_EntityIdValues = atLeast(version, 6000, 5)
+      ? readArray(reader, OWNER, "m_EntityIdValues", (r) => r.readUInt64())
+      : readInts(reader, OWNER, "m_EntityIdValues");
   }
   return values;
 }
