@@ -2430,7 +2430,7 @@ in c37af7d's `m_Skin`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
-| 45 Mesh (`main` bundles; `mesh` bundles, section 20; the `scene` skinned mesh and the `legacy-animation` quad, sections 24 and 25) | 36 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 3 in the 6000.6 `mesh-skinned` bundles and the typed 6000.6 `legacy-animation` bundle: `c37af7d` cannot read SerializedFile format 23 at all. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
+| 53 Mesh (`main` bundles; `mesh` bundles, section 20; the `scene` skinned mesh and the `legacy-animation` quad, sections 24 and 25) | 43 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 4 in the typed 6000.6 `mesh-skinned`, `scene` and `legacy-animation` bundles: `c37af7d` cannot read SerializedFile format 23's type trees. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
 | 51 AudioClip (`audio`, `adpcm` and `audiohdr` bundles, section 11) | 51 WAV | |
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
