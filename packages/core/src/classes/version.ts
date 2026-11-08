@@ -18,3 +18,17 @@ export function atLeast(
   if (minor !== wantMinor) return minor > wantMinor;
   return patch >= wantPatch;
 }
+
+/**
+ * Whether `version` is `major.minor.patch` or a later patch of that same
+ * `major.minor`: a field Unity backported to one release line in a patch.
+ * Internal, as {@link atLeast}.
+ */
+export function patchFrom(
+  version: UnityVersion,
+  major: number,
+  minor: number,
+  patch: number,
+): boolean {
+  return version[0] === major && version[1] === minor && version[2] >= patch;
+}

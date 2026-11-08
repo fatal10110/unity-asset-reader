@@ -9,6 +9,7 @@ import { ClassID } from "../serialized/ClassID.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
 import { baseName } from "../serialized/SerializedFile.js";
 import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
+import { readAnimationClip, type AnimationClip } from "./AnimationClip.js";
 import { readAnimator, type Animator } from "./Animator.js";
 import { readAnimatorController, type AnimatorController } from "./AnimatorController.js";
 import {
@@ -31,6 +32,7 @@ import { readFont, type Font } from "./Font.js";
 import { readMovieTexture, type MovieTexture } from "./MovieTexture.js";
 import { readVideoClipData, type VideoClipData } from "./VideoClip.js";
 import {
+  toAnimationClipFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -49,6 +51,7 @@ import {
   toTextAssetFields,
   toTexture2DFields,
   toVideoClipFields,
+  type AnimationClipFields,
   type AnimatorControllerFields,
   type AnimatorFields,
   type AnimatorOverrideControllerFields,
@@ -132,6 +135,7 @@ export interface ObjectDataMap {
   AnimatorController: AnimatorController;
   Animator: Animator;
   AnimatorOverrideController: AnimatorOverrideController;
+  AnimationClip: AnimationClip;
 }
 
 /**
@@ -159,6 +163,7 @@ export interface AssetDataMap {
   AnimatorController: AnimatorControllerFields;
   Animator: AnimatorFields;
   AnimatorOverrideController: AnimatorOverrideControllerFields;
+  AnimationClip: AnimationClipFields;
 }
 
 /**
@@ -207,6 +212,7 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   AnimatorController: readAnimatorController,
   Animator: readAnimator,
   AnimatorOverrideController: readAnimatorOverrideController,
+  AnimationClip: readAnimationClip,
 };
 
 /** {@link CLASS_READERS} by class id, and the class name each id has there. */
@@ -285,6 +291,7 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   AnimatorController: toAnimatorControllerFields,
   Animator: toAnimatorFields,
   AnimatorOverrideController: toAnimatorOverrideControllerFields,
+  AnimationClip: toAnimationClipFields,
 };
 
 /**
