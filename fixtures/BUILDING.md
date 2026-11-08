@@ -2435,7 +2435,7 @@ in c37af7d's `m_Skin`:
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
-| 152 AnimationClip (`animation`, `animator`, `scene` and `legacy-animation` bundles, sections 22 to 25) | 116 curve dumps: every clip of 2019.4, 2020.3 and 6000.3.26f1, typed and not; 4 with a `verdict` (below); and 6000.6.4f1's `legacy` and `dense` without type trees | The other 36 of the 38 in the 6000.6 bundles: with type trees `c37af7d` cannot read format 23; without them it reads the clips without `GenericBinding.metaData` (6000.5), so the bindings come out misread and `Convert()` throws (`ArgumentException`), or the object does not load. The two it exports have no binding or one whose misreading changes nothing, and match |
+| 160 AnimationClip (`animation`, `animator`, `scene`, `legacy-animation` and `ui-animation` bundles, sections 22 to 26) | 122 curve dumps: every clip of 2019.4, 2020.3 and 6000.3.26f1, typed and not; 6 with a `verdict` (below); and 6000.6.4f1's `legacy` and `dense` without type trees | The other 38 of the 40 in the 6000.6 bundles: with type trees `c37af7d` cannot read format 23; without them it reads the clips without `GenericBinding.metaData` (6000.5), so the bindings come out misread and `Convert()` throws (`ArgumentException`), or the object does not load. The two it exports have no binding or one whose misreading changes nothing, and match |
 | 42 Shader (`shader` and `shader-variants` bundles, section 18) | 23 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 11 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android `shader` bundles, and both shaders of the three `shader-variants` bundles (#283). The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 148 Texture2D | 105 PNG | 29 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
@@ -2471,7 +2471,11 @@ unity-asset-reader reads the renderer and names them (`blendShape.smile`); the
 test hashes the names back and compares the rest. Every 2019.4 and 2020.3
 `smile` and `walk` names them as unity-asset-reader does. A clip nothing plays
 gets no verdict: its curves keep `path_<hash>`, and their attributes stay
-CRC-32s with the renderer read too (the `legacy-animation` bundles' `unlisted`). 6000.6.4f1 has no other oracle:
+CRC-32s with the renderer read too (the `legacy-animation` bundles' `unlisted`).
+The 6000.3.26f1 `ui-animation` bundles' `ui` clips have the other `verdict`:
+`c37af7d` misreads their Avatar-less `Animator` as having no transform
+hierarchy (section 26), so it names none of their paths; the test hashes the
+names back. 6000.6.4f1 has no other oracle:
 `packages/animation/tests/cross-editor.test.ts` holds each of its clips to the
 2019.4 one, as it does the 2020.3 and 6000.3 ones (object references compared
 by the name of the object they reach; the one documented difference is the
@@ -5499,3 +5503,187 @@ only to a clip with a named path on a blend shape curve.
 Every fixture `Animation` has the TPK tree of its version, so the stripped
 builds are read through it; `packages/core/tests/AnimationComponent.test.ts`
 reads each TPK layout from 2019.1 to 6000.6 with two listed clips.
+
+## 26. The `ui-animation` bundles (#315)
+
+`ui-animation/{lz4,lz4-notypetree}/ui-animation` for **2019.4.41f2**,
+**2020.3.30f1**, **6000.3.26f1** and **6000.6.4f1**: one bundle per editor and
+kind, made from code by an editor script, for the `RectTransform` reader
+(class 224) and as the oracle fixture of #304's `BuildTOS` and `FindChild`
+through a UI hierarchy. Each bundle holds:
+
+- `ui`, a prefab of four GameObjects, each with a `RectTransform` and no plain
+  `Transform`: the root `ui` with a `Canvas` and an `Animator`; `Panel`, and
+  below it `Button` and `Label`, each with its anchors, anchored position,
+  size delta and pivot set away from the defaults;
+- `ui`, a Mecanim clip: `RectTransform` curves on `Panel`
+  (`m_AnchoredPosition.x`, `.y`) and `Panel/Button` (`m_SizeDelta.x`,
+  `m_AnchorMin.y`, `m_Pivot.x`), which AssetStudio names through its
+  `CustomCurveResolver`, and on `Panel/Label` a scale curve (`localScale`
+  through the `Transform` type) and `m_IsActive`;
+- `ui`, an `AnimatorController` whose one state plays the clip.
+
+The `Animator` has no Avatar and the bundle holds none: `FindTOS` returns from
+any Avatar whose `m_TOS` covers the bindings, and `AddAnimatorTOS` tries
+`m_Avatar` before the hierarchy (`AnimationClipExtensions.cs`), so only the
+`Animator`'s GameObject hierarchy, walked through its `RectTransform`s, names
+the clip's paths. The script fails unless the saved prefab's Animator has no
+Avatar and every Transform in it is a `RectTransform`.
+
+`com.unity.modules.ui` (the `Canvas`) is already in the manifests of the
+section 24 projects, so the manifests are copied unchanged. Each project is a
+fresh copy named `uar-315-ui-animation-<editor version>`, holding
+`ProjectSettings/` and `Packages/` of the section 24 project of the same
+editor and only this file under `Assets/`.
+
+`Assets/Editor/BuildUiAnimation.cs`:
+
+```csharp
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
+using UnityEngine;
+
+// The ui-animation fixtures (#315), created from code: a prefab "ui", a Canvas
+// whose children are RectTransforms, with an Animator that has no Avatar and
+// plays "ui", a clip on the children's paths. The bundle holds no Avatar, so
+// only the Animator's hierarchy, through RectTransforms, names the paths.
+public static class BuildUiAnimation
+{
+    const string Dir = "Assets/Fixtures/ui-animation";
+
+    public static void Build()
+    {
+        Directory.CreateDirectory(Dir);
+        var clip = new AnimationClip { name = "ui" };
+        // RectTransform properties (custom bindings), a Transform scale through
+        // the RectTransform below and an active curve, on child paths.
+        clip.SetCurve("Panel", typeof(RectTransform), "m_AnchoredPosition.x", Keys(0f, 10f, 0.5f, 30f, 1f, 10f));
+        clip.SetCurve("Panel", typeof(RectTransform), "m_AnchoredPosition.y", Keys(0f, 20f, 1f, -20f));
+        clip.SetCurve("Panel/Button", typeof(RectTransform), "m_SizeDelta.x", Keys(0f, 100f, 1f, 150f));
+        clip.SetCurve("Panel/Button", typeof(RectTransform), "m_AnchorMin.y", Keys(0f, 0.25f, 1f, 0.5f));
+        clip.SetCurve("Panel/Button", typeof(RectTransform), "m_Pivot.x", Keys(0f, 0.5f, 1f, 0f));
+        clip.SetCurve("Panel/Label", typeof(Transform), "localScale.x", Keys(0f, 1f, 1f, 2f));
+        clip.SetCurve("Panel/Label", typeof(Transform), "localScale.y", Keys(0f, 1f, 1f, 0.5f));
+        clip.SetCurve("Panel/Label", typeof(Transform), "localScale.z", Keys(0f, 1f, 1f, 1f));
+        clip.SetCurve("Panel/Label", typeof(GameObject), "m_IsActive", Keys(0f, 1f, 0.5f, 0f, 1f, 1f));
+        AssetDatabase.CreateAsset(clip, Dir + "/ui.anim");
+        Debug.Log("FIXTURE-INFO clip ui legacy=" + clip.legacy +
+            " curves=" + AnimationUtility.GetCurveBindings(clip).Length);
+        var controller = AnimatorController.CreateAnimatorControllerAtPathWithClip(Dir + "/ui.controller", clip);
+
+        var root = new GameObject("ui", typeof(RectTransform), typeof(Canvas));
+        var panel = Child(root.transform, "Panel", new Vector2(0.25f, 0.25f), new Vector2(0.75f, 0.75f),
+            new Vector2(10f, 20f), new Vector2(-40f, -30f), new Vector2(0.5f, 0.25f));
+        Child(panel, "Button", new Vector2(0f, 0.25f), new Vector2(0f, 0.25f),
+            new Vector2(8f, -4f), new Vector2(100f, 30f), new Vector2(0.5f, 0.5f));
+        Child(panel, "Label", new Vector2(0f, 0f), new Vector2(1f, 1f),
+            new Vector2(0f, 2f), new Vector2(-16f, -8f), new Vector2(0f, 1f));
+        var animator = root.AddComponent<Animator>();
+        animator.runtimeAnimatorController = controller;
+        PrefabUtility.SaveAsPrefabAsset(root, Dir + "/ui.prefab");
+        Object.DestroyImmediate(root);
+        AssetDatabase.SaveAssets();
+
+        // The saved Animator has no Avatar, and its children are RectTransforms.
+        var saved = AssetDatabase.LoadAssetAtPath<GameObject>(Dir + "/ui.prefab");
+        var savedAnimator = saved.GetComponent<Animator>();
+        var rects = saved.GetComponentsInChildren<Transform>(true).Select(t => t is RectTransform).ToArray();
+        Debug.Log("FIXTURE-INFO animator avatar=" + (savedAnimator.avatar == null ? "null" : savedAnimator.avatar.name) +
+            " controller=" + savedAnimator.runtimeAnimatorController.name +
+            " rects=" + rects.Count(r => r) + "/" + rects.Length);
+        if (savedAnimator.avatar != null) throw new System.Exception("the Animator has an Avatar");
+        if (rects.Any(r => !r)) throw new System.Exception("a Transform is not a RectTransform");
+
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static Transform Child(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax,
+        Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 pivot)
+    {
+        var t = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+        t.SetParent(parent, false);
+        t.anchorMin = anchorMin;
+        t.anchorMax = anchorMax;
+        t.anchoredPosition = anchoredPosition;
+        t.sizeDelta = sizeDelta;
+        t.pivot = pivot;
+        return t;
+    }
+
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var keys = new Keyframe[tv.Length / 2];
+        for (int i = 0; i < keys.Length; i++) keys[i] = new Keyframe(tv[2 * i], tv[2 * i + 1]);
+        return new AnimationCurve(keys);
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", name);
+        Directory.CreateDirectory(dir);
+        var assets = new[] { "ui.prefab", "ui.anim", "ui.controller" };
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "ui-animation", assetNames = assets.Select(x => Dir + "/" + x).ToArray() },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: " + name);
+        Debug.Log("FIXTURE-OK ui-animation " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildUiAnimation.Build` (same
+command as section 2). The log must hold two `FIXTURE-OK ui-animation` lines
+(`lz4`, `lz4-notypetree`) and these `FIXTURE-INFO` lines, the same in all four
+editors:
+
+```
+FIXTURE-INFO clip ui legacy=False curves=9
+FIXTURE-INFO animator avatar=null controller=ui rects=4/4
+```
+
+Copy only these files:
+
+```
+Build/lz4/ui-animation               ->  fixtures/bundles/editor/<editor version>/ui-animation/lz4/ui-animation
+Build/lz4-notypetree/ui-animation    ->  fixtures/bundles/editor/<editor version>/ui-animation/lz4-notypetree/ui-animation
+```
+
+6000.6.4f1's build without type trees is committed too, in
+`modern-goldens.json` with its typed twin, as in section 22.
+
+Then rerun the goldens, `make-modern-goldens.py` first. Both now dump
+`RectTransform` (`DUMPED_CLASSES` 224); no fixture held one before, so no
+other entry changes. `make-modern-goldens.py` checks the 6000.6 bundles'
+counts and that the Animator has no Avatar (its `evidence`).
+`make-tpk-trees.py` adds the `RectTransform` trees (it rewrites the whole
+file, so every class id is passed), and `make-export-goldens.py` adds the `ui`
+clip of the 2019.4, 2020.3 and 6000.3.26f1 bundles, typed and not
+(AssetStudio's `.anim` curves); it does not load the 6000.6 bundles (section
+17). In the 2019.4 and 2020.3 clips AssetStudio names every path through the
+`Animator`'s hierarchy. In the 6000.3.26f1 ones it names none: c37af7d's
+`Animator` reader lacks `m_AnimatePhysics`, which Unity writes before
+`m_HasTransformHierarchy` from 2023.1 (Unity's type trees, `fixtures/tpk-trees.json`
+class 95), so it reads that byte, false, as `m_HasTransformHierarchy`, and
+`AddAnimatorTOS` gets only the root from `BuildTOS(Animator)`. The script gives
+such a clip a `verdict` (`ANIMATOR_VERDICT`): every path it wrote is
+`path_<hash>`, and UnityPy reads an `Animator` whose `m_AnimatePhysics` is false
+and `m_HasTransformHierarchy` true and whose controller lists the clip.
+`packages/animation/tests/ui.test.ts` and `goldens.test.ts` compare those two
+goldens with each named path replaced by `path_<CRC-32>`.
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221 1 4 23 33 137 111 224
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+Every fixture `RectTransform` has the TPK tree of its version, so the stripped
+builds are read through it; `packages/core/tests/RectTransform.test.ts` reads
+each TPK layout from 2019.1 to 6000.6 with two children.

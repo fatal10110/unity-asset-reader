@@ -258,9 +258,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(
     exported("AnimationClip"),
-    116,
-    "the 17 clips of the animation, animator and scene bundles and the 2 of the legacy-animation " +
-      "bundles (#314) of 2019.4, 2020.3 and 6000.3, typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
+    122,
+    "the 17 clips of the animation, animator and scene bundles, the 2 of the legacy-animation " +
+      "bundles (#314) and the 1 of the ui-animation bundles (#315) of 2019.4, 2020.3 and 6000.3, typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
       "whose bindings c37af7d misreads harmlessly (none, or one Transform binding)",
   );
 });
@@ -353,7 +353,9 @@ test("an AnimationClip golden has a verdict exactly where AssetStudio missed its
   // fixtures/BUILDING.md section 17 (#304): c37af7d's Renderer reader fails on
   // Unity 6000's SkinnedMeshRenderer, so its blend shape attributes stay CRC-32s.
   const clips = all.filter((o) => o.cls === "AnimationClip" && o.entry!.anim);
-  const withVerdict = clips.filter((o) => o.entry!.verdict);
+  const withVerdict = clips.filter(
+    (o) => o.entry!.verdict && !o.entry!.verdict.startsWith("c37af7d's Animator reader"),
+  );
   for (const o of withVerdict) {
     assert.match(o.entry!.verdict!, /^c37af7d's Renderer reader fails on this file's/, at(o));
     assert.ok(o.entry!.unreadObjects?.SkinnedMeshRenderer, at(o));
@@ -373,5 +375,25 @@ test("an AnimationClip golden has a verdict exactly where AssetStudio missed its
     const float = o.entry!.anim!.curves.float;
     assert.ok(float.every((c) => /^path_\d+$/.test(c.path)), at(o));
     if (o.fixture.includes("/6000.3.")) assert.ok(o.entry!.unreadObjects?.SkinnedMeshRenderer, at(o));
+  }
+});
+
+test("an AnimationClip golden has the Animator verdict exactly where AssetStudio named no path", () => {
+  // fixtures/BUILDING.md section 26 (#315): c37af7d reads Unity 2023.1+'s
+  // m_AnimatePhysics as m_HasTransformHierarchy, so an Animator without an
+  // Avatar names none of its clip's paths.
+  const clips = all.filter((o) => o.cls === "AnimationClip" && o.entry!.anim);
+  const withVerdict = clips.filter((o) => o.entry!.verdict?.startsWith("c37af7d's Animator reader"));
+  assert.deepEqual(
+    withVerdict.map((o) => o.fixture),
+    [
+      "editor/6000.3.26f1/ui-animation/lz4-notypetree/ui-animation",
+      "editor/6000.3.26f1/ui-animation/lz4/ui-animation",
+    ],
+    "the 6000.3.26f1 ui-animation bundles' clip, typed and not",
+  );
+  for (const o of withVerdict) {
+    const paths = Object.values(o.entry!.anim!.curves).flatMap((list) => list.map((c) => c.path));
+    assert.ok(paths.every((p) => /^path_\d+$/.test(p)), at(o));
   }
 });

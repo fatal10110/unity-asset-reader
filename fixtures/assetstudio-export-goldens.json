@@ -6487,6 +6487,146 @@
         }
       }
     },
+    "editor/2019.4.41f2/ui-animation/lz4-notypetree/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-5475132284455094842": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6623,
+            "sha256": "9a02640326cc6d1fc1080045cf3013cdd19d39096293d822a38ee3a963eeb560",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "Panel/Label",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "Panel/Label",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/ui-animation/lz4/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-5475132284455094842": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6623,
+            "sha256": "9a02640326cc6d1fc1080045cf3013cdd19d39096293d822a38ee3a963eeb560",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "Panel/Label",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "Panel/Label",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/uncompressed/main": {
       "CAB-ba01e3c16ba268ec36e9543a39dc83ad": {
         "-1107784300911722889": {
@@ -10196,6 +10336,146 @@
             "size": 4860,
             "sha256": "3772a3e4275b99ebeecba8d52b90cc9192cce137af06c6889459107b460e7459",
             "extension": ".webm"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/ui-animation/lz4-notypetree/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-7772245796004648032": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6623,
+            "sha256": "9a02640326cc6d1fc1080045cf3013cdd19d39096293d822a38ee3a963eeb560",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "Panel/Label",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "Panel/Label",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/ui-animation/lz4/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-7772245796004648032": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6623,
+            "sha256": "9a02640326cc6d1fc1080045cf3013cdd19d39096293d822a38ee3a963eeb560",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "Panel/Label",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "Panel",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "Panel/Button",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "Panel/Label",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
           }
         }
       }
@@ -15496,6 +15776,148 @@
         }
       }
     },
+    "editor/6000.3.26f1/ui-animation/lz4-notypetree/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "4382616185172931899": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6660,
+            "sha256": "700f307a6b6c3aaf8f351e8cd0e8e211d968be1a7728a37476e57529cfb5a47f",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "path_2451500780",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "path_1668086795",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "path_1668086795",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "path_2451500780",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "verdict": "c37af7d's Animator reader lacks m_AnimatePhysics, which Unity writes before m_HasTransformHierarchy from 2023.1, so it reads that byte (false) as m_HasTransformHierarchy and AddAnimatorTOS names nothing from the hierarchy of the Animator that plays the clip (UnityPy reads it true), leaving each path as path_<hash>; unity-asset-reader-animation names them; the golden is compared with each named path replaced by path_<CRC-32> (#315)"
+        }
+      }
+    },
+    "editor/6000.3.26f1/ui-animation/lz4/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "4382616185172931899": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3120,
+            "objectSha256": "424d04a50c9ec4b439b94d5ca14dc5d534192ed8d91d47e46270331bd3581c29",
+            "name": "ui"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 6660,
+            "sha256": "700f307a6b6c3aaf8f351e8cd0e8e211d968be1a7728a37476e57529cfb5a47f",
+            "curves": {
+              "rotation": [],
+              "euler": [],
+              "position": [],
+              "scale": [
+                {
+                  "path": "path_2451500780",
+                  "keys": "000000003f8000003f8000003f8000007f8000007f8000007f8000000000000000000000000000003f800000400000003f0000003f80000000000000000000007f800000000000000000000000000000"
+                }
+              ],
+              "float": [
+                {
+                  "path": "path_1668086795",
+                  "attribute": "m_AnchoredPosition.x",
+                  "classId": 224,
+                  "keys": "000000004120000000000000000000003f00000041f0000000000000000000003f800000412000000000000000000000"
+                },
+                {
+                  "path": "path_1668086795",
+                  "attribute": "m_AnchoredPosition.y",
+                  "classId": 224,
+                  "keys": "0000000041a0000000000000000000003f800000c1a000000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_SizeDelta.x",
+                  "classId": 224,
+                  "keys": "0000000042c8000000000000000000003f800000431600000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_AnchorMin.y",
+                  "classId": 224,
+                  "keys": "000000003e80000000000000000000003f8000003f0000000000000000000000"
+                },
+                {
+                  "path": "path_1039651226",
+                  "attribute": "m_Pivot.x",
+                  "classId": 224,
+                  "keys": "000000003f00000000000000000000003f800000000000000000000000000000"
+                },
+                {
+                  "path": "path_2451500780",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "verdict": "c37af7d's Animator reader lacks m_AnimatePhysics, which Unity writes before m_HasTransformHierarchy from 2023.1, so it reads that byte (false) as m_HasTransformHierarchy and AddAnimatorTOS names nothing from the hierarchy of the Animator that plays the clip (UnityPy reads it true), leaving each path as path_<hash>; unity-asset-reader-animation names them; the golden is compared with each named path replaced by path_<CRC-32> (#315)"
+        }
+      }
+    },
     "editor/6000.6.4f1/animation/lz4-notypetree/animation": {
       "CAB-bc6059c3637d2fd6fe4605f932620b0b": {
         "-2005639260757898484": {
@@ -17118,6 +17540,34 @@
           },
           "inputOracle": "modern-goldens.json",
           "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/ui-animation/lz4-notypetree/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-7586614561742571886": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3148,
+            "name": "ui"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: Assets CAB-b303b946ee6e8351ad1bc9c5cceb56b5"
+        }
+      }
+    },
+    "editor/6000.6.4f1/ui-animation/lz4/ui-animation": {
+      "CAB-b303b946ee6e8351ad1bc9c5cceb56b5": {
+        "-7586614561742571886": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3148,
+            "name": "ui"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.ArgumentOutOfRangeException: count ('-1461685850') must be a non-negative value. (Parameter 'count')"
         }
       }
     },

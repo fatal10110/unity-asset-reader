@@ -10,7 +10,13 @@ import type { AnimationClip, GameObject } from "unity-asset-reader";
 import { crc32 } from "../src/crc.js";
 import { clipCurves } from "../src/index.js";
 import { CLASS, findRoots, findTOS, Scene } from "../src/tos.js";
-import { asGolden, exportGoldens, fixtureEnv, objectOf } from "./helpers.js";
+import {
+  asAssetStudioWithoutHierarchy,
+  asGolden,
+  exportGoldens,
+  fixtureEnv,
+  objectOf,
+} from "./helpers.js";
 
 const FIXTURES = ["2019.4.41f2", "2020.3.30f1", "6000.3.26f1", "6000.6.4f1"].flatMap((editor) =>
   ["lz4", "lz4-notypetree"].map((kind) => `editor/${editor}/ui-animation/${kind}/ui-animation`),
@@ -51,6 +57,9 @@ for (const fixture of FIXTURES) {
 test("the ui clips convert to AssetStudio's .anim curves, float32 bit for bit", () => {
   // 2019.4, 2020.3 and 6000.3, typed and not: c37af7d cannot load 6000.6's
   // (BUILDING.md section 17); cross-editor.test.ts holds those to the others.
+  // c37af7d misreads 6000.3's Animator (m_AnimatePhysics, 2023.1+, read as
+  // m_HasTransformHierarchy), so it names no path there: those goldens carry
+  // the verdict and are compared with the names hashed back (section 26).
   const goldens = Object.entries(exportGoldens)
     .filter(([fixture]) => fixture.includes("/ui-animation/"))
     .flatMap(([fixture, files]) =>
@@ -62,17 +71,16 @@ test("the ui clips convert to AssetStudio's .anim curves, float32 bit for bit", 
     );
   assert.equal(goldens.length, 6);
   for (const { fixture, file, pathId, entry } of goldens) {
-    assert.equal(entry.verdict, undefined, fixture);
+    const misread = fixture.includes("/6000.3.");
+    if (misread) assert.match(entry.verdict ?? "", /^c37af7d's Animator reader lacks/, fixture);
+    else assert.equal(entry.verdict, undefined, fixture);
     const env = fixtureEnv(fixture);
-    const got = asGolden(clipCurves(env, objectOf(env, file, pathId)));
+    const curves = clipCurves(env, objectOf(env, file, pathId));
+    const got = asGolden(misread ? asAssetStudioWithoutHierarchy(curves) : curves);
     assert.deepEqual(got.curves, entry.anim!.curves, fixture);
     assert.deepEqual(got.events, entry.anim!.events, fixture);
-    // AssetStudio named every path too.
-    assert.ok(
-      Object.values(entry.anim!.curves).every((list) =>
-        list.every((c: { path: string }) => !c.path.startsWith("path_")),
-      ),
-      fixture,
-    );
+    // AssetStudio named every path too, where it read the Animator right.
+    const paths = Object.values(entry.anim!.curves).flatMap((list) => list.map((c) => c.path));
+    assert.ok(paths.every((p) => p.startsWith("path_") === misread), fixture);
   }
 });

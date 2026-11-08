@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { load, type Env, type ObjectReader, type PPtr } from "unity-asset-reader";
 import { loadFixture } from "../../../fixtures/helpers.js";
+import { crc32 } from "../src/crc.js";
 import type { ClipCurves, CurveKey } from "../src/index.js";
 
 /** A curve as the export goldens record it: its keys' float32 bits as one hex string. */
@@ -104,5 +105,25 @@ export function asGolden(c: ClipCurves): Pick<GoldenAnim, "curves" | "events"> {
       intParameter: e.intParameter,
       messageOptions: e.messageOptions,
     })),
+  };
+}
+
+/**
+ * The Animator verdict of the export goldens (#315): c37af7d misreads the
+ * Animator of Unity 2023.1+ as having no transform hierarchy, so it named none
+ * of the paths of a clip the Animator plays without an Avatar. Returns the
+ * curves with each path hashed back.
+ */
+export function asAssetStudioWithoutHierarchy(curves: ClipCurves): ClipCurves {
+  const hashed = <T extends { path: string }>(list: T[]): T[] =>
+    list.map((c) => (c.path === "" ? c : { ...c, path: `path_${crc32(c.path)}` }));
+  return {
+    ...curves,
+    rotation: hashed(curves.rotation),
+    euler: hashed(curves.euler),
+    position: hashed(curves.position),
+    scale: hashed(curves.scale),
+    float: hashed(curves.float),
+    pptr: hashed(curves.pptr),
   };
 }
