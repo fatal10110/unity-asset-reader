@@ -234,7 +234,7 @@ generated block data; no current editor writes those formats.
 | ETC | `ETC_RGB4` (ETC1), `ETC2_RGB`, `ETC2_RGBA1`, `ETC2_RGBA8` | WASM `decode_etc1`, `decode_etc2`, `decode_etc2a1`, `decode_etc2a8` | editor-built (6000.3) |
 | | `ETC_RGB4_3DS`, `ETC_RGBA8_3DS` | WASM, the decoder of `ETC_RGB4` / `ETC2_RGBA8` | `ETC_RGB4` / `ETC2_RGBA8` fixture data |
 | EAC | `EAC_R`, `EAC_RG` | WASM `decode_eacr`, `decode_eacrg` | editor-built (6000.3) |
-| | `EAC_R_SIGNED`, `EAC_RG_SIGNED` | WASM `decode_eacr_signed`, `decode_eacrg_signed` | synthetic |
+| | `EAC_R_SIGNED`, `EAC_RG_SIGNED` | WASM `decode_eacr_signed`, `decode_eacrg_signed` | editor-script-built (2019.4, 2020.3, 6000.3, 6000.6) |
 | PVRTC | `PVRTC_RGB2`, `PVRTC_RGBA2`, `PVRTC_RGB4`, `PVRTC_RGBA4` | WASM `decode_pvrtc` | editor-built (2019.4) |
 | ATC | `ATC_RGB4`, `ATC_RGBA8` | WASM `decode_atc_rgb4`, `decode_atc_rgba8` | synthetic |
 | ASTC | `ASTC_RGB_4x4`, `ASTC_RGB_5x5`, `ASTC_RGB_6x6`, `ASTC_RGB_8x8`, `ASTC_RGB_10x10`, `ASTC_RGB_12x12` (Unity's `ASTC_4x4` ... `ASTC_12x12`), `ASTC_HDR_4x4`, `ASTC_HDR_12x12` | WASM `decode_astc` | editor-built (6000.3) |

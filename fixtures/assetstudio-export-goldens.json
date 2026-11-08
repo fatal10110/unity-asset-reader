@@ -2508,6 +2508,56 @@
         }
       }
     },
+    "editor/2019.4.41f2/signed-eac/android": {
+      "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+        "-8189961022302785183": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 624,
+            "objectSha256": "ee6ee8bcae6a3f013975a258417c352d4d0ac7aff7ebccb1732eb9199dd5dd3c",
+            "name": "44_EAC_RG_SIGNED",
+            "format": 44,
+            "formatName": "EAC_RG_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 512,
+            "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "03ea3019e647db3821df6252654b604352cb94ea5848e8bf99785fda616b1945",
+            "pngSize": 158,
+            "pngSha256": "bcf07edff04443c9f971a5457d44b6a79f2362279d4aed7e03a006dd7af81cd4"
+          }
+        },
+        "2452150551095139037": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 368,
+            "objectSha256": "c2f8db4217c303b7f8c4509fd12ce749f8d3511dda965eb2d53d7167d058edc0",
+            "name": "42_EAC_R_SIGNED",
+            "format": 42,
+            "formatName": "EAC_R_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 256,
+            "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9",
+            "pngSize": 132,
+            "pngSha256": "ba692ddd50ce71aaf9a7e20ec5a1a695ab70d081766069a6562774f7e1e6df59"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/spine/lz4-notypetree/skeletons": {
       "CAB-3bfd4c79ed1e0e60e47036ff17aac9b1": {
         "-2008323714379738163": {
@@ -5445,6 +5495,56 @@
           },
           "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
           "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        }
+      }
+    },
+    "editor/2020.3.30f1/signed-eac/android": {
+      "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+        "5037857617709236087": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 636,
+            "objectSha256": "c75a21128472cb45d9b08851f74b3b10831132cf1851c1b581bf31bbbf2ccd88",
+            "name": "44_EAC_RG_SIGNED",
+            "format": 44,
+            "formatName": "EAC_RG_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 512,
+            "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "03ea3019e647db3821df6252654b604352cb94ea5848e8bf99785fda616b1945",
+            "pngSize": 158,
+            "pngSha256": "bcf07edff04443c9f971a5457d44b6a79f2362279d4aed7e03a006dd7af81cd4"
+          }
+        },
+        "7997057137500425309": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 380,
+            "objectSha256": "be4b1f8b22fe541261a1f33ce09d82109099f1b8dd23ee0908a8ae1a47e18e16",
+            "name": "42_EAC_R_SIGNED",
+            "format": 42,
+            "formatName": "EAC_R_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 256,
+            "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9",
+            "pngSize": 132,
+            "pngSha256": "ba692ddd50ce71aaf9a7e20ec5a1a695ab70d081766069a6562774f7e1e6df59"
+          }
         }
       }
     },
@@ -8549,6 +8649,56 @@
         }
       }
     },
+    "editor/6000.3.26f1/signed-eac/android": {
+      "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+        "-4300357251172282118": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 384,
+            "objectSha256": "edebb9ab20098f874bb4d3582f40a3e543cc8d45613b44a7b218eb3b20f4e337",
+            "name": "42_EAC_R_SIGNED",
+            "format": 42,
+            "formatName": "EAC_R_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 256,
+            "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "f321de6d552ad32489ac3ab83f7f6b4f7de606d419924a0733fd8de63657abd9",
+            "pngSize": 132,
+            "pngSha256": "ba692ddd50ce71aaf9a7e20ec5a1a695ab70d081766069a6562774f7e1e6df59"
+          }
+        },
+        "8275919650330547958": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 640,
+            "objectSha256": "368b8b419bf9ad64e2b7d850fca76cc485eff466caad06420596461398354d99",
+            "name": "44_EAC_RG_SIGNED",
+            "format": 44,
+            "formatName": "EAC_RG_SIGNED",
+            "width": 32,
+            "height": 16,
+            "imageSize": 512,
+            "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "png": {
+            "width": 32,
+            "height": 16,
+            "rgbaSha256": "03ea3019e647db3821df6252654b604352cb94ea5848e8bf99785fda616b1945",
+            "pngSize": 158,
+            "pngSha256": "bcf07edff04443c9f971a5457d44b6a79f2362279d4aed7e03a006dd7af81cd4"
+          }
+        }
+      }
+    },
     "editor/6000.3.26f1/stripped/adpcm": {
       "CAB-333a25f4ea19566c1a144e5e562221f1": {
         "1318902803100645839": {
@@ -9006,6 +9156,42 @@
           "inputOracle": "modern-goldens.json; object bytes not checked (UnityPy 1.25.3 cannot read the fixture)",
           "oracle": "composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
           "exportError": "not exported: its D3D11 programs need Windows' D3DCompiler or HLSLDecompiler, whose text depends on the host"
+        }
+      }
+    },
+    "editor/6000.6.4f1/signed-eac/android": {
+      "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+        "114210640317195105": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 640,
+            "name": "44_EAC_RG_SIGNED",
+            "format": 44,
+            "width": 32,
+            "height": 16,
+            "imageSize": 512,
+            "imageSha256": "7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b",
+            "formatName": "EAC_RG_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "5903687226026840257": {
+          "class": "Texture2D",
+          "input": {
+            "classId": 28,
+            "byteSize": 384,
+            "name": "42_EAC_R_SIGNED",
+            "format": 42,
+            "width": 32,
+            "height": 16,
+            "imageSize": 256,
+            "imageSha256": "456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49",
+            "formatName": "EAC_R_SIGNED"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
         }
       }
     },

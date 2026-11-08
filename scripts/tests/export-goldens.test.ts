@@ -214,7 +214,7 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259),
   // and both shaders of the shader-variants bundles of the same three (#283).
   assert.equal(exported("Shader"), 23);
-  assert.equal(exported("Texture2D"), 99);
+  assert.equal(exported("Texture2D"), 105);
   assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
   assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
