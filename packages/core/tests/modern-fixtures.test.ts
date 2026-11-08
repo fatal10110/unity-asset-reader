@@ -77,6 +77,9 @@ const MODERN = [
   // The shader bundles (#237), their Shader objects dumped too.
   "editor/6000.6.4f1/shader/lz4/windows",
   "editor/6000.6.4f1/shader/lz4/android",
+  // The skinned meshes (#285), their Mesh objects dumped; MeshSkinned.test.ts reads them.
+  "editor/6000.6.4f1/mesh/lz4/mesh-skinned",
+  "editor/6000.6.4f1/mesh/lz4/mesh-skinned-compressed",
 ];
 
 for (const name of MODERN) {

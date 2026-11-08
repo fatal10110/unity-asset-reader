@@ -54,15 +54,22 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
 
-test("the export goldens have an OBJ for 21 of the 27 fixture Meshes", () => {
+test("the export goldens have an OBJ for 29 of the 37 fixture Meshes", () => {
   // Each main bundle's triangle, detail and compressed (fixtures/BUILDING.md
-  // section 20); the six basevertex meshes have none (#257).
-  assert.equal(ALL.length, 27);
-  assert.equal(MESHES.length, 21);
+  // section 20), skinned and skinned-compressed (#285); the six basevertex
+  // meshes have none (#257), nor the two 6000.6 skinned ones, which c37af7d
+  // cannot read (format 23).
+  assert.equal(ALL.length, 37);
+  assert.equal(MESHES.length, 29);
   const without = ALL.filter(({ entry }) => !entry.obj);
-  assert.equal(without.length, 6);
-  for (const { entry } of without) {
-    assert.match(entry.exportError!, /^not exported: ExportMesh leaves out the submesh's baseVertex 3/);
+  assert.equal(without.length, 8);
+  for (const { fixture, entry } of without) {
+    assert.match(
+      entry.exportError!,
+      fixture.startsWith("editor/6000.6.4f1/")
+        ? /^AssetStudio did not load the object: /
+        : /^not exported: ExportMesh leaves out the submesh's baseVertex 3/,
+    );
   }
 });
 

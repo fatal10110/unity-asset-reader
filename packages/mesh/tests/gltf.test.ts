@@ -210,8 +210,8 @@ function readMesh(fixture: string, file: string, pathId: bigint): MeshData {
   return reader.read<MeshData>();
 }
 
-test("there are 27 fixture Meshes", () => {
-  assert.equal(MESHES.length, 27);
+test("there are 37 fixture Meshes", () => {
+  assert.equal(MESHES.length, 37);
 });
 
 for (const { fixture, file, pathId } of MESHES) {

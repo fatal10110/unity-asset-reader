@@ -1065,6 +1065,126 @@
         }
       }
     },
+    "editor/2019.4.41f2/mesh/lz4-notypetree/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "-8780776723343371440": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2576,
+            "objectSha256": "a90a90760c23cf89d43fba23944e9e0848fca66c30019e54e1fa5797d4830ded",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/mesh/lz4/mesh": {
       "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
         "-2721278527805802049": {
@@ -1112,6 +1232,246 @@
           "obj": {
             "size": 804,
             "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/mesh/lz4/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "-8780776723343371440": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2576,
+            "objectSha256": "a90a90760c23cf89d43fba23944e9e0848fca66c30019e54e1fa5797d4830ded",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/mesh/lz4/mesh-skinned-compressed": {
+      "CAB-dea7df81208559a8fd33b5cc4bc6aee7": {
+        "2972110313435297033": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 1968,
+            "objectSha256": "343bd473148b1c85a99fa7136d237792ed70317a30bb1b6e79b8275e25abba83",
+            "name": "skinned-compressed"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 862,
+            "sha256": "eb2f85abd24d4a347054f2a5d13ec36c620aa150bd45b739c6bf5bcffc3fea73"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f3def7c",
+                "f32:3e842108",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ef7bdef",
+                "f32:3f042108",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ef7bdef",
+                "f32:3e94a529",
+                "f32:3e6739ce",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f14a529",
+                "f32:3e6739ce",
+                "f32:3e46318c",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ec6318c",
+                "f32:3e94a529",
+                "f32:3e46318c",
+                "f32:3e042108"
+              ],
+              [
+                "f32:3ea5294a",
+                "f32:3e94a529",
+                "f32:3e46318c",
+                "f32:3e46318c"
+              ],
+              [
+                "f32:3f2d6b5b",
+                "f32:3dc6318c",
+                "f32:3dc6318c",
+                "f32:3e042108"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
           }
         }
       }
@@ -4479,6 +4839,126 @@
         }
       }
     },
+    "editor/2020.3.30f1/mesh/lz4-notypetree/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "4020397364590765541": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2580,
+            "objectSha256": "dd24dc5e101d9febb6628d2bce2e628ba3625b4a88b48338b0954df193a694ee",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    },
     "editor/2020.3.30f1/mesh/lz4/mesh": {
       "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
         "-742743565720691645": {
@@ -4526,6 +5006,126 @@
           "obj": {
             "size": 804,
             "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/mesh/lz4/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "4020397364590765541": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2580,
+            "objectSha256": "dd24dc5e101d9febb6628d2bce2e628ba3625b4a88b48338b0954df193a694ee",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
           }
         }
       }
@@ -7187,6 +7787,126 @@
         }
       }
     },
+    "editor/6000.3.26f1/mesh/lz4-notypetree/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "807727709083402067": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2612,
+            "objectSha256": "9d8e48ad930121e21f3415f6f6ab48d91f8f637f9d44cfc9ec77e9b0b1b39d0b",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    },
     "editor/6000.3.26f1/mesh/lz4/mesh": {
       "CAB-ba7ba22df33fb96ae10aba81fa3835e0": {
         "-1524767021796067512": {
@@ -7234,6 +7954,246 @@
           "obj": {
             "size": 804,
             "sha256": "395782e8689e4cdfcc0c1d60469978f81b678959b9dd62f3a162f1439c38390d"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/mesh/lz4/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "807727709083402067": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2612,
+            "objectSha256": "9d8e48ad930121e21f3415f6f6ab48d91f8f637f9d44cfc9ec77e9b0b1b39d0b",
+            "name": "skinned"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 449,
+            "sha256": "0af7576fd567d756d1eb84b92d447b372c20561360739f747fe88167026807d3"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f400000",
+                "f32:3e800000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3f000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f000000",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f19999a",
+                "f32:3e800000",
+                "f32:3e19999a",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ecccccd",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3dcccccd"
+              ],
+              [
+                "f32:3eb33333",
+                "f32:3e99999a",
+                "f32:3e4ccccd",
+                "f32:3e19999a"
+              ],
+              [
+                "f32:3f333333",
+                "f32:3dcccccd",
+                "f32:3dcccccd",
+                "f32:3dcccccd"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/mesh/lz4/mesh-skinned-compressed": {
+      "CAB-dea7df81208559a8fd33b5cc4bc6aee7": {
+        "-4100442587671260119": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2004,
+            "objectSha256": "7c871813a4e7c820f17c7d5894f45876938556ba75f24cfbaf308a8071aa4828",
+            "name": "skinned-compressed"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 862,
+            "sha256": "eb2f85abd24d4a347054f2a5d13ec36c620aa150bd45b739c6bf5bcffc3fea73"
+          },
+          "skin": {
+            "boneWeights": [
+              [
+                "f32:3f800000",
+                "f32:00000000",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f3def7c",
+                "f32:3e842108",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ef7bdef",
+                "f32:3f042108",
+                "f32:00000000",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ef7bdef",
+                "f32:3e94a529",
+                "f32:3e6739ce",
+                "f32:00000000"
+              ],
+              [
+                "f32:3f14a529",
+                "f32:3e6739ce",
+                "f32:3e46318c",
+                "f32:00000000"
+              ],
+              [
+                "f32:3ec6318c",
+                "f32:3e94a529",
+                "f32:3e46318c",
+                "f32:3e042108"
+              ],
+              [
+                "f32:3ea5294a",
+                "f32:3e94a529",
+                "f32:3e46318c",
+                "f32:3e46318c"
+              ],
+              [
+                "f32:3f2d6b5b",
+                "f32:3dc6318c",
+                "f32:3dc6318c",
+                "f32:3e042108"
+              ]
+            ],
+            "boneIndices": [
+              [
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                0,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                4,
+                2,
+                3,
+                0
+              ],
+              [
+                3,
+                2,
+                1,
+                0
+              ],
+              [
+                1,
+                0,
+                4,
+                2
+              ],
+              [
+                4,
+                3,
+                0,
+                1
+              ]
+            ]
           }
         }
       }
@@ -7475,6 +8435,34 @@
             "size": 11180,
             "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
           }
+        }
+      }
+    },
+    "editor/6000.6.4f1/mesh/lz4/mesh-skinned": {
+      "CAB-7f66b75d5f4eed4b16b3a7079c841ddd": {
+        "3377899297740980683": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2612,
+            "name": "skinned"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/mesh/lz4/mesh-skinned-compressed": {
+      "CAB-dea7df81208559a8fd33b5cc4bc6aee7": {
+        "-4711641434651387484": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 2004,
+            "name": "skinned-compressed"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.ArgumentOutOfRangeException: count ('-1227905637') must be a non-negative value. (Parameter 'count')"
         }
       }
     },
