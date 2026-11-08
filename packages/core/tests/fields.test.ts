@@ -40,6 +40,9 @@ const EDITOR = [
   // 6000.6's AnimationClip (#302), in modern-goldens.json.
   "editor/6000.6.4f1/animation/lz4/animation",
   "editor/6000.6.4f1/animation/lz4-notypetree/animation",
+  // 6000.6's GameObject, Transform and renderers (#305), in modern-goldens.json.
+  "editor/6000.6.4f1/scene/lz4/scene",
+  "editor/6000.6.4f1/scene/lz4-notypetree/scene",
 ];
 
 /** The renames beyond the rule, as the fields' JSDoc documents them; `null` drops the key. */
@@ -71,6 +74,8 @@ const RENAMES: Record<string, string | null> = {
   m_KeepAnimatorControllerStateOnDisable: "keepAnimatorStateOnDisable",
   // An AnimationClip's (#302): the rule would make it `pPtrCurves`.
   m_PPtrCurves: "pptrCurves",
+  // A SkinnedMeshRenderer's (#305): the rule would make it `aABB`.
+  m_AABB: "aabb",
 };
 
 /** The rule: `m_Width` -> `width`, `Width` -> `width`, `m_sRGB` -> `sRGB`. */
@@ -150,15 +155,20 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "AudioClip",
       "Avatar",
       "Font",
+      "GameObject",
       "Material",
       "Mesh",
+      "MeshFilter",
+      "MeshRenderer",
       "MonoBehaviour",
       "MonoScript",
       "Shader",
+      "SkinnedMeshRenderer",
       "Sprite",
       "SpriteAtlas",
       "TextAsset",
       "Texture2D",
+      "Transform",
       "VideoClip",
     ],
   );

@@ -36,6 +36,11 @@ const KNOWN = new Set([
   "Animator",
   "AnimatorOverrideController",
   "AnimationClip",
+  "GameObject",
+  "Transform",
+  "MeshFilter",
+  "MeshRenderer",
+  "SkinnedMeshRenderer",
 ]);
 
 /** Load a fixture as bare bytes, the way the usage block does. */

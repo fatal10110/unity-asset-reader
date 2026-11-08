@@ -65,16 +65,21 @@ export {
   toAudioClipFields,
   toAvatarFields,
   toFontFields,
+  toGameObjectFields,
   toMaterialFields,
   toMeshFields,
+  toMeshFilterFields,
+  toMeshRendererFields,
   toMonoBehaviourFields,
   toMonoScriptFields,
   toMovieTextureFields,
   toShaderFields,
+  toSkinnedMeshRendererFields,
   toSpriteAtlasFields,
   toSpriteFields,
   toTextAssetFields,
   toTexture2DFields,
+  toTransformFields,
   toVideoClipFields,
 } from "./classes/fields.js";
 export type {
@@ -99,6 +104,12 @@ export type {
   AnimatorOverrideControllerFields,
   AssetBundleFields,
   AvatarFields,
+  GameObjectFields,
+  MeshFilterFields,
+  MeshRendererFields,
+  RendererFields,
+  SkinnedMeshRendererFields,
+  TransformFields,
   AvatarConstantFields,
   AxesFields,
   Blend1dDataConstantFields,
@@ -353,3 +364,16 @@ export type {
   SkeletonNode,
   SkeletonPose,
 } from "./classes/Avatar.js";
+export { readGameObject } from "./classes/GameObject.js";
+export type { ComponentPair, GameObject } from "./classes/GameObject.js";
+export { readTransform } from "./classes/Transform.js";
+export type { Transform } from "./classes/Transform.js";
+export { readMeshFilter } from "./classes/MeshFilter.js";
+export type { MeshFilter } from "./classes/MeshFilter.js";
+export { readMeshRenderer, readSkinnedMeshRenderer } from "./classes/Renderer.js";
+export type {
+  MeshRenderer,
+  Renderer,
+  SkinnedMeshRenderer,
+  StaticBatchInfo,
+} from "./classes/Renderer.js";

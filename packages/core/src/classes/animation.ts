@@ -180,7 +180,7 @@ export function readUInts(reader: ObjectReader, owner: string, what: string): nu
  * refusals its readers share: Unity 2019.1 and later only, the supported
  * floor, and an unknown version (`[0, 0, 0, 0]`) read as 2019 in formats 18
  * to 21 only (see `layoutVersion`). Internal: shared with the animation
- * class readers.
+ * class readers and the scene ones (GameObject, Transform, the renderers).
  *
  * @throws {UnsupportedError} of kind `"Unity version"` before 2019.1, or for
  *   an unknown version in another format; of kind `"build target"` for an

@@ -34,11 +34,11 @@ function withNumberOffset(tree: Record<string, unknown>): Record<string, unknown
   return { ...tree, m_StreamData: { ...stream, offset: Number(stream.offset) } };
 }
 
-// --- the 35 fixture Meshes ------------------------------------------------------------
+// --- the 41 fixture Meshes ------------------------------------------------------------
 
 const FIXTURES = fixturesWith(ClassID.Mesh);
 
-test("the fixtures hold 35 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
+test("the fixtures hold 41 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
   const count = FIXTURES.flatMap((name) =>
     Object.values(golden(name).objects).flatMap((objs) =>
       objs.filter((o) => o.classId === ClassID.Mesh),
@@ -47,8 +47,9 @@ test("the fixtures hold 35 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", ()
   // A triangle in each main bundle; detail and basevertex, typed and not, and
   // compressed, typed only (fixtures/BUILDING.md section 20; #253, #257);
   // skinned, typed and not, and skinned-compressed, typed only and not from
-  // 2020.3 (#285, MeshSkinned.test.ts).
-  assert.equal(count, 12 + 3 * 2 * 2 + 3 + 3 * 2 + 2);
+  // 2020.3 (#285, MeshSkinned.test.ts); the scene bundles' skinned mesh,
+  // typed and not (#305, section 24).
+  assert.equal(count, 12 + 3 * 2 * 2 + 3 + 3 * 2 + 2 + 3 * 2);
   for (const editor of ["2019.4.41f2", "2020.3.30f1", "6000.3.25f1"]) {
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4/main`), editor);
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4-notypetree/main`), editor);
