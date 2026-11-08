@@ -324,6 +324,9 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
   2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 that reach the FSB5 header paths Unity writes besides
   the plain one: a 37800 Hz clip (frequency chunk), 4-channel (channels chunk) and 5.1 clips,
   PCM16 and IMAADPCM, each converting to AssetStudio's WAV byte for byte (#289).
+- The README records that Unity writes `PCM16` for 8-bit, 24-bit, 32-bit integer and 32-bit
+  float source WAVs alike (probed on 2019.4.41f2, 2020.3.30f1 and 6000.3.26f1), so `PCM8` and
+  `PCM32` stay tested on hand-built banks and `PCM24` and `PCMFLOAT` stay unsupported (#296).
 
 ### 1.0.0 - 2026-10-29
 
