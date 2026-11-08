@@ -120,6 +120,16 @@ function expected(type: string, low: Record<string, unknown>, reader: ObjectRead
     // A Behaviour's m_Enabled, a UInt8, as MonoBehaviourFields has it (#303).
     return { ...(renamed(low) as object), enabled: low.m_Enabled !== 0 };
   }
+  if (type === "Animation") {
+    // The same m_Enabled; m_Animation and m_Animations are the clip and the clips (#314).
+    const { m_Animation, m_Animations, ...rest } = low;
+    return {
+      ...(renamed(rest) as object),
+      enabled: low.m_Enabled !== 0,
+      clip: m_Animation,
+      clips: m_Animations,
+    };
+  }
   return renamed(low);
 }
 
@@ -147,6 +157,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
   assert.deepStrictEqual(
     [...seen].sort(),
     [
+      "Animation",
       "AnimationClip",
       "Animator",
       "AnimatorController",

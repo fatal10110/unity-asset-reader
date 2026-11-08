@@ -1616,8 +1616,11 @@ def main() -> None:
                                              ("variantAtlas", VARIANT_VERDICT)] if field in entry]
         if verdicts and "png" in entry:
             entry["verdict"] = "; ".join(verdicts)
+        # Only on a curve whose path is named (#314): one nothing plays keeps
+        # path_<hash>, and its attribute stays a CRC-32 with the renderer too.
         if ("anim" in entry and "SkinnedMeshRenderer" in entry.get("unreadObjects", {})
                 and any(re.fullmatch(r"blendShape\.\d+", c["attribute"])
+                        and not re.fullmatch(r"path_\d+", c["path"])
                         for c in entry["anim"]["curves"]["float"])):
             entry["verdict"] = BLENDSHAPE_VERDICT
         if ("exportError" in entry) == any(k in entry for k in OUTPUTS):

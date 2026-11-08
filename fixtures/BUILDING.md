@@ -2430,12 +2430,12 @@ in c37af7d's `m_Skin`:
 
 | Objects | Golden | Why not |
 | --- | --- | --- |
-| 37 Mesh (`main` bundles; `mesh` bundles, section 20) | 29 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 2 in the 6000.6 `mesh-skinned` bundles: `c37af7d` cannot read SerializedFile format 23 at all. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
+| 53 Mesh (`main` bundles; `mesh` bundles, section 20; the `scene` skinned mesh and the `legacy-animation` quad, sections 24 and 25) | 43 OBJ; the skinned ones also their decoded `m_Skin` (`skin`, #285) | 4 in the typed 6000.6 `mesh-skinned`, `scene` and `legacy-animation` bundles: `c37af7d` cannot read SerializedFile format 23's type trees. 6 `basevertex` (section 20): `ExportMesh` writes the indices without their submesh's `baseVertex`, which unity-asset-reader adds (#257). Not a golden, so the entry holds an `exportError` and that OBJ's size and hash as `objWithoutBaseVertex` |
 | 51 AudioClip (`audio`, `adpcm` and `audiohdr` bundles, section 11) | 51 WAV | |
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
-| 136 AnimationClip (`animation`, `animator` and `scene` bundles, sections 22 to 24) | 104 curve dumps: every clip of 2019.4, 2020.3 and 6000.3.26f1, typed and not; 2 with a `verdict` (below); and 6000.6.4f1's `legacy` and `dense` without type trees | The other 32 of the 34 in the 6000.6 bundles: with type trees `c37af7d` cannot read format 23; without them it reads the clips without `GenericBinding.metaData` (6000.5), so the bindings come out misread and `Convert()` throws (`ArgumentException`), or the object does not load. The two it exports have no binding or one whose misreading changes nothing, and match |
+| 152 AnimationClip (`animation`, `animator`, `scene` and `legacy-animation` bundles, sections 22 to 25) | 116 curve dumps: every clip of 2019.4, 2020.3 and 6000.3.26f1, typed and not; 4 with a `verdict` (below); and 6000.6.4f1's `legacy` and `dense` without type trees | The other 36 of the 38 in the 6000.6 bundles: with type trees `c37af7d` cannot read format 23; without them it reads the clips without `GenericBinding.metaData` (6000.5), so the bindings come out misread and `Convert()` throws (`ArgumentException`), or the object does not load. The two it exports have no binding or one whose misreading changes nothing, and match |
 | 42 Shader (`shader` and `shader-variants` bundles, section 18) | 23 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 11 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android `shader` bundles, and both shaders of the three `shader-variants` bundles (#283). The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 148 Texture2D | 105 PNG | 29 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
@@ -2462,13 +2462,16 @@ what `GetImage()` cuts instead and asserts the difference:
 
 `packages/animation/tests/goldens.test.ts` compares each AnimationClip's dump
 with `clipCurves()`, float32 bit for bit. The 6000.3.26f1 `scene` bundles'
-`smile` clips, typed and not, have a `verdict`: `c37af7d`'s Renderer reader
+`smile` clips and `legacy-animation` bundles' `walk` clips, typed and not, have
+a `verdict`: `c37af7d`'s Renderer reader
 lacks fields Unity 6000 writes and fails on their SkinnedMeshRenderer
 (`unreadObjects`), so `CustomCurveResolver` finds no renderer and writes the
 blend shape attributes as their CRC-32 (`blendShape.42599183`), where
 unity-asset-reader reads the renderer and names them (`blendShape.smile`); the
 test hashes the names back and compares the rest. Every 2019.4 and 2020.3
-`smile` names them as unity-asset-reader does. 6000.6.4f1 has no other oracle:
+`smile` and `walk` names them as unity-asset-reader does. A clip nothing plays
+gets no verdict: its curves keep `path_<hash>`, and their attributes stay
+CRC-32s with the renderer read too (the `legacy-animation` bundles' `unlisted`). 6000.6.4f1 has no other oracle:
 `packages/animation/tests/cross-editor.test.ts` holds each of its clips to the
 2019.4 one, as it does the 2020.3 and 6000.3 ones (object references compared
 by the name of the object they reach; the one documented difference is the
@@ -5265,6 +5268,237 @@ TPK layout from 2019.1 to 6000.6 filled. 2019.4.41f2 has none of the renderer
 fields from 2020.1 on, 2020.3.30f1 `m_RayTraceProcedural` and the
 `MeshRenderer`'s `m_EnlightenVertexStream`, and the 6000.x editors every field
 up to 6000.3's `m_MaskInteraction`.
+
+## 25. The `legacy-animation` bundles (#314)
+
+`legacy-animation/{lz4,lz4-notypetree}/legacy-animation` for **2019.4.41f2**,
+**2020.3.30f1**, **6000.3.26f1** and **6000.6.4f1**: one bundle per editor and
+kind, made from code by an editor script, for the `Animation` reader (a legacy
+`Animation` component, class 111) and as the oracle fixture of the
+`Animation` branches of #304's `FindTOS` and `FindRoots`. Each bundle holds:
+
+- `legacy`, a prefab of four GameObjects: the root `legacy` with a legacy
+  `Animation` component; `Body` and `Body/Arm`; and `Skin`, a
+  `SkinnedMeshRenderer` of the `face` mesh, without bones or material;
+- `walk`, a Mecanim clip (`legacy` false): position curves on `Body`,
+  quaternion rotation and `m_IsActive` curves on `Body/Arm`, and the `Skin`
+  renderer's two blend shape weights (`blendShape.smile`, `blendShape.blink`);
+- `unlisted`, the same curves in a clip no component lists;
+- `face`, a quad with two blend shapes, `smile` and `blink`, a frame each.
+
+The `Animation` component's default clip (`m_Animation`) is `walk`, and
+`AnimationUtility.SetAnimationClips` makes `walk` its only listed clip
+(`m_Animations`). Its other fields are set away from their defaults through a
+`SerializedObject`: `m_WrapMode` 4 (ping-pong), `m_PlayAutomatically` false,
+`m_AnimatePhysics` true, `m_CullingType` 1 (based on renderers), and in the
+6000.x editors `m_UpdateMode` 1 (2023.1+).
+
+Why a Mecanim clip: a legacy clip keeps its curves in the curve arrays with
+string paths and has no generic bindings, and AssetStudio's `AddTOS` names only
+the paths of the bindings (`AnimationClipExtensions.cs`), so a legacy clip
+would leave the `Animation` branch untested. The bundle holds no Avatar and no
+Animator, which `FindTOS` would try first. Whether Unity keeps a Mecanim clip in
+an `Animation` component's list was a time-boxed probe: the script reloads the
+saved prefab and fails unless `m_Animations` still lists `walk`. Unity
+accepted it in all four editors, so the probe's build is the committed one.
+
+The quad's vertex streams differ between the typed and the untyped build of
+2019.4.41f2 and 2020.3.30f1 (the normals in stream 0 or in stream 1); its
+untyped Mesh is checked through Unity's own tree of the version instead of
+its typed twin (`packages/core/tests/Mesh.test.ts`).
+
+Each project is a fresh copy named `uar-314-legacy-animation-<editor version>`,
+holding `ProjectSettings/` and `Packages/` of the section 24 project of the
+same editor and only this file under `Assets/`.
+
+`Assets/Editor/BuildLegacyAnimation.cs`:
+
+```csharp
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+// The legacy-animation fixtures (#314), created from code: a prefab "legacy"
+// whose root has a legacy Animation component listing "walk", a Mecanim (not
+// legacy) clip with curves on child paths and two blend shape weights. The
+// bundle holds no Avatar and no Animator, so only the Animation component
+// names the clip's paths. "unlisted", the same curves in a clip no component
+// lists, keeps its path hashes.
+public static class BuildLegacyAnimation
+{
+    const string Dir = "Assets/Fixtures/legacy-animation";
+
+    public static void Build()
+    {
+        // Keep every vertex channel of the mesh.
+        PlayerSettings.stripUnusedMeshComponents = false;
+        Directory.CreateDirectory(Dir);
+        var mesh = Face("face");
+        AssetDatabase.CreateAsset(mesh, Dir + "/face.asset");
+
+        var walk = new AnimationClip { name = "walk" };
+        Curves(walk);
+        AssetDatabase.CreateAsset(walk, Dir + "/walk.anim");
+        var unlisted = new AnimationClip { name = "unlisted" };
+        Curves(unlisted);
+        AssetDatabase.CreateAsset(unlisted, Dir + "/unlisted.anim");
+        foreach (var c in new[] { walk, unlisted })
+            Debug.Log("FIXTURE-INFO clip " + c.name + " legacy=" + c.legacy +
+                " curves=" + AnimationUtility.GetCurveBindings(c).Length);
+
+        var root = new GameObject("legacy");
+        var body = Child(root.transform, "Body");
+        Child(body, "Arm");
+        var skin = Child(root.transform, "Skin");
+        skin.gameObject.AddComponent<SkinnedMeshRenderer>().sharedMesh = mesh;
+        var anim = root.AddComponent<Animation>();
+        anim.clip = walk;
+        AnimationUtility.SetAnimationClips(anim, new[] { walk });
+        // Every field away from its default (m_UpdateMode only from 2023.1).
+        var so = new SerializedObject(anim);
+        so.FindProperty("m_WrapMode").intValue = (int)WrapMode.PingPong;
+        so.FindProperty("m_PlayAutomatically").boolValue = false;
+        so.FindProperty("m_AnimatePhysics").boolValue = true;
+        so.FindProperty("m_CullingType").intValue = (int)AnimationCullingType.BasedOnRenderers;
+        var update = so.FindProperty("m_UpdateMode");
+        if (update != null) update.intValue = 1;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        PrefabUtility.SaveAsPrefabAsset(root, Dir + "/legacy.prefab");
+        Object.DestroyImmediate(root);
+        AssetDatabase.SaveAssets();
+
+        // The probe: the saved component still lists the Mecanim clip.
+        var saved = AssetDatabase.LoadAssetAtPath<GameObject>(Dir + "/legacy.prefab").GetComponent<Animation>();
+        var check = new SerializedObject(saved);
+        var list = check.FindProperty("m_Animations");
+        var names = Enumerable.Range(0, list.arraySize)
+            .Select(i => list.GetArrayElementAtIndex(i).objectReferenceValue)
+            .Select(o => o == null ? "null" : o.name).ToArray();
+        var mode = check.FindProperty("m_UpdateMode");
+        Debug.Log("FIXTURE-INFO animation clip=" + (saved.clip == null ? "null" : saved.clip.name) +
+            " animations=" + string.Join(",", names) +
+            " wrap=" + check.FindProperty("m_WrapMode").intValue +
+            " play=" + check.FindProperty("m_PlayAutomatically").boolValue +
+            " physics=" + check.FindProperty("m_AnimatePhysics").boolValue +
+            " culling=" + check.FindProperty("m_CullingType").intValue +
+            " update=" + (mode == null ? "none" : mode.intValue.ToString()));
+        if (names.Length != 1 || names[0] != "walk") throw new System.Exception("m_Animations lost the Mecanim clip");
+
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    // Child-path position, rotation and active curves and two blend shape weights.
+    static void Curves(AnimationClip clip)
+    {
+        clip.SetCurve("Body", typeof(Transform), "localPosition.x", Keys(0f, 0f, 0.5f, 0.25f, 1f, 0f));
+        clip.SetCurve("Body", typeof(Transform), "localPosition.y", Keys(0f, 0f, 1f, 0.5f));
+        clip.SetCurve("Body", typeof(Transform), "localPosition.z", Keys(0f, 0.1f, 1f, -0.1f));
+        var q = Quaternion.Euler(0f, 45f, 0f);
+        clip.SetCurve("Body/Arm", typeof(Transform), "localRotation.x", Keys(0f, 0f, 1f, q.x));
+        clip.SetCurve("Body/Arm", typeof(Transform), "localRotation.y", Keys(0f, 0f, 1f, q.y));
+        clip.SetCurve("Body/Arm", typeof(Transform), "localRotation.z", Keys(0f, 0f, 1f, q.z));
+        clip.SetCurve("Body/Arm", typeof(Transform), "localRotation.w", Keys(0f, 1f, 1f, q.w));
+        clip.SetCurve("Body/Arm", typeof(GameObject), "m_IsActive", Keys(0f, 1f, 0.5f, 0f, 1f, 1f));
+        clip.SetCurve("Skin", typeof(SkinnedMeshRenderer), "blendShape.smile", Keys(0f, 0f, 0.5f, 100f, 1f, 25f));
+        clip.SetCurve("Skin", typeof(SkinnedMeshRenderer), "blendShape.blink", Keys(0f, 0f, 0.25f, 100f, 0.5f, 0f));
+    }
+
+    static Transform Child(Transform parent, string name)
+    {
+        var t = new GameObject(name).transform;
+        t.SetParent(parent, false);
+        return t;
+    }
+
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var keys = new Keyframe[tv.Length / 2];
+        for (int i = 0; i < keys.Length; i++) keys[i] = new Keyframe(tv[2 * i], tv[2 * i + 1]);
+        return new AnimationCurve(keys);
+    }
+
+    // A quad with two blend shapes, "smile" and "blink", one frame each.
+    static Mesh Face(string name)
+    {
+        var mesh = new Mesh { name = name };
+        mesh.vertices = new[] { new Vector3(0f, 0f, 0f), new Vector3(1f, 0f, 0f), new Vector3(0f, 1f, 0f), new Vector3(1f, 1f, 0f) };
+        mesh.normals = Enumerable.Repeat(new Vector3(0f, 0f, -1f), 4).ToArray();
+        mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
+        mesh.triangles = new[] { 0, 2, 1, 1, 2, 3 };
+        mesh.AddBlendShapeFrame("smile", 100f,
+            new[] { Vector3.zero, Vector3.zero, new Vector3(0f, 0.25f, 0f), new Vector3(0f, 0.25f, 0f) }, null, null);
+        mesh.AddBlendShapeFrame("blink", 100f,
+            new[] { new Vector3(0.125f, 0f, 0f), new Vector3(-0.125f, 0f, 0f), Vector3.zero, Vector3.zero }, null, null);
+        Debug.Log("FIXTURE-INFO " + name + " shapes=" + mesh.blendShapeCount);
+        return mesh;
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", name);
+        Directory.CreateDirectory(dir);
+        var assets = new[] { "legacy.prefab", "walk.anim", "unlisted.anim", "face.asset" };
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "legacy-animation", assetNames = assets.Select(x => Dir + "/" + x).ToArray() },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: " + name);
+        Debug.Log("FIXTURE-OK legacy-animation " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildLegacyAnimation.Build` (same
+command as section 2). The log must hold two `FIXTURE-OK legacy-animation`
+lines (`lz4`, `lz4-notypetree`) and these `FIXTURE-INFO` lines (`update=none`
+for 2019.4.41f2 and 2020.3.30f1, `update=1` for the 6000.x editors):
+
+```
+FIXTURE-INFO face shapes=2
+FIXTURE-INFO clip walk legacy=False curves=10
+FIXTURE-INFO clip unlisted legacy=False curves=10
+FIXTURE-INFO animation clip=walk animations=walk wrap=4 play=False physics=True culling=1 update=none
+```
+
+Copy only these files:
+
+```
+Build/lz4/legacy-animation               ->  fixtures/bundles/editor/<editor version>/legacy-animation/lz4/legacy-animation
+Build/lz4-notypetree/legacy-animation    ->  fixtures/bundles/editor/<editor version>/legacy-animation/lz4-notypetree/legacy-animation
+```
+
+6000.6.4f1's build without type trees is committed too, in
+`modern-goldens.json` with its typed twin, as in section 22.
+
+Then rerun the goldens, `make-modern-goldens.py` first. Both now dump
+`Animation` (`DUMPED_CLASSES` 111); no fixture held one before, so no other
+entry changes. `make-modern-goldens.py` checks the 6000.6 bundles' counts,
+the listed clip and the component's fields (its `evidence`).
+`make-tpk-trees.py` adds the `Animation` trees (it rewrites the whole file,
+so every class id is passed), and `make-export-goldens.py` adds the two clips
+of the 2019.4, 2020.3 and 6000.3.26f1 bundles (AssetStudio's `.anim` curves:
+`walk` named through the `Animation` component, `unlisted` with its hashes)
+and the `face` Mesh of every bundle but 6000.6.4f1's typed one, whose
+format-23 type trees c37af7d fails on; it does not load the 6000.6 clips
+without type trees either (section 17). The 6000.3.26f1 `walk` clips get the
+blend shape `verdict` of section 17; `unlisted` does not: the script gives it
+only to a clip with a named path on a blend shape curve.
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221 1 4 23 33 137 111
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+Every fixture `Animation` has the TPK tree of its version, so the stripped
+builds are read through it; `packages/core/tests/AnimationComponent.test.ts`
+reads each TPK layout from 2019.1 to 6000.6 with two listed clips.
 
 ## 27. The scene export oracle: AssetStudio's ModelConverter (#306)
 

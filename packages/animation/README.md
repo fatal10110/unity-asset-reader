@@ -84,9 +84,9 @@ bound to paths and properties by CRC-32 hashes. They are decoded as AssetStudio'
   stepped segment gives `Infinity`). Float curves get no slopes, as in AssetStudio.
 - Dense samples become a key per frame, constants a key at time 0 and one at the clip's last frame,
   without slopes.
-- A path hash is named from the loaded `Avatar`s' path tables and the hierarchy of each `Animator`
-  that plays the clip. Load the bundle that holds them with the clip; a hash nothing names stays
-  `path_<hash>`.
+- A path hash is named from the loaded `Avatar`s' path tables, the hierarchy of each `Animator`
+  that plays the clip and that of each legacy `Animation` component that lists it. Load the bundle
+  that holds them with the clip; a hash nothing names stays `path_<hash>`.
 - Blend shape and material property hashes are named from the renderer at the curve's path, and
   stay numbers without it. Engine properties AssetStudio does not name are `typetree_<hash>`,
   script fields `script_<hash>`.
@@ -126,8 +126,7 @@ negated, rotations y and z, bind poses are mirrored on both sides, triangles rev
 - YAML (`.anim` text) output.
 - Muscle-to-bone conversion of humanoid clips.
 - `m_CompressedRotationCurves`, which AssetStudio leaves compressed too.
-- Names from a legacy `Animation` component's hierarchy, and from `RectTransform` hierarchies:
-  core reads neither class yet.
+- Names from `RectTransform` hierarchies: core does not read the class yet.
 
 ## Acknowledgements
 

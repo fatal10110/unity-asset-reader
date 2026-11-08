@@ -117,7 +117,7 @@ def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
     textures, atlases, shaders, meshes, clips = [], [], [], [], []
-    animation, scene = {}, {}
+    animation, scene, components = {}, {}, []
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
         if obj.type.name in ("AnimationClip", "Animator", "AnimatorController",
@@ -126,6 +126,8 @@ def evidence(name, path):
         if obj.type.name in ("GameObject", "Transform", "MeshFilter", "MeshRenderer",
                              "SkinnedMeshRenderer", "Mesh"):
             scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
+        if obj.type.name == "Animation":
+            components.append(obj.read_typetree())
         if obj.type.name == "AnimationClip" and "/animation/" in name:
             tree = obj.read_typetree()
             parts = tree["m_MuscleClip"]["m_Clip"]["data"]
@@ -205,6 +207,28 @@ def evidence(name, path):
                              "Avatar": 2}, animation
         assert [mesh["name"] for mesh in meshes] == ["skinned"]
         return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items()))}
+    if "/legacy-animation/" in name:
+        # The legacy-animation fixtures (#314): the "legacy" prefab (four
+        # GameObjects, a SkinnedMeshRenderer), whose root's legacy Animation
+        # lists the Mecanim clip "walk", and "unlisted", a clip nothing lists;
+        # no Avatar, no Animator.
+        assert scene == {"GameObject": 4, "Transform": 4, "SkinnedMeshRenderer": 1,
+                         "Mesh": 1}, scene
+        assert animation == {"AnimationClip": 2}, animation
+        assert [mesh["name"] for mesh in meshes] == ["face"]
+        assert len(components) == 1, components
+        component = components[0]
+        clips = {obj.path_id: obj.read_typetree()["m_Name"] for obj in env.objects
+                 if obj.type.name == "AnimationClip"}
+        listed = [clips[ptr["m_PathID"]] for ptr in component["m_Animations"]]
+        assert listed == ["walk"], listed
+        assert clips[component["m_Animation"]["m_PathID"]] == "walk"
+        fields = {k: component[k] for k in ("m_WrapMode", "m_PlayAutomatically",
+                                             "m_AnimatePhysics", "m_UpdateMode", "m_CullingType")}
+        assert fields == {"m_WrapMode": 4, "m_PlayAutomatically": False, "m_AnimatePhysics": True,
+                          "m_UpdateMode": 1, "m_CullingType": 1}, fields
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
+                "listed": listed}
     if "/animation/" in name:
         # The animation fixtures (#302): one legacy clip, whose curves stay in
         # the curve arrays, and five Mecanim clips, whose curves land in the
@@ -260,6 +284,9 @@ def main():
         ("animation/lz4", "animation"), ("animation/lz4-notypetree", "animation"),
         # GameObject, Transform, MeshFilter, MeshRenderer, SkinnedMeshRenderer (#305).
         ("scene/lz4", "scene"), ("scene/lz4-notypetree", "scene"),
+        # The legacy Animation component (#314) and the clip it lists.
+        ("legacy-animation/lz4", "legacy-animation"),
+        ("legacy-animation/lz4-notypetree", "legacy-animation"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

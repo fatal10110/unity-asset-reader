@@ -229,9 +229,10 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     all.filter((o) => o.cls === cls && !o.entry!.exportError).length;
   assert.equal(
     exported("Mesh"),
-    36,
+    43,
     "main's triangle; detail, compressed, skinned and skinned-compressed of the mesh bundles; " +
-      "the scene bundles' skinned mesh (#305), but 6000.6.4f1's typed one",
+      "the scene bundles' skinned mesh (#305) and the legacy-animation bundles' quad (#314), " +
+      "but 6000.6.4f1's typed ones",
   );
   assert.equal(
     exported("AudioClip"),
@@ -257,9 +258,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(
     exported("AnimationClip"),
-    104,
-    "the 17 clips of the animation, animator and scene bundles of 2019.4, 2020.3 and 6000.3, " +
-      "typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
+    116,
+    "the 17 clips of the animation, animator and scene bundles and the 2 of the legacy-animation " +
+      "bundles (#314) of 2019.4, 2020.3 and 6000.3, typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
       "whose bindings c37af7d misreads harmlessly (none, or one Transform binding)",
   );
 });
@@ -360,7 +361,17 @@ test("an AnimationClip golden has a verdict exactly where AssetStudio missed its
   }
   assert.deepEqual(
     withVerdict.map((o) => o.entry!.input.name),
-    ["smile", "smile"],
-    "the 6000.3.26f1 scene bundles' blend shape clip, typed and not",
+    ["walk", "walk", "smile", "smile"],
+    "the 6000.3.26f1 legacy-animation (#314) and scene bundles' blend shape clips, typed and not",
   );
+  // A clip nothing plays keeps path_<hash> and CRC-32 attributes with the
+  // renderer too, so it gets no verdict though the renderer was not read (#314).
+  const unlisted = clips.filter((o) => o.entry!.input.name === "unlisted");
+  assert.equal(unlisted.length, 6);
+  for (const o of unlisted) {
+    assert.equal(o.entry!.verdict, undefined, at(o));
+    const float = o.entry!.anim!.curves.float;
+    assert.ok(float.every((c) => /^path_\d+$/.test(c.path)), at(o));
+    if (o.fixture.includes("/6000.3.")) assert.ok(o.entry!.unreadObjects?.SkinnedMeshRenderer, at(o));
+  }
 });

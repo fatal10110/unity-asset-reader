@@ -112,6 +112,8 @@ DUMPED_CLASSES = {
     23: "MeshRenderer",
     33: "MeshFilter",
     137: "SkinnedMeshRenderer",
+    # For its hardcoded reader (#314); only the legacy-animation fixtures hold it.
+    111: "Animation",
 }
 # Class id -> how to get at the raw bytes an object carries (#41), in the
 # `rawData` golden: its own field when inline, else its StreamedResource.
