@@ -1785,6 +1785,201 @@ contains the prepared plain and half-scale variant pixel references. Those
 references do not settle Rotate90. Its rectangle-only variant harness must not
 be used as a tight-mask oracle.
 
+### Custom ScriptablePacker (maintainer-approved route, 2026-11-08)
+
+After the 24 configurations above, the
+[maintainer decision on #160](https://github.com/fatal10110/unity-asset-reader/issues/160)
+approved one more route: a custom Sprite Atlas V2 `ScriptablePacker` whose
+`Pack()` returns `SpritePack.rot = (PackTransform)4`. The public
+`PackTransform` enum ends at `Rotate180 = 3`, so 4 is a value it does not
+list; Unity's own native code still blits the atlas and writes `settingsRaw`,
+so nothing is edited after the build. On 2026-11-08 it was built once in a
+fresh 6000.3.26f1 project and once in a fresh 6000.6.4f1 project, each holding
+only these two files in `Assets/Editor/` (plus `ProjectSettings/` and
+`Packages/` of an empty project of the same editor):
+
+```csharp
+using UnityEditor.U2D;
+using UnityEngine;
+
+// #160: a custom Sprite Atlas V2 packer. Each sprite gets its own 128x128 cell,
+// its origin at the cell's centre, so it stays inside the cell whichever way
+// Unity turns it about any of its corners. Sprites taller than wide are returned
+// with PackTransform 4, a value the public enum does not list (it ends at
+// Rotate180 = 3; SpritePackingRotation names 4 Rotate90). The wide ones are the
+// control: the listed values FlipHorizontal, FlipVertical and Rotate180 (and
+// None for 49x33). Unity's native code then blits the atlas, writes the UVs and
+// writes settingsRaw; nothing is edited after the build.
+public class Rotate90Packer : ScriptablePacker
+{
+    public const int Cell = 128;
+
+    public override bool Pack(SpriteAtlasPackingSettings config, SpriteAtlasTextureSettings setting, PackerData input)
+    {
+        for (int i = 0; i < input.spriteData.Length; i++)
+        {
+            var sprite = input.spriteData[i];
+            var rot = sprite.rect.height > sprite.rect.width ? (PackTransform)4 : Control(sprite.rect.width);
+            sprite.output = new SpritePack { x = (i % 4) * Cell + Cell / 2, y = (i / 4) * Cell + Cell / 2, page = 0, rot = rot };
+            input.spriteData[i] = sprite;
+            Debug.Log("PACKER-OUT " + sprite.guid + " rect=" + sprite.rect + " tex=" + sprite.texIndex
+                      + " -> " + sprite.output.x + "," + sprite.output.y + " rot=" + (int)rot);
+        }
+        return true;
+    }
+
+    static PackTransform Control(int width)
+    {
+        switch (width)
+        {
+            case 47: case 43: return PackTransform.FlipHorizontal;
+            case 37: case 53: return PackTransform.FlipVertical;
+            case 41: return PackTransform.Rotate180;
+            default: return PackTransform.None;
+        }
+    }
+}
+```
+
+```csharp
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEditor.U2D;
+using UnityEngine;
+using UnityEngine.U2D;
+
+// #160: twelve asymmetric self-describing images (section 12 recipe and
+// section 16 dimensions) in one Sprite Atlas V2 packed by Rotate90Packer.
+public static class BuildPackerProbe
+{
+    const string Dir = "Assets/Fixtures/packer";
+
+    public static void Build()
+    {
+        EditorSettings.spritePackerMode = SpritePackerMode.SpriteAtlasV2;
+        if (!AssetDatabase.IsValidFolder("Assets/Fixtures")) AssetDatabase.CreateFolder("Assets", "Fixtures");
+        if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/Fixtures", "packer");
+        var packerPath = Dir + "/Rotate90Packer.asset";
+        AssetDatabase.DeleteAsset(packerPath);
+        var packer = ScriptableObject.CreateInstance<Rotate90Packer>();
+        AssetDatabase.CreateAsset(packer, packerPath);
+
+        var dimensions = new int[,] { { 13, 47 }, { 47, 13 }, { 19, 37 }, { 37, 19 }, { 23, 41 }, { 41, 23 },
+                                      { 33, 49 }, { 49, 33 }, { 35, 43 }, { 43, 35 }, { 7, 53 }, { 53, 7 } };
+        var sprites = new List<Object>();
+        for (int id = 0; id < 12; id++)
+        {
+            var shape = id % 3 == 0 ? Shape.Full : id % 3 == 1 ? Shape.Triangle : Shape.Ell;
+            var path = Png("t" + id.ToString("D2"), dimensions[id, 0], dimensions[id, 1], id + 1, shape,
+                           shape == Shape.Full ? SpriteMeshType.FullRect : SpriteMeshType.Tight, new Vector2(0.3f, 0.6f));
+            sprites.Add(AssetDatabase.LoadAssetAtPath<Texture2D>(path));
+        }
+
+        var atlasPath = Dir + "/turned.spriteatlasv2";
+        AssetDatabase.DeleteAsset(atlasPath);
+        var atlas = new SpriteAtlasAsset();
+        atlas.Add(sprites.ToArray());
+        atlas.SetScriptablePacker(packer);
+        SpriteAtlasAsset.Save(atlas, atlasPath);
+        AssetDatabase.ImportAsset(atlasPath);
+        var importer = (SpriteAtlasImporter)AssetImporter.GetAtPath(atlasPath);
+        importer.packingSettings = new SpriteAtlasPackingSettings { enableRotation = true, enableTightPacking = true, padding = 2, blockOffset = 1 };
+        importer.textureSettings = new SpriteAtlasTextureSettings { readable = false, generateMipMaps = false, sRGB = true, filterMode = FilterMode.Point };
+        importer.SetPlatformSettings(new TextureImporterPlatformSettings { name = "Standalone", overridden = true, maxTextureSize = 1024, format = TextureImporterFormat.RGBA32 });
+        importer.includeInBuild = true;
+        importer.SaveAndReimport();
+
+        AssetDatabase.SaveAssets();
+        SpriteAtlasUtility.PackAllAtlases(BuildTarget.StandaloneWindows64);
+        Debug.Log("FIXTURE-ASSET " + atlasPath);
+
+        var dir = Path.Combine("Build", "packer");
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "sprites", assetNames = new[] { atlasPath } } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, BuildAssetBundleOptions.ChunkBasedCompression,
+                                                BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: packer");
+        Debug.Log("FIXTURE-OK sprite -> " + dir);
+    }
+
+    enum Shape { Full, Triangle, Ell }
+
+    // Section 12's recipe: R = 5x + 3, G = 5y + 5 (y from the bottom), B = 16 id + 7,
+    // alpha 255 inside the shape and 0 outside, colour kept outside too.
+    static Color32[] Pixels(int w, int h, int id, Shape shape)
+    {
+        var px = new Color32[w * h];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float u = (x + 0.5f) / w, v = (y + 0.5f) / h;
+                bool inside = shape == Shape.Full || (shape == Shape.Triangle ? v <= u : u < 0.4f || v < 0.4f);
+                px[y * w + x] = new Color32((byte)(x * 5 + 3), (byte)(y * 5 + 5), (byte)(id * 16 + 7), (byte)(inside ? 255 : 0));
+            }
+        return px;
+    }
+
+    // A PNG imported as one uncompressed RGBA32 sprite, as section 12's Png does.
+    static string Png(string name, int w, int h, int id, Shape shape, SpriteMeshType mesh, Vector2 pivot)
+    {
+        var path = Dir + "/" + name + ".png";
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex.SetPixels32(Pixels(w, h, id, shape));
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.ImportAsset(path);
+        var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+        imp.textureType = TextureImporterType.Sprite;
+        imp.spriteImportMode = SpriteImportMode.Single;
+        imp.alphaIsTransparency = false;
+        imp.mipmapEnabled = false;
+        imp.filterMode = FilterMode.Point;
+        imp.textureCompression = TextureImporterCompression.Uncompressed;
+        imp.spritePixelsPerUnit = 8f;
+        var settings = new TextureImporterSettings();
+        imp.ReadTextureSettings(settings);
+        settings.spriteMeshType = mesh;
+        settings.spriteAlignment = (int)SpriteAlignment.Custom;
+        settings.spritePivot = pivot;
+        settings.spriteExtrude = 1;
+        imp.SetTextureSettings(settings);
+        imp.SetPlatformTextureSettings(new TextureImporterPlatformSettings { name = "Standalone", overridden = true, format = TextureImporterFormat.RGBA32, maxTextureSize = 1024 });
+        imp.SaveAndReimport();
+        return path;
+    }
+}
+```
+
+The twelve images are the dimensions and pixel recipe listed above, named
+`t00` to `t11` by `id`, with Full/FullRect, Triangle/Tight and Ell/Tight
+alternating by `id % 3`. The packer returns 4 for the six tall ones and the
+listed values as a control for the wide ones (47x13 and 43x35 FlipHorizontal,
+37x19 and 53x7 FlipVertical, 41x23 Rotate180, 49x33 None).
+
+```text
+Unity.exe -batchmode -nographics -quit -projectPath <external-unity-project> -executeMethod BuildPackerProbe.Build -logFile <external-log>
+<UnityPy-1.25.4-python> scripts/inspect-rotate90-experiment.py --scriptable-packer <external-6000.3-project> <external-6000.6-project>
+```
+
+The second command checks that each project's two files equal the blocks
+above, reads `Build/packer/sprites` and writes `scriptablePackerProbes` in
+`fixtures/rotate90-experiment.json`, leaving the 24 probes above unchanged.
+
+**Result: negative in both editors.** Unity neither rejected the packer nor
+warned: `Pack()` ran (twice per build, at import and in `PackAllAtlases`), the
+build logged `FIXTURE-OK sprite`, and every sprite sits at the `x`/`y` the
+packer returned. But the native side dropped the transform for every sprite,
+including the listed control values: its own placement log prints rotation 0
+for all twelve right after `Pack()`, all 24 built entries have `settingsRaw`
+rotation 0, and every opaque atlas pixel inside each `textureRect` holds its
+own source position (`everyOpaquePixelUnturned`), so nothing was turned or
+flipped. A first 6000.3.26f1 build, whose packer returned 4 for the tall
+images and None for the wide ones (no control), gave the same all-zero result.
+In these editors `SpritePack.rot` is not applied at all, so a custom packer
+cannot produce a native Rotate90 (or any packing transform). No bundle is
+committed, `unpack` in `sprite.ts` keeps AssetStudio's Rotate90 direction, and the
+forced-flag tests remain the only Rotate90 coverage.
+
 ## 17. Export goldens: the AssetStudio harness (#233)
 
 Export output (Texture2D and Sprite PNGs, OBJ, WAV, TextAsset files, shader text, font and

@@ -485,13 +485,17 @@ verdict; variant pixel hashes are retained with a warning that UnityPy ignores
 the downscale multiplier. Only 2019 and later are in this fixture addition's
 support scope.
 
-The bounded Rotate90 experiment in BUILDING section 15 records 24 probe cases
+The bounded Rotate90 experiment in BUILDING section 16 records 24 probe cases
 and 288 genuinely packed entries across 2019 legacy/V1 and 6000.6 V1/V2.
 Legacy size/padding remain controlled by its built-in policy; its size labels
 are not applied limits, and some legacy mesh/order settings repeat.
 `rotate90-experiment.json` is an independent negative experiment report, not a
 pixel golden or native Rotate90 acceptance fixture. None of these probes wrote
-rotation value 4; #160 remains open with the same acceptance requirement.
+rotation value 4. Its `scriptablePackerProbes` add the custom Sprite Atlas V2
+`ScriptablePacker` route in 6000.3.26f1 and 6000.6.4f1 (2026-11-08): the
+packer asked for `PackTransform` 4 (and the listed values as a control), but
+Unity wrote rotation 0 for all 24 entries and left every pixel unturned, so
+no native Rotate90 fixture exists and `decodeSprite` keeps AssetStudio's direction.
 
 
 ### Export goldens (AssetStudio, #233)
