@@ -48,7 +48,7 @@ function tpkTree(name: string, reader: ObjectReader): unknown {
     .readTypeTree();
 }
 
-test("the fixtures hold 41 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
+test("the fixtures hold 47 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
   const count = FIXTURES.flatMap((name) =>
     Object.values(golden(name).objects).flatMap((objs) =>
       objs.filter((o) => o.classId === ClassID.Mesh),

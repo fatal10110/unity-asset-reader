@@ -287,7 +287,7 @@ layouts they already had.
 | `Animator` (`AnimatorFields`) | `avatar`, `controller` (pointers), `gameObject`, `enabled`, `cullingMode`, `updateMode`, `applyRootMotion` and the other flags | 2019.1 | Yes, and 6000.6 |
 | `AnimatorOverrideController` (`AnimatorOverrideControllerFields`) | `controller`, and `clips`: each original clip with the clip that overrides it | 2019.1 | Yes, and 6000.6 |
 | `AnimationClip` (`AnimationClipFields`) | `legacy`; a legacy clip's curves (`positionCurves`, `rotationCurves`, `eulerCurves`, `scaleCurves`, `floatCurves`, `pptrCurves`); a Mecanim clip's `muscleClip` (its streamed, dense and constant parts, raw, and its loop settings) and `clipBindingConstant` (what each curve animates); `sampleRate`, `wrapMode`, `events` | 2019.1 | Yes, and 6000.6 |
-| `Animation` (`AnimationFields`) | A legacy `Animation` component: `clip` (the default one) and `clips` (pointers), `gameObject`, `enabled`, `wrapMode`, `playAutomatically`, `animatePhysics`, `cullingType` | 2019.1 | Yes, and 6000.6 |
+| `Animation` (`AnimationFields`) | A legacy `Animation` component: `clip` (the default one) and `clips` (pointers), `gameObject`, `enabled`, `wrapMode`, `playAutomatically`, `animatePhysics`, `cullingType`, `updateMode` (2023.1+) | 2019.1 | Yes, and 6000.6 |
 | `GameObject` (`GameObjectFields`) | `component` (each `{ component }` pointer, the `Transform` first), `layer`, `name`, `tag`, `isActive` | 2019.1 | Yes, and 6000.6 |
 | `Transform` (`TransformFields`) | `gameObject`, `localRotation`, `localPosition`, `localScale`, `children`, `father` (pointers to the parent and child `Transform`s) | 2019.1 | Yes, and 6000.6 |
 | `MeshFilter` (`MeshFilterFields`) | `gameObject`, `mesh` | 2019.1 | Yes, and 6000.6 |
