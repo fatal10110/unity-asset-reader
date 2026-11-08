@@ -1616,8 +1616,8 @@ would mix two oracle versions in one file for no extra check.
 | `more-plain/textures` | 13 textures, 8x5, no mips, raw byte ramp | R8, RG16, RG32, RGB48, RGBA64 tested by #108; eight signed variants remain unsupported |
 | `sprite/sprites` | Section 12 source, Atlas V1 | #155: atlas drops packed sprite arrays and embeds `*spriteInstanceData` in every render-data entry; the core reads it (`Sprite.test.ts`). #229: its 17 packed sprites (RGBA32) are cut to UnityPy's crop, every opaque pixel of its own image lands where section 12's recipe drew it, and their tight masks equal AssetStudio's images of the same sprites in the 6000.3 build |
 | `variant/sprites` | `rect` master plus `half` variant, scale 0.5 | #153: two real entries have `downscaleMultiplier = 0.5`; the resize is checked to the byte on the 2019.4 variant (section 14). #229: this variant's half-scale sprites are cut at AssetStudio's size; their pixels differ from 2019.4's. #230: they are checked to the byte against AssetStudio's executed `CutImage` of this atlas' own entries (section 15, `--modern`) |
-| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2 tight packing | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder; their tight masks (all tight-packed) against `sprite/sprites`' masks, without it |
-| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2 rectangle packing | #160 probe: flips and Rotate180 observed, no rotation value 4. #229: as `sprite-v2` |
+| `sprite-v2/sprites` | Section 12 shapes, native Atlas V2, packed with the importer defaults (tight, see below) | #160 probe: flips observed, no rotation value 4. #229: DXT5 atlas, its packed sprites checked against UnityPy's crop with the WASM decoder; their tight masks (all tight-packed) against `sprite/sprites`' masks, without it |
+| `sprite-v2-rect/sprites` | Same shapes, native Atlas V2. Its builder asks for rectangle packing of the `packed` atlas, but the request never reached Unity: same importer defaults, every entry tight-packed (see below) | #160 probe: flips and Rotate180 observed, no rotation value 4. #229: as `sprite-v2` |
 
 The 6000.6 atlas holds the imported sprites' names, rects, pivots, border,
 vertex data and indices inside `*spriteInstanceData`; individual packed Sprite
@@ -1658,6 +1658,36 @@ in each bundle; do not copy text manifests or any C# into the repository.
 The preparer takes the section 12 `BuildSprites` source, writes it into the
 local project, and derives the variant and V2 builders from it. It uses native
 packing throughout and never forces `settingsRaw`.
+
+**The V2 atlases were packed with the importer defaults, not section 12's
+settings (#292).** The V2 builders keep section 12's `Atlas()` calls, now on a
+`SpriteAtlasAsset`. In 6000.6 its `SetPackingSettings`, `SetTextureSettings`,
+`SetPlatformSettings` and `SetIncludeInBuild` are obsolete (the compiler warns
+"SetPackingSettings is no longer supported and will be removed. Use
+SpriteAtlasImporter.SetPackingSettings instead", and the same for the other
+three) and empty (UnityCsReference
+`Editor/Mono/2D/SpriteAtlas/SpriteAtlasAsset.bindings.cs`:
+`public void SetPackingSettings(SpriteAtlasPackingSettings src) { }`). Section
+16's settings check shows the first three change nothing; `SetIncludeInBuild(true)`
+asks for the default anyway. The settings that applied to both bundles' atlases
+are the `.spriteatlasv2` importer defaults that check read back from the
+6000.6.4f1 editor:
+
+| Setting | Section 12 asks for | Applied (importer default) |
+|---|---|---|
+| Packing | `packed` atlas: tight with rotation (`sprite-v2-rect`: rectangle with rotation); `rect` atlas: rectangle, no rotation | tight, rotation enabled |
+| Padding / block offset | 2 / 1 | 4 / 1 |
+| Filter | point | bilinear |
+| Standalone format, maximum size | RGBA32, 256 | Automatic compressed (the atlases are DXT5), 2048 |
+| Include in build | yes | yes |
+
+The committed data agrees: all 17 + 17 `packedSprites` entries of the two V2
+bundles in `modern-goldens.json` have `settingsRaw` bit 1 (packing mode) 0,
+tight, while the V1 `sprite/sprites` has `r_a` and `r_b` rectangle-packed; and
+the V2 atlas textures are DXT5 (format 12) where V1's are RGBA32 (format 4). The
+two V2 bundles thus differ only by their packer run, not by their settings:
+`sprite-v2`'s packed page is 256x128 and `sprite-v2-rect`'s 128x256, with
+different rotations. They are kept as built; every result above stands.
 
 The plain builder writes `(k * 37 + 11) & 255` into every byte. This exercises
 both signs of the signed channels and distinct high/low bytes of 16-bit
@@ -1954,7 +1984,7 @@ requires native flag 4 before any direction verdict. On 2026-10-05 the installed
 2019.4.41f2 legacy/V1 and 6000.6.4f1 V1/V2 packers were each run through these
 six probe cases (24 total; some legacy settings repeat):
 
-| Case | Requested atlas maximum (V1/V2) | Packing / imported mesh | Order |
+| Case | Requested atlas maximum (V1; V2 not applied) | Packing / imported mesh | Order |
 | --- | --- | --- | --- |
 | c0 | 64 | rectangle / FullRect | forward |
 | c1 | 64 | tight / Tight | forward |
@@ -1966,15 +1996,22 @@ six probe cases (24 total; some legacy settings repeat):
 For legacy packing, all cases use `TightRotateEnabledSpritePackerPolicy` and
 separate case-specific packing tags. The rectangle/tight column describes the
 imported mesh setting there; it does not select a different legacy policy.
-V1/V2 request the listed atlas maxima and tight-packing settings, with rotation
-enabled and padding 2. Legacy uses the built-in policy without overriding its
-atlas maximum or padding: the size in its case name is only a label. Its c1, c2
-and c4 repeat the same Tight/forward settings with separately imported images.
+V1 requests the listed atlas maximum and packing (rectangle for c0 and c5,
+tight for the rest), with rotation enabled and padding 2, through `SpriteAtlas`'s
+setters, and Unity applied them: V1 produced pages within the requested limits,
+and 6000.6 V1's c0 and c5 entries are rectangle-packed (`settingsRaw` 3075).
+The V2 builder (`AtlasV2` in the preparer) makes the same calls on a
+`SpriteAtlasAsset`, where they do nothing in 6000.6 (#292, see the settings
+check below). All six V2 cases were therefore packed with the same importer
+defaults: tight packing, rotation enabled, padding 4, maximum size 2048,
+Automatic compressed format, bilinear filtering. That is why V2 produced 128x256
+or 256x128 pages even for the 64/128 requests, and why V2's c0 and c5 entries
+are tight-packed (`settingsRaw` 3073, packing-mode bit 0). The V2 rows are six
+image sets under one setting, not six settings.
+Legacy uses the built-in policy without overriding its atlas maximum or padding:
+the size in its case name is only a label. Its c1, c2 and c4 repeat the same
+Tight/forward settings with separately imported images.
 All image imports use Windows RGBA32, point filtering and no mipmaps.
-V1 produced pages within the requested limits. V2 produced 128x256 or 256x128
-pages even for the 64/128 requests; those calls did not establish effective
-V2 size limits in this experiment. The report records this limitation explicitly
-without assuming its cause.
 
 Each case imports twelve asymmetric non-square images with dimensions
 13x47, 47x13, 19x37, 37x19, 23x41, 41x23, 33x49, 49x33, 35x43, 43x35,
@@ -2021,12 +2058,33 @@ verdict, AssetStudio Rotate90 pixel cross-check, or decoder direction change is
 justified by these results. #160 stays open with its native-fixture requirement
 unchanged. Existing forced-flag tests remain synthetic coverage. The public
 rotation enum's lack of a named Rotate90 does not establish that native flag 4
-is impossible; this result applies only to the bounded configurations above.
+is impossible; this result applies only to the bounded configurations above
+(for V2, the importer defaults).
 
 The separate [`codex/fixture-oracle-references` branch at `be60685`](https://github.com/fatal10110/unity-asset-reader/tree/be60685)
 contains the prepared plain and half-scale variant pixel references. Those
 references do not settle Rotate90. Its rectangle-only variant harness must not
 be used as a tight-mask oracle.
+
+### V2 atlas settings check (#292)
+
+On 2026-11-08 a fresh 6000.6.4f1 project (`ProjectSettings/` and `Packages/` of
+an empty project, one editor script, no images) saved four empty
+`.spriteatlasv2` assets with `SpriteAtlasAsset.Save` and `ImportAsset`, then
+logged each one's `SpriteAtlasImporter.packingSettings`, `textureSettings`,
+`includeInBuild` and `GetPlatformSettings("DefaultTexturePlatform")` /
+`("Standalone")`:
+
+| Atlas | Set up with | Importer settings read back |
+|---|---|---|
+| A | nothing | rotation on, tight on, padding 4, block offset 1; bilinear, no mips, sRGB, aniso 1; include in build; both platforms not overridden, 2048, AutomaticCompressed |
+| B | `AtlasV2`'s four `SpriteAtlasAsset` setters (c0: rectangle, padding 2, point, Standalone RGBA32 64) | identical to A |
+| C | the V2 fixture builders' setters (`Atlas("packed", packed, false, true)`: also DefaultTexturePlatform Uncompressed 256, Standalone RGBA32 256) | identical to A |
+| D | B's values through `SpriteAtlasImporter` (as the custom packer below) | tight off, padding 2, point, Standalone overridden RGBA32 64 |
+
+So the `SpriteAtlasAsset` setters were no-ops and the route that applies is
+`SpriteAtlasImporter`, set after the first import and followed by
+`SaveAndReimport()`. No committed bundle was rebuilt.
 
 ### Custom ScriptablePacker (maintainer-approved route, 2026-11-08)
 
@@ -2197,7 +2255,9 @@ The twelve images are the dimensions and pixel recipe listed above, named
 `t00` to `t11` by `id`, with Full/FullRect, Triangle/Tight and Ell/Tight
 alternating by `id % 3`. The packer returns 4 for the six tall ones and the
 listed values as a control for the wide ones (47x13 and 43x35 FlipHorizontal,
-37x19 and 53x7 FlipVertical, 41x23 Rotate180, 49x33 None).
+37x19 and 53x7 FlipVertical, 41x23 Rotate180, 49x33 None). The atlas settings
+go through `SpriteAtlasImporter`, the route that applies; `SpriteAtlasAsset`'s
+setters do nothing (settings check above).
 
 ```text
 Unity.exe -batchmode -nographics -quit -projectPath <external-unity-project> -executeMethod BuildPackerProbe.Build -logFile <external-log>
