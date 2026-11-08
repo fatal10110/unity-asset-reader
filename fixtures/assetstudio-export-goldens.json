@@ -14,6 +14,7 @@
     "Shader": "AssetStudio.CLI.Exporter.ExportShader(item, dir), ShaderConverter.Convert(); Vulkan stages of SMOL-V encoding version 1: aras-p/smol-v 6303e97 smolv::Decode, disassembled by AssetStudio's SpirV.Module.ReadFrom + Disassembler, framed as SpirVShaderConverter.Convert; variants in m_PlayerSubPrograms: composite (plan section 5, revision 2026-11-08a): UnityPy 1.25.4's type tree in AssetStudio's SerializedShader, each distinct (m_BlobIndex, m_GpuProgramType) of m_PlayerSubPrograms as one SerializedSubProgram of tier 0, its blob entries read by ShaderSubProgram(reader, false), text by ShaderConverter.ConvertSerializedShader",
     "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
     "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)",
+    "ModelConverter": "new AssetStudio.ModelConverter(Animator, Options, clips): once with no clip (frames, meshes, bones, morphs), once with every AnimationClip of the Animator's file (keyframe tracks); floats as float32 bits",
     "AnimationClip": "AssetStudio.CLI.Exporter.ExportAnimationClip(item, dir), AnimationClipExtensions.Convert(); the clip's curve lists and m_Events dumped after it, floats as float32 bits"
   },
   "execution": "AssetStudio's projects built unmodified from the revision's tree for net8.0-windows; objects loaded with its AssetsManager (one bundle per folder; SpecifyUnityVersion, the CLI's --unity_version, = the editor in the fixture's path, which a version-stripped file needs); Shaders with variants in m_PlayerSubPrograms: the composite instead (their entries' \"oracle\"); exporters called on the en-US culture of the GUI's export thread. PNG decoded with the ImageSharp AssetStudio pins; rgbaSha256 is its RGBA8 pixels in the PNG's row order, top row first.",
@@ -54,6 +55,1194 @@
     "Vortice.DirectX/3.4.3-beta": "f4FpyMpCq3hGhmBqnVecoeOp9n7Q5D3HejoaJyoGvt1BiKJ2tlYT1dv3Hu+IZZ7sl0i8AQsLL65pMAdQ3O7MIQ==",
     "Vortice.Mathematics/1.7.6": "R2yq/lCV2jveczsY//gB+eCxvYLmv/9wdZQzrWUJQgX6BMZVrobctSbYR2rRyKC9H7+KHfPhGMoqsLUTLiuDKA==",
     "ZstdSharp.Port/0.7.2": "P6bMQYwgczSwP+sNkIMeoi5/zpE9/zD+fLT9l7bovVs3H/HVkxErMTcxNL9axFTfa5sAIQ+i8xru3w3bVlqQUg=="
+  },
+  "models": {
+    "editor/2019.4.41f2/scene/lz4-notypetree/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "-4233156400366396733": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [
+            {
+              "path": "scene/Skin",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "matrix": "3f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "matrix": "3f7746e9be8483ef00000000be46c5e73e8483ef3f7746ea000000003f39753000000000000000003f800000bdcccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "matrix": "3f5db3d7bf00000000000000bf4000003f0000003f5db3d8000000003fa646e200000000000000003f800000be4ccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck",
+                  "matrix": "3f3504f1bf3504f500000000bfcba5933f3504f43f3504f2000000003fcba59000000000000000003f800000be99999a0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+                  "matrix": "3f000000bf5db3d700000000c02646e13f5db3d83f000000000000003fc0000000000000000000003f800000becccccd0000000000000000000000003f800000"
+                }
+              ]
+            },
+            {
+              "path": "scene/Prop",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": []
+            }
+          ],
+          "morphs": [
+            {
+              "path": "scene/Skin",
+              "channels": [
+                {
+                  "name": "smile",
+                  "keyframes": [
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004bd800000400800003f380000800000003e800000be0000003e000000000000003e0000000000000000000005bf88000040100000bf080000800000003e800000be0000003e000000000000003e8000000000000000000006bea0000040580000bd000000800000003e800000be0000003e000000000000003ec000000000000000000007bfc80000406000003eb00000800000003e800000be0000003e000000000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004be000000401000003f300000800000003f000000be8000003e800000000000003e0000000000000000000005bf90000040200000bf100000800000003f000000be8000003e800000000000003e8000000000000000000006bec0000040700000bd800000800000003f000000be8000003e800000000000003ec000000000000000000007bfd00000408000003ea00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                },
+                {
+                  "name": "blink",
+                  "keyframes": [
+                    {
+                      "weight": "41c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bd2aaaab3daaaaabbcaaaaab800000003e2aaaabbdaaaaab3daaaaab000000003e0000000000000000000001bf8555553e2aaaab3dd55555800000003e2aaaabbdaaaaab3daaaaab000000003e8000000000000000000002bd2aaaab3fa00000be8aaaab800000003e2aaaabbdaaaaab3daaaaab000000003ec000000000000000000003bf8555553faaaaab3ef55555800000003e2aaaabbdaaaaab3daaaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bdaaaaab3e2aaaabbd2aaaab800000003eaaaaabbe2aaaab3e2aaaab000000003e0000000000000000000001bf8aaaab3eaaaaab3daaaaaa800000003eaaaaabbe2aaaab3e2aaaab000000003e8000000000000000000002bdaaaaab3fc00000be955555800000003eaaaaabbe2aaaab3e2aaaab000000003ec000000000000000000003bf8aaaab3fd555563eeaaaab800000003eaaaaabbe2aaaab3e2aaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000be0000003e800000bd800000800000003f000000be8000003e800000000000003e0000000000000000000001bf9000003f0000003d800000800000003f000000be8000003e800000000000003e8000000000000000000002be0000003fe00000bea00000800000003f000000be8000003e800000000000003ec000000000000000000003bf900000400000003ee00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clips": [
+            "move",
+            "muscle",
+            "smile"
+          ],
+          "animations": [
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            },
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "smile",
+                    "keys": "00000000000000003f00000042c800003f80000041c80000"
+                  }
+                },
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "blink",
+                    "keys": "00000000000000003e80000042c800003f00000000000000"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "editor/2019.4.41f2/scene/lz4/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "-4233156400366396733": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [
+            {
+              "path": "scene/Skin",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "matrix": "3f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "matrix": "3f7746e9be8483ef00000000be46c5e73e8483ef3f7746ea000000003f39753000000000000000003f800000bdcccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "matrix": "3f5db3d7bf00000000000000bf4000003f0000003f5db3d8000000003fa646e200000000000000003f800000be4ccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck",
+                  "matrix": "3f3504f1bf3504f500000000bfcba5933f3504f43f3504f2000000003fcba59000000000000000003f800000be99999a0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+                  "matrix": "3f000000bf5db3d700000000c02646e13f5db3d83f000000000000003fc0000000000000000000003f800000becccccd0000000000000000000000003f800000"
+                }
+              ]
+            },
+            {
+              "path": "scene/Prop",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": []
+            }
+          ],
+          "morphs": [
+            {
+              "path": "scene/Skin",
+              "channels": [
+                {
+                  "name": "smile",
+                  "keyframes": [
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004bd800000400800003f380000800000003e800000be0000003e000000000000003e0000000000000000000005bf88000040100000bf080000800000003e800000be0000003e000000000000003e8000000000000000000006bea0000040580000bd000000800000003e800000be0000003e000000000000003ec000000000000000000007bfc80000406000003eb00000800000003e800000be0000003e000000000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004be000000401000003f300000800000003f000000be8000003e800000000000003e0000000000000000000005bf90000040200000bf100000800000003f000000be8000003e800000000000003e8000000000000000000006bec0000040700000bd800000800000003f000000be8000003e800000000000003ec000000000000000000007bfd00000408000003ea00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                },
+                {
+                  "name": "blink",
+                  "keyframes": [
+                    {
+                      "weight": "41c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bd2aaaab3daaaaabbcaaaaab800000003e2aaaabbdaaaaab3daaaaab000000003e0000000000000000000001bf8555553e2aaaab3dd55555800000003e2aaaabbdaaaaab3daaaaab000000003e8000000000000000000002bd2aaaab3fa00000be8aaaab800000003e2aaaabbdaaaaab3daaaaab000000003ec000000000000000000003bf8555553faaaaab3ef55555800000003e2aaaabbdaaaaab3daaaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bdaaaaab3e2aaaabbd2aaaab800000003eaaaaabbe2aaaab3e2aaaab000000003e0000000000000000000001bf8aaaab3eaaaaab3daaaaaa800000003eaaaaabbe2aaaab3e2aaaab000000003e8000000000000000000002bdaaaaab3fc00000be955555800000003eaaaaabbe2aaaab3e2aaaab000000003ec000000000000000000003bf8aaaab3fd555563eeaaaab800000003eaaaaabbe2aaaab3e2aaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000be0000003e800000bd800000800000003f000000be8000003e800000000000003e0000000000000000000001bf9000003f0000003d800000800000003f000000be8000003e800000000000003e8000000000000000000002be0000003fe00000bea00000800000003f000000be8000003e800000000000003ec000000000000000000003bf900000400000003ee00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clips": [
+            "move",
+            "muscle",
+            "smile"
+          ],
+          "animations": [
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            },
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "smile",
+                    "keys": "00000000000000003f00000042c800003f80000041c80000"
+                  }
+                },
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "blink",
+                    "keys": "00000000000000003e80000042c800003f00000000000000"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "editor/2020.3.30f1/scene/lz4-notypetree/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "-4002911334254477530": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [
+            {
+              "path": "scene/Skin",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "matrix": "3f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "matrix": "3f7746e9be8483ef00000000be46c5e73e8483ef3f7746ea000000003f39753000000000000000003f800000bdcccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "matrix": "3f5db3d7bf00000000000000bf4000003f0000003f5db3d8000000003fa646e200000000000000003f800000be4ccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck",
+                  "matrix": "3f3504f1bf3504f500000000bfcba5933f3504f43f3504f2000000003fcba59000000000000000003f800000be99999a0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+                  "matrix": "3f000000bf5db3d700000000c02646e13f5db3d83f000000000000003fc0000000000000000000003f800000becccccd0000000000000000000000003f800000"
+                }
+              ]
+            },
+            {
+              "path": "scene/Prop",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": []
+            }
+          ],
+          "morphs": [
+            {
+              "path": "scene/Skin",
+              "channels": [
+                {
+                  "name": "smile",
+                  "keyframes": [
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004bd800000400800003f380000800000003e800000be0000003e000000000000003e0000000000000000000005bf88000040100000bf080000800000003e800000be0000003e000000000000003e8000000000000000000006bea0000040580000bd000000800000003e800000be0000003e000000000000003ec000000000000000000007bfc80000406000003eb00000800000003e800000be0000003e000000000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004be000000401000003f300000800000003f000000be8000003e800000000000003e0000000000000000000005bf90000040200000bf100000800000003f000000be8000003e800000000000003e8000000000000000000006bec0000040700000bd800000800000003f000000be8000003e800000000000003ec000000000000000000007bfd00000408000003ea00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                },
+                {
+                  "name": "blink",
+                  "keyframes": [
+                    {
+                      "weight": "41c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bd2aaaab3daaaaabbcaaaaab800000003e2aaaabbdaaaaab3daaaaab000000003e0000000000000000000001bf8555553e2aaaab3dd55555800000003e2aaaabbdaaaaab3daaaaab000000003e8000000000000000000002bd2aaaab3fa00000be8aaaab800000003e2aaaabbdaaaaab3daaaaab000000003ec000000000000000000003bf8555553faaaaab3ef55555800000003e2aaaabbdaaaaab3daaaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bdaaaaab3e2aaaabbd2aaaab800000003eaaaaabbe2aaaab3e2aaaab000000003e0000000000000000000001bf8aaaab3eaaaaab3daaaaaa800000003eaaaaabbe2aaaab3e2aaaab000000003e8000000000000000000002bdaaaaab3fc00000be955555800000003eaaaaabbe2aaaab3e2aaaab000000003ec000000000000000000003bf8aaaab3fd555563eeaaaab800000003eaaaaabbe2aaaab3e2aaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000be0000003e800000bd800000800000003f000000be8000003e800000000000003e0000000000000000000001bf9000003f0000003d800000800000003f000000be8000003e800000000000003e8000000000000000000002be0000003fe00000bea00000800000003f000000be8000003e800000000000003ec000000000000000000003bf900000400000003ee00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clips": [
+            "move",
+            "muscle",
+            "smile"
+          ],
+          "animations": [
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            },
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "smile",
+                    "keys": "00000000000000003f00000042c800003f80000041c80000"
+                  }
+                },
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "blink",
+                    "keys": "00000000000000003e80000042c800003f00000000000000"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "editor/2020.3.30f1/scene/lz4/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "-4002911334254477530": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [
+            {
+              "path": "scene/Skin",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "matrix": "3f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000000000000000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "matrix": "3f7746e9be8483ef00000000be46c5e73e8483ef3f7746ea000000003f39753000000000000000003f800000bdcccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "matrix": "3f5db3d7bf00000000000000bf4000003f0000003f5db3d8000000003fa646e200000000000000003f800000be4ccccd0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck",
+                  "matrix": "3f3504f1bf3504f500000000bfcba5933f3504f43f3504f2000000003fcba59000000000000000003f800000be99999a0000000000000000000000003f800000"
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+                  "matrix": "3f000000bf5db3d700000000c02646e13f5db3d83f000000000000003fc0000000000000000000003f800000becccccd0000000000000000000000003f800000"
+                }
+              ]
+            },
+            {
+              "path": "scene/Prop",
+              "vertexCount": 8,
+              "vertices": "800000000000000000000000bf800000000000003e000000800000003f800000be800000bf8000003f8000003f00000080000000400000003f400000bf80000040000000bf000000be8000004040000000000000bfc00000404000003ec00000",
+              "bones": []
+            }
+          ],
+          "morphs": [
+            {
+              "path": "scene/Skin",
+              "channels": [
+                {
+                  "name": "smile",
+                  "keyframes": [
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004bd800000400800003f380000800000003e800000be0000003e000000000000003e0000000000000000000005bf88000040100000bf080000800000003e800000be0000003e000000000000003e8000000000000000000006bea0000040580000bd000000800000003e800000be0000003e000000000000003ec000000000000000000007bfc80000406000003eb00000800000003e800000be0000003e000000000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000004be000000401000003f300000800000003f000000be8000003e800000000000003e0000000000000000000005bf90000040200000bf100000800000003f000000be8000003e800000000000003e8000000000000000000006bec0000040700000bd800000800000003f000000be8000003e800000000000003ec000000000000000000007bfd00000408000003ea00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                },
+                {
+                  "name": "blink",
+                  "keyframes": [
+                    {
+                      "weight": "41c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bd2aaaab3daaaaabbcaaaaab800000003e2aaaabbdaaaaab3daaaaab000000003e0000000000000000000001bf8555553e2aaaab3dd55555800000003e2aaaabbdaaaaab3daaaaab000000003e8000000000000000000002bd2aaaab3fa00000be8aaaab800000003e2aaaabbdaaaaab3daaaaab000000003ec000000000000000000003bf8555553faaaaab3ef55555800000003e2aaaabbdaaaaab3daaaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42480000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000bdaaaaab3e2aaaabbd2aaaab800000003eaaaaabbe2aaaab3e2aaaab000000003e0000000000000000000001bf8aaaab3eaaaaab3daaaaaa800000003eaaaaabbe2aaaab3e2aaaab000000003e8000000000000000000002bdaaaaab3fc00000be955555800000003eaaaaabbe2aaaab3e2aaaab000000003ec000000000000000000003bf8aaaab3fd555563eeaaaab800000003eaaaaabbe2aaaab3e2aaaab000000003f00000000000000"
+                    },
+                    {
+                      "weight": "42c80000",
+                      "hasNormals": true,
+                      "hasTangents": true,
+                      "vertices": "00000000be0000003e800000bd800000800000003f000000be8000003e800000000000003e0000000000000000000001bf9000003f0000003d800000800000003f000000be8000003e800000000000003e8000000000000000000002be0000003fe00000bea00000800000003f000000be8000003e800000000000003ec000000000000000000003bf900000400000003ee00000800000003f000000be8000003e800000000000003f00000000000000"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "clips": [
+            "move",
+            "muscle",
+            "smile"
+          ],
+          "animations": [
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            },
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "smile",
+                    "keys": "00000000000000003f00000042c800003f80000041c80000"
+                  }
+                },
+                {
+                  "path": "scene/Skin",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": {
+                    "channel": "blink",
+                    "keys": "00000000000000003e80000042c800003f00000000000000"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "editor/6000.3.26f1/scene/lz4-notypetree/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "2399028389030786113": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [],
+          "morphs": [],
+          "clips": [
+            "muscle",
+            "smile",
+            "move"
+          ],
+          "animations": [
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            }
+          ],
+          "unreadObjects": {
+            "MeshRenderer": 1,
+            "SkinnedMeshRenderer": 1
+          },
+          "verdict": "c37af7d's Renderer reader fails on this file's MeshRenderer and SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's unreadObjects), so ModelConverter converts no mesh: no bones, bind poses or morphs, and no blend shape track; the frames and transform tracks are compared, the skin and morphs with another editor's dump of the same mesh"
+        }
+      }
+    },
+    "editor/6000.3.26f1/scene/lz4/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "2399028389030786113": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [],
+          "morphs": [],
+          "clips": [
+            "muscle",
+            "smile",
+            "move"
+          ],
+          "animations": [
+            {
+              "name": "muscle",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "smile",
+              "sampleRate": "42700000",
+              "tracks": []
+            },
+            {
+              "name": "move",
+              "sampleRate": "42700000",
+              "tracks": [
+                {
+                  "path": "scene/Armature/Hips",
+                  "translations": "0000000080000000000000003dcccccd3f000000be8000003e800000000000003f800000800000003f000000bdcccccd",
+                  "rotations": "",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine",
+                  "translations": "",
+                  "rotations": "000000000000000080000000800000003f8000003f8000000000000080000000be8483ee3f7746ea",
+                  "scalings": "",
+                  "blendShape": null
+                },
+                {
+                  "path": "scene/Armature/Hips/Spine/Chest",
+                  "translations": "",
+                  "rotations": "",
+                  "scalings": "000000003f8000003f8000003f8000003f0000003fa000003f4000003f8000003f8000003fc000003f8000003f800000",
+                  "blendShape": null
+                }
+              ]
+            }
+          ],
+          "unreadObjects": {
+            "MeshRenderer": 1,
+            "SkinnedMeshRenderer": 1
+          },
+          "verdict": "c37af7d's Renderer reader fails on this file's MeshRenderer and SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's unreadObjects), so ModelConverter converts no mesh: no bones, bind poses or morphs, and no blend shape track; the frames and transform tracks are compared, the skin and morphs with another editor's dump of the same mesh"
+        }
+      }
+    },
+    "editor/6000.6.4f1/scene/lz4-notypetree/scene": {
+      "CAB-bb882be6a1a145aba38a45a20e4878ba": {
+        "8972215846459664265": {
+          "root": "scene",
+          "frames": [
+            {
+              "path": "scene",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips",
+              "translation": "800000000000000000000000",
+              "rotation": "8000000000000000000000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine",
+              "translation": "80000000bf4000003dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest",
+              "translation": "3e46c5e6bf3975303dcccccd",
+              "rotation": "8000000000000000be05a8a93f7dcf55",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck",
+              "translation": "3ec00002bf2646e23dcccccf",
+              "rotation": "8000000000000000be05a8a93f7dcf54",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Armature/Hips/Spine/Chest/Neck/Head",
+              "translation": "3f07c3b7bf07c3b53dcccccd",
+              "rotation": "8000000000000000be05a8a83f7dcf56",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Skin",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            },
+            {
+              "path": "scene/Prop",
+              "translation": "c00000000000000000000000",
+              "rotation": "00000000be8483ef800000003f7746eb",
+              "scale": "400000003f0000003f800000"
+            },
+            {
+              "path": "scene/Prop/Hidden",
+              "translation": "800000000000000000000000",
+              "rotation": "0000000080000000800000003f800000",
+              "scale": "3f8000003f8000003f800000"
+            }
+          ],
+          "meshes": [],
+          "morphs": [],
+          "clips": [
+            "move"
+          ],
+          "animationsError": "NullReferenceException: Object reference not set to an instance of an object.",
+          "unreadObjects": {
+            "AnimationClip": 2,
+            "AnimatorController": 1,
+            "MeshRenderer": 1,
+            "SkinnedMeshRenderer": 1
+          },
+          "verdict": "c37af7d's Renderer reader fails on this file's MeshRenderer and SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's unreadObjects), so ModelConverter converts no mesh: no bones, bind poses or morphs, and no blend shape track; the frames and transform tracks are compared, the skin and morphs with another editor's dump of the same mesh"
+        }
+      }
+    }
   },
   "fixtures": {
     "editor/2019.4.41f2/animation/lz4-notypetree/animation": {
