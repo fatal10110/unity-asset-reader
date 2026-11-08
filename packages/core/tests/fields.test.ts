@@ -37,6 +37,9 @@ const EDITOR = [
   // 6000.6's animator classes (#303), in modern-goldens.json.
   "editor/6000.6.4f1/animator/lz4/animator",
   "editor/6000.6.4f1/animator/lz4-notypetree/animator",
+  // 6000.6's AnimationClip (#302), in modern-goldens.json.
+  "editor/6000.6.4f1/animation/lz4/animation",
+  "editor/6000.6.4f1/animation/lz4-notypetree/animation",
 ];
 
 /** The renames beyond the rule, as the fields' JSDoc documents them; `null` drops the key. */
@@ -66,6 +69,8 @@ const RENAMES: Record<string, string | null> = {
   m_IKOnFeet: "ikOnFeet",
   "(int&)m_LayerBlendingMode": "layerBlendingMode",
   m_KeepAnimatorControllerStateOnDisable: "keepAnimatorStateOnDisable",
+  // An AnimationClip's (#302): the rule would make it `pPtrCurves`.
+  m_PPtrCurves: "pptrCurves",
 };
 
 /** The rule: `m_Width` -> `width`, `Width` -> `width`, `m_sRGB` -> `sRGB`. */
@@ -137,6 +142,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
   assert.deepStrictEqual(
     [...seen].sort(),
     [
+      "AnimationClip",
       "Animator",
       "AnimatorController",
       "AnimatorOverrideController",

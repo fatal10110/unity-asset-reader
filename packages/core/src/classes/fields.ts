@@ -14,8 +14,29 @@ import type {
   AssetBundleScriptInfo,
   AssetInfo,
 } from "./AssetBundle.js";
+import type {
+  AnimationClip,
+  AnimationClipBindingConstant,
+  AnimationCurve,
+  AnimationEvent,
+  ClipMuscleConstant,
+  CompressedAnimationCurve,
+  ConstantClip,
+  FloatCurve,
+  Keyframe,
+  PPtrCurve,
+  QuaternionCurve,
+  StreamedClip,
+  Vector3Curve,
+} from "./AnimationClip.js";
 import type { Animator } from "./Animator.js";
-import type { OffsetPtr, ValueArrayConstant, ValueConstant } from "./animation.js";
+import type {
+  HandPose,
+  HumanPose,
+  OffsetPtr,
+  ValueArrayConstant,
+  ValueConstant,
+} from "./animation.js";
 import type {
   AnimatorController,
   Blend1dDataConstant,
@@ -2694,6 +2715,380 @@ function humanDescription(data: HumanDescription): HumanDescriptionFields {
     hasTranslationDoF: data.m_HasTranslationDoF,
     hasExtraRoot: data.m_HasExtraRoot,
     skeletonHasParents: data.m_SkeletonHasParents,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// AnimationClip (#302)
+
+/** The friendly form of {@link AnimationCurve}: keys of a value over time. */
+export interface AnimationCurveFields<T> {
+  /** Unity: `m_Curve`. The keys, Unity's names kept (none has the `m_` prefix). */
+  curve: Keyframe<T>[];
+  /** Unity: `m_PreInfinity`. Unity's `WrapMode` before the first key. */
+  preInfinity: number;
+  /** Unity: `m_PostInfinity`. Unity's `WrapMode` after the last key. */
+  postInfinity: number;
+  /** Unity: `m_RotationOrder`. */
+  rotationOrder: number;
+}
+
+/** The friendly form of {@link QuaternionCurve}. */
+export interface QuaternionCurveFields {
+  curve: AnimationCurveFields<Quaternion>;
+  path: string;
+}
+
+/** The friendly form of {@link Vector3Curve}. */
+export interface Vector3CurveFields {
+  curve: AnimationCurveFields<Vector3>;
+  path: string;
+}
+
+/** The friendly form of a compressed curve's values (`PackedQuatVector`). */
+export interface PackedQuatVectorFields {
+  /** Unity: `m_NumItems`. */
+  numItems: number;
+  /** Unity: `m_Data`. The packed bits, a view (R7). */
+  data: Uint8Array;
+}
+
+/** The friendly form of {@link CompressedAnimationCurve}. */
+export interface CompressedAnimationCurveFields {
+  /** Unity: `m_Path`. */
+  path: string;
+  /** Unity: `m_Times`. */
+  times: PackedIntVectorFields;
+  /** Unity: `m_Values`. */
+  values: PackedQuatVectorFields;
+  /** Unity: `m_Slopes`. */
+  slopes: PackedFloatVectorFields;
+  /** Unity: `m_PreInfinity`. */
+  preInfinity: number;
+  /** Unity: `m_PostInfinity`. */
+  postInfinity: number;
+}
+
+/** The friendly form of {@link FloatCurve}: its other fields keep Unity's names. */
+export interface FloatCurveFields extends Omit<FloatCurve, "curve"> {
+  curve: AnimationCurveFields<number>;
+}
+
+/** The friendly form of {@link DenseClip}. */
+export interface DenseClipFields {
+  /** Unity: `m_FrameCount`. */
+  frameCount: number;
+  /** Unity: `m_CurveCount`. */
+  curveCount: number;
+  /** Unity: `m_SampleRate`. */
+  sampleRate: number;
+  /** Unity: `m_BeginTime`. */
+  beginTime: number;
+  /** Unity: `m_SampleArray`. `curveCount` samples per frame, raw. */
+  sampleArray: number[];
+}
+
+/** The friendly form of {@link Clip}: the three parts of a Mecanim clip's curves. */
+export interface ClipFields {
+  /** Unity: `m_StreamedClip`. Raw words, not decoded. */
+  streamedClip: StreamedClip;
+  /** Unity: `m_DenseClip`. */
+  denseClip: DenseClipFields;
+  /** Unity: `m_ConstantClip`. */
+  constantClip: ConstantClip;
+}
+
+/** The friendly form of {@link HumanGoal}. */
+export interface HumanGoalFields {
+  /** Unity: `m_X`. */
+  x: XForm;
+  /** Unity: `m_WeightT`. */
+  weightT: number;
+  /** Unity: `m_WeightR`. */
+  weightR: number;
+  /** Unity: `m_HintT`. */
+  hintT: Vector3;
+  /** Unity: `m_HintWeightT`. */
+  hintWeightT: number;
+}
+
+/** The friendly form of {@link HandPose}. */
+export interface HandPoseFields {
+  /** Unity: `m_GrabX`. */
+  grabX: XForm;
+  /** Unity: `m_DoFArray`. One float per finger degree of freedom. */
+  doFArray: number[];
+  /** Unity: `m_Override`. */
+  override: number;
+  /** Unity: `m_CloseOpen`. */
+  closeOpen: number;
+  /** Unity: `m_InOut`. */
+  inOut: number;
+  /** Unity: `m_Grab`. */
+  grab: number;
+}
+
+/** The friendly form of {@link HumanPose}. */
+export interface HumanPoseFields {
+  /** Unity: `m_RootX`. */
+  rootX: XForm;
+  /** Unity: `m_LookAtPosition`. */
+  lookAtPosition: Vector3;
+  /** Unity: `m_LookAtWeight`. */
+  lookAtWeight: Vector4;
+  /** Unity: `m_GoalArray`. */
+  goalArray: HumanGoalFields[];
+  /** Unity: `m_LeftHandPose`. */
+  leftHandPose: HandPoseFields;
+  /** Unity: `m_RightHandPose`. */
+  rightHandPose: HandPoseFields;
+  /** Unity: `m_DoFArray`. One float per muscle. */
+  doFArray: number[];
+  /** Unity: `m_TDoFArray`. */
+  tDoFArray: Vector3[];
+}
+
+/** The friendly form of {@link ValueDelta}. */
+export interface ValueDeltaFields {
+  /** Unity: `m_Start`. */
+  start: number;
+  /** Unity: `m_Stop`. */
+  stop: number;
+}
+
+/** The friendly form of {@link ClipMuscleConstant}. */
+export interface ClipMuscleConstantFields {
+  /** Unity: `m_DeltaPose`. */
+  deltaPose: HumanPoseFields;
+  /** Unity: `m_StartX`. */
+  startX: XForm;
+  /** Unity: `m_StopX`. */
+  stopX: XForm;
+  /** Unity: `m_LeftFootStartX`. */
+  leftFootStartX: XForm;
+  /** Unity: `m_RightFootStartX`. */
+  rightFootStartX: XForm;
+  /** Unity: `m_AverageSpeed`. */
+  averageSpeed: Vector3;
+  /** Unity: `m_Clip`. */
+  clip: OffsetPtr<ClipFields>;
+  /** Unity: `m_StartTime`. */
+  startTime: number;
+  /** Unity: `m_StopTime`. */
+  stopTime: number;
+  /** Unity: `m_OrientationOffsetY`. */
+  orientationOffsetY: number;
+  /** Unity: `m_Level`. */
+  level: number;
+  /** Unity: `m_CycleOffset`. */
+  cycleOffset: number;
+  /** Unity: `m_AverageAngularSpeed`. */
+  averageAngularSpeed: number;
+  /** Unity: `m_IndexArray`. Each binding's curve index, -1 for none. */
+  indexArray: number[];
+  /** Unity: `m_ValueArrayDelta`. */
+  valueArrayDelta: ValueDeltaFields[];
+  /** Unity: `m_ValueArrayReferencePose`. */
+  valueArrayReferencePose: number[];
+  /** Unity: `m_Mirror`. */
+  mirror: boolean;
+  /** Unity: `m_LoopTime`. */
+  loopTime: boolean;
+  /** Unity: `m_LoopBlend`. */
+  loopBlend: boolean;
+  /** Unity: `m_LoopBlendOrientation`. */
+  loopBlendOrientation: boolean;
+  /** Unity: `m_LoopBlendPositionY`. */
+  loopBlendPositionY: boolean;
+  /** Unity: `m_LoopBlendPositionXZ`. */
+  loopBlendPositionXZ: boolean;
+  /** Unity: `m_StartAtOrigin`. */
+  startAtOrigin: boolean;
+  /** Unity: `m_KeepOriginalOrientation`. */
+  keepOriginalOrientation: boolean;
+  /** Unity: `m_KeepOriginalPositionY`. */
+  keepOriginalPositionY: boolean;
+  /** Unity: `m_KeepOriginalPositionXZ`. */
+  keepOriginalPositionXZ: boolean;
+  /** Unity: `m_HeightFromFeet`. */
+  heightFromFeet: boolean;
+}
+
+/**
+ * The friendly form of {@link AnimationClip}. The structs whose fields have
+ * no `m_` prefix (`PPtrCurve`, `AnimationEvent`, the bindings) keep their
+ * low-level shape.
+ */
+export interface AnimationClipFields extends NamedObjectFields {
+  /** Unity: `m_Legacy`. A legacy clip keeps its curves in the curve arrays. */
+  legacy: boolean;
+  /** Unity: `m_Compressed`. */
+  compressed: boolean;
+  /** Unity: `m_UseHighQualityCurve`. */
+  useHighQualityCurve: boolean;
+  /** Unity: `m_RotationCurves`. */
+  rotationCurves: QuaternionCurveFields[];
+  /** Unity: `m_CompressedRotationCurves`. */
+  compressedRotationCurves: CompressedAnimationCurveFields[];
+  /** Unity: `m_EulerCurves`. */
+  eulerCurves: Vector3CurveFields[];
+  /** Unity: `m_PositionCurves`. */
+  positionCurves: Vector3CurveFields[];
+  /** Unity: `m_ScaleCurves`. */
+  scaleCurves: Vector3CurveFields[];
+  /** Unity: `m_FloatCurves`. */
+  floatCurves: FloatCurveFields[];
+  /** Unity: `m_PPtrCurves`. */
+  pptrCurves: PPtrCurve[];
+  /** Unity: `m_SampleRate`. */
+  sampleRate: number;
+  /** Unity: `m_WrapMode`. */
+  wrapMode: number;
+  /** Unity: `m_Bounds`. */
+  bounds: AABBFields;
+  /** Unity: `m_MuscleClipSize`. The byte size of the runtime clip blob; 0 for a legacy clip. */
+  muscleClipSize: number;
+  /** Unity: `m_MuscleClip`. A Mecanim clip's curves, raw, and its settings. */
+  muscleClip: ClipMuscleConstantFields;
+  /** Unity: `m_ClipBindingConstant`. */
+  clipBindingConstant: AnimationClipBindingConstant;
+  /** Unity: `m_HasGenericRootTransform`. */
+  hasGenericRootTransform: boolean;
+  /** Unity: `m_HasMotionFloatCurves`. */
+  hasMotionFloatCurves: boolean;
+  /** Unity: `m_Events`. */
+  events: AnimationEvent[];
+}
+
+/**
+ * An `AnimationClip` as {@link AnimationClipFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAnimationClipFields(data: AnimationClip): AnimationClipFields {
+  const vector3Curve = (c: Vector3Curve): Vector3CurveFields => ({
+    curve: animationCurve(c.curve),
+    path: c.path,
+  });
+  return defined({
+    ...namedObject(data),
+    legacy: data.m_Legacy,
+    compressed: data.m_Compressed,
+    useHighQualityCurve: data.m_UseHighQualityCurve,
+    rotationCurves: data.m_RotationCurves.map((c: QuaternionCurve) => ({
+      curve: animationCurve(c.curve),
+      path: c.path,
+    })),
+    compressedRotationCurves: data.m_CompressedRotationCurves.map(
+      (c: CompressedAnimationCurve) => ({
+        path: c.m_Path,
+        times: packedInts(c.m_Times),
+        values: { numItems: c.m_Values.m_NumItems, data: c.m_Values.m_Data },
+        slopes: packedFloats(c.m_Slopes),
+        preInfinity: c.m_PreInfinity,
+        postInfinity: c.m_PostInfinity,
+      }),
+    ),
+    eulerCurves: data.m_EulerCurves.map(vector3Curve),
+    positionCurves: data.m_PositionCurves.map(vector3Curve),
+    scaleCurves: data.m_ScaleCurves.map(vector3Curve),
+    floatCurves: data.m_FloatCurves.map((c: FloatCurve) =>
+      defined({ ...c, curve: animationCurve(c.curve) }),
+    ),
+    pptrCurves: data.m_PPtrCurves,
+    sampleRate: data.m_SampleRate,
+    wrapMode: data.m_WrapMode,
+    bounds: aabb(data.m_Bounds),
+    muscleClipSize: data.m_MuscleClipSize,
+    muscleClip: clipMuscleConstant(data.m_MuscleClip),
+    clipBindingConstant: data.m_ClipBindingConstant,
+    hasGenericRootTransform: data.m_HasGenericRootTransform,
+    hasMotionFloatCurves: data.m_HasMotionFloatCurves,
+    events: data.m_Events,
+  });
+}
+
+function animationCurve<T>(curve: AnimationCurve<T>): AnimationCurveFields<T> {
+  return {
+    curve: curve.m_Curve,
+    preInfinity: curve.m_PreInfinity,
+    postInfinity: curve.m_PostInfinity,
+    rotationOrder: curve.m_RotationOrder,
+  };
+}
+
+function handPose(pose: HandPose): HandPoseFields {
+  return {
+    grabX: pose.m_GrabX,
+    doFArray: pose.m_DoFArray,
+    override: pose.m_Override,
+    closeOpen: pose.m_CloseOpen,
+    inOut: pose.m_InOut,
+    grab: pose.m_Grab,
+  };
+}
+
+function humanPose(pose: HumanPose): HumanPoseFields {
+  return {
+    rootX: pose.m_RootX,
+    lookAtPosition: pose.m_LookAtPosition,
+    lookAtWeight: pose.m_LookAtWeight,
+    goalArray: pose.m_GoalArray.map((goal) => ({
+      x: goal.m_X,
+      weightT: goal.m_WeightT,
+      weightR: goal.m_WeightR,
+      hintT: goal.m_HintT,
+      hintWeightT: goal.m_HintWeightT,
+    })),
+    leftHandPose: handPose(pose.m_LeftHandPose),
+    rightHandPose: handPose(pose.m_RightHandPose),
+    doFArray: pose.m_DoFArray,
+    tDoFArray: pose.m_TDoFArray,
+  };
+}
+
+function clipMuscleConstant(clip: ClipMuscleConstant): ClipMuscleConstantFields {
+  const { m_StreamedClip, m_DenseClip, m_ConstantClip } = clip.m_Clip.data;
+  return {
+    deltaPose: humanPose(clip.m_DeltaPose),
+    startX: clip.m_StartX,
+    stopX: clip.m_StopX,
+    leftFootStartX: clip.m_LeftFootStartX,
+    rightFootStartX: clip.m_RightFootStartX,
+    averageSpeed: clip.m_AverageSpeed,
+    clip: {
+      data: {
+        streamedClip: m_StreamedClip,
+        denseClip: {
+          frameCount: m_DenseClip.m_FrameCount,
+          curveCount: m_DenseClip.m_CurveCount,
+          sampleRate: m_DenseClip.m_SampleRate,
+          beginTime: m_DenseClip.m_BeginTime,
+          sampleArray: m_DenseClip.m_SampleArray,
+        },
+        constantClip: m_ConstantClip,
+      },
+    },
+    startTime: clip.m_StartTime,
+    stopTime: clip.m_StopTime,
+    orientationOffsetY: clip.m_OrientationOffsetY,
+    level: clip.m_Level,
+    cycleOffset: clip.m_CycleOffset,
+    averageAngularSpeed: clip.m_AverageAngularSpeed,
+    indexArray: clip.m_IndexArray,
+    valueArrayDelta: clip.m_ValueArrayDelta.map((d) => ({ start: d.m_Start, stop: d.m_Stop })),
+    valueArrayReferencePose: clip.m_ValueArrayReferencePose,
+    mirror: clip.m_Mirror,
+    loopTime: clip.m_LoopTime,
+    loopBlend: clip.m_LoopBlend,
+    loopBlendOrientation: clip.m_LoopBlendOrientation,
+    loopBlendPositionY: clip.m_LoopBlendPositionY,
+    loopBlendPositionXZ: clip.m_LoopBlendPositionXZ,
+    startAtOrigin: clip.m_StartAtOrigin,
+    keepOriginalOrientation: clip.m_KeepOriginalOrientation,
+    keepOriginalPositionY: clip.m_KeepOriginalPositionY,
+    keepOriginalPositionXZ: clip.m_KeepOriginalPositionXZ,
+    heightFromFeet: clip.m_HeightFromFeet,
   };
 }
 

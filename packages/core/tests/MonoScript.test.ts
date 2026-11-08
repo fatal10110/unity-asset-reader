@@ -74,8 +74,12 @@ for (const name of FIXTURES) {
       assert.deepEqual(env.objects.find((o) => o.pathId === reader.pathId)!.read(), script);
       // What the m_PropertiesHash JSDoc promises and a dump cannot show: it is
       // the oldTypeHash of the MonoBehaviour type whose object points here.
-      const hashes = goldenPropertiesHashes(name, reader.pathId);
-      assert.ok(hashes.includes(hex(script.m_PropertiesHash)), hashes.join(", "));
+      // The animation bundles' script (#302) has no MonoBehaviour: only clip
+      // curves name it.
+      if (!name.includes("/animation/")) {
+        const hashes = goldenPropertiesHashes(name, reader.pathId);
+        assert.ok(hashes.includes(hex(script.m_PropertiesHash)), hashes.join(", "));
+      }
 
       if (enableTypeTree) {
         const tree = reader.readTypeTree();

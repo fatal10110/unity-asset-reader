@@ -57,6 +57,7 @@ export type { GLTextureSettings, StreamingInfo, Texture2D } from "./classes/Text
 export { TextureFormat } from "./classes/TextureFormat.js";
 export type { ObjectData, ObjectDataMap, Texture2DData } from "./classes/registry.js";
 export {
+  toAnimationClipFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -78,7 +79,21 @@ export {
 } from "./classes/fields.js";
 export type {
   AABBFields,
+  AnimationClipFields,
   AnimationClipOverrideFields,
+  AnimationCurveFields,
+  ClipFields,
+  ClipMuscleConstantFields,
+  CompressedAnimationCurveFields,
+  DenseClipFields,
+  FloatCurveFields,
+  HandPoseFields,
+  HumanGoalFields,
+  HumanPoseFields,
+  PackedQuatVectorFields,
+  QuaternionCurveFields,
+  ValueDeltaFields,
+  Vector3CurveFields,
   AnimatorControllerFields,
   AnimatorFields,
   AnimatorOverrideControllerFields,
@@ -268,6 +283,28 @@ export type {
   ValueArrayConstant,
   ValueConstant,
 } from "./classes/animation.js";
+export { readAnimationClip } from "./classes/AnimationClip.js";
+export type {
+  AnimationClip,
+  AnimationClipBindingConstant,
+  AnimationCurve,
+  AnimationEvent,
+  Clip,
+  ClipMuscleConstant,
+  CompressedAnimationCurve,
+  ConstantClip,
+  DenseClip,
+  FloatCurve,
+  GenericBinding,
+  Keyframe,
+  PackedQuatVector,
+  PPtrCurve,
+  PPtrKeyframe,
+  QuaternionCurve,
+  StreamedClip,
+  ValueDelta,
+  Vector3Curve,
+} from "./classes/AnimationClip.js";
 export { readAnimator } from "./classes/Animator.js";
 export type { Animator } from "./classes/Animator.js";
 export { readAnimatorController } from "./classes/AnimatorController.js";

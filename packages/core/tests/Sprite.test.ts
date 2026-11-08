@@ -25,7 +25,7 @@ import {
   type SerializedFile,
   type UnityVersion,
 } from "../src/serialized/SerializedFile.js";
-import { fixturesWith, objectBytes, objectsOf, withTail } from "./class-readers.js";
+import { fixturesWith, objectBytes, objectsOf, typedTwin, withTail } from "./class-readers.js";
 
 const FIXTURES = fixturesWith(ClassID.Sprite);
 const READERS = [
@@ -88,22 +88,28 @@ function normalize(node: Node, value: unknown): unknown {
 for (const { classId, read } of READERS) {
   for (const name of fixturesWith(classId)) {
     test(`${name}: class ${classId} equals the golden dump and readTypeTree()`, () => {
-      const sf = Object.values(golden(name).serialized!)[0]!;
+      // A build without type trees (the animation bundles' sprites, #302) is
+      // compared with its typed twin's dump.
+      const sf = Object.values(golden(typedTwin(name)).serialized!)[0]!;
       const objects = objectsOf(name, classId);
       assert.ok(objects.length > 0);
-      for (const { env, reader, dump } of objects) {
+      for (const { env, reader, dump, enableTypeTree } of objects) {
         assert.ok(dump, `no golden dump for ${reader.pathId}`);
         const value = read(reader);
         assert.equal(reader.position, reader.byteSize, "byteSize not consumed exactly");
         // Every field, in Unity's order, with the oracle's values.
         const normalized = normalize(tree(sf, classId), value);
         assert.equal(JSON.stringify(normalized), JSON.stringify(dump));
+        // obj.read() goes through the registry to this reader.
+        assert.deepEqual(env.objects.find((o) => o.pathId === reader.pathId)!.read(), value);
+        if (!enableTypeTree) {
+          assert.equal(reader.serializedType?.nodes, null, "the file has a type tree after all");
+          continue;
+        }
         // The same object through its type tree, keys in the same order.
         const typed = reader.readTypeTree();
         assert.equal(JSON.stringify(normalize(tree(sf, classId), typed)), JSON.stringify(dump));
         assert.deepEqual(value, typed);
-        // obj.read() goes through the registry to this reader.
-        assert.deepEqual(env.objects.find((o) => o.pathId === reader.pathId)!.read(), value);
       }
     });
   }

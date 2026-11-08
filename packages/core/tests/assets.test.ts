@@ -35,6 +35,7 @@ const KNOWN = new Set([
   "AnimatorController",
   "Animator",
   "AnimatorOverrideController",
+  "AnimationClip",
 ]);
 
 /** Load a fixture as bare bytes, the way the usage block does. */

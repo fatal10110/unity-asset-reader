@@ -177,7 +177,7 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
       );
       assert.ok(o.fixture.includes("/6000.") || o.fixture.endsWith("/windows"), where);
     } else if (o.source === "modern-goldens.json") {
-      // c37af7d cannot read SerializedFile format 23 (6000.6) at all.
+      // c37af7d cannot read SerializedFile format 23's (6000.6) type trees.
       assert.match(exportError!, /^AssetStudio did not load the object: /, where);
     } else if (o.cls === "Mesh") {
       // fixtures/BUILDING.md section 20: ExportMesh leaves out the submesh's
@@ -218,8 +218,16 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259),
   // and both shaders of the shader-variants bundles of the same three (#283).
   assert.equal(exported("Shader"), 23);
-  assert.equal(exported("Texture2D"), 105);
-  assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
+  // And the animation bundles' two textures (#302) of 2019.4, 2020.3 and 6000.3.26f1, typed
+  // and not, and of 6000.6.4f1 without type trees: c37af7d fails on format 23's type trees,
+  // and reads a format-23 file without them.
+  assert.equal(exported("Texture2D"), 119);
+  assert.equal(
+    exported("Sprite"),
+    124,
+    "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite, and the animation bundles' two (#302) of " +
+      "2019.4, 2020.3 and 6000.3.26f1",
+  );
   assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
 });

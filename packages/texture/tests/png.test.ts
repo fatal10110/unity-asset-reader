@@ -295,6 +295,7 @@ test("every fixture Texture2D without an AssetStudio PNG has a known reason", ()
     }
     reasons.set(reason, (reasons.get(reason) ?? 0) + 1);
   }
-  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 29, "0x0": 9, R16_Alt: 5 });
-  assert.equal(exported.length + 29 + 9 + 5, textures.length);
+  // "format 23" holds two textures of 6000.6.4f1's animation bundles (#302).
+  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 31, "0x0": 9, R16_Alt: 5 });
+  assert.equal(exported.length + 31 + 9 + 5, textures.length);
 });

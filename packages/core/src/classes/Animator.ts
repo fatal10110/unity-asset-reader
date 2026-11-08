@@ -8,7 +8,7 @@ import { animationLayoutVersion, readBool } from "./animation.js";
 import { readEditorExtension, type EditorExtension } from "./EditorExtension.js";
 import { readPPtr, type PPtr } from "./PPtr.js";
 import { assumingLayout, endOfObject } from "./Sprite.js";
-import { atLeast } from "./version.js";
+import { atLeast, patchFrom } from "./version.js";
 
 /**
  * The fields of an `Animator` component, as a player build stores them,
@@ -120,9 +120,4 @@ function readAnimatorFields(reader: ObjectReader, version: UnityVersion, out: Pa
   }
   reader.align();
   endOfObject(reader, "Animator");
-}
-
-/** Whether the version is `major.minor.patch` or a later patch of that same `major.minor`. */
-function patchFrom(version: UnityVersion, major: number, minor: number, patch: number): boolean {
-  return version[0] === major && version[1] === minor && version[2] >= patch;
 }
