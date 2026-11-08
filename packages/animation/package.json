@@ -37,6 +37,7 @@
     "unity-asset-reader": "^1.3.0"
   },
   "devDependencies": {
+    "gltf-validator": "2.0.0-dev.3.10",
     "unity-asset-reader": "*"
   },
   "repository": {

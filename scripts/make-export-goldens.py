@@ -116,6 +116,19 @@ a blend shape curve animates (6000.3: c37af7d's Renderer reader lacks Unity
 6000's fields), AssetStudio leaves the attribute as its CRC-32 and the entry
 gets a `verdict`: unity-asset-reader-animation names it from the mesh.
 
+Scenes (#306): for the #305 scene bundles (MODEL_ROOTS), the harness also runs
+new ModelConverter(Animator, Options, clips) (AssetStudio.Utility) on the
+Animator of the GameObject `scene`, before any clip is exported (Convert()
+replaces a clip's curve lists). Options: game Normal, UV0 to UV7 on, no
+materials or textures (exportMaterials false). Twice: with no clip, for the
+frames, meshes (converted positions, bones and bind poses) and morphs; then
+with every AnimationClip of the Animator's file, for the keyframe tracks. The first call cannot fail on a clip: an euler binding reaches
+Fbx.EulerToQuaternion, the native FBX SDK, which the harness does not load
+(the scene clips have none). Every float is dumped as its float32 bits, to
+the golden's `models`: fixture -> SerializedFile -> the Animator's pathId.
+Where AssetStudio fails to read the file's renderers (6000.3), ModelConverter
+converts no mesh and the dump gets a `verdict`.
+
 Two kinds of Sprite get their golden and a `verdict`, where
 unity-asset-reader-texture's decodeSprite differs from GetImage() by design:
 one cut from a texture with an ETC1 split alpha texture (GetImage() never reads
@@ -195,6 +208,15 @@ ANIMATOR_VERDICT = ("c37af7d's Animator reader lacks m_AnimatePhysics, which Uni
                     "hierarchy of the Animator that plays the clip (UnityPy reads it true), "
                     "leaving each path as path_<hash>; unity-asset-reader-animation names them; "
                     "the golden is compared with each named path replaced by path_<CRC-32> (#315)")
+# The scene fixtures (#305) whose Animator ModelConverter converts (#306): the fixture
+# set (the third part of the key) -> the names of the GameObjects whose Animator it takes.
+MODEL_ROOTS = {"scene": ["scene"]}
+# What a ModelConverter dump records when AssetStudio could not read the file's renderers.
+MODEL_VERDICT = ("c37af7d's Renderer reader fails on this file's MeshRenderer and "
+                 "SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's "
+                 "unreadObjects), so ModelConverter converts no mesh: no bones, bind poses or "
+                 "morphs, and no blend shape track; the frames and transform tracks are "
+                 "compared, the skin and morphs with another editor's dump of the same mesh")
 # The output each class's entry holds.
 OUTPUTS = ["png", "obj", "wav", "bytes", "shader", "font", "video", "anim"]
 # AssetStudio ships FMOD with its GUI; the harness loads the x64 build from the
@@ -248,6 +270,9 @@ METHODS = {
               "variants in m_PlayerSubPrograms: " + COMPOSITE,
     "Font": "AssetStudio.CLI.Exporter.ExportFont(item, dir)",
     "VideoClip": "AssetStudio.CLI.Exporter.ExportVideoClip(item, dir)",
+    "ModelConverter": "new AssetStudio.ModelConverter(Animator, Options, clips): once with no "
+                      "clip (frames, meshes, bones, morphs), once with every AnimationClip of the "
+                      "Animator's file (keyframe tracks); floats as float32 bits",
     "AnimationClip": "AssetStudio.CLI.Exporter.ExportAnimationClip(item, dir), "
                      "AnimationClipExtensions.Convert(); the clip's curve lists and m_Events "
                      "dumped after it, floats as float32 bits",
@@ -730,6 +755,101 @@ public static class Program {
         }).ToList();
     }
 
+    // --- ModelConverter (#306): frames, skin, morphs and keyframe tracks, as float32 bits ---
+
+    static string Hex(IEnumerable<float> values) => string.Concat(values.Select(Bits));
+    static float[] V3(Vector3 v) => new[] { v.X, v.Y, v.Z };
+    static float[] V4(Vector4 v) => new[] { v.X, v.Y, v.Z, v.W };
+    static float[] Q(Quaternion q) => new[] { q.X, q.Y, q.Z, q.W };
+
+    // Keyframes as one hex string: per key its time, then the value's components.
+    static string Track<T>(List<ImportedKeyframe<T>> keys, Func<T, float[]> parts) =>
+        string.Concat(keys.Select(k => Bits(k.time) + Hex(parts(k.value))));
+
+    // The options the GUI's "Export Animator" passes, without materials or textures:
+    // ConvertMaterial returns before it reads them when exportMaterials is false.
+    static ModelConverter.Options ModelOptions(Game game) {
+        var uvs = new Dictionary<string, (bool, int)>();
+        for (var i = 0; i < 8; i++) uvs["UV" + i] = (true, 0);
+        return new ModelConverter.Options {
+            imageFormat = ImageFormat.Png, game = game, collectAnimations = false,
+            exportMaterials = false, materials = new HashSet<Material>(), uvs = uvs,
+            texs = new Dictionary<string, int>(),
+        };
+    }
+
+    // The frame tree, depth first, each frame by its names joined with "/".
+    static void Frames(ImportedFrame frame, string parent, List<object> list) {
+        var path = parent == null ? frame.Name : parent + "/" + frame.Name;
+        list.Add(new Dictionary<string, object> {
+            ["path"] = path, ["translation"] = Hex(V3(frame.LocalPosition)),
+            ["rotation"] = Hex(Q(frame.LocalRotation)), ["scale"] = Hex(V3(frame.LocalScale)),
+        });
+        for (var i = 0; i < frame.Count; i++) Frames(frame[i], path, list);
+    }
+
+    // What new ModelConverter(Animator, Options, clips) converts, twice: with no clip
+    // (frames, meshes, morphs; a clip with an euler binding would stop the constructor at
+    // the native Fbx.EulerToQuaternion), then with every clip of its file.
+    static void DumpModel(Animator animator, Game game, Dictionary<string, object> model) {
+        var options = ModelOptions(game);
+        var scene = new ModelConverter(animator, options, new AnimationClip[0]);
+        var frames = new List<object>();
+        Frames(scene.RootFrame, null, frames);
+        model["frames"] = frames;
+        model["meshes"] = scene.MeshList.Select(m => new Dictionary<string, object> {
+            ["path"] = m.Path, ["vertexCount"] = m.VertexList.Count,
+            // Positions as converted, -x: a morph vertex below is one of these plus its delta.
+            ["vertices"] = Hex(m.VertexList.SelectMany(v => V3(v.Vertex))),
+            ["bones"] = (m.BoneList ?? new List<ImportedBone>()).Select(b => new Dictionary<string, object> {
+                ["path"] = b.Path,
+                // In the order Matrix4x4(float[]) reads them: Unity's e00 e01 e02 e03 e10 ...
+                ["matrix"] = Hex(new[] {
+                    b.Matrix.M00, b.Matrix.M10, b.Matrix.M20, b.Matrix.M30,
+                    b.Matrix.M01, b.Matrix.M11, b.Matrix.M21, b.Matrix.M31,
+                    b.Matrix.M02, b.Matrix.M12, b.Matrix.M22, b.Matrix.M32,
+                    b.Matrix.M03, b.Matrix.M13, b.Matrix.M23, b.Matrix.M33 }),
+            }).ToList(),
+        }).ToList();
+        model["morphs"] = scene.MorphList.Select(morph => new Dictionary<string, object> {
+            ["path"] = morph.Path,
+            ["channels"] = morph.Channels.Select(c => new Dictionary<string, object> {
+                ["name"] = c.Name,
+                ["keyframes"] = c.KeyframeList.Select(k => new Dictionary<string, object> {
+                    ["weight"] = Bits(k.Weight), ["hasNormals"] = k.hasNormals, ["hasTangents"] = k.hasTangents,
+                    // Per vertex: its index (8 hex digits), position, normal and tangent.
+                    ["vertices"] = string.Concat(k.VertexList.Select(v => v.Index.ToString("x8")
+                        + Hex(V3(v.Vertex.Vertex)) + Hex(V3(v.Vertex.Normal)) + Hex(V4(v.Vertex.Tangent)))),
+                }).ToList(),
+            }).ToList(),
+        }).ToList();
+        // Every clip of the Animator's file, in file order, as the tests export the scene
+        // (on Unity 6000 c37af7d finds none through the AnimatorController's list).
+        var clips = animator.assetsFile.Objects.OfType<AnimationClip>().ToList();
+        model["clips"] = clips.Select(c => c.m_Name).ToList();
+        ModelConverter animated;
+        try {
+            animated = new ModelConverter(animator, options, clips.ToArray());
+        } catch (Exception error) {
+            // Kept apart: the frames, meshes and morphs above stand without the clips.
+            model["animationsError"] = error.GetType().Name + ": " + error.Message;
+            return;
+        }
+        model["animations"] = animated.AnimationList.Select(a => new Dictionary<string, object> {
+            ["name"] = a.Name, ["sampleRate"] = Bits(a.SampleRate),
+            ["tracks"] = a.TrackList.Select(t => new Dictionary<string, object> {
+                ["path"] = t.Path,
+                ["translations"] = Track(t.Translations, V3),
+                ["rotations"] = Track(t.Rotations, Q),
+                ["scalings"] = Track(t.Scalings, V3),
+                ["blendShape"] = t.BlendShape == null ? null : new Dictionary<string, object> {
+                    ["channel"] = t.BlendShape.ChannelName,
+                    ["keys"] = Track(t.BlendShape.Keyframes, f => new[] { f }),
+                },
+            }).ToList(),
+        }).ToList();
+    }
+
     // An exporter that writes one file as is: its size, hash and extension.
     static void ExportFile(Dictionary<string, object> result, string method, string output, string outDir,
             Func<bool> export) {
@@ -776,6 +896,7 @@ public static class Program {
             composite[int.Parse(c.Name, CultureInfo.InvariantCulture)] = c.Value;
         }
         var results = new List<Dictionary<string, object>>();
+        var models = new List<Dictionary<string, object>>();
         foreach (var job in JsonDocument.Parse(File.ReadAllText(args[0])).RootElement.EnumerateArray()) {
             var manager = new AssetsManager { Game = game };
             logger.Errors.Clear();
@@ -785,6 +906,35 @@ public static class Program {
             // version every other file already records.
             if (!string.IsNullOrEmpty(editor)) manager.SpecifyUnityVersion = editor;
             manager.LoadFiles(job.GetProperty("input").GetString());
+            // ModelConverter first (#306), on the clips as read: ExportAnimationClip's
+            // Convert() below replaces their curve lists.
+            if (!dump && job.TryGetProperty("models", out var roots)) {
+                var names = roots.EnumerateArray().Select(r => r.GetString()).ToHashSet();
+                foreach (var assetsFile in manager.assetsFileList) {
+                    foreach (var animator in assetsFile.Objects.OfType<Animator>()) {
+                        if (!animator.m_GameObject.TryGet(out var root) || !names.Contains(root.m_Name)) continue;
+                        var model = new Dictionary<string, object> {
+                            ["fixture"] = job.GetProperty("key").GetString(), ["file"] = assetsFile.fileName,
+                            ["pathId"] = animator.m_PathID.ToString(CultureInfo.InvariantCulture), ["root"] = root.m_Name,
+                        };
+                        try {
+                            DumpModel(animator, game, model);
+                        } catch (Exception error) {
+                            model["exportError"] = error.GetType().Name + ": " + error.Message;
+                        }
+                        // What AssetStudio failed to read in the file: ModelConverter
+                        // converts the renderers it did read.
+                        var unreadModel = new SortedDictionary<string, int>(StringComparer.Ordinal);
+                        foreach (var info in assetsFile.m_Objects) {
+                            if (assetsFile.ObjectsDic.ContainsKey(info.m_PathID)) continue;
+                            var cls = ((ClassIDType)info.classID).ToString();
+                            unreadModel[cls] = unreadModel.GetValueOrDefault(cls) + 1;
+                        }
+                        if (unreadModel.Count > 0) model["unreadObjects"] = unreadModel;
+                        models.Add(model);
+                    }
+                }
+            }
             foreach (var want in job.GetProperty("objects").EnumerateArray()) {
                 var fileName = want.GetProperty("file").GetString();
                 var pathId = long.Parse(want.GetProperty("pathId").GetString(), CultureInfo.InvariantCulture);
@@ -998,6 +1148,7 @@ public static class Program {
             manager.Clear();
         }
         File.WriteAllText(args[1], JsonSerializer.Serialize(results));
+        File.WriteAllText(args[5], JsonSerializer.Serialize(models));
         return 0;
     }
 }
@@ -1411,26 +1562,32 @@ def main() -> None:
                     "--player-programs", str(project / "runs" / "player-requests.json"),
                     str(composite)], check=True)
 
-    def run(name: str, mode: str = "export") -> dict[int, dict]:
+    def run(name: str, mode: str = "export") -> tuple[dict[int, dict], list[dict]]:
         """One harness process over every job, exporting into runs/<name>/<index>/."""
-        manifest = [{"input": host.path(bundle), "editor": editor_of(key), "objects": [
+        manifest = [{"input": host.path(bundle), "editor": editor_of(key), "key": key, "objects": [
             {"index": i, "file": flat[i]["file"], "pathId": flat[i]["pathId"],
-             "output": host.path(project / "runs" / name / str(i))} for i in indices]}
+             "output": host.path(project / "runs" / name / str(i))} for i in indices],
+            **({"models": MODEL_ROOTS[key.split("/")[2]]}
+               if len(key.split("/")) > 2 and key.split("/")[2] in MODEL_ROOTS else {})}
             for key, bundle, indices in bundles]
         jobs_file = project / "runs" / f"{name}.json"
         results_file = project / "runs" / f"{name}-results.json"
+        models_file = project / "runs" / f"{name}-models.json"
         jobs_file.parent.mkdir(parents=True, exist_ok=True)
         jobs_file.write_text(json.dumps(manifest, indent=1))
         host.run(str(exe), host.path(jobs_file), host.path(results_file), mode,
-                 host.path(stages), host.path(composite))
-        return {r.pop("index"): r for r in json.loads(results_file.read_text())}
+                 host.path(stages), host.path(composite), host.path(models_file))
+        return ({r.pop("index"): r for r in json.loads(results_file.read_text())},
+                json.loads(models_file.read_text()))
 
     # The Vulkan stages first: smol-v decodes them between the two harness runs.
-    dumped = run("dump", "dump")
+    dumped, _ = run("dump", "dump")
     stage_goldens = decode_stages(smolv_exe, stages, dumped)
 
     # Two runs: an export that differs between them is no golden.
-    results, again = run("a"), run("b")
+    (results, models), (again, models_again) = run("a"), run("b")
+    if models != models_again:
+        raise SystemExit("nondeterministic: ModelConverter's output differs between two runs")
     for index, result in results.items():
         if result != again.get(index):
             for output in OUTPUTS:
@@ -1518,6 +1675,21 @@ def main() -> None:
         status = result.get("exportError") or next(k for k in OUTPUTS if k in result)
         print(f"  {where:<90} {entry['class']:<10} {status}")
 
+    # fixture -> SerializedFile -> the Animator's pathId -> what ModelConverter converted (#306).
+    model_goldens: dict = {}
+    for model in models:
+        key, file, path_id = model.pop("fixture"), model.pop("file"), model.pop("pathId")
+        if "exportError" not in model and not model["frames"]:
+            raise SystemExit(f"{key} {file} {path_id}: ModelConverter converted no frame")
+        if "SkinnedMeshRenderer" in model.get("unreadObjects", {}):
+            model["verdict"] = MODEL_VERDICT
+        model_goldens.setdefault(key, {}).setdefault(file, {})[path_id] = model
+        status = model.get("exportError") or (f"{len(model['frames'])} frames, "
+                                               f"{len(model['meshes'])} meshes, " + (
+                                                   model.get("animationsError")
+                                                   or f"{len(model['animations'])} animations"))
+        print(f"  {key + ' ' + file + ' ' + path_id:<90} ModelConverter {status}")
+
     golden = {
         "_oracle": f"AssetStudio {REVISION[:7]} (Razviar/assetstudio), executed; Vulkan "
                    f"stages of SMOL-V encoding version 1: aras-p/smol-v {SMOLV_REVISION[:7]} "
@@ -1546,6 +1718,7 @@ def main() -> None:
         "fmod": {"path": FMOD, "sha256": FMOD_SHA256},
         "nugetSource": NUGET_SOURCE,
         "packageSha512": PACKAGE_SHA512,
+        "models": model_goldens,
         "fixtures": fixtures,
     }
     OUTPUT.write_text(json.dumps(golden, indent=2) + "\n")

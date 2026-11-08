@@ -134,6 +134,34 @@ function avatarTOS(scene: Scene, avatar: ObjectReader): Map<number, string> {
 }
 
 /**
+ * A GameObject's children, in `m_Children` order: each child Transform that
+ * loads, with its GameObject. Shared by {@link buildTOS} and the glTF scene
+ * export, so both walk the same hierarchy.
+ *
+ * @throws {Error} when the GameObject has no Transform, where upstream throws
+ *   `NullReferenceException`
+ */
+export function children(
+  scene: Scene,
+  go: ObjectReader,
+): { go: ObjectReader; transform: ObjectReader }[] {
+  const transform = scene.component(go, CLASS.Transform);
+  if (!transform) throw new Error(`GameObject ${go.pathId} has no Transform`);
+  const found: { go: ObjectReader; transform: ObjectReader }[] = [];
+  for (const childPtr of scene.read<Transform>(transform).m_Children) {
+    const childTransform = scene.tryGet(childPtr, transform, CLASS.Transform);
+    if (!childTransform) continue;
+    const child = scene.tryGet(
+      scene.read<Transform>(childTransform).m_GameObject,
+      childTransform,
+      CLASS.GameObject,
+    );
+    if (child) found.push({ go: child, transform: childTransform });
+  }
+  return found;
+}
+
+/**
  * The paths of a GameObject's hierarchy by their CRC-32 (upstream
  * `BuildTOS(GameObject)`): each child, by `m_Children`, as the names from the
  * GameObject down joined with `/`, the GameObject itself `""` at 0. A UI
@@ -145,17 +173,7 @@ function avatarTOS(scene: Scene, avatar: ObjectReader): Map<number, string> {
 export function buildTOS(scene: Scene, go: ObjectReader): Map<number, string> {
   const tos = new Map<number, string>([[0, ""]]);
   const walk = (parent: ObjectReader, parentPath: string) => {
-    const transform = scene.component(parent, CLASS.Transform);
-    if (!transform) throw new Error(`GameObject ${parent.pathId} has no Transform`);
-    for (const childPtr of scene.read<Transform>(transform).m_Children) {
-      const childTransform = scene.tryGet(childPtr, transform, CLASS.Transform);
-      if (!childTransform) continue;
-      const child = scene.tryGet(
-        scene.read<Transform>(childTransform).m_GameObject,
-        childTransform,
-        CLASS.GameObject,
-      );
-      if (!child) continue;
+    for (const { go: child } of children(scene, parent)) {
       const name = scene.read<GameObject>(child).m_Name;
       const path = parentPath !== "" ? `${parentPath}/${name}` : name;
       tos.set(crc32(path), path);
