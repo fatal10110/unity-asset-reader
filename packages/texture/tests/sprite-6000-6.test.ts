@@ -64,7 +64,10 @@ const wasmTest = (name: string, fn: () => Promise<void>) => test(name, { skip },
 
 const FIXTURE = "editor/6000.6.4f1/sprite/sprites";
 const VARIANT = "editor/6000.6.4f1/variant/sprites";
-/** Atlas V2 builds of the same sprites: their atlases are DXT5, so their pixels need the WASM. */
+/**
+ * Atlas V2 builds of the same sprites, packed with the importer defaults (BUILDING.md section 13,
+ * #292): their atlases are DXT5, so their pixels need the WASM.
+ */
 const V2 = ["editor/6000.6.4f1/sprite-v2/sprites", "editor/6000.6.4f1/sprite-v2-rect/sprites"];
 const ALL = [FIXTURE, VARIANT, ...V2];
 
@@ -303,7 +306,8 @@ test("the V2 atlases' masks are those of the same sprites in the V1 build, flips
   let compared = 0;
   for (const p of PACKED.filter((x) => V2.includes(x.fixture))) {
     const what = `${p.fixture} ${p.golden.name}`;
-    // Every V2 packed sprite is tight-packed: the mask applies.
+    // Every V2 packed sprite is tight-packed, sprite-v2-rect's too (its builder's rectangle
+    // request never reached Unity, #292): the mask applies.
     assert.equal((p.golden.settingsRaw >> 1) & 1, 0, what);
     const mask = maskOf(p);
     if (p.golden.name === "r_b") {
