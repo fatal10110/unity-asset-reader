@@ -47,8 +47,10 @@ interface AssetOf<T extends AssetType, D> {
    * AssetStudio's `Shader.Name` formula: Unity leaves its `m_Name` empty.
    * That reads the whole object; a Shader its reader refuses or cannot fit
    * (before Unity 2019.1, a stripped file outside format 21, an editor file,
-   * a layout past 6000.6) keeps its `m_Name`, usually `""`. Read on first
-   * access and kept.
+   * a layout past 6000.6) keeps its `m_Name`, usually `""`. Without a type
+   * tree a `GameObject` is named from its header, and `""` where its reader
+   * refuses it (the same versions and editor files). Read on first access
+   * and kept.
    */
   readonly name: string;
   /**
@@ -102,7 +104,8 @@ export type Asset<T extends AssetType = AssetType> = T extends KnownAssetType
  * Classes whose data starts with the `NamedObject` header, so `m_Name` can be
  * read without a type tree: those AssetStudio derives from `NamedObject`
  * (its `Classes/`), and `AssetBundleManifest`, whose type tree starts with
- * `m_Name` too. Any other class without a type tree is named `""`.
+ * `m_Name` too. `readName` says how the other classes are named without a
+ * type tree.
  */
 const NAMED_CLASSES: ReadonlySet<number> = new Set([
   ClassID.AnimationClip,
@@ -185,7 +188,8 @@ export function makeAsset(
 /**
  * `m_Name` as cheaply as the object allows: through the type tree as far as
  * `m_Name`; without one, the `NamedObject` header, a `MonoBehaviour`'s or a
- * `GameObject`'s header; otherwise `""`. A `Shader` is named by its parsed form.
+ * `GameObject`'s header (`""` for a GameObject its reader refuses); otherwise
+ * `""`. A `Shader` is named by its parsed form.
  */
 function readName(reader: ObjectReader): string {
   if (reader.type === ClassID.Shader) {
@@ -203,7 +207,16 @@ function readName(reader: ObjectReader): string {
   if (nodes && nodes.length > 0) return readTypeTreeName(reader) ?? "";
   if (NAMED_CLASSES.has(reader.type)) return readNamedObject(reader).m_Name;
   if (reader.type === ClassID.MonoBehaviour) return readMonoBehaviour(reader).m_Name;
-  if (reader.type === ClassID.GameObject) return readGameObjectName(reader);
+  if (reader.type === ClassID.GameObject) {
+    // A GameObject the reader refuses (before Unity 2019.1, an unknown version
+    // outside formats 18-21 or whose header does not fit 2019's, an editor
+    // file) is named "", as before #308; a corrupt one still throws.
+    try {
+      return readGameObjectName(reader);
+    } catch (error) {
+      if (!(error instanceof UnsupportedError)) throw error;
+    }
+  }
   return "";
 }
 

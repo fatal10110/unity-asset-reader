@@ -242,8 +242,10 @@ export interface Env {
    * - `name` reads the type tree only as far as `m_Name`. Without a type tree
    *   it reads the `NamedObject` header of the asset classes (every class with
    *   a hardcoded reader, `Mesh`, `AnimationClip`, `AssetBundleManifest`, ...)
-   *   or a `MonoBehaviour`'s header, and is `""` for any other class (a
-   *   `GameObject`, a `Transform`). A `Shader`'s name is its parsed form's, so
+   *   or a `MonoBehaviour`'s or a `GameObject`'s header, and is `""` for any
+   *   other class (a `Transform`) and for a `GameObject` its reader refuses
+   *   (before Unity 2019.1, an unknown version it cannot fit, an editor
+   *   file). A `Shader`'s name is its parsed form's, so
    *   it reads the whole object with `readShader`: about 0.2 ms for the
    *   largest fixture shader's 28 KB parsed form, growing with its size, so
    *   milliseconds for a large game shader, and `data` reads it again. A
