@@ -29,8 +29,9 @@ installs `texture2ddecoder-wasm` automatically.
 
 - **[Core](packages/core/README.md):** unpack bundles, list assets, and read their data.
   Use `load(bytes)` for bytes you already have or `await open(url)` to fetch a file.
-  It does not decode textures to pixels or audio to WAV, does not export meshes, and does
-  not read the disk; it throws `UnsupportedError` on a compression, container or Unity
+  Its `GltfWriter` writes binary glTF 2.0 files from data you give it (meshes, nodes, skins,
+  morph targets, animations). It does not decode textures to pixels or audio to WAV, does
+  not convert Unity meshes, and does not read the disk; it throws `UnsupportedError` on a compression, container or Unity
   version it does not read.
 - **[Textures](packages/texture/README.md):** convert `Texture2D` and `Sprite` assets to
   RGBA pixels with `await decodeImage(asset)`. It does not decode mip levels past the first,
@@ -40,7 +41,8 @@ installs `texture2ddecoder-wasm` automatically.
   split bundles and resource sidecars. It does not run in browsers, does not stream (each file
   is read whole), and does not look up dependency bundles itself: pass them, or their folder.
 - **[Meshes](packages/mesh/README.md):** write a `Mesh` as Wavefront OBJ text with
-  `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`.
+  `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`
+  (built on core's `GltfWriter`).
   It does not export materials, bones, blend shapes or UV channels past the first.
 - **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
   `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound; Vorbis sound to Ogg with

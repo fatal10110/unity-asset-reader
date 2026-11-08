@@ -395,7 +395,8 @@ Each of these throws `UnsupportedError` naming what it found:
   (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
   `baseVertex` takes an index past the vertices throws `CorruptError`.
 
-Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
+Out of scope for this package: decoding audio or video; converting meshes to OBJ or glTF (the
+[glTF writer](#gltf-writer) here only writes what it is given); writing or repacking bundles;
 image encoding. Texture and sprite pixels, and PNG encoding, are in
 [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md).
 
@@ -510,8 +511,26 @@ For tools that work below `load()`:
 | `SerializedFileFormatVersion`, `BuildTarget` | Format version and target platform constants |
 | `decompressLz4`, `lzmaDecompress`, `gunzip`, `unzlib` | The block decompressors, each checking its output size |
 | `formatSingle(value)`, `formatSingleInvariant(value)` | Write a float32 as .NET 8's `float.ToString()` does, under en-US and invariant culture |
+| `GltfWriter` | Build a binary glTF 2.0 file (`.glb`); see [glTF writer](#gltf-writer) |
 | `BinaryReader`, `Endian` | Bounds-checked reader over a `Uint8Array`, little- or big-endian |
 | `UnsupportedError`, `CorruptError`, `ResourceNotFoundError` | See [Errors](#errors) |
+
+### glTF writer
+
+The building blocks of a binary glTF 2.0 file (`.glb`), for the feature packages that export
+models (`meshToGltf()` in
+[`unity-asset-reader-mesh`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/mesh/README.md)
+is built on it). It follows the glTF 2.0 specification and knows nothing about Unity: what goes
+in, and how Unity's left-handed space is converted, is the caller's choice. Sync, no dependency.
+
+| Export | What |
+|---|---|
+| `GltfWriter` | `new GltfWriter(generator)`, then `addAccessor()`, `addMesh()`, `addSkin()`, `addNode()`, `addAnimation()` and `addScene()`, each returning the index the others refer to it by; `toGlb()` checks the references and the spec's counting rules (`UnsupportedError`) and returns the file's bytes |
+| `GltfAccessor`, `GltfComponentArray`, `GltfAccessorType` | One accessor: a typed array (its class picks the component type), `SCALAR` to `MAT4`, the buffer view's `target`, `normalized`, and `bounds` for the `min` and `max` glTF requires of `POSITION` and animation inputs |
+| `GltfMesh`, `GltfPrimitive` | A mesh of triangle primitives: attributes, indices, morph targets (`POSITION`, `NORMAL`, `TANGENT` deltas) and default `weights` |
+| `GltfNode` | A node: `mesh`, `skin`, `children`, `translation`, `rotation`, `scale`, `weights` |
+| `GltfSkin` | `joints` and their `inverseBindMatrices`, for meshes with `JOINTS_0` and `WEIGHTS_0` |
+| `GltfAnimation`, `GltfAnimationChannel`, `GltfAnimationSampler` | Channels targeting a node's `translation`, `rotation`, `scale` or `weights`, sampled `LINEAR`, `STEP` or `CUBICSPLINE` |
 
 ## Acknowledgements
 
