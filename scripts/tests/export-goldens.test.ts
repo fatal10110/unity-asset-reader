@@ -258,10 +258,11 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(
     exported("AnimationClip"),
-    116,
+    119,
     "the 17 clips of the animation, animator and scene bundles and the 2 of the legacy-animation " +
       "bundles (#314) of 2019.4, 2020.3 and 6000.3, typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
-      "whose bindings c37af7d misreads harmlessly (none, or one Transform binding)",
+      "whose bindings c37af7d misreads harmlessly (none, or one Transform binding); the " +
+      "humanoid bundles' pose clip of the same three editors (#318)",
   );
 });
 

@@ -40,7 +40,8 @@ const has = (kind: keyof GoldenAnim["curves"], pick = (_: GoldenAnim) => true) =
 
 test("every AnimationClip AssetStudio exports converts to the curves and events of its .anim", () => {
   // Every clip of 2019.4, 2020.3 and 6000.3, typed and not; two of 6000.6 (BUILDING.md, 17).
-  assert.equal(clips.length, 116);
+  // And the three typed `pose` clips of the humanoid oracle's bundles (BUILDING.md, 28).
+  assert.equal(clips.length, 119);
   for (const c of clips) {
     const env = fixtureEnv(c.fixture);
     const curves = clipCurves(env, objectOf(env, c.file, c.pathId));
