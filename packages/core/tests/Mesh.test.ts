@@ -22,6 +22,7 @@ import type { UnityVersion } from "../src/serialized/SerializedFile.js";
 import type { TypeTreeNode } from "../src/serialized/TypeTree.js";
 import { fixturesWith, objectBytes, typedTwin } from "./class-readers.js";
 import { build, readerOf, template, versionRefusal, withTail, type Writer } from "./media.js";
+import { serializedOf, tpkReader, treeAt } from "./tpk-layouts.js";
 
 const f = Math.fround;
 const loadName = (name: string): Env => load([{ name, data: loadFixture(name) }]);
@@ -38,6 +39,15 @@ function withNumberOffset(tree: Record<string, unknown>): Record<string, unknown
 
 const FIXTURES = fixturesWith(ClassID.Mesh);
 
+/** A fixture Mesh's own bytes read through the TPK tree of its version. */
+function tpkTree(name: string, reader: ObjectReader): unknown {
+  const { sf, bytes } = serializedOf(name);
+  const from = { sf, info: sf.objects.find((o) => o.pathId === reader.pathId)! };
+  const version = { unity: reader.version, text: reader.unityVersion };
+  return tpkReader(from, bytes(reader.pathId), treeAt(ClassID.Mesh, reader.version), version)
+    .readTypeTree();
+}
+
 test("the fixtures hold 41 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", () => {
   const count = FIXTURES.flatMap((name) =>
     Object.values(golden(name).objects).flatMap((objs) =>
@@ -48,8 +58,9 @@ test("the fixtures hold 41 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", ()
   // compressed, typed only (fixtures/BUILDING.md section 20; #253, #257);
   // skinned, typed and not, and skinned-compressed, typed only and not from
   // 2020.3 (#285, MeshSkinned.test.ts); the scene bundles' skinned mesh,
-  // typed and not (#305, section 24).
-  assert.equal(count, 12 + 3 * 2 * 2 + 3 + 3 * 2 + 2 + 3 * 2);
+  // typed and not (#305, section 24); the legacy-animation bundles' blend
+  // shape quad, typed and not (#314, section 25).
+  assert.equal(count, 12 + 3 * 2 * 2 + 3 + 3 * 2 + 2 + 3 * 2 + 3 * 2);
   for (const editor of ["2019.4.41f2", "2020.3.30f1", "6000.3.25f1"]) {
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4/main`), editor);
     assert.ok(FIXTURES.includes(`editor/${editor}/lz4-notypetree/main`), editor);
@@ -64,15 +75,21 @@ test("the fixtures hold 41 Meshes: 2019.4, 2020.3 and 6000.3, typed and not", ()
 for (const name of FIXTURES) {
   test(`${name}: readMesh() equals readTypeTree() of the same object`, () => {
     // A build without type trees holds the same object, under the same path
-    // id, as its typed twin.
+    // id, as its typed twin; but for the legacy-animation quad (#314), whose
+    // vertex streams 2019.4 and 2020.3 lay out differently in the two builds:
+    // its bytes are read through Unity's own tree of the version (TPK).
     const twin = loadName(typedTwin(name));
+    const ownBytes = name.includes("/legacy-animation/lz4-notypetree/");
     const meshes = loadName(name).objects.filter((o) => o.type === ClassID.Mesh);
     assert.equal(meshes.length, name.endsWith("/mesh") ? 2 : 1);
     for (const reader of meshes) {
       const mesh = readMesh(reader);
       assert.equal(reader.position, reader.byteSize, "byteSize not consumed exactly");
       const typed = twin.objects.find((o) => o.pathId === reader.pathId)!;
-      const tree = typed.readTypeTree() as Record<string, unknown>;
+      const tree = (ownBytes ? tpkTree(name, reader) : typed.readTypeTree()) as Record<
+        string,
+        unknown
+      >;
       // From 2020.1 the type tree reads the offset as UInt64, a bigint (D9).
       const offset = (tree.m_StreamData as { offset: unknown }).offset;
       assert.equal(typeof offset, atLeast(reader.version, 2020, 1) ? "bigint" : "number");

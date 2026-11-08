@@ -58,6 +58,7 @@ export { TextureFormat } from "./classes/TextureFormat.js";
 export type { ObjectData, ObjectDataMap, Texture2DData } from "./classes/registry.js";
 export {
   toAnimationClipFields,
+  toAnimationFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -99,6 +100,7 @@ export type {
   QuaternionCurveFields,
   ValueDeltaFields,
   Vector3CurveFields,
+  AnimationFields,
   AnimatorControllerFields,
   AnimatorFields,
   AnimatorOverrideControllerFields,
@@ -316,6 +318,8 @@ export type {
   ValueDelta,
   Vector3Curve,
 } from "./classes/AnimationClip.js";
+export { readAnimation } from "./classes/AnimationComponent.js";
+export type { Animation } from "./classes/AnimationComponent.js";
 export { readAnimator } from "./classes/Animator.js";
 export type { Animator } from "./classes/Animator.js";
 export { readAnimatorController } from "./classes/AnimatorController.js";
