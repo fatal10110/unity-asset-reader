@@ -44,7 +44,9 @@ clip's table), and what reading the objects throws.
 `sceneToGltf(env, root, { clips })` writes the scene of `root` (a GameObject, or an Animator for
 its GameObject) as a `.glb` (`Uint8Array`), animated by `clips` (`SceneToGltfOptions.clips`:
 AnimationClip readers, each read with `clipCurves()`); see [glTF scene export](#gltf-scene-export).
-It throws `UnsupportedError` for a skin glTF cannot hold (bones not one per bind pose, or outside
+It throws `UnsupportedError` for an optimized hierarchy (the Animator's `m_HasTransformHierarchy`
+false, or a skinned renderer with bind poses but no `m_Bones`; upstream rebuilds those from the
+Avatar and `m_BoneNameHashes`), a skin glTF cannot hold (bones not one per bind pose, or outside
 the hierarchy) or a mesh without positions or triangles, `CorruptError` for indices past the data.
 
 ```js
@@ -100,10 +102,12 @@ negated, rotations y and z, bind poses are mirrored on both sides, triangles rev
 
 - Nodes: the root's ancestors and its hierarchy, each GameObject's local position, rotation and
   scale. Inactive GameObjects are written too.
-- Meshes: each SkinnedMeshRenderer's mesh, and each MeshRenderer's MeshFilter mesh, with
+- Meshes: each SkinnedMeshRenderer's mesh, and each MeshRenderer's MeshFilter mesh, from the root
+  down (the ancestors' renderers are left out, as upstream does), with
   `POSITION`, `NORMAL` and `TEXCOORD_0`; no materials, tangents, colours or other UV channels.
 - Skins: joints from the renderer's `m_Bones`, in order, inverse bind matrices from the mesh's
-  bind poses, `JOINTS_0` and `WEIGHTS_0` from its bone weights.
+  bind poses, `JOINTS_0` and `WEIGHTS_0` from its bone weights. A renderer without bones writes
+  its mesh unskinned when the mesh has no bind poses, and throws when it has some.
 - Blend shapes: a morph target per channel, from its last (full weight) frame; glTF has no
   in-between frames. Weights are Unity's over that full weight, so 1 is the full shape.
 - Animations: `translation`, `rotation`, `scale` and blend shape `weights` channels, each a

@@ -155,15 +155,17 @@ export interface SceneToGltfOptions {
  *   each named after its GameObject with its local position, rotation and
  *   scale. Inactive GameObjects are written too; glTF has no visibility.
  * - Meshes: a SkinnedMeshRenderer's mesh, or a MeshRenderer's MeshFilter
- *   mesh, on the GameObject's node: `POSITION`, `NORMAL` (left out when a
+ *   mesh, on the GameObject's node in the root's hierarchy (not on the
+ *   ancestors, as upstream converts renderers from the root down): `POSITION`, `NORMAL` (left out when a
  *   normal is not unit length), `TEXCOORD_0`, a primitive per submesh with
  *   triangles. No materials, tangents, colours or other UV channels.
  * - Skins: a SkinnedMeshRenderer with `m_Bones` gets a skin whose joints are
  *   the bones' nodes, in `m_Bones` order (the order of the vertices' bone
  *   indices), and whose inverse bind matrices are the mesh's `m_BindPose`;
  *   `JOINTS_0` and `WEIGHTS_0` from the mesh's bone weights. A renderer
- *   without bones writes its mesh unskinned (upstream's fallback to
- *   `m_BoneNameHashes` is not taken).
+ *   without bones writes its mesh unskinned when the mesh has no bind poses;
+ *   with bind poses (upstream finds the bones by `m_BoneNameHashes`, an
+ *   optimized rig) it throws `UnsupportedError`.
  * - Blend shapes: a morph target per channel, the deltas of its last frame
  *   (glTF has no in-between frames, so a channel's earlier frames are
  *   dropped); the node's weights are the renderer's `m_BlendShapeWeights`
@@ -191,8 +193,10 @@ export interface SceneToGltfOptions {
  * @param options the clips to animate it with
  * @returns the `.glb` file's bytes
  * @throws {TypeError} when `root` is neither, or a clip is not an AnimationClip
- * @throws {UnsupportedError} when a skin's bones are not one per bind pose or
- *   not nodes of the hierarchy, a skinned mesh lacks bone weights, or a mesh
+ * @throws {UnsupportedError} when the root's Animator has an optimized
+ *   hierarchy (`m_HasTransformHierarchy` false), a skin's bones are not one
+ *   per bind pose or not nodes of the hierarchy, a skinned renderer has bind
+ *   poses but no `m_Bones`, a skinned mesh lacks bone weights, or a mesh
  *   has no positions or triangles or a layout glTF cannot take
  * @throws {CorruptError} when a mesh's indices, bone indices or blend shapes
  *   point past its data

@@ -76,6 +76,16 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
   }
   const rootTransform = scene.component(rootGo, CLASS.Transform);
   if (!rootTransform) throw new Error(`GameObject ${rootGo.pathId} has no Transform`);
+  // An optimized hierarchy: upstream rebuilds it from the Avatar
+  // (DeoptimizeTransformHierarchy, ModelConverter.cs:118), which is not ported.
+  const animator = root.type === CLASS.Animator ? root : scene.component(rootGo, CLASS.Animator);
+  if (animator && !scene.read<Animator>(animator).m_HasTransformHierarchy) {
+    throw new UnsupportedError(
+      "Animator hierarchy",
+      "optimized (m_HasTransformHierarchy false)",
+      `Animator ${animator.pathId}: its GameObjects were stripped; deoptimizing from the Avatar is not supported`,
+    );
+  }
 
   const gltf = new GltfWriter("unity-asset-reader-animation");
   const nodes: GltfNode[] = [];
@@ -131,7 +141,10 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
 
   // Each node's renderer: a SkinnedMeshRenderer, or a MeshRenderer with its MeshFilter.
   const meshes = new Map<number, WrittenMesh>();
+  // Only the root's own hierarchy, as ConvertTransforms (ModelConverter.cs:150) converts
+  // renderers; the ancestors chained above it are frames only.
   objects.forEach((go, index) => {
+    if (index < ancestors.length) return;
     const skinned = scene.component(go, SKINNED);
     const filter = skinned ? undefined : scene.component(go, MESH_FILTER);
     const holder = skinned ?? (scene.component(go, CLASS.MeshRenderer) && filter);
@@ -143,6 +156,14 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
     const mesh = scene.read<MeshData>(meshObj);
     const node = nodes[index]!;
     let joints: number[] | undefined;
+    if (smr && smr.m_Bones.length === 0 && mesh.m_BindPose.length > 0) {
+      // Bone type 2 of ConvertMeshRenderer: the bones by m_BoneNameHashes, an optimized rig.
+      throw new UnsupportedError(
+        "SkinnedMeshRenderer bones",
+        `no bones, ${mesh.m_BindPose.length} bind poses`,
+        `Mesh "${mesh.m_Name}": bones found by m_BoneNameHashes (an optimized hierarchy) are not supported`,
+      );
+    }
     if (smr && smr.m_Bones.length > 0) {
       // Bone type 1 of ConvertMeshRenderer (ModelConverter.cs:437): m_Bones, one per bind pose.
       if (smr.m_Bones.length !== mesh.m_BindPose.length) {

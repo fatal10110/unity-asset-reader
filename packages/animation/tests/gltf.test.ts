@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import * as gltfValidator from "gltf-validator";
-import type { Animator, Env, GameObject, ObjectReader } from "unity-asset-reader";
+import type { Animator, Env, GameObject, MeshData, ObjectReader } from "unity-asset-reader";
 import { clipCurves, sceneToGltf } from "../src/index.js";
 import { bits, fixtureEnv } from "./helpers.js";
 
@@ -386,40 +386,89 @@ function unityHermite(t0: number, v0: number, out0: number, t1: number, v1: numb
   return ((a * s + b) * s + out0 * dt) * s + v0;
 }
 
+/** The glTF 2.0 spec's cubic spline (Appendix C) of a sampler's component `d` at time `t`. */
+function gltfSpline(sampler: ReturnType<typeof samplerOf>, d: number, t: number): number {
+  const { times, keys } = sampler;
+  let k = 0;
+  while (k + 2 < times.length && times[k + 1]! <= t) k++;
+  const td = times[k + 1]! - times[k]!;
+  const s = (t - times[k]!) / td;
+  const [p0, p1] = [keys[k]!, keys[k + 1]!];
+  return (2 * s ** 3 - 3 * s ** 2 + 1) * p0.value[d]! + td * (s ** 3 - 2 * s ** 2 + s) * p0.outTangent[d]! +
+    (-2 * s ** 3 + 3 * s ** 2) * p1.value[d]! + td * (s ** 3 - s ** 2) * p1.inTangent[d]!;
+}
+
+/** The blend shape channel names and last-frame full weights of the scene's shaped mesh. */
+function shapesOf(env: Env): { names: string[]; full: number[] } {
+  for (const smr of env.objects.filter((o) => o.type === 137)) {
+    const ptr = smr.read<{ m_Mesh: Parameters<Env["resolve"]>[0] }>().m_Mesh;
+    const found = env.resolve(ptr, smr);
+    if (found.status !== "found") continue;
+    const shapes = found.object.read<MeshData>().m_Shapes;
+    if (!shapes || shapes.channels.length === 0) continue;
+    return {
+      names: shapes.channels.map((c) => c.name),
+      full: shapes.channels.map((c) => shapes.fullWeights[c.frameIndex + c.frameCount - 1]!),
+    };
+  }
+  throw new Error("no SkinnedMeshRenderer with blend shapes");
+}
+
 test("between the keys the glTF cubic spline matches Unity's Hermite curve within 1e-6", () => {
-  // The glTF 2.0 spec's spline (Appendix C) on the file's float32 data, against the
-  // Hermite cubic of clipCurves' keys: both evaluated in double, so they differ only by
-  // the rounding of the blend shape weights to float32 after the division by 100.
+  // The glTF spline on the file's float32 data, against the Hermite cubic of clipCurves'
+  // keys: both evaluated in double, so they differ only by the rounding to float32 of the
+  // blend shape weights and slopes after the division by the full weight (100).
   const TOLERANCE = 1e-6;
   let compared = 0;
+  let weights = 0;
   for (const key of [fixture("2019.4.41f2", "lz4"), fixture("6000.6.4f1", "lz4")]) {
     const env = fixtureEnv(key);
     const gltf = exportOf(key);
+    const shapes = shapesOf(env);
     for (const clip of clipsOf(env)) {
       const name = clip.read<{ m_Name: string }>().m_Name;
-      for (const ch of expectedChannels(env, clip).channels) {
+      const expected = expectedChannels(env, clip);
+      // Each curve as [glTF sampler, component, keys of that component].
+      const curves: { label: string; sampler: ReturnType<typeof samplerOf>; d: number;
+        keys: { time: number; value: number; inSlope: number; outSlope: number }[] }[] = [];
+      for (const ch of expected.channels) {
         const width = ch.keys[0]!.value.length;
-        const ours = samplerOf(gltf, name, nodeOf(gltf, ch.path), ch.target, width);
-        for (let i = 0; i + 1 < ch.keys.length; i++) {
-          const [a, b] = [ch.keys[i]!, ch.keys[i + 1]!];
+        const sampler = samplerOf(gltf, name, nodeOf(gltf, ch.path), ch.target, width);
+        for (let d = 0; d < width; d++) {
+          curves.push({ label: `${ch.path} ${ch.target} d${d}`, sampler, d, keys: ch.keys.map((k) => ({
+            time: k.time, value: k.value[d]!, inSlope: k.inSlope[d]!, outSlope: k.outSlope[d]!,
+          })) });
+        }
+      }
+      for (const c of expected.float) {
+        if (c.classId !== 137 || !c.attribute.startsWith("blendShape.")) continue;
+        const channel = c.attribute.slice("blendShape.".length);
+        const d = shapes.names.findIndex((n) => n === channel || n.split(".").pop() === channel);
+        assert.ok(d >= 0, `${key} ${name}: no blend shape ${channel}`);
+        const full = shapes.full[d]!;
+        const sampler = samplerOf(gltf, name, nodeOf(gltf, c.path), "weights", shapes.names.length);
+        curves.push({ label: `${c.path} ${c.attribute}`, sampler, d, keys: c.keyframes.map((k) => ({
+          time: k.time, value: k.value / full, inSlope: k.inSlope / full, outSlope: k.outSlope / full,
+        })) });
+        weights++;
+      }
+      for (const { label, sampler, d, keys } of curves) {
+        for (let i = 0; i + 1 < keys.length; i++) {
+          const [a, b] = [keys[i]!, keys[i + 1]!];
           for (const s of [0.25, 0.5, 0.75]) {
             const t = a.time + s * (b.time - a.time);
-            const td = b.time - a.time;
-            for (let d = 0; d < width; d++) {
-              const p0 = ours.keys[i]!;
-              const p1 = ours.keys[i + 1]!;
-              const gl = (2 * s ** 3 - 3 * s ** 2 + 1) * p0.value[d]! + td * (s ** 3 - 2 * s ** 2 + s) * p0.outTangent[d]! +
-                (-2 * s ** 3 + 3 * s ** 2) * p1.value[d]! + td * (s ** 3 - s ** 2) * p1.inTangent[d]!;
-              const unity = unityHermite(a.time, a.value[d]!, a.outSlope[d]!, b.time, b.value[d]!, b.inSlope[d]!, t);
-              assert.ok(Math.abs(gl - unity) <= TOLERANCE, `${key} ${name} ${ch.path} d${d} at ${t}: ${gl} vs ${unity}`);
-              compared++;
-            }
+            const gl = gltfSpline(sampler, d, t);
+            const unity = unityHermite(a.time, a.value, a.outSlope, b.time, b.value, b.inSlope, t);
+            assert.ok(Math.abs(gl - unity) <= TOLERANCE, `${key} ${name} ${label} at ${t}: ${gl} vs ${unity}`);
+            compared++;
           }
         }
       }
     }
   }
   assert.ok(compared > 0);
+  // The smile clip's blend shape curve, in both editors.
+  assert.ok(weights >= 2, `${weights} blend shape curves compared`);
 });
 
 /**
