@@ -28,8 +28,9 @@ installs `texture2ddecoder-wasm` automatically.
 
 - **[Core](packages/core/README.md):** unpack bundles, list assets, and read their data.
   Use `load(bytes)` for bytes you already have or `await open(url)` to fetch a file.
-  It does not decode textures, meshes or audio, and does not read the disk; it throws
-  `UnsupportedError` on a compression, container or Unity version it does not read.
+  It does not decode textures to pixels or audio to WAV, does not export meshes, and does
+  not read the disk; it throws `UnsupportedError` on a compression, container or Unity
+  version it does not read.
 - **[Textures](packages/texture/README.md):** convert `Texture2D` and `Sprite` assets to
   RGBA pixels with `await decodeImage(asset)`. It does not decode mip levels past the first,
   `Cubemap`, `Texture2DArray` or `Texture3D` assets, or a few formats such as `DXT3` and
