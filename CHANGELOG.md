@@ -176,7 +176,12 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ## unity-asset-reader-texture
 
-### 1.2.1 - Unreleased
+### 1.3.0 - Unreleased
+
+- `decodeSprite`'s new `preferMasterAtlas` option cuts a sprite of a variant `SpriteAtlas` from
+  the loaded atlas AssetStudio's loader moves it to, its master atlas, so the result equals
+  AssetStudio's `ExportSprite` PNG (#294). Off by default: without it the sprite is cut from its
+  own variant atlas, as before. `decodeImage` and `imageInfo` do not take it.
 
 - Sprites follow their texture and atlas pointers with core's `resolveOrThrow`; the errors and
   their messages are unchanged (#255). Needs `unity-asset-reader` 1.3.0.

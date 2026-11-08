@@ -1,5 +1,6 @@
 // Ported from AssetStudio.Utility/SpriteHelper.cs (MIT, © Perfare / RazTools / Razviar)
 // Ported from AssetStudio/Classes/Mesh.cs (MIT, © Perfare / RazTools / Razviar)
+// Ported from AssetStudio/AssetsManager.cs (MIT, © Perfare / RazTools / Razviar): the post-load SpriteAtlas walk, see masterAtlases
 // Ported from UnityPy/export/SpriteHelper.py (MIT, © K0lb3): the alpha texture merge, see mergeAlpha
 // Derived from SixLabors/ImageSharp.Drawing src/ImageSharp.Drawing/Shapes/Rasterization/*.cs @ v1.0.0-beta15 (Apache-2.0, © Six Labors): the triangle fill at the end of this file, see there
 
@@ -46,6 +47,21 @@ export interface DecodeSpriteOptions {
    * packed as a rectangle is never masked.
    */
   tightMesh?: boolean;
+  /**
+   * Cut a sprite of a variant atlas (`m_IsVariant`) from the loaded atlas that
+   * AssetStudio's loader moves it to, its master atlas, rather than from the
+   * variant it points at. Without it (the default) the sprite is cut from its
+   * own atlas, as UnityPy does. The atlas is chosen as `AssetsManager` does
+   * after loading: walking the env's SpriteAtlas objects in load order (files,
+   * then objects), each one with render data takes every Sprite its
+   * `m_PackedSprites` lists whose current atlas is a variant; so the first
+   * such atlas that is not a variant keeps it. A variant loaded without its
+   * master keeps the variant. A sprite whose own atlas is not a variant, is
+   * not loaded, or is null is cut as without the option. Only
+   * {@link decodeSprite} takes it: `decodeImage` and `imageInfo` always use
+   * the sprite's own atlas.
+   */
+  preferMasterAtlas?: boolean;
 }
 
 /**
@@ -189,6 +205,10 @@ export interface SpriteSource {
  * other way, mistranslates the same upstream call rather than checking it
  * independently (#34; verification tracked in #160).
  *
+ * With `options.preferMasterAtlas`, a sprite of a variant atlas is cut from
+ * the atlas AssetStudio's loader moves it to, its master atlas, as
+ * AssetStudio's `ExportSprite` does: see {@link DecodeSpriteOptions}.
+ *
  * With `options.decodedTextures`, sequential calls reuse their shared atlas
  * (and its alpha texture). The caller owns the map and decides how long to
  * retain its decoded pixels.
@@ -246,7 +266,7 @@ export async function decodeSprite(
   env: Env,
   options: DecodeSpriteOptions = {},
 ): Promise<RgbaImage> {
-  const source = locateSprite(sprite, env);
+  const source = locateSprite(sprite, env, options.preferMasterAtlas === true);
   let image = await decodeTextureObject(source.texture, options.decodedTextures);
   if (source.alphaTexture) {
     const alpha = await decodeTextureObject(source.alphaTexture, options.decodedTextures);
@@ -295,10 +315,15 @@ export interface SpriteLocation {
  * needed. A {@link PackedSprite} is its atlas entry and the sprite that entry
  * holds. Internal: exported for `imageInfo`, not from the package.
  *
+ * @param preferMasterAtlas {@link DecodeSpriteOptions.preferMasterAtlas}
  * @throws what {@link decodeSprite} throws, but for decoding and for reading
  *   the textures
  */
-export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): SpriteLocation {
+export function locateSprite(
+  obj: ObjectReader | PackedSprite,
+  env: Env,
+  preferMasterAtlas = false,
+): SpriteLocation {
   if (isPacked(obj)) return locatePacked(obj, env);
   if (obj?.type !== ClassID.Sprite) {
     throw new TypeError(
@@ -313,7 +338,12 @@ export function locateSprite(obj: ObjectReader | PackedSprite, env: Env): Sprite
   const atlasPointer = sprite.m_SpriteAtlas;
   const atlas = atlasPointer ? env.resolve(atlasPointer, obj) : undefined;
   if (atlasPointer && atlas?.status === "found") {
-    const atlasObj = resolveOrThrow(env, atlasPointer, obj, `${what}'s atlas`, ClassID.SpriteAtlas);
+    const ownAtlas = resolveOrThrow(env, atlasPointer, obj, `${what}'s atlas`, ClassID.SpriteAtlas);
+    const atlasObj =
+      (preferMasterAtlas &&
+        ownAtlas.read<SpriteAtlas>().m_IsVariant &&
+        masterAtlases(env).get(obj)) ||
+      ownAtlas;
     const data = atlasObj.read<SpriteAtlas>();
     if (!data.m_PackedSprites) {
       // 6000.6+: the atlas holds its sprites (spriteInstanceData), which packedSprites()
@@ -398,6 +428,54 @@ function locatePacked(packed: PackedSprite, env: Env): SpriteLocation {
   const alphaTexture = findAlphaTexture(env, entry.alphaTexture, atlasObj, alphaWhat);
   const { version } = atlasObj;
   return { sprite, rect: entry, texture, alphaTexture, atlas: data, version, what };
+}
+
+/**
+ * Each env's sprites that AssetStudio's loader moves off their variant atlas,
+ * by Sprite object, to the atlas it moves them to; built on first use.
+ */
+const masterAtlasesByEnv = new WeakMap<Env, Map<ObjectReader, ObjectReader>>();
+
+/**
+ * The atlas each Sprite of `env` whose own atlas is a variant ends up in, by
+ * upstream `AssetsManager`'s post-load walk: every SpriteAtlas, in load order,
+ * with a non-empty `m_RenderDataMap`, takes each Sprite of its
+ * `m_PackedSprites` whose current atlas is a variant. Upstream does not check
+ * that the atlas taking it is not a variant itself, and neither does this.
+ * Upstream also gives an atlas each listed sprite whose atlas pointer is null;
+ * that is left out (#294 is about variants). A 6000.6 atlas lists no Sprite
+ * objects (`m_PackedSprites` is absent) and is passed over.
+ */
+function masterAtlases(env: Env): Map<ObjectReader, ObjectReader> {
+  let moved = masterAtlasesByEnv.get(env);
+  if (moved) return moved;
+  moved = new Map();
+  const isVariant = new Map<ObjectReader, boolean>();
+  const variant = (atlas: ObjectReader): boolean => {
+    let v = isVariant.get(atlas);
+    if (v === undefined) isVariant.set(atlas, (v = atlas.read<SpriteAtlas>().m_IsVariant));
+    return v;
+  };
+  for (const atlas of env.objects) {
+    if (atlas.type !== ClassID.SpriteAtlas) continue;
+    const data = atlas.read<SpriteAtlas>();
+    if (!data.m_PackedSprites || data.m_RenderDataMap.length === 0) continue;
+    for (const pointer of data.m_PackedSprites) {
+      const found = env.resolve(pointer, atlas);
+      if (found.status !== "found" || found.object.type !== ClassID.Sprite) continue;
+      const sprite = found.object;
+      let current = moved.get(sprite);
+      if (!current) {
+        const own = sprite.read<Sprite>().m_SpriteAtlas;
+        const resolved = own && env.resolve(own, sprite);
+        if (resolved?.status !== "found" || resolved.object.type !== ClassID.SpriteAtlas) continue;
+        current = resolved.object;
+      }
+      if (variant(current)) moved.set(sprite, atlas);
+    }
+  }
+  masterAtlasesByEnv.set(env, moved);
+  return moved;
 }
 
 /** The Texture2D a pointer names. */
