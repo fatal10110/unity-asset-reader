@@ -59,7 +59,7 @@ export class Scene {
    *
    * ponytail: upstream's `Transform` includes `RectTransform` (224), which has
    * no reader in core; only class 4 counts, so a UI hierarchy's paths stay
-   * unresolved. Upgrade: a RectTransform reader in core.
+   * unresolved. Upgrade: a RectTransform reader in core (#315).
    */
   component(go: ObjectReader, classId: number): ObjectReader | undefined {
     let last: ObjectReader | undefined;
@@ -179,7 +179,7 @@ function animatorTOS(scene: Scene, animator: ObjectReader): Map<number, string> 
  * the clip, is left out: core has no `Animation` reader.
  *
  * ponytail: a legacy `Animation` component's hierarchy names no paths. Upgrade:
- * an `Animation` reader in core, then its `m_GameObject`'s `buildTOS`.
+ * an `Animation` reader in core, then its `m_GameObject`'s `buildTOS` (#314).
  */
 export function findTOS(
   scene: Scene,
