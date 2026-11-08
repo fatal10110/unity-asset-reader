@@ -5,7 +5,7 @@ import { BinaryReader, CorruptError, UnsupportedError } from "unity-asset-reader
 /**
  * The codec of every sample of an FSB5 sound bank (FMOD's `FMOD_SOUND_FORMAT`,
  * the header's `mode`). Only `PCM8`, `PCM16`, `PCM32`, `GCADPCM`, `IMAADPCM`
- * and `FADPCM` convert to WAV here.
+ * and `FADPCM` convert to WAV here, and `VORBIS` to Ogg given its setup header.
  */
 export const Fsb5Codec = {
   NONE: 0,
@@ -51,6 +51,12 @@ export interface Fsb5Sample {
    * sample's `DSPCOEFF` chunk.
    */
   dspCoefficients?: Int16Array[];
+  /**
+   * `VORBIS` only: the CRC-32 of the Vorbis setup header FMOD left out of the
+   * bank, from the sample's `VORBISDATA` chunk; {@link fsb5ToOgg} looks the
+   * header up by it.
+   */
+  vorbisCrc?: number;
 }
 
 /** An FSB5 sound bank, as Unity stores an `AudioClip`'s sound from Unity 5.0. */
@@ -75,6 +81,7 @@ const CHANNELS = [1, 2, 6, 8];
 const CHUNK_CHANNELS = 1;
 const CHUNK_FREQUENCY = 2;
 const CHUNK_DSPCOEFF = 7;
+const CHUNK_VORBISDATA = 11;
 
 /** Bytes of one channel's `DSPCOEFF` entry: 16 coefficients, then 14 bytes this ignores. */
 const DSP_CHANNEL_SIZE = 0x2e;
@@ -91,7 +98,8 @@ const DSP_CHANNEL_SIZE = 0x2e;
  * (bit 0: another chunk follows; 1-24: size; 25-31: type) and its body. A
  * `FREQUENCY` chunk gives the rate in Hz and a `CHANNELS` chunk the channel
  * count, overriding the word's; `DSPCOEFF` holds `GCADPCM`'s coefficients,
- * big-endian.
+ * big-endian; `VORBISDATA` starts with the CRC-32 of the sample's Vorbis setup
+ * header.
  *
  * Differences from Fmod5Sharp: a `FREQUENCY` chunk's value is the rate itself
  * (as python-fsb5 reads it), not looked up as an id when it is 10 or below; a
@@ -184,6 +192,7 @@ function readSampleHeader(reader: BinaryReader, index: number): SampleHeader {
 
   let frequency: number | undefined;
   let dspCoefficients: Int16Array[] | undefined;
+  let vorbisCrc: number | undefined;
   while (more) {
     const at = reader.position;
     const word = reader.readUInt32();
@@ -217,6 +226,15 @@ function readSampleHeader(reader: BinaryReader, index: number): SampleHeader {
         for (let k = 0; k < 16; k++) coefficients[k] = body.readInt16();
         dspCoefficients.push(coefficients);
       }
+    } else if (type === CHUNK_VORBISDATA) {
+      // The CRC, then bytes neither reference reads.
+      if (size < 4) {
+        throw new CorruptError(
+          `FSB5 sample ${index}: chunk type ${type} at offset ${at} is ${size} bytes, ` +
+            `expected at least 4`,
+        );
+      }
+      vorbisCrc = body.readUInt32();
     }
   }
 
@@ -229,6 +247,7 @@ function readSampleHeader(reader: BinaryReader, index: number): SampleHeader {
   }
   const header: SampleHeader = { frequency, channels, sampleCount, dataOffset };
   if (dspCoefficients) header.dspCoefficients = dspCoefficients;
+  if (vorbisCrc !== undefined) header.vorbisCrc = vorbisCrc;
   return header;
 }
 

@@ -318,7 +318,18 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 
 ## unity-asset-reader-audio
 
-### 1.0.1 - Unreleased
+### 1.1.0 - Unreleased
+
+- `fsb5ToOgg(bytes, headers)` rebuilds an FSB5 Vorbis sample as an Ogg Vorbis file, as
+  Fmod5Sharp's `FmodVorbisRebuilder` does. FMOD leaves the Vorbis setup header out of its banks
+  and no table of them ships with the package (they are bytes of FMOD's library): the caller
+  passes a `Map` from CRC-32 to `{ headerBytes, seekBit }`, the shape of Fmod5Sharp's
+  `vorbis_headers_converted.json`. Without it, or without the sample's CRC, `UnsupportedError`
+  names the CRC. `readFsb5()` gives the CRC from the `VORBISDATA` chunk as
+  `Fsb5Sample.vorbisCrc`, and `fsb5ToWav()`'s Vorbis refusal points to `fsb5ToOgg()`. Checked
+  locally only, with the table: the tone-vorbis clip of the 2019.4.41f2, 2020.3.30f1 and
+  6000.3.25f1 bundles decodes (ffmpeg, CRC checks on) to its frame count and within 2 LSB of
+  AssetStudio's WAV (#241).
 
 - The IMAADPCM decode is checked against editor-built clips: a mono and a stereo clip of
   2019.4.41f2, 2020.3.30f1 and 6000.3.26f1 bundles convert to AssetStudio's WAV byte for byte

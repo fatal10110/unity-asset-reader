@@ -33,7 +33,8 @@ The texture package installs `texture2ddecoder-wasm` automatically.
 - **[Meshes](packages/mesh/README.md):** write a `Mesh` as Wavefront OBJ text with
   `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`.
 - **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
-  `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound (not Vorbis).
+  `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound; Vorbis sound to Ogg with
+  `fsb5ToOgg()`, given its setup header (none ships with the package).
 - **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
   page textures with `spineSkeletons(env)`.
 - **[Shaders](packages/shader/README.md):** write a `Shader` as the inspection text AssetStudio
@@ -130,7 +131,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 | Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture` and `Mesh` (its vertices and triangles decoded) |
 | Texture formats | 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
 | Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
-| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
+| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, and to Ogg for Vorbis sound given a caller-supplied setup header table, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
 | Shaders | `Shader` to AssetStudio's inspection text, through `unity-asset-reader-shader`: OpenGL, OpenGL ES and Metal programs as their source, Vulkan programs as SPIR-V disassembly; tested to match AssetStudio's `.shader` file on the OpenGL ES, Vulkan and Metal shaders of the 2019.4 and 2020.3 bundles, and its converter's text (on UnityPy's type tree) on those of the 6000.3 and 6000.6 bundles without an `Int` property, several keyword variants per stage included |
 | Platforms | Xbox 360 textures are byte-swapped back and Switch textures deswizzled. Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)) |
 | Runtimes | Browsers and Web Workers (ES2020, WebAssembly for textures); Node.js `^20.19.0 \|\| >=22.12.0`, `import` and `require` |
@@ -180,7 +181,8 @@ Each of these throws `UnsupportedError`, naming what it found:
   alpha) is not the size of their texture. A `Sprite` object that points at a Unity 6000.6
   `SpriteAtlas` (the atlas' own packed sprites are supported).
 - Meshes: a submesh of lines or points, a vertex format Unity does not define.
-- Audio: Vorbis and the other FSB5 codecs that are not PCM or ADPCM (MPEG, ATRAC9, XMA, ...);
+- Audio: Vorbis without a setup header table from the caller (none ships), and the other FSB5
+  codecs that are not PCM, ADPCM or Vorbis (MPEG, ATRAC9, XMA, ...);
   IMA ADPCM of more than two channels and GCADPCM of more than one; sound that is not an FSB5
   bank (`AudioClip`s from before Unity 5.0).
 - Shader text: Direct3D programs (they need Windows' D3DCompiler), shaders that list their
@@ -224,7 +226,7 @@ copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` 
 | [AssetsTools.NET](https://github.com/nesrak1/AssetsTools.NET) (© nesrak1) | MIT | UnityPy's Switch deswizzle, ported into `unity-asset-reader-texture`, is based on its `SwitchSwizzle.cs`. |
 | [ImageSharp.Drawing](https://github.com/SixLabors/ImageSharp.Drawing) (© Six Labors) | Apache-2.0 | The sprite tight-mesh triangle fill in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v1.0.0-beta15, the version AssetStudio uses, so the masks match to the pixel. |
 | [ImageSharp](https://github.com/SixLabors/ImageSharp) (© Six Labors) | Apache-2.0 | The sprite variant-atlas resize in `unity-asset-reader-texture` is a modified TypeScript translation of parts of v2.1.3, the version AssetStudio uses, so the resized sprites match to the byte. |
-| [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (© 2021 Sam Byass) | MIT | The FSB5 parser and the ADPCM decoders of `unity-asset-reader-audio` are hand-ported from it. |
+| [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (© 2021 Sam Byass) | MIT | The FSB5 parser, the ADPCM decoders and the Vorbis to Ogg rebuild of `unity-asset-reader-audio` are hand-ported from it. |
 | [python-fsb5](https://github.com/HearthSim/python-fsb5) (© 2016 Simon Pinfold) | MIT | Second reference for the FSB5 parser of `unity-asset-reader-audio`. |
 | [CSspv](https://github.com/Anteru/csspv) (© 2017 Matthäus G. Chajdas) | BSD-2-Clause | The SPIR-V disassembler of `unity-asset-reader-shader` is hand-ported from it, as AssetStudio vendors it. |
 | [smol-v](https://github.com/aras-p/smol-v) (© 2016-2018 Aras Pranckevicius) | MIT or public domain | The SMOL-V format Unity stores Vulkan programs in; the decoder of `unity-asset-reader-shader` is ported from AssetStudio's C# port of its decoder. |

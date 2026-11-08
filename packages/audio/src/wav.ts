@@ -32,7 +32,7 @@ const ADPCM: Partial<Record<Fsb5Codec, (sample: Fsb5Sample) => Int16Array>> = {
  * @param bytes the sound bank
  * @returns the WAV file, a new array
  * @throws {UnsupportedError} for any other codec (kind `"FSB5 codec"`, with
- *   its name: Vorbis, MPEG, ...), for a GCADPCM sample of more than one
+ *   its name: Vorbis, MPEG, ...; {@link fsb5ToOgg} converts Vorbis), for a GCADPCM sample of more than one
  *   channel, and as {@link readFsb5} does
  * @throws {CorruptError} when the bank has no sample, its first sample has no
  *   channels, or its data is shorter than its frames need; and as
@@ -62,7 +62,10 @@ export function fsb5ToWav(bytes: Uint8Array): Uint8Array {
   if (decode === undefined) {
     const names = Object.keys(Fsb5Codec) as (keyof typeof Fsb5Codec)[];
     const name = names.find((key) => Fsb5Codec[key] === codec);
-    const hint = "WAV is written for PCM and ADPCM only";
+    const hint =
+      codec === Fsb5Codec.VORBIS
+        ? "WAV is written for PCM and ADPCM only; fsb5ToOgg rebuilds Vorbis as Ogg"
+        : "WAV is written for PCM and ADPCM only";
     throw new UnsupportedError("FSB5 codec", name ?? codec, hint);
   }
   const pcm = decode(sample);
