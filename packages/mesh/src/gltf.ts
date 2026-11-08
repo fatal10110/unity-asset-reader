@@ -1,45 +1,18 @@
-// glTF 2.0 binary (.glb) writer for a decoded Mesh. Not a port: AssetStudio
-// exports models as FBX, so there is no upstream glTF to follow. The geometry
-// is converted from Unity's left-handed space the way meshToObj (AssetStudio's
-// OBJ export) converts it, so both formats hold the same vertices and faces.
+// A decoded Mesh as binary glTF 2.0 (.glb), written with core's GltfWriter.
+// Not a port: AssetStudio exports models as FBX, so there is no upstream glTF
+// to follow. The geometry is converted from Unity's left-handed space the way
+// meshToObj (AssetStudio's OBJ export) converts it, so both formats hold the
+// same vertices and faces.
 
-import { CorruptError, UnsupportedError, type MeshData } from "unity-asset-reader";
+import {
+  CorruptError,
+  GltfWriter,
+  UnsupportedError,
+  type GltfAccessorType,
+  type MeshData,
+} from "unity-asset-reader";
 
-/**
- * WHATWG `TextEncoder`, declared here because the package compiles with
- * `lib: ["ES2020"]` and no DOM or node types (R4). It is a platform global in
- * browsers, workers, Deno and Node >= 11.
- */
-declare const TextEncoder: { new (): { encode(input?: string): Uint8Array } };
-
-// glTF enums: buffer view targets and accessor component types.
-const ARRAY_BUFFER = 34962;
-const ELEMENT_ARRAY_BUFFER = 34963;
-const FLOAT = 5126;
-const UNSIGNED_SHORT = 5123;
-const UNSIGNED_INT = 5125;
-const VECTOR = ["SCALAR", "VEC2", "VEC3", "VEC4"];
-
-// The GLB container (glTF 2.0 spec, GLB File Format): "glTF", version 2, chunks "JSON" and "BIN\0".
-const GLB_MAGIC = 0x46546c67;
-const CHUNK_JSON = 0x4e4f534a;
-const CHUNK_BIN = 0x004e4942;
-
-interface Accessor {
-  bufferView: number;
-  componentType: number;
-  count: number;
-  type: string;
-  min?: number[];
-  max?: number[];
-}
-
-interface BufferView {
-  buffer: number;
-  byteOffset: number;
-  byteLength: number;
-  target: number;
-}
+const VECTOR: GltfAccessorType[] = ["SCALAR", "VEC2", "VEC3", "VEC4"];
 
 /** A vertex attribute: where it comes from and how its components are converted. */
 interface Attribute {
@@ -83,7 +56,8 @@ interface Attribute {
  * - `COLOR_0` when a component is outside 0 to 1 (HDR colours).
  * Normals are never renormalised, so the ones written are the OBJ's.
  *
- * No materials, other UV channels, bones or blend shapes.
+ * No materials, other UV channels, bones or blend shapes. Written with core's
+ * `GltfWriter`.
  *
  * @param mesh a Mesh as `obj.read()` gives it (`MeshData`)
  * @returns the `.glb` file's bytes
@@ -107,23 +81,6 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
       `Mesh "${name}": glTF needs the vertices' positions`,
     );
   }
-
-  const accessors: Accessor[] = [];
-  const bufferViews: BufferView[] = [];
-  const chunks: Uint8Array[] = [];
-  let byteLength = 0;
-  /** Append bytes to the buffer, 4-aligned, and return their buffer view. */
-  const addView = (bytes: Uint8Array, target: number): number => {
-    bufferViews.push({ buffer: 0, byteOffset: byteLength, byteLength: bytes.length, target });
-    chunks.push(bytes);
-    byteLength += bytes.length;
-    const pad = -bytes.length & 3;
-    if (pad > 0) {
-      chunks.push(new Uint8Array(pad));
-      byteLength += pad;
-    }
-    return bufferViews.length - 1;
-  };
 
   const negateX = (values: Float32Array, at: number, d: number): number =>
     d === 0 ? -values[at]! : values[at + d]!;
@@ -221,20 +178,16 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
     converted.delete("COLOR_0");
   }
 
+  const gltf = new GltfWriter("unity-asset-reader-mesh");
   const attributes: Record<string, number> = {};
   for (const [key, { width, data }] of converted) {
-    const bytes = new Uint8Array(data.length * 4);
-    const view = new DataView(bytes.buffer);
-    data.forEach((value, i) => view.setFloat32(i * 4, value, true));
-    accessors.push({
-      bufferView: addView(bytes, ARRAY_BUFFER),
-      componentType: FLOAT,
-      count,
+    attributes[key] = gltf.addAccessor({
+      data,
       type: VECTOR[width - 1]!,
+      target: "ARRAY_BUFFER",
       // glTF requires the bounds of POSITION only.
-      ...(key === "POSITION" && bounds(data, width)),
+      bounds: key === "POSITION",
     });
-    attributes[key] = accessors.length - 1;
   }
 
   // A 16-bit index of 65535 is the primitive restart value, which glTF
@@ -243,7 +196,6 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
   const wide =
     mesh.m_IndexFormat !== 0 ||
     mesh.indices.some((part) => part.some((index) => index >= 0xffff));
-  const size = wide ? 4 : 2;
   const primitives: { attributes: Record<string, number>; indices: number }[] = [];
   mesh.indices.forEach((triangles, i) => {
     // glTF has no empty accessor, so a submesh without triangles is left out.
@@ -253,8 +205,7 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
         `Mesh "${name}" submesh ${i}: ${triangles.length} indices are not whole triangles`,
       );
     }
-    const bytes = new Uint8Array(triangles.length * size);
-    const view = new DataView(bytes.buffer);
+    const indices = wide ? new Uint32Array(triangles.length) : new Uint16Array(triangles.length);
     for (let k = 0; k < triangles.length; k++) {
       // The winding reversed: each triangle (a, b, c) is written (c, b, a).
       const at = k - (k % 3) + 2 - (k % 3);
@@ -264,16 +215,12 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
           `Mesh "${name}" submesh ${i}: index ${at} is ${index}, past the ${count} vertices`,
         );
       }
-      if (wide) view.setUint32(k * 4, index, true);
-      else view.setUint16(k * 2, index, true);
+      indices[k] = index;
     }
-    accessors.push({
-      bufferView: addView(bytes, ELEMENT_ARRAY_BUFFER),
-      componentType: wide ? UNSIGNED_INT : UNSIGNED_SHORT,
-      count: triangles.length,
-      type: "SCALAR",
+    primitives.push({
+      attributes,
+      indices: gltf.addAccessor({ data: indices, type: "SCALAR", target: "ELEMENT_ARRAY_BUFFER" }),
     });
-    primitives.push({ attributes, indices: accessors.length - 1 });
   });
   if (primitives.length === 0) {
     throw new UnsupportedError(
@@ -283,17 +230,9 @@ export function meshToGltf(mesh: MeshData): Uint8Array {
     );
   }
 
-  const json = {
-    asset: { version: "2.0", generator: "unity-asset-reader-mesh" },
-    scene: 0,
-    scenes: [{ nodes: [0] }],
-    nodes: [{ name, mesh: 0 }],
-    meshes: [{ name, primitives }],
-    accessors,
-    bufferViews,
-    buffers: [{ byteLength }],
-  };
-  return glb(new TextEncoder().encode(JSON.stringify(json)), chunks, byteLength);
+  gltf.addMesh({ name, primitives });
+  gltf.addScene([gltf.addNode({ name, mesh: 0 })]);
+  return gltf.toGlb();
 }
 
 /**
@@ -316,43 +255,4 @@ function everyVertex(
 ): boolean {
   for (let at = 0; at < data.length; at += width) if (!test(data, at)) return false;
   return true;
-}
-
-/** The per-component bounds of an attribute, as glTF's `min` and `max`. */
-function bounds(data: Float32Array, width: number): { min: number[]; max: number[] } {
-  const min = new Array<number>(width).fill(Infinity);
-  const max = new Array<number>(width).fill(-Infinity);
-  data.forEach((value, i) => {
-    const d = i % width;
-    if (value < min[d]!) min[d] = value;
-    if (value > max[d]!) max[d] = value;
-  });
-  return { min, max };
-}
-
-/**
- * The GLB container: a 12-byte header, the JSON chunk padded with spaces to
- * 4 bytes, then the binary chunk (already 4-aligned).
- */
-function glb(json: Uint8Array, chunks: Uint8Array[], binLength: number): Uint8Array {
-  const jsonLength = json.length + (-json.length & 3);
-  const total = 12 + 8 + jsonLength + 8 + binLength;
-  const out = new Uint8Array(total);
-  const view = new DataView(out.buffer);
-  view.setUint32(0, GLB_MAGIC, true);
-  view.setUint32(4, 2, true);
-  view.setUint32(8, total, true);
-  view.setUint32(12, jsonLength, true);
-  view.setUint32(16, CHUNK_JSON, true);
-  out.set(json, 20);
-  out.fill(0x20, 20 + json.length, 20 + jsonLength);
-  let at = 20 + jsonLength;
-  view.setUint32(at, binLength, true);
-  view.setUint32(at + 4, CHUNK_BIN, true);
-  at += 8;
-  for (const chunk of chunks) {
-    out.set(chunk, at);
-    at += chunk.length;
-  }
-  return out;
 }
