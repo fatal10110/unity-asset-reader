@@ -331,18 +331,6 @@ test("the Animator gates between TPK's: 2020.3.42, 2021.3.15, 2022.1.23, 2022.2.
   }
 });
 
-test("a controller's EntityId values are refused, not guessed (6000.3 and 6000.6 layouts)", () => {
-  for (const key of ["6000.2.0b2", "6000.6.0a5"]) {
-    const nodes = TPK[String(ClassID.AnimatorController)]![key]!;
-    const from = TEMPLATE(ClassID.AnimatorController);
-    const reader = tpkReader(from, filled(nodes, 1), nodes, versionOf(key));
-    assert.throws(
-      () => readAnimatorController(reader),
-      (err: unknown) => err instanceof UnsupportedError && err.kind === "EntityId values",
-    );
-  }
-});
-
 // --- the shared structs (animation.ts) ------------------------------------------------
 
 test("readHumanPose reads an AnimationClip's HumanPose at every TPK AnimationClip tree", () => {

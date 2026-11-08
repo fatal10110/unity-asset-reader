@@ -379,8 +379,6 @@ Each of these throws `UnsupportedError` naming what it found:
   format Unity does not define, bone weights in an integer format or more than four per vertex
   (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
   `baseVertex` takes an index past the vertices throws `CorruptError`.
-- An `AnimatorController` (Unity 6000.2 and later) whose parameter defaults hold entity ids
-  (kind `"EntityId values"`): no type tree says what one holds, and no Unity controller writes one.
 
 Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
 image encoding. Texture and sprite pixels, and PNG encoding, are in

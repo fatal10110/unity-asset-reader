@@ -31,6 +31,14 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- `readTypeTree()` reads a childless `EntityId` node (Unity 6000.2 and later) by its
+  `byteSize`: an `Int32` (`number`) when it is 4 bytes (6000.2 to 6000.4), a `UInt64`
+  (`bigint`) when it is 8 (6000.5 on), and refuses any other size (`UnsupportedError`, kind
+  `"EntityId size"`) (#307). It read as `{}` of 0 bytes, as UnityPy reads it, so a non-empty
+  `vector<EntityId>` failed the end-of-object check. `readAnimatorController()` reads a
+  controller's `m_EntityIdValues` the same way instead of refusing a non-empty one (kind
+  `"EntityId values"` is gone), and `m_EntityIdValues` / `entityIdValues` are typed
+  `number[] | bigint[]`.
 - A hand-written `AnimationClip` reader (`readAnimationClip`), Unity 2019.1 to 6000.6 (#302),
   with its `asset.data` shape (`toAnimationClipFields`, `AnimationClipFields`). It returns the
   curves raw: a legacy clip's curve arrays, a Mecanim clip's streamed words, dense samples and
