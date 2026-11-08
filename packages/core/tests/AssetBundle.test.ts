@@ -128,9 +128,9 @@ test("the AssetBundle checks cover formats 21 and 22, typed and not, every edito
   // 2019.4, three each from 2020.3 and 6000.3.26f1, the 2019.4 spine
   // skeletons (#238) and split atlas (#254), the mesh bundle of each of the
   // three editors (#253) and their adpcm bundles (#251), and their skinned
-  // mesh bundles (#285), and the animator (#303) and animation (#302)
-  // bundles of 2019.4, 2020.3 and 6000.3.26f1.
-  assert.equal(NO_TYPE_TREE.length, 49);
+  // mesh bundles (#285), and the animator (#303), animation (#302) and scene
+  // (#305) bundles of 2019.4, 2020.3 and 6000.3.26f1.
+  assert.equal(NO_TYPE_TREE.length, 52);
 });
 
 // --- m_Container entries, resolved ----------------------------------------------

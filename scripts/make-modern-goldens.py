@@ -117,12 +117,15 @@ def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
     textures, atlases, shaders, meshes, clips = [], [], [], [], []
-    animation = {}
+    animation, scene = {}, {}
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
         if obj.type.name in ("AnimationClip", "Animator", "AnimatorController",
                              "AnimatorOverrideController", "Avatar"):
             animation[obj.type.name] = animation.get(obj.type.name, 0) + 1
+        if obj.type.name in ("GameObject", "Transform", "MeshFilter", "MeshRenderer",
+                             "SkinnedMeshRenderer", "Mesh"):
+            scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
         if obj.type.name == "AnimationClip" and "/animation/" in name:
             tree = obj.read_typetree()
             parts = tree["m_MuscleClip"]["m_Clip"]["data"]
@@ -191,6 +194,17 @@ def evidence(name, path):
         assert animation == {"AnimationClip": 8, "Animator": 2, "AnimatorController": 1,
                              "AnimatorOverrideController": 1, "Avatar": 2}, animation
         return {"animation": dict(sorted(animation.items()))}
+    if "/scene/" in name:
+        # The scene fixtures (#305): the "scene" prefab (ten GameObjects, an
+        # Animator on its generic Avatar, a SkinnedMeshRenderer, a MeshFilter
+        # and a MeshRenderer) and the "humanoid" one (22 GameObjects, an
+        # Animator on its humanoid Avatar), one controller, three clips, one Mesh.
+        assert scene == {"GameObject": 32, "Transform": 32, "MeshFilter": 1, "MeshRenderer": 1,
+                         "SkinnedMeshRenderer": 1, "Mesh": 1}, scene
+        assert animation == {"AnimationClip": 3, "Animator": 2, "AnimatorController": 1,
+                             "Avatar": 2}, animation
+        assert [mesh["name"] for mesh in meshes] == ["skinned"]
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items()))}
     if "/animation/" in name:
         # The animation fixtures (#302): one legacy clip, whose curves stay in
         # the curve arrays, and five Mecanim clips, whose curves land in the
@@ -244,6 +258,8 @@ def main():
         ("animator/lz4", "animator"), ("animator/lz4-notypetree", "animator"),
         # AnimationClip (#302): legacy, streamed, dense and constant clips.
         ("animation/lz4", "animation"), ("animation/lz4-notypetree", "animation"),
+        # GameObject, Transform, MeshFilter, MeshRenderer, SkinnedMeshRenderer (#305).
+        ("scene/lz4", "scene"), ("scene/lz4-notypetree", "scene"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

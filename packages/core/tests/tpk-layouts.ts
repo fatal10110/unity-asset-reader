@@ -98,6 +98,10 @@ export function filled(nodes: GoldenNode[], entityIds = 0): Uint8Array {
       case "UInt16":
         w.u16(n * 97);
         break;
+      case "SInt16":
+        // Negative, so a sign mix-up shows (a Renderer's sorting fields).
+        w.u16(0x10000 - n);
+        break;
       case "int":
         w.i32(n % 2 ? -n : n);
         break;

@@ -83,6 +83,7 @@ import type {
 } from "./Avatar.js";
 import type { EditorExtension } from "./EditorExtension.js";
 import type { CharacterInfo, Font, Rectf } from "./Font.js";
+import type { ComponentPair, GameObject } from "./GameObject.js";
 import type {
   CompressedMesh,
   MeshData,
@@ -100,10 +101,17 @@ import type {
   UnityTexEnv,
   Vector2,
 } from "./Material.js";
+import type { MeshFilter } from "./MeshFilter.js";
 import type { MonoScript, Hash128 } from "./MonoScript.js";
 import type { MovieTexture } from "./MovieTexture.js";
 import type { NamedObject } from "./NamedObject.js";
 import type { PPtr } from "./PPtr.js";
+import type {
+  MeshRenderer,
+  Renderer,
+  SkinnedMeshRenderer,
+  StaticBatchInfo,
+} from "./Renderer.js";
 import type { MonoBehaviourData, Texture2DData } from "./registry.js";
 import type {
   Binding,
@@ -142,6 +150,7 @@ import { textAssetString, type TextAsset } from "./TextAsset.js";
 import type { Texture } from "./Texture.js";
 import type { GLTextureSettings, StreamingInfo } from "./Texture2D.js";
 import type { TextureFormat } from "./TextureFormat.js";
+import type { Transform } from "./Transform.js";
 import type { StreamedResource, VideoClipData } from "./VideoClip.js";
 
 // ---------------------------------------------------------------------------
@@ -3089,6 +3098,263 @@ function clipMuscleConstant(clip: ClipMuscleConstant): ClipMuscleConstantFields 
     keepOriginalPositionY: clip.m_KeepOriginalPositionY,
     keepOriginalPositionXZ: clip.m_KeepOriginalPositionXZ,
     heightFromFeet: clip.m_HeightFromFeet,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// GameObject, Transform, MeshFilter, MeshRenderer, SkinnedMeshRenderer (#305)
+
+/** The friendly form of {@link GameObject}. */
+export interface GameObjectFields extends EditorExtensionFields {
+  /**
+   * Unity: `m_Component`. Its components, each a `ComponentPair` whose one
+   * field is `component`: a `Transform` first, then the rest in the
+   * inspector's order.
+   */
+  component: ComponentPair[];
+  /** Unity: `m_Layer`. 0 to 31. */
+  layer: number;
+  /** Unity: `m_Name`. */
+  name: string;
+  /** Unity: `m_Tag`. An index into the project's tags, 0 `Untagged`. */
+  tag: number;
+  /** Unity: `m_IsActive`. The GameObject's own active flag (`activeSelf`). */
+  isActive: boolean;
+}
+
+/**
+ * A `GameObject` as {@link GameObjectFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toGameObjectFields(data: GameObject): GameObjectFields {
+  return defined({
+    ...editorExtension(data),
+    component: data.m_Component,
+    layer: data.m_Layer,
+    name: data.m_Name,
+    tag: data.m_Tag,
+    isActive: data.m_IsActive,
+  });
+}
+
+/** The friendly form of {@link Transform}. */
+export interface TransformFields extends EditorExtensionFields {
+  /** Unity: `m_GameObject`. The GameObject it is attached to. */
+  gameObject: PPtr;
+  /** Unity: `m_LocalRotation`. Rotation relative to the parent. */
+  localRotation: Quaternion;
+  /** Unity: `m_LocalPosition`. Position relative to the parent. */
+  localPosition: Vector3;
+  /** Unity: `m_LocalScale`. Scale relative to the parent. */
+  localScale: Vector3;
+  /** Unity: `m_Children`. The child Transforms, in hierarchy order. */
+  children: PPtr[];
+  /** Unity: `m_Father`. The parent Transform; a null pointer for a root. */
+  father: PPtr;
+}
+
+/**
+ * A `Transform` as {@link TransformFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toTransformFields(data: Transform): TransformFields {
+  return defined({
+    ...editorExtension(data),
+    gameObject: data.m_GameObject,
+    localRotation: data.m_LocalRotation,
+    localPosition: data.m_LocalPosition,
+    localScale: data.m_LocalScale,
+    children: data.m_Children,
+    father: data.m_Father,
+  });
+}
+
+/** The friendly form of {@link MeshFilter}. */
+export interface MeshFilterFields extends EditorExtensionFields {
+  /** Unity: `m_GameObject`. The GameObject it is attached to. */
+  gameObject: PPtr;
+  /** Unity: `m_Mesh`. */
+  mesh: PPtr;
+}
+
+/**
+ * A `MeshFilter` as {@link MeshFilterFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toMeshFilterFields(data: MeshFilter): MeshFilterFields {
+  return defined({
+    ...editorExtension(data),
+    gameObject: data.m_GameObject,
+    mesh: data.m_Mesh,
+  });
+}
+
+/** The friendly form of {@link Renderer}: the fields every renderer starts with. */
+export interface RendererFields extends EditorExtensionFields {
+  /** Unity: `m_GameObject`. The GameObject it is attached to. */
+  gameObject: PPtr;
+  /** Unity: `m_Enabled`. */
+  enabled: boolean;
+  /** Unity: `m_CastShadows`. `ShadowCastingMode`: 0 off, 1 on, 2 two sided, 3 shadows only. */
+  castShadows: number;
+  /** Unity: `m_ReceiveShadows`. */
+  receiveShadows: number;
+  /** Unity: `m_DynamicOccludee`. */
+  dynamicOccludee: number;
+  /** Unity: `m_StaticShadowCaster`. Unity 2021.1 and later. */
+  staticShadowCaster?: number;
+  /** Unity: `m_MotionVectors`. `MotionVectorGenerationMode`. */
+  motionVectors: number;
+  /** Unity: `m_LightProbeUsage`. */
+  lightProbeUsage: number;
+  /** Unity: `m_ReflectionProbeUsage`. */
+  reflectionProbeUsage: number;
+  /** Unity: `m_RayTracingMode`. Unity 2019.3 and later. */
+  rayTracingMode?: number;
+  /** Unity: `m_RayTraceProcedural`. Unity 2020.1 and later. */
+  rayTraceProcedural?: number;
+  /** Unity: `m_RayTracingAccelStructBuildFlagsOverride`. Unity 2023.2 and later. */
+  rayTracingAccelStructBuildFlagsOverride?: number;
+  /** Unity: `m_RayTracingAccelStructBuildFlags`. Unity 2023.2 and later. */
+  rayTracingAccelStructBuildFlags?: number;
+  /** Unity: `m_SmallMeshCulling`. Unity 2023.3 (6000.0) and later. */
+  smallMeshCulling?: number;
+  /** Unity: `m_ForceMeshLod`. Unity 6000.2 and later. */
+  forceMeshLod?: number;
+  /** Unity: `m_MeshLodSelectionBias`. Unity 6000.2 and later. */
+  meshLodSelectionBias?: number;
+  /** Unity: `m_RenderingLayerMask`. */
+  renderingLayerMask: number;
+  /** Unity: `m_RendererPriority`. */
+  rendererPriority: number;
+  /** Unity: `m_LightmapIndex`. 65535 when the renderer has no lightmap. */
+  lightmapIndex: number;
+  /** Unity: `m_LightmapIndexDynamic`. */
+  lightmapIndexDynamic: number;
+  /** Unity: `m_LightmapTilingOffset`. */
+  lightmapTilingOffset: Vector4;
+  /** Unity: `m_LightmapTilingOffsetDynamic`. */
+  lightmapTilingOffsetDynamic: Vector4;
+  /** Unity: `m_Materials`. */
+  materials: PPtr[];
+  /** Unity: `m_StaticBatchInfo`. */
+  staticBatchInfo: StaticBatchInfo;
+  /** Unity: `m_StaticBatchRoot`. */
+  staticBatchRoot: PPtr;
+  /** Unity: `m_ProbeAnchor`. */
+  probeAnchor: PPtr;
+  /** Unity: `m_LightProbeVolumeOverride`. */
+  lightProbeVolumeOverride: PPtr;
+  /** Unity: `m_SortingLayerID`. */
+  sortingLayerID: number;
+  /** Unity: `m_SortingLayer`. */
+  sortingLayer: number;
+  /** Unity: `m_SortingOrder`. */
+  sortingOrder: number;
+  /** Unity: `m_MaskInteraction`. `SpriteMaskInteraction`. Unity 6000.3 and later. */
+  maskInteraction?: number;
+}
+
+/** The friendly form of {@link MeshRenderer}. */
+export interface MeshRendererFields extends RendererFields {
+  /** Unity: `m_AdditionalVertexStreams`. */
+  additionalVertexStreams: PPtr;
+  /** Unity: `m_EnlightenVertexStream`. Unity 2020.1 and later. */
+  enlightenVertexStream?: PPtr;
+}
+
+/**
+ * A `MeshRenderer` as {@link MeshRendererFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toMeshRendererFields(data: MeshRenderer): MeshRendererFields {
+  return defined({
+    ...rendererFields(data),
+    additionalVertexStreams: data.m_AdditionalVertexStreams,
+    enlightenVertexStream: data.m_EnlightenVertexStream,
+  });
+}
+
+/** The friendly form of {@link SkinnedMeshRenderer}. */
+export interface SkinnedMeshRendererFields extends RendererFields {
+  /** Unity: `m_Quality`. `SkinQuality`: 0 auto, 1, 2 or 4 bones. */
+  quality: number;
+  /** Unity: `m_UpdateWhenOffscreen`. */
+  updateWhenOffscreen: boolean;
+  /** Unity: `m_SkinnedMotionVectors`. */
+  skinnedMotionVectors: boolean;
+  /** Unity: `m_Mesh`. The skinned `Mesh`. */
+  mesh: PPtr;
+  /** Unity: `m_Bones`. The bone Transforms, in the order of the mesh's bind poses. */
+  bones: PPtr[];
+  /** Unity: `m_BlendShapeWeights`. One weight per blend shape of the mesh, 0 to 100. */
+  blendShapeWeights: number[];
+  /** Unity: `m_RootBone`. */
+  rootBone: PPtr;
+  /** Unity: `m_AABB` (the rule would make it `aABB`). The bounds, relative to the root bone. */
+  aabb: AABBFields;
+  /** Unity: `m_DirtyAABB`. */
+  dirtyAABB: boolean;
+}
+
+/**
+ * A `SkinnedMeshRenderer` as {@link SkinnedMeshRendererFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toSkinnedMeshRendererFields(data: SkinnedMeshRenderer): SkinnedMeshRendererFields {
+  return defined({
+    ...rendererFields(data),
+    quality: data.m_Quality,
+    updateWhenOffscreen: data.m_UpdateWhenOffscreen,
+    skinnedMotionVectors: data.m_SkinnedMotionVectors,
+    mesh: data.m_Mesh,
+    bones: data.m_Bones,
+    blendShapeWeights: data.m_BlendShapeWeights,
+    rootBone: data.m_RootBone,
+    aabb: { center: data.m_AABB.m_Center, extent: data.m_AABB.m_Extent },
+    dirtyAABB: data.m_DirtyAABB,
+  });
+}
+
+function rendererFields(data: Renderer): RendererFields {
+  return {
+    ...editorExtension(data),
+    gameObject: data.m_GameObject,
+    enabled: data.m_Enabled,
+    castShadows: data.m_CastShadows,
+    receiveShadows: data.m_ReceiveShadows,
+    dynamicOccludee: data.m_DynamicOccludee,
+    staticShadowCaster: data.m_StaticShadowCaster,
+    motionVectors: data.m_MotionVectors,
+    lightProbeUsage: data.m_LightProbeUsage,
+    reflectionProbeUsage: data.m_ReflectionProbeUsage,
+    rayTracingMode: data.m_RayTracingMode,
+    rayTraceProcedural: data.m_RayTraceProcedural,
+    rayTracingAccelStructBuildFlagsOverride: data.m_RayTracingAccelStructBuildFlagsOverride,
+    rayTracingAccelStructBuildFlags: data.m_RayTracingAccelStructBuildFlags,
+    smallMeshCulling: data.m_SmallMeshCulling,
+    forceMeshLod: data.m_ForceMeshLod,
+    meshLodSelectionBias: data.m_MeshLodSelectionBias,
+    renderingLayerMask: data.m_RenderingLayerMask,
+    rendererPriority: data.m_RendererPriority,
+    lightmapIndex: data.m_LightmapIndex,
+    lightmapIndexDynamic: data.m_LightmapIndexDynamic,
+    lightmapTilingOffset: data.m_LightmapTilingOffset,
+    lightmapTilingOffsetDynamic: data.m_LightmapTilingOffsetDynamic,
+    materials: data.m_Materials,
+    staticBatchInfo: data.m_StaticBatchInfo,
+    staticBatchRoot: data.m_StaticBatchRoot,
+    probeAnchor: data.m_ProbeAnchor,
+    lightProbeVolumeOverride: data.m_LightProbeVolumeOverride,
+    sortingLayerID: data.m_SortingLayerID,
+    sortingLayer: data.m_SortingLayer,
+    sortingOrder: data.m_SortingOrder,
+    maskInteraction: data.m_MaskInteraction,
   };
 }
 

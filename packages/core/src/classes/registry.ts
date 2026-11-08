@@ -18,8 +18,16 @@ import {
 } from "./AnimatorOverrideController.js";
 import { readAssetBundle, type AssetBundle } from "./AssetBundle.js";
 import { readAvatar, type Avatar } from "./Avatar.js";
+import { readGameObject, type GameObject } from "./GameObject.js";
 import { readMaterial, type Material } from "./Material.js";
 import { readMeshData, type MeshData } from "./Mesh.js";
+import { readMeshFilter, type MeshFilter } from "./MeshFilter.js";
+import {
+  readMeshRenderer,
+  readSkinnedMeshRenderer,
+  type MeshRenderer,
+  type SkinnedMeshRenderer,
+} from "./Renderer.js";
 import { readShader, type Shader } from "./Shader.js";
 import { readTexture2D, type Texture2D } from "./Texture2D.js";
 import { readMonoBehaviour, type MonoBehaviour } from "./MonoBehaviour.js";
@@ -27,6 +35,7 @@ import { readMonoScript, type MonoScript } from "./MonoScript.js";
 import { readSprite, type Sprite } from "./Sprite.js";
 import { readSpriteAtlas, type SpriteAtlas } from "./SpriteAtlas.js";
 import { readTextAsset, type TextAsset } from "./TextAsset.js";
+import { readTransform, type Transform } from "./Transform.js";
 import { readAudioClipData, type AudioClipData } from "./AudioClip.js";
 import { readFont, type Font } from "./Font.js";
 import { readMovieTexture, type MovieTexture } from "./MovieTexture.js";
@@ -40,16 +49,21 @@ import {
   toAvatarFields,
   toAudioClipFields,
   toFontFields,
+  toGameObjectFields,
   toMaterialFields,
   toMeshFields,
+  toMeshFilterFields,
+  toMeshRendererFields,
   toMonoBehaviourFields,
   toMonoScriptFields,
   toMovieTextureFields,
   toShaderFields,
+  toSkinnedMeshRendererFields,
   toSpriteAtlasFields,
   toSpriteFields,
   toTextAssetFields,
   toTexture2DFields,
+  toTransformFields,
   toVideoClipFields,
   type AnimationClipFields,
   type AnimatorControllerFields,
@@ -57,6 +71,11 @@ import {
   type AnimatorOverrideControllerFields,
   type AssetBundleFields,
   type AvatarFields,
+  type GameObjectFields,
+  type MeshFilterFields,
+  type MeshRendererFields,
+  type SkinnedMeshRendererFields,
+  type TransformFields,
   type AudioClipFields,
   type FontFields,
   type MaterialFields,
@@ -136,6 +155,11 @@ export interface ObjectDataMap {
   Animator: Animator;
   AnimatorOverrideController: AnimatorOverrideController;
   AnimationClip: AnimationClip;
+  GameObject: GameObject;
+  Transform: Transform;
+  MeshFilter: MeshFilter;
+  MeshRenderer: MeshRenderer;
+  SkinnedMeshRenderer: SkinnedMeshRenderer;
 }
 
 /**
@@ -164,6 +188,11 @@ export interface AssetDataMap {
   Animator: AnimatorFields;
   AnimatorOverrideController: AnimatorOverrideControllerFields;
   AnimationClip: AnimationClipFields;
+  GameObject: GameObjectFields;
+  Transform: TransformFields;
+  MeshFilter: MeshFilterFields;
+  MeshRenderer: MeshRendererFields;
+  SkinnedMeshRenderer: SkinnedMeshRendererFields;
 }
 
 /**
@@ -213,6 +242,11 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   Animator: readAnimator,
   AnimatorOverrideController: readAnimatorOverrideController,
   AnimationClip: readAnimationClip,
+  GameObject: readGameObject,
+  Transform: readTransform,
+  MeshFilter: readMeshFilter,
+  MeshRenderer: readMeshRenderer,
+  SkinnedMeshRenderer: readSkinnedMeshRenderer,
 };
 
 /** {@link CLASS_READERS} by class id, and the class name each id has there. */
@@ -292,6 +326,11 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   Animator: toAnimatorFields,
   AnimatorOverrideController: toAnimatorOverrideControllerFields,
   AnimationClip: toAnimationClipFields,
+  GameObject: toGameObjectFields,
+  Transform: toTransformFields,
+  MeshFilter: toMeshFilterFields,
+  MeshRenderer: toMeshRendererFields,
+  SkinnedMeshRenderer: toSkinnedMeshRendererFields,
 };
 
 /**

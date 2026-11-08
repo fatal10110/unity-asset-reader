@@ -58,6 +58,11 @@ const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.Animator,
   ClassID.AnimatorOverrideController,
   ClassID.AnimationClip,
+  ClassID.GameObject,
+  ClassID.Transform,
+  ClassID.MeshFilter,
+  ClassID.MeshRenderer,
+  ClassID.SkinnedMeshRenderer,
 ]);
 /** Whether a fixture holds an object of a class without a hardcoded reader. */
 const hasOthers = (name: string): boolean =>
