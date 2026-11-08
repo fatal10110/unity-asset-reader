@@ -31,6 +31,11 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- A hand-written reader for the legacy `Animation` component (`readAnimation`), Unity 2019.1 to
+  6000.6 (#314), with its `asset.data` shape (`toAnimationFields`, `AnimationFields`). AssetStudio
+  reads `m_Animation` and `m_Animations` only; the rest comes from Unity's own type trees:
+  `m_WrapMode`, `m_PlayAutomatically`, `m_AnimatePhysics`, `m_CullingType` and, from 2023.1,
+  `m_UpdateMode`.
 - `asset.name` of a GameObject in a bundle built without type trees is its `m_Name`, read
   from the GameObject header (components, layer, name) as upstream reads it (#308). It was
   `""`, and stays `""` for a GameObject the GameObject reader refuses (before Unity 2019.1, an
@@ -478,7 +483,8 @@ scene readers.
   holds (#304): rotation, euler, position, scale, float and object reference curves, each with
   its path (and attribute and class id) and keyframes (time, value, in and out slope), and the
   clip's events. A Mecanim clip's streamed, dense and constant data is decoded as AssetStudio's
-  `AnimationClipConverter` does, its path hashes named from the loaded Avatars and Animators,
+  `AnimationClipConverter` does, its path hashes named from the loaded Avatars, Animators and
+  legacy Animation components (#314),
   humanoid curves as muscle attributes; legacy curves are merged as `Convert()` merges them.
   Pure TypeScript, sync, browser-safe, no dependencies. Every fixture clip of Unity 2019.4,
   2020.3 and 6000.3 matches AssetStudio's curves float32 bit for bit. The dense and constant
