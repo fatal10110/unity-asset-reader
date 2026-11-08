@@ -76842,6 +76842,3355 @@
           "Transform": 32
         }
       }
+    },
+    "editor/6000.6.4f1/legacy-animation/lz4/legacy-animation": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.6.4f1",
+      "files": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": {
+          "sha256": "ada5df7b8051fb1fe064db31ddd6a612290dd35c67fb388991a9a1a92ee34237",
+          "size": 45631
+        }
+      },
+      "objects": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": [
+          {
+            "pathId": "-1548301857022800127",
+            "classId": 4,
+            "byteSize": 80
+          },
+          {
+            "pathId": "-2829309711682841473",
+            "classId": 74,
+            "byteSize": 3240
+          },
+          {
+            "pathId": "-4615257749679061048",
+            "classId": 43,
+            "byteSize": 812
+          },
+          {
+            "pathId": "-4662634936016116161",
+            "classId": 1,
+            "byteSize": 47
+          },
+          {
+            "pathId": "-4826317543375862557",
+            "classId": 74,
+            "byteSize": 3244
+          },
+          {
+            "pathId": "-5562513066675920489",
+            "classId": 4,
+            "byteSize": 68
+          },
+          {
+            "pathId": "-8631225869028427513",
+            "classId": 111,
+            "byteSize": 60
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 552
+          },
+          {
+            "pathId": "1987335868902504672",
+            "classId": 4,
+            "byteSize": 68
+          },
+          {
+            "pathId": "2022734720362471812",
+            "classId": 1,
+            "byteSize": 43
+          },
+          {
+            "pathId": "2563688967975853262",
+            "classId": 4,
+            "byteSize": 92
+          },
+          {
+            "pathId": "3345940984474281207",
+            "classId": 137,
+            "byteSize": 216
+          },
+          {
+            "pathId": "3693563004649036361",
+            "classId": 1,
+            "byteSize": 31
+          },
+          {
+            "pathId": "8537887127459452232",
+            "classId": 1,
+            "byteSize": 31
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": {
+          "formatVersion": 23,
+          "unityVersion": "6000.6.4f1",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 111,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "541f12f17fe2f8e8e2082e819a659a28",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Animation", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 1],
+                [2, "SInt64", "m_PathID", 8, 1],
+                [1, "UInt8", "m_Enabled", 1, 16641],
+                [1, "PPtr<AnimationClip>", "m_Animation", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "m_Animations", -1, 32800],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<AnimationClip>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "int", "m_WrapMode", 4, 0],
+                [1, "bool", "m_PlayAutomatically", 1, 0],
+                [1, "bool", "m_AnimatePhysics", 1, 16384],
+                [1, "int", "m_UpdateMode", 4, 0],
+                [1, "int", "m_CullingType", 4, 0]
+              ]
+            },
+            {
+              "classId": 4,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "55ef5908c66860587f939791f59650e6",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Transform", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 1],
+                [2, "SInt64", "m_PathID", 8, 1],
+                [1, "Quaternionf", "m_LocalRotation", 16, 2097152],
+                [2, "float", "x", 4, 0],
+                [2, "float", "y", 4, 0],
+                [2, "float", "z", 4, 0],
+                [2, "float", "w", 4, 0],
+                [1, "Vector3f", "m_LocalPosition", 12, 2097152],
+                [2, "float", "x", 4, 0],
+                [2, "float", "y", 4, 0],
+                [2, "float", "z", 4, 0],
+                [1, "Vector3f", "m_LocalScale", 12, 2113536],
+                [2, "float", "x", 4, 0],
+                [2, "float", "y", 4, 0],
+                [2, "float", "z", 4, 0],
+                [1, "vector", "m_Children", -1, 32833],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Transform>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 1],
+                [4, "SInt64", "m_PathID", 8, 1],
+                [1, "PPtr<Transform>", "m_Father", 12, 1],
+                [2, "int", "m_FileID", 4, 1],
+                [2, "SInt64", "m_PathID", 8, 1]
+              ]
+            },
+            {
+              "classId": 74,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "a1a069e8791c5cf85b0d667e7bd2303d",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AnimationClip", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "bool", "m_Legacy", 1, 0],
+                [1, "bool", "m_Compressed", 1, 16],
+                [1, "bool", "m_UseHighQualityCurve", 1, 16400],
+                [1, "vector", "m_RotationCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "QuaternionCurve", "data", -1, 32768],
+                [4, "AnimationCurve", "curve", -1, 32768],
+                [5, "vector", "m_Curve", -1, 32769],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "Keyframe", "data", 88, 0],
+                [8, "float", "time", 4, 0],
+                [8, "Quaternionf", "value", 16, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [9, "float", "w", 4, 0],
+                [8, "Quaternionf", "inSlope", 16, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [9, "float", "w", 4, 0],
+                [8, "Quaternionf", "outSlope", 16, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [9, "float", "w", 4, 0],
+                [8, "int", "weightedMode", 4, 0],
+                [8, "Quaternionf", "inWeight", 16, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [9, "float", "w", 4, 0],
+                [8, "Quaternionf", "outWeight", 16, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [9, "float", "w", 4, 0],
+                [5, "int", "m_PreInfinity", 4, 1],
+                [5, "int", "m_PostInfinity", 4, 1],
+                [5, "int", "m_RotationOrder", 4, 1],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [1, "vector", "m_CompressedRotationCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "CompressedAnimationCurve", "data", -1, 32768],
+                [4, "string", "m_Path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "PackedBitVector", "m_Times", -1, 32768],
+                [5, "unsigned int", "m_NumItems", 4, 0],
+                [5, "vector", "m_Data", -1, 32768],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "UInt8", "data", 1, 0],
+                [5, "UInt8", "m_BitSize", 1, 16384],
+                [4, "PackedBitVector", "m_Values", -1, 32768],
+                [5, "unsigned int", "m_NumItems", 4, 0],
+                [5, "vector", "m_Data", -1, 49152],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "UInt8", "data", 1, 0],
+                [4, "PackedBitVector", "m_Slopes", -1, 32768],
+                [5, "unsigned int", "m_NumItems", 4, 0],
+                [5, "float", "m_Range", 4, 0],
+                [5, "float", "m_Start", 4, 0],
+                [5, "vector", "m_Data", -1, 32768],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "UInt8", "data", 1, 0],
+                [5, "UInt8", "m_BitSize", 1, 16384],
+                [4, "int", "m_PreInfinity", 4, 0],
+                [4, "int", "m_PostInfinity", 4, 0],
+                [1, "vector", "m_EulerCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "Vector3Curve", "data", -1, 32768],
+                [4, "AnimationCurve", "curve", -1, 32768],
+                [5, "vector", "m_Curve", -1, 32769],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "Keyframe", "data", 68, 0],
+                [8, "float", "time", 4, 0],
+                [8, "Vector3f", "value", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "inSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "int", "weightedMode", 4, 0],
+                [8, "Vector3f", "inWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [5, "int", "m_PreInfinity", 4, 1],
+                [5, "int", "m_PostInfinity", 4, 1],
+                [5, "int", "m_RotationOrder", 4, 1],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [1, "vector", "m_PositionCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "Vector3Curve", "data", -1, 32768],
+                [4, "AnimationCurve", "curve", -1, 32768],
+                [5, "vector", "m_Curve", -1, 32769],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "Keyframe", "data", 68, 0],
+                [8, "float", "time", 4, 0],
+                [8, "Vector3f", "value", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "inSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "int", "weightedMode", 4, 0],
+                [8, "Vector3f", "inWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [5, "int", "m_PreInfinity", 4, 1],
+                [5, "int", "m_PostInfinity", 4, 1],
+                [5, "int", "m_RotationOrder", 4, 1],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [1, "vector", "m_ScaleCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "Vector3Curve", "data", -1, 32768],
+                [4, "AnimationCurve", "curve", -1, 32768],
+                [5, "vector", "m_Curve", -1, 32769],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "Keyframe", "data", 68, 0],
+                [8, "float", "time", 4, 0],
+                [8, "Vector3f", "value", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "inSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outSlope", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "int", "weightedMode", 4, 0],
+                [8, "Vector3f", "inWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [8, "Vector3f", "outWeight", 12, 2097152],
+                [9, "float", "x", 4, 0],
+                [9, "float", "y", 4, 0],
+                [9, "float", "z", 4, 0],
+                [5, "int", "m_PreInfinity", 4, 1],
+                [5, "int", "m_PostInfinity", 4, 1],
+                [5, "int", "m_RotationOrder", 4, 1],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [1, "vector", "m_FloatCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "FloatCurve", "data", -1, 32768],
+                [4, "AnimationCurve", "curve", -1, 32768],
+                [5, "vector", "m_Curve", -1, 32769],
+                [6, "Array", "Array", -1, 16384],
+                [7, "int", "size", 4, 0],
+                [7, "Keyframe", "data", 28, 0],
+                [8, "float", "time", 4, 0],
+                [8, "float", "value", 4, 0],
+                [8, "float", "inSlope", 4, 0],
+                [8, "float", "outSlope", 4, 0],
+                [8, "int", "weightedMode", 4, 0],
+                [8, "float", "inWeight", 4, 0],
+                [8, "float", "outWeight", 4, 0],
+                [5, "int", "m_PreInfinity", 4, 1],
+                [5, "int", "m_PostInfinity", 4, 1],
+                [5, "int", "m_RotationOrder", 4, 1],
+                [4, "string", "attribute", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "Type*", "classID", 4, 0],
+                [4, "PPtr<MonoScript>", "script", 12, 0],
+                [5, "int", "m_FileID", 4, 8388609],
+                [5, "SInt64", "m_PathID", 8, 8388609],
+                [4, "int", "flags", 4, 0],
+                [1, "vector", "m_PPtrCurves", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "PPtrCurve", "data", -1, 32768],
+                [4, "vector", "curve", -1, 32768],
+                [5, "Array", "Array", -1, 16384],
+                [6, "int", "size", 4, 0],
+                [6, "PPtrKeyframe", "data", 16, 0],
+                [7, "float", "time", 4, 0],
+                [7, "PPtr<Object>", "value", 12, 0],
+                [8, "int", "m_FileID", 4, 8388609],
+                [8, "SInt64", "m_PathID", 8, 8388609],
+                [4, "string", "attribute", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "path", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "Type*", "classID", 4, 0],
+                [4, "PPtr<MonoScript>", "script", 12, 0],
+                [5, "int", "m_FileID", 4, 8388609],
+                [5, "SInt64", "m_PathID", 8, 8388609],
+                [4, "int", "flags", 4, 0],
+                [1, "float", "m_SampleRate", 4, 0],
+                [1, "int", "m_WrapMode", 4, 0],
+                [1, "AABB", "m_Bounds", 24, 0],
+                [2, "Vector3f", "m_Center", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [2, "Vector3f", "m_Extent", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [1, "unsigned int", "m_MuscleClipSize", 4, 0],
+                [1, "ClipMuscleConstant", "m_MuscleClip", -1, 32768],
+                [2, "HumanPose", "m_DeltaPose", -1, 0],
+                [3, "xform", "m_RootX", 40, 0],
+                [4, "float3", "t", 12, 2097152],
+                [5, "float", "x", 4, 0],
+                [5, "float", "y", 4, 0],
+                [5, "float", "z", 4, 0],
+                [4, "float4", "q", 16, 2097152],
+                [5, "float", "x", 4, 0],
+                [5, "float", "y", 4, 0],
+                [5, "float", "z", 4, 0],
+                [5, "float", "w", 4, 0],
+                [4, "float3", "s", 12, 2097152],
+                [5, "float", "x", 4, 0],
+                [5, "float", "y", 4, 0],
+                [5, "float", "z", 4, 0],
+                [3, "float3", "m_LookAtPosition", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [3, "float4", "m_LookAtWeight", 16, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [4, "float", "w", 4, 0],
+                [3, "staticvector", "m_GoalArray", -1, 0],
+                [4, "Array", "Array", -1, 0],
+                [5, "int", "size", 4, 0],
+                [5, "HumanGoal", "data", 64, 0],
+                [6, "xform", "m_X", 40, 0],
+                [7, "float3", "t", 12, 2097152],
+                [8, "float", "x", 4, 0],
+                [8, "float", "y", 4, 0],
+                [8, "float", "z", 4, 0],
+                [7, "float4", "q", 16, 2097152],
+                [8, "float", "x", 4, 0],
+                [8, "float", "y", 4, 0],
+                [8, "float", "z", 4, 0],
+                [8, "float", "w", 4, 0],
+                [7, "float3", "s", 12, 2097152],
+                [8, "float", "x", 4, 0],
+                [8, "float", "y", 4, 0],
+                [8, "float", "z", 4, 0],
+                [6, "float", "m_WeightT", 4, 0],
+                [6, "float", "m_WeightR", 4, 0],
+                [6, "float3", "m_HintT", 12, 2097152],
+                [7, "float", "x", 4, 0],
+                [7, "float", "y", 4, 0],
+                [7, "float", "z", 4, 0],
+                [6, "float", "m_HintWeightT", 4, 0],
+                [3, "HandPose", "m_LeftHandPose", -1, 0],
+                [4, "xform", "m_GrabX", 40, 0],
+                [5, "float3", "t", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "float4", "q", 16, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [6, "float", "w", 4, 0],
+                [5, "float3", "s", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [4, "staticvector", "m_DoFArray", -1, 0],
+                [5, "Array", "Array", -1, 0],
+                [6, "int", "size", 4, 0],
+                [6, "float", "data", 4, 0],
+                [4, "float", "m_Override", 4, 0],
+                [4, "float", "m_CloseOpen", 4, 0],
+                [4, "float", "m_InOut", 4, 0],
+                [4, "float", "m_Grab", 4, 0],
+                [3, "HandPose", "m_RightHandPose", -1, 0],
+                [4, "xform", "m_GrabX", 40, 0],
+                [5, "float3", "t", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "float4", "q", 16, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [6, "float", "w", 4, 0],
+                [5, "float3", "s", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [4, "staticvector", "m_DoFArray", -1, 0],
+                [5, "Array", "Array", -1, 0],
+                [6, "int", "size", 4, 0],
+                [6, "float", "data", 4, 0],
+                [4, "float", "m_Override", 4, 0],
+                [4, "float", "m_CloseOpen", 4, 0],
+                [4, "float", "m_InOut", 4, 0],
+                [4, "float", "m_Grab", 4, 0],
+                [3, "staticvector", "m_DoFArray", -1, 0],
+                [4, "Array", "Array", -1, 0],
+                [5, "int", "size", 4, 0],
+                [5, "float", "data", 4, 0],
+                [3, "staticvector", "m_TDoFArray", -1, 0],
+                [4, "Array", "Array", -1, 0],
+                [5, "int", "size", 4, 0],
+                [5, "float3", "data", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [2, "xform", "m_StartX", 40, 0],
+                [3, "float3", "t", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [3, "float4", "q", 16, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [4, "float", "w", 4, 0],
+                [3, "float3", "s", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [2, "xform", "m_StopX", 40, 0],
+                [3, "float3", "t", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [3, "float4", "q", 16, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [4, "float", "w", 4, 0],
+                [3, "float3", "s", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [2, "xform", "m_LeftFootStartX", 40, 0],
+                [3, "float3", "t", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [3, "float4", "q", 16, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [4, "float", "w", 4, 0],
+                [3, "float3", "s", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [2, "xform", "m_RightFootStartX", 40, 0],
+                [3, "float3", "t", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [3, "float4", "q", 16, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [4, "float", "w", 4, 0],
+                [3, "float3", "s", 12, 2097152],
+                [4, "float", "x", 4, 0],
+                [4, "float", "y", 4, 0],
+                [4, "float", "z", 4, 0],
+                [2, "float3", "m_AverageSpeed", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [2, "OffsetPtr", "m_Clip", -1, 0],
+                [3, "Clip", "data", -1, 0],
+                [4, "StreamedClip", "m_StreamedClip", -1, 0],
+                [5, "vector", "data", -1, 0],
+                [6, "Array", "Array", -1, 0],
+                [7, "int", "size", 4, 0],
+                [7, "unsigned int", "data", 4, 0],
+                [5, "UInt16", "curveCount", 2, 0],
+                [5, "UInt16", "discreteCurveCount", 2, 0],
+                [4, "DenseClip", "m_DenseClip", -1, 0],
+                [5, "int", "m_FrameCount", 4, 0],
+                [5, "unsigned int", "m_CurveCount", 4, 0],
+                [5, "float", "m_SampleRate", 4, 0],
+                [5, "float", "m_BeginTime", 4, 0],
+                [5, "vector", "m_SampleArray", -1, 0],
+                [6, "Array", "Array", -1, 0],
+                [7, "int", "size", 4, 0],
+                [7, "float", "data", 4, 0],
+                [4, "ConstantClip", "m_ConstantClip", -1, 0],
+                [5, "vector", "data", -1, 0],
+                [6, "Array", "Array", -1, 0],
+                [7, "int", "size", 4, 0],
+                [7, "float", "data", 4, 0],
+                [2, "float", "m_StartTime", 4, 0],
+                [2, "float", "m_StopTime", 4, 0],
+                [2, "float", "m_OrientationOffsetY", 4, 0],
+                [2, "float", "m_Level", 4, 0],
+                [2, "float", "m_CycleOffset", 4, 0],
+                [2, "float", "m_AverageAngularSpeed", 4, 0],
+                [2, "staticvector", "m_IndexArray", -1, 0],
+                [3, "Array", "Array", -1, 0],
+                [4, "int", "size", 4, 0],
+                [4, "int", "data", 4, 0],
+                [2, "vector", "m_ValueArrayDelta", -1, 0],
+                [3, "Array", "Array", -1, 0],
+                [4, "int", "size", 4, 0],
+                [4, "ValueDelta", "data", 8, 0],
+                [5, "float", "m_Start", 4, 0],
+                [5, "float", "m_Stop", 4, 0],
+                [2, "vector", "m_ValueArrayReferencePose", -1, 0],
+                [3, "Array", "Array", -1, 0],
+                [4, "int", "size", 4, 0],
+                [4, "float", "data", 4, 0],
+                [2, "bool", "m_Mirror", 1, 0],
+                [2, "bool", "m_LoopTime", 1, 0],
+                [2, "bool", "m_LoopBlend", 1, 0],
+                [2, "bool", "m_LoopBlendOrientation", 1, 0],
+                [2, "bool", "m_LoopBlendPositionY", 1, 0],
+                [2, "bool", "m_LoopBlendPositionXZ", 1, 0],
+                [2, "bool", "m_StartAtOrigin", 1, 0],
+                [2, "bool", "m_KeepOriginalOrientation", 1, 0],
+                [2, "bool", "m_KeepOriginalPositionY", 1, 0],
+                [2, "bool", "m_KeepOriginalPositionXZ", 1, 0],
+                [2, "bool", "m_HeightFromFeet", 1, 16384],
+                [1, "AnimationClipBindingConstant", "m_ClipBindingConstant", -1, 32768],
+                [2, "vector", "genericBindings", -1, 32768],
+                [3, "Array", "Array", -1, 49152],
+                [4, "int", "size", 4, 0],
+                [4, "GenericBinding", "data", 30, 32768],
+                [5, "unsigned int", "path", 4, 0],
+                [5, "unsigned int", "attribute", 4, 0],
+                [5, "PPtr<Object>", "script", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [5, "int", "typeID", 4, 0],
+                [5, "UInt8", "customType", 1, 0],
+                [5, "UInt8", "isPPtrCurve", 1, 0],
+                [5, "UInt8", "isIntCurve", 1, 0],
+                [5, "UInt8", "isSerializeReferenceCurve", 1, 0],
+                [5, "UInt16", "metaData", 2, 16384],
+                [2, "vector", "pptrCurveMapping", -1, 32768],
+                [3, "Array", "Array", -1, 16384],
+                [4, "int", "size", 4, 0],
+                [4, "PPtr<Object>", "data", 12, 0],
+                [5, "int", "m_FileID", 4, 8388609],
+                [5, "SInt64", "m_PathID", 8, 8388609],
+                [1, "bool", "m_HasGenericRootTransform", 1, 16],
+                [1, "bool", "m_HasMotionFloatCurves", 1, 16400],
+                [1, "vector", "m_Events", -1, 32769],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "AnimationEvent", "data", -1, 32768],
+                [4, "float", "time", 4, 0],
+                [4, "string", "functionName", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "data", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "PPtr<Object>", "objectReferenceParameter", 12, 0],
+                [5, "int", "m_FileID", 4, 8388609],
+                [5, "SInt64", "m_PathID", 8, 8388609],
+                [4, "float", "floatParameter", 4, 0],
+                [4, "int", "intParameter", 4, 0],
+                [4, "int", "messageOptions", 4, 0]
+              ]
+            },
+            {
+              "classId": 1,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "86e34eb8ee7642b089fb98c9d81dd9b0",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "GameObject", "Base", -1, 32768],
+                [1, "vector", "m_Component", -1, 268468289],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "ComponentPair", "data", 12, 0],
+                [4, "PPtr<Component>", "component", 12, 0],
+                [5, "int", "m_FileID", 4, 1],
+                [5, "SInt64", "m_PathID", 8, 1],
+                [1, "unsigned int", "m_Layer", 4, 0],
+                [1, "string", "m_Name", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "UInt16", "m_Tag", 2, 0],
+                [1, "bool", "m_IsActive", 1, 0]
+              ]
+            },
+            {
+              "classId": 43,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "e2111e61d01f991fffb89353e8fe9cd8",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Mesh", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_SubMeshes", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "SubMesh", "data", 48, 0],
+                [4, "unsigned int", "firstByte", 4, 0],
+                [4, "unsigned int", "indexCount", 4, 0],
+                [4, "int", "topology", 4, 0],
+                [4, "unsigned int", "baseVertex", 4, 0],
+                [4, "unsigned int", "firstVertex", 4, 0],
+                [4, "unsigned int", "vertexCount", 4, 0],
+                [4, "AABB", "localAABB", 24, 0],
+                [5, "Vector3f", "m_Center", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "Vector3f", "m_Extent", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [1, "BlendShapeData", "m_Shapes", -1, 32769],
+                [2, "vector", "vertices", -1, 32768],
+                [3, "Array", "Array", -1, 16384],
+                [4, "int", "size", 4, 0],
+                [4, "BlendShapeVertex", "data", 40, 0],
+                [5, "Vector3f", "vertex", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "Vector3f", "normal", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "Vector3f", "tangent", 12, 2097152],
+                [6, "float", "x", 4, 0],
+                [6, "float", "y", 4, 0],
+                [6, "float", "z", 4, 0],
+                [5, "unsigned int", "index", 4, 0],
+                [2, "vector", "shapes", -1, 32768],
+                [3, "Array", "Array", -1, 49152],
+                [4, "int", "size", 4, 0],
+                [4, "MeshBlendShape", "data", 10, 32768],
+                [5, "unsigned int", "firstVertex", 4, 0],
+                [5, "unsigned int", "vertexCount", 4, 0],
+                [5, "bool", "hasNormals", 1, 0],
+                [5, "bool", "hasTangents", 1, 16384],
+                [2, "vector", "channels", -1, 32768],
+                [3, "Array", "Array", -1, 49152],
+                [4, "int", "size", 4, 0],
+                [4, "MeshBlendShapeChannel", "data", -1, 32768],
+                [5, "string", "name", -1, 32768],
+                [6, "Array", "Array", -1, 16385],
+                [7, "int", "size", 4, 0],
+                [7, "char", "data", 1, 0],
+                [5, "unsigned int", "nameHash", 4, 0],
+                [5, "int", "frameIndex", 4, 0],
+                [5, "int", "frameCount", 4, 0],
+                [2, "vector", "fullWeights", -1, 32768],
+                [3, "Array", "Array", -1, 16384],
+                [4, "int", "size", 4, 0],
+                [4, "float", "data", 4, 0],
+                [1, "vector", "m_BindPose", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "Matrix4x4f", "data", 64, 0],
+                [4, "float", "e00", 4, 0],
+                [4, "float", "e01", 4, 0],
+                [4, "float", "e02", 4, 0],
+                [4, "float", "e03", 4, 0],
+                [4, "float", "e10", 4, 0],
+                [4, "float", "e11", 4, 0],
+                [4, "float", "e12", 4, 0],
+                [4, "float", "e13", 4, 0],
+                [4, "float", "e20", 4, 0],
+                [4, "float", "e21", 4, 0],
+                [4, "float", "e22", 4, 0],
+                [4, "float", "e23", 4, 0],
+                [4, "float", "e30", 4, 0],
+                [4, "float", "e31", 4, 0],
+                [4, "float", "e32", 4, 0],
+                [4, "float", "e33", 4, 0],
+                [1, "vector", "m_BoneNameHashes", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "unsigned int", "data", 4, 0],
+                [1, "unsigned int", "m_RootBoneNameHash", 4, 1],
+                [1, "vector", "m_BonesAABB", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "MinMaxAABB", "data", 24, 0],
+                [4, "Vector3f", "m_Min", 12, 2097152],
+                [5, "float", "x", 4, 0],
+                [5, "float", "y", 4, 0],
+                [5, "float", "z", 4, 0],
+                [4, "Vector3f", "m_Max", 12, 2097152],
+                [5, "float", "x", 4, 0],
+                [5, "float", "y", 4, 0],
+                [5, "float", "z", 4, 0],
+                [1, "VariableBoneCountWeights", "m_VariableBoneCountWeights", -1, 32769],
+                [2, "vector", "m_Data", -1, 32768],
+                [3, "Array", "Array", -1, 16384],
+                [4, "int", "size", 4, 0],
+                [4, "unsigned int", "data", 4, 0],
+                [1, "UInt8", "m_MeshCompression", 1, 1],
+                [1, "bool", "m_IsReadable", 1, 1],
+                [1, "bool", "m_KeepVertices", 1, 1],
+                [1, "bool", "m_KeepIndices", 1, 16385],
+                [1, "int", "m_IndexFormat", 4, 1],
+                [1, "vector", "m_IndexBuffer", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "VertexData", "m_VertexData", -1, 49153],
+                [2, "unsigned int", "m_VertexCount", 4, 1],
+                [2, "vector", "m_Channels", -1, 32769],
+                [3, "Array", "Array", -1, 16384],
+                [4, "int", "size", 4, 0],
+                [4, "ChannelInfo", "data", 4, 0],
+                [5, "UInt8", "stream", 1, 1],
+                [5, "UInt8", "offset", 1, 1],
+                [5, "UInt8", "format", 1, 1],
+                [5, "UInt8", "dimension", 1, 1],
+                [2, "TypelessData", "m_DataSize", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 1],
+                [1, "CompressedMesh", "m_CompressedMesh", -1, 32769],
+                [2, "PackedBitVector", "m_Vertices", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "float", "m_Range", 4, 0],
+                [3, "float", "m_Start", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_UV", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "float", "m_Range", 4, 0],
+                [3, "float", "m_Start", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_Normals", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "float", "m_Range", 4, 0],
+                [3, "float", "m_Start", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_Tangents", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "float", "m_Range", 4, 0],
+                [3, "float", "m_Start", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_Weights", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_NormalSigns", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_TangentSigns", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_FloatColors", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "float", "m_Range", 4, 0],
+                [3, "float", "m_Start", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_BoneIndices", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "PackedBitVector", "m_Triangles", -1, 32768],
+                [3, "unsigned int", "m_NumItems", 4, 0],
+                [3, "vector", "m_Data", -1, 32768],
+                [4, "Array", "Array", -1, 16384],
+                [5, "int", "size", 4, 0],
+                [5, "UInt8", "data", 1, 0],
+                [3, "UInt8", "m_BitSize", 1, 16384],
+                [2, "unsigned int", "m_UVInfo", 4, 0],
+                [1, "AABB", "m_LocalAABB", 24, 1],
+                [2, "Vector3f", "m_Center", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [2, "Vector3f", "m_Extent", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [1, "int", "m_CookingOptions", 4, 0],
+                [1, "bool", "m_PreBakeConvexCollisionMesh", 1, 0],
+                [1, "bool", "m_PreBakeTriangleCollisionMesh", 1, 16384],
+                [1, "vector", "m_BakedConvexCollisionMesh", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "vector", "m_BakedTriangleCollisionMesh", -1, 32769],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "float", "m_MeshMetrics[0]", 4, 0],
+                [1, "float", "m_MeshMetrics[1]", 4, 16384],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "UInt64", "offset", 8, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 0],
+                [4, "char", "data", 1, 0],
+                [1, "MeshLodInfo", "m_MeshLodInfo", -1, 32769],
+                [2, "LodSelectionCurve", "m_LodSelectionCurve", 8, 32768],
+                [3, "float", "m_LodSlope", 4, 0],
+                [3, "float", "m_LodBias", 4, 16384],
+                [2, "int", "m_NumLevels", 4, 16384],
+                [2, "vector", "m_SubMeshes", -1, 49152],
+                [3, "Array", "Array", -1, 49152],
+                [4, "int", "size", 4, 0],
+                [4, "MeshLodSubMesh", "data", -1, 32768],
+                [5, "vector", "m_Levels", -1, 49152],
+                [6, "Array", "Array", -1, 49152],
+                [7, "int", "size", 4, 0],
+                [7, "MeshLodRange", "data", 8, 32768],
+                [8, "unsigned int", "m_IndexStart", 4, 0],
+                [8, "unsigned int", "m_IndexCount", 4, 16384]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 0],
+                [5, "char", "data", 1, 0],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0]
+              ]
+            },
+            {
+              "classId": 137,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f38b0a190a1ad8915eab70f842ddaff5",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "SkinnedMeshRenderer", "Base", -1, 32768],
+                [1, "PPtr<GameObject>", "m_GameObject", 12, 65],
+                [2, "int", "m_FileID", 4, 1],
+                [2, "SInt64", "m_PathID", 8, 1],
+                [1, "bool", "m_Enabled", 1, 1],
+                [1, "UInt8", "m_CastShadows", 1, 0],
+                [1, "UInt8", "m_ReceiveShadows", 1, 256],
+                [1, "UInt8", "m_DynamicOccludee", 1, 256],
+                [1, "UInt8", "m_StaticShadowCaster", 1, 8388864],
+                [1, "UInt8", "m_MotionVectors", 1, 0],
+                [1, "UInt8", "m_LightProbeUsage", 1, 0],
+                [1, "UInt8", "m_ReflectionProbeUsage", 1, 0],
+                [1, "UInt8", "m_RayTracingMode", 1, 0],
+                [1, "UInt8", "m_RayTraceProcedural", 1, 256],
+                [1, "UInt8", "m_RayTracingAccelStructBuildFlagsOverride", 1, 8388864],
+                [1, "UInt8", "m_RayTracingAccelStructBuildFlags", 1, 8388608],
+                [1, "UInt8", "m_SmallMeshCulling", 1, 16640],
+                [1, "SInt16", "m_ForceMeshLod", 2, 16384],
+                [1, "float", "m_MeshLodSelectionBias", 4, 0],
+                [1, "unsigned int", "m_RenderingLayerMask", 4, 0],
+                [1, "int", "m_RendererPriority", 4, 0],
+                [1, "UInt16", "m_LightmapIndex", 2, 8388609],
+                [1, "UInt16", "m_LightmapIndexDynamic", 2, 8388609],
+                [1, "Vector4f", "m_LightmapTilingOffset", 16, 10485761],
+                [2, "float", "x", 4, 0],
+                [2, "float", "y", 4, 0],
+                [2, "float", "z", 4, 0],
+                [2, "float", "w", 4, 0],
+                [1, "Vector4f", "m_LightmapTilingOffsetDynamic", 16, 10485761],
+                [2, "float", "x", 4, 0],
+                [2, "float", "y", 4, 0],
+                [2, "float", "z", 4, 0],
+                [2, "float", "w", 4, 0],
+                [1, "vector", "m_Materials", -1, 32800],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Material>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "StaticBatchInfo", "m_StaticBatchInfo", 4, 1],
+                [2, "UInt16", "firstSubMesh", 2, 0],
+                [2, "UInt16", "subMeshCount", 2, 0],
+                [1, "PPtr<Transform>", "m_StaticBatchRoot", 12, 1],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "PPtr<Transform>", "m_ProbeAnchor", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "PPtr<GameObject>", "m_LightProbeVolumeOverride", 12, 16384],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "int", "m_SortingLayerID", 4, 8388609],
+                [1, "SInt16", "m_SortingLayer", 2, 1],
+                [1, "SInt16", "m_SortingOrder", 2, 16385],
+                [1, "int", "m_MaskInteraction", 4, 8404992],
+                [1, "int", "m_Quality", 4, 8388608],
+                [1, "bool", "m_UpdateWhenOffscreen", 1, 0],
+                [1, "bool", "m_SkinnedMotionVectors", 1, 16384],
+                [1, "PPtr<Mesh>", "m_Mesh", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "m_Bones", -1, 49153],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Transform>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "vector", "m_BlendShapeWeights", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "float", "data", 4, 0],
+                [1, "PPtr<Transform>", "m_RootBone", 12, 0],
+                [2, "int", "m_FileID", 4, 8388609],
+                [2, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AABB", "m_AABB", 24, 0],
+                [2, "Vector3f", "m_Center", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [2, "Vector3f", "m_Extent", 12, 2097152],
+                [3, "float", "x", 4, 0],
+                [3, "float", "y", 4, 0],
+                [3, "float", "z", 4, 0],
+                [1, "bool", "m_DirtyAABB", 1, 16385]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-1548301857022800127": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "8537887127459452232"
+                },
+                "m_LocalRotation": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000",
+                  "w": "f32:3f800000"
+                },
+                "m_LocalPosition": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000"
+                },
+                "m_LocalScale": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:3f800000"
+                },
+                "m_Children": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "1987335868902504672"
+                  }
+                ],
+                "m_Father": {
+                  "m_FileID": 0,
+                  "m_PathID": "2563688967975853262"
+                }
+              }
+            },
+            "-2829309711682841473": {
+              "value": {
+                "m_Name": "walk",
+                "m_Legacy": false,
+                "m_Compressed": false,
+                "m_UseHighQualityCurve": true,
+                "m_RotationCurves": [],
+                "m_CompressedRotationCurves": [],
+                "m_EulerCurves": [],
+                "m_PositionCurves": [],
+                "m_ScaleCurves": [],
+                "m_FloatCurves": [],
+                "m_PPtrCurves": [],
+                "m_SampleRate": "f32:42700000",
+                "m_WrapMode": 0,
+                "m_Bounds": {
+                  "m_Center": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Extent": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  }
+                },
+                "m_MuscleClipSize": 3376,
+                "m_MuscleClip": {
+                  "m_DeltaPose": {
+                    "m_RootX": {
+                      "t": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "q": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000",
+                        "w": "f32:3f800000"
+                      },
+                      "s": {
+                        "x": "f32:3f800000",
+                        "y": "f32:3f800000",
+                        "z": "f32:3f800000"
+                      }
+                    },
+                    "m_LookAtPosition": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "m_LookAtWeight": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:00000000"
+                    },
+                    "m_GoalArray": [
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      }
+                    ],
+                    "m_LeftHandPose": {
+                      "m_GrabX": {
+                        "t": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "q": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000",
+                          "w": "f32:3f800000"
+                        },
+                        "s": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000",
+                          "z": "f32:3f800000"
+                        }
+                      },
+                      "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                      "m_Override": "f32:00000000",
+                      "m_CloseOpen": "f32:00000000",
+                      "m_InOut": "f32:00000000",
+                      "m_Grab": "f32:00000000"
+                    },
+                    "m_RightHandPose": {
+                      "m_GrabX": {
+                        "t": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "q": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000",
+                          "w": "f32:3f800000"
+                        },
+                        "s": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000",
+                          "z": "f32:3f800000"
+                        }
+                      },
+                      "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                      "m_Override": "f32:00000000",
+                      "m_CloseOpen": "f32:00000000",
+                      "m_InOut": "f32:00000000",
+                      "m_Grab": "f32:00000000"
+                    },
+                    "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                    "m_TDoFArray": [
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      }
+                    ]
+                  },
+                  "m_StartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_StopX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_LeftFootStartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_RightFootStartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_AverageSpeed": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Clip": {
+                    "data": {
+                      "m_StreamedClip": {
+                        "data": [4286578687, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 1036831949, 3, 0, 0, 0, 0, 4, 0, 0, 0, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 1065353216, 7, 0, 0, 0, 1065353216, 8, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 10, 0, 3229614080, 1077936128, 0, 0, 1, 3212836864, 1069547520, 0, 0, 2, 1053609164, 3206125978, 0, 1036831949, 3, 0, 0, 0, 0, 4, 3208900374, 1066595152, 0, 0, 5, 0, 0, 0, 0, 6, 1042015504, 3194607512, 0, 1065353216, 7, 1098907648, 3242196992, 0, 1065353216, 8, 3301441536, 1150681088, 0, 0, 9, 3326607360, 1167458304, 0, 0, 1048576000, 1, 9, 1179123712, 3314941952, 0, 1120403456, 1056964608, 6, 0, 1082130432, 3225419776, 0, 1048576000, 1, 3212836864, 0, 1061158912, 1048576000, 2, 1053609164, 0, 3197737370, 0, 7, 3246391296, 1094713344, 0, 0, 8, 1150681088, 3294691328, 0, 1120403456, 9, 0, 0, 0, 0, 1065353216, 9, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1056964608, 2, 0, 0, 0, 3184315597, 3, 0, 0, 0, 0, 4, 0, 0, 0, 1053028118, 5, 0, 0, 0, 0, 6, 0, 0, 0, 1064076126, 7, 0, 0, 0, 1065353216, 8, 0, 0, 0, 1103626240, 2139095040, 0],
+                        "curveCount": 10,
+                        "discreteCurveCount": 0
+                      },
+                      "m_DenseClip": {
+                        "m_FrameCount": 62,
+                        "m_CurveCount": 0,
+                        "m_SampleRate": "f32:42700000",
+                        "m_BeginTime": "f32:00000000",
+                        "m_SampleArray": []
+                      },
+                      "m_ConstantClip": {
+                        "data": []
+                      }
+                    }
+                  },
+                  "m_StartTime": "f32:00000000",
+                  "m_StopTime": "f32:3f800000",
+                  "m_OrientationOffsetY": "f32:00000000",
+                  "m_Level": "f32:00000000",
+                  "m_CycleOffset": "f32:00000000",
+                  "m_AverageAngularSpeed": "f32:00000000",
+                  "m_IndexArray": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  "m_ValueArrayDelta": [
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:3f000000"
+                    },
+                    {
+                      "m_Start": "f32:3dcccccd",
+                      "m_Stop": "f32:bdcccccd"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:3ec3ef16"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:3f800000",
+                      "m_Stop": "f32:3f6c835e"
+                    },
+                    {
+                      "m_Start": "f32:3f800000",
+                      "m_Stop": "f32:3f800000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:41c80000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    }
+                  ],
+                  "m_ValueArrayReferencePose": [],
+                  "m_Mirror": false,
+                  "m_LoopTime": false,
+                  "m_LoopBlend": false,
+                  "m_LoopBlendOrientation": false,
+                  "m_LoopBlendPositionY": false,
+                  "m_LoopBlendPositionXZ": false,
+                  "m_StartAtOrigin": true,
+                  "m_KeepOriginalOrientation": false,
+                  "m_KeepOriginalPositionY": true,
+                  "m_KeepOriginalPositionXZ": false,
+                  "m_HeightFromFeet": false
+                },
+                "m_ClipBindingConstant": {
+                  "genericBindings": [
+                    {
+                      "path": 2073732236,
+                      "attribute": 1,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 4,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 3015751433,
+                      "attribute": 2,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 4,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 3015751433,
+                      "attribute": 2086281974,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 1,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 2722875168,
+                      "attribute": 42599183,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 137,
+                      "customType": 20,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 2722875168,
+                      "attribute": 842569181,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 137,
+                      "customType": 20,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    }
+                  ],
+                  "pptrCurveMapping": []
+                },
+                "m_HasGenericRootTransform": false,
+                "m_HasMotionFloatCurves": false,
+                "m_Events": []
+              }
+            },
+            "-4615257749679061048": {
+              "value": {
+                "m_Name": "face",
+                "m_SubMeshes": [
+                  {
+                    "firstByte": 0,
+                    "indexCount": 6,
+                    "topology": 0,
+                    "baseVertex": 0,
+                    "firstVertex": 0,
+                    "vertexCount": 4,
+                    "localAABB": {
+                      "m_Center": {
+                        "x": "f32:3f000000",
+                        "y": "f32:3f000000",
+                        "z": "f32:00000000"
+                      },
+                      "m_Extent": {
+                        "x": "f32:3f000000",
+                        "y": "f32:3f000000",
+                        "z": "f32:00000000"
+                      }
+                    }
+                  }
+                ],
+                "m_Shapes": {
+                  "vertices": [
+                    {
+                      "vertex": {
+                        "x": "f32:00000000",
+                        "y": "f32:3e800000",
+                        "z": "f32:00000000"
+                      },
+                      "normal": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "tangent": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "index": 2
+                    },
+                    {
+                      "vertex": {
+                        "x": "f32:00000000",
+                        "y": "f32:3e800000",
+                        "z": "f32:00000000"
+                      },
+                      "normal": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "tangent": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "index": 3
+                    },
+                    {
+                      "vertex": {
+                        "x": "f32:3e000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "normal": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "tangent": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "index": 0
+                    },
+                    {
+                      "vertex": {
+                        "x": "f32:be000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "normal": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "tangent": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "index": 1
+                    }
+                  ],
+                  "shapes": [
+                    {
+                      "firstVertex": 0,
+                      "vertexCount": 2,
+                      "hasNormals": false,
+                      "hasTangents": false
+                    },
+                    {
+                      "firstVertex": 2,
+                      "vertexCount": 2,
+                      "hasNormals": false,
+                      "hasTangents": false
+                    }
+                  ],
+                  "channels": [
+                    {
+                      "name": "smile",
+                      "nameHash": 42599183,
+                      "frameIndex": 0,
+                      "frameCount": 1
+                    },
+                    {
+                      "name": "blink",
+                      "nameHash": 842569181,
+                      "frameIndex": 1,
+                      "frameCount": 1
+                    }
+                  ],
+                  "fullWeights": ["f32:42c80000", "f32:42c80000"]
+                },
+                "m_BindPose": [],
+                "m_BoneNameHashes": [],
+                "m_RootBoneNameHash": 0,
+                "m_BonesAABB": [],
+                "m_VariableBoneCountWeights": {
+                  "m_Data": []
+                },
+                "m_MeshCompression": 0,
+                "m_IsReadable": true,
+                "m_KeepVertices": true,
+                "m_KeepIndices": false,
+                "m_IndexFormat": 0,
+                "m_IndexBuffer": "hex:000002000100010002000300",
+                "m_VertexData": {
+                  "m_VertexCount": 4,
+                  "m_Channels": [
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 3
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 12,
+                      "format": 0,
+                      "dimension": 3
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 1,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 2
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    },
+                    {
+                      "stream": 0,
+                      "offset": 0,
+                      "format": 0,
+                      "dimension": 0
+                    }
+                  ],
+                  "m_DataSize": "hex:0000000000000000000000000000000000000000000080bf0000803f00000000000000000000000000000000000080bf000000000000803f000000000000000000000000000080bf0000803f0000803f000000000000000000000000000080bf00000000000000000000803f00000000000000000000803f0000803f0000803f"
+                },
+                "m_CompressedMesh": {
+                  "m_Vertices": {
+                    "m_NumItems": 0,
+                    "m_Range": "f32:00000000",
+                    "m_Start": "f32:00000000",
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_UV": {
+                    "m_NumItems": 0,
+                    "m_Range": "f32:00000000",
+                    "m_Start": "f32:00000000",
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_Normals": {
+                    "m_NumItems": 0,
+                    "m_Range": "f32:00000000",
+                    "m_Start": "f32:00000000",
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_Tangents": {
+                    "m_NumItems": 0,
+                    "m_Range": "f32:00000000",
+                    "m_Start": "f32:00000000",
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_Weights": {
+                    "m_NumItems": 0,
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_NormalSigns": {
+                    "m_NumItems": 0,
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_TangentSigns": {
+                    "m_NumItems": 0,
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_FloatColors": {
+                    "m_NumItems": 0,
+                    "m_Range": "f32:00000000",
+                    "m_Start": "f32:00000000",
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_BoneIndices": {
+                    "m_NumItems": 0,
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_Triangles": {
+                    "m_NumItems": 0,
+                    "m_Data": "hex:",
+                    "m_BitSize": 0
+                  },
+                  "m_UVInfo": 0
+                },
+                "m_LocalAABB": {
+                  "m_Center": {
+                    "x": "f32:3f000000",
+                    "y": "f32:3f000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Extent": {
+                    "x": "f32:3f000000",
+                    "y": "f32:3f000000",
+                    "z": "f32:00000000"
+                  }
+                },
+                "m_CookingOptions": 30,
+                "m_PreBakeConvexCollisionMesh": false,
+                "m_PreBakeTriangleCollisionMesh": false,
+                "m_BakedConvexCollisionMesh": "hex:",
+                "m_BakedTriangleCollisionMesh": "hex:",
+                "m_MeshMetrics[0]": "f32:3f800000",
+                "m_MeshMetrics[1]": "f32:3f800000",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                },
+                "m_MeshLodInfo": {
+                  "m_LodSelectionCurve": {
+                    "m_LodSlope": "f32:00000000",
+                    "m_LodBias": "f32:00000000"
+                  },
+                  "m_NumLevels": 1,
+                  "m_SubMeshes": [
+                    {
+                      "m_Levels": [
+                        {
+                          "m_IndexStart": 0,
+                          "m_IndexCount": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "-4662634936016116161": {
+              "value": {
+                "m_Component": [
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "2563688967975853262"
+                    }
+                  },
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "-8631225869028427513"
+                    }
+                  }
+                ],
+                "m_Layer": 0,
+                "m_Name": "legacy",
+                "m_Tag": 0,
+                "m_IsActive": true
+              }
+            },
+            "-4826317543375862557": {
+              "value": {
+                "m_Name": "unlisted",
+                "m_Legacy": false,
+                "m_Compressed": false,
+                "m_UseHighQualityCurve": true,
+                "m_RotationCurves": [],
+                "m_CompressedRotationCurves": [],
+                "m_EulerCurves": [],
+                "m_PositionCurves": [],
+                "m_ScaleCurves": [],
+                "m_FloatCurves": [],
+                "m_PPtrCurves": [],
+                "m_SampleRate": "f32:42700000",
+                "m_WrapMode": 0,
+                "m_Bounds": {
+                  "m_Center": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Extent": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  }
+                },
+                "m_MuscleClipSize": 3376,
+                "m_MuscleClip": {
+                  "m_DeltaPose": {
+                    "m_RootX": {
+                      "t": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      "q": {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000",
+                        "w": "f32:3f800000"
+                      },
+                      "s": {
+                        "x": "f32:3f800000",
+                        "y": "f32:3f800000",
+                        "z": "f32:3f800000"
+                      }
+                    },
+                    "m_LookAtPosition": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "m_LookAtWeight": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:00000000"
+                    },
+                    "m_GoalArray": [
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      },
+                      {
+                        "m_X": {
+                          "t": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000"
+                          },
+                          "q": {
+                            "x": "f32:00000000",
+                            "y": "f32:00000000",
+                            "z": "f32:00000000",
+                            "w": "f32:3f800000"
+                          },
+                          "s": {
+                            "x": "f32:3f800000",
+                            "y": "f32:3f800000",
+                            "z": "f32:3f800000"
+                          }
+                        },
+                        "m_WeightT": "f32:00000000",
+                        "m_WeightR": "f32:00000000",
+                        "m_HintT": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "m_HintWeightT": "f32:00000000"
+                      }
+                    ],
+                    "m_LeftHandPose": {
+                      "m_GrabX": {
+                        "t": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "q": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000",
+                          "w": "f32:3f800000"
+                        },
+                        "s": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000",
+                          "z": "f32:3f800000"
+                        }
+                      },
+                      "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                      "m_Override": "f32:00000000",
+                      "m_CloseOpen": "f32:00000000",
+                      "m_InOut": "f32:00000000",
+                      "m_Grab": "f32:00000000"
+                    },
+                    "m_RightHandPose": {
+                      "m_GrabX": {
+                        "t": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000"
+                        },
+                        "q": {
+                          "x": "f32:00000000",
+                          "y": "f32:00000000",
+                          "z": "f32:00000000",
+                          "w": "f32:3f800000"
+                        },
+                        "s": {
+                          "x": "f32:3f800000",
+                          "y": "f32:3f800000",
+                          "z": "f32:3f800000"
+                        }
+                      },
+                      "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                      "m_Override": "f32:00000000",
+                      "m_CloseOpen": "f32:00000000",
+                      "m_InOut": "f32:00000000",
+                      "m_Grab": "f32:00000000"
+                    },
+                    "m_DoFArray": ["f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000", "f32:00000000"],
+                    "m_TDoFArray": [
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      },
+                      {
+                        "x": "f32:00000000",
+                        "y": "f32:00000000",
+                        "z": "f32:00000000"
+                      }
+                    ]
+                  },
+                  "m_StartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_StopX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_LeftFootStartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_RightFootStartX": {
+                    "t": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000"
+                    },
+                    "q": {
+                      "x": "f32:00000000",
+                      "y": "f32:00000000",
+                      "z": "f32:00000000",
+                      "w": "f32:3f800000"
+                    },
+                    "s": {
+                      "x": "f32:3f800000",
+                      "y": "f32:3f800000",
+                      "z": "f32:3f800000"
+                    }
+                  },
+                  "m_AverageSpeed": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Clip": {
+                    "data": {
+                      "m_StreamedClip": {
+                        "data": [4286578687, 10, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 1036831949, 3, 0, 0, 0, 0, 4, 0, 0, 0, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 1065353216, 7, 0, 0, 0, 1065353216, 8, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 10, 0, 3229614080, 1077936128, 0, 0, 1, 3212836864, 1069547520, 0, 0, 2, 1053609164, 3206125978, 0, 1036831949, 3, 0, 0, 0, 0, 4, 3208900374, 1066595152, 0, 0, 5, 0, 0, 0, 0, 6, 1042015504, 3194607512, 0, 1065353216, 7, 1098907648, 3242196992, 0, 1065353216, 8, 3301441536, 1150681088, 0, 0, 9, 3326607360, 1167458304, 0, 0, 1048576000, 1, 9, 1179123712, 3314941952, 0, 1120403456, 1056964608, 6, 0, 1082130432, 3225419776, 0, 1048576000, 1, 3212836864, 0, 1061158912, 1048576000, 2, 1053609164, 0, 3197737370, 0, 7, 3246391296, 1094713344, 0, 0, 8, 1150681088, 3294691328, 0, 1120403456, 9, 0, 0, 0, 0, 1065353216, 9, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1056964608, 2, 0, 0, 0, 3184315597, 3, 0, 0, 0, 0, 4, 0, 0, 0, 1053028118, 5, 0, 0, 0, 0, 6, 0, 0, 0, 1064076126, 7, 0, 0, 0, 1065353216, 8, 0, 0, 0, 1103626240, 2139095040, 0],
+                        "curveCount": 10,
+                        "discreteCurveCount": 0
+                      },
+                      "m_DenseClip": {
+                        "m_FrameCount": 62,
+                        "m_CurveCount": 0,
+                        "m_SampleRate": "f32:42700000",
+                        "m_BeginTime": "f32:00000000",
+                        "m_SampleArray": []
+                      },
+                      "m_ConstantClip": {
+                        "data": []
+                      }
+                    }
+                  },
+                  "m_StartTime": "f32:00000000",
+                  "m_StopTime": "f32:3f800000",
+                  "m_OrientationOffsetY": "f32:00000000",
+                  "m_Level": "f32:00000000",
+                  "m_CycleOffset": "f32:00000000",
+                  "m_AverageAngularSpeed": "f32:00000000",
+                  "m_IndexArray": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  "m_ValueArrayDelta": [
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:3f000000"
+                    },
+                    {
+                      "m_Start": "f32:3dcccccd",
+                      "m_Stop": "f32:bdcccccd"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:3ec3ef16"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    },
+                    {
+                      "m_Start": "f32:3f800000",
+                      "m_Stop": "f32:3f6c835e"
+                    },
+                    {
+                      "m_Start": "f32:3f800000",
+                      "m_Stop": "f32:3f800000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:41c80000"
+                    },
+                    {
+                      "m_Start": "f32:00000000",
+                      "m_Stop": "f32:00000000"
+                    }
+                  ],
+                  "m_ValueArrayReferencePose": [],
+                  "m_Mirror": false,
+                  "m_LoopTime": false,
+                  "m_LoopBlend": false,
+                  "m_LoopBlendOrientation": false,
+                  "m_LoopBlendPositionY": false,
+                  "m_LoopBlendPositionXZ": false,
+                  "m_StartAtOrigin": true,
+                  "m_KeepOriginalOrientation": false,
+                  "m_KeepOriginalPositionY": true,
+                  "m_KeepOriginalPositionXZ": false,
+                  "m_HeightFromFeet": false
+                },
+                "m_ClipBindingConstant": {
+                  "genericBindings": [
+                    {
+                      "path": 2073732236,
+                      "attribute": 1,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 4,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 3015751433,
+                      "attribute": 2,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 4,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 3015751433,
+                      "attribute": 2086281974,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 1,
+                      "customType": 0,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 2722875168,
+                      "attribute": 42599183,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 137,
+                      "customType": 20,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    },
+                    {
+                      "path": 2722875168,
+                      "attribute": 842569181,
+                      "script": {
+                        "m_FileID": 0,
+                        "m_PathID": "0"
+                      },
+                      "typeID": 137,
+                      "customType": 20,
+                      "isPPtrCurve": 0,
+                      "isIntCurve": 0,
+                      "isSerializeReferenceCurve": 0,
+                      "metaData": 0
+                    }
+                  ],
+                  "pptrCurveMapping": []
+                },
+                "m_HasGenericRootTransform": false,
+                "m_HasMotionFloatCurves": false,
+                "m_Events": []
+              }
+            },
+            "-5562513066675920489": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "2022734720362471812"
+                },
+                "m_LocalRotation": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000",
+                  "w": "f32:3f800000"
+                },
+                "m_LocalPosition": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000"
+                },
+                "m_LocalScale": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:3f800000"
+                },
+                "m_Children": [],
+                "m_Father": {
+                  "m_FileID": 0,
+                  "m_PathID": "2563688967975853262"
+                }
+              }
+            },
+            "-8631225869028427513": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "-4662634936016116161"
+                },
+                "m_Enabled": 1,
+                "m_Animation": {
+                  "m_FileID": 0,
+                  "m_PathID": "-2829309711682841473"
+                },
+                "m_Animations": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2829309711682841473"
+                  }
+                ],
+                "m_WrapMode": 4,
+                "m_PlayAutomatically": false,
+                "m_AnimatePhysics": true,
+                "m_UpdateMode": 1,
+                "m_CullingType": 1
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "legacy-animation",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4826317543375862557"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4615257749679061048"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2829309711682841473"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-8631225869028427513"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5562513066675920489"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4662634936016116161"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-4615257749679061048"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2829309711682841473"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-1548301857022800127"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "1987335868902504672"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "2022734720362471812"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "2563688967975853262"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "3345940984474281207"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "3693563004649036361"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8537887127459452232"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/legacy-animation/face.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-4615257749679061048"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/legacy-animation/legacy.prefab",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 12,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-4662634936016116161"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/legacy-animation/unlisted.anim",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-4826317543375862557"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/legacy-animation/walk.anim",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-2829309711682841473"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "legacy-animation",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "1987335868902504672": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "3693563004649036361"
+                },
+                "m_LocalRotation": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000",
+                  "w": "f32:3f800000"
+                },
+                "m_LocalPosition": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000"
+                },
+                "m_LocalScale": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:3f800000"
+                },
+                "m_Children": [],
+                "m_Father": {
+                  "m_FileID": 0,
+                  "m_PathID": "-1548301857022800127"
+                }
+              }
+            },
+            "2022734720362471812": {
+              "value": {
+                "m_Component": [
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "-5562513066675920489"
+                    }
+                  },
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "3345940984474281207"
+                    }
+                  }
+                ],
+                "m_Layer": 0,
+                "m_Name": "Skin",
+                "m_Tag": 0,
+                "m_IsActive": true
+              }
+            },
+            "2563688967975853262": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "-4662634936016116161"
+                },
+                "m_LocalRotation": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000",
+                  "w": "f32:3f800000"
+                },
+                "m_LocalPosition": {
+                  "x": "f32:00000000",
+                  "y": "f32:00000000",
+                  "z": "f32:00000000"
+                },
+                "m_LocalScale": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:3f800000"
+                },
+                "m_Children": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-1548301857022800127"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5562513066675920489"
+                  }
+                ],
+                "m_Father": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                }
+              }
+            },
+            "3345940984474281207": {
+              "value": {
+                "m_GameObject": {
+                  "m_FileID": 0,
+                  "m_PathID": "2022734720362471812"
+                },
+                "m_Enabled": true,
+                "m_CastShadows": 1,
+                "m_ReceiveShadows": 1,
+                "m_DynamicOccludee": 1,
+                "m_StaticShadowCaster": 0,
+                "m_MotionVectors": 1,
+                "m_LightProbeUsage": 1,
+                "m_ReflectionProbeUsage": 1,
+                "m_RayTracingMode": 3,
+                "m_RayTraceProcedural": 0,
+                "m_RayTracingAccelStructBuildFlagsOverride": 0,
+                "m_RayTracingAccelStructBuildFlags": 1,
+                "m_SmallMeshCulling": 1,
+                "m_ForceMeshLod": -1,
+                "m_MeshLodSelectionBias": "f32:00000000",
+                "m_RenderingLayerMask": 1,
+                "m_RendererPriority": 0,
+                "m_LightmapIndex": 65535,
+                "m_LightmapIndexDynamic": 65535,
+                "m_LightmapTilingOffset": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:00000000",
+                  "w": "f32:00000000"
+                },
+                "m_LightmapTilingOffsetDynamic": {
+                  "x": "f32:3f800000",
+                  "y": "f32:3f800000",
+                  "z": "f32:00000000",
+                  "w": "f32:00000000"
+                },
+                "m_Materials": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                ],
+                "m_StaticBatchInfo": {
+                  "firstSubMesh": 0,
+                  "subMeshCount": 0
+                },
+                "m_StaticBatchRoot": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_ProbeAnchor": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_LightProbeVolumeOverride": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_SortingLayerID": 0,
+                "m_SortingLayer": 0,
+                "m_SortingOrder": 0,
+                "m_MaskInteraction": 0,
+                "m_Quality": 0,
+                "m_UpdateWhenOffscreen": false,
+                "m_SkinnedMotionVectors": true,
+                "m_Mesh": {
+                  "m_FileID": 0,
+                  "m_PathID": "-4615257749679061048"
+                },
+                "m_Bones": [],
+                "m_BlendShapeWeights": [],
+                "m_RootBone": {
+                  "m_FileID": 0,
+                  "m_PathID": "0"
+                },
+                "m_AABB": {
+                  "m_Center": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  },
+                  "m_Extent": {
+                    "x": "f32:00000000",
+                    "y": "f32:00000000",
+                    "z": "f32:00000000"
+                  }
+                },
+                "m_DirtyAABB": true
+              }
+            },
+            "3693563004649036361": {
+              "value": {
+                "m_Component": [
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "1987335868902504672"
+                    }
+                  }
+                ],
+                "m_Layer": 0,
+                "m_Name": "Arm",
+                "m_Tag": 0,
+                "m_IsActive": true
+              }
+            },
+            "8537887127459452232": {
+              "value": {
+                "m_Component": [
+                  {
+                    "component": {
+                      "m_FileID": 0,
+                      "m_PathID": "-1548301857022800127"
+                    }
+                  }
+                ],
+                "m_Layer": 0,
+                "m_Name": "Body",
+                "m_Tag": 0,
+                "m_IsActive": true
+              }
+            }
+          },
+          "names": {
+            "-1548301857022800127": "",
+            "-2829309711682841473": "walk",
+            "-4615257749679061048": "face",
+            "-4662634936016116161": "legacy",
+            "-4826317543375862557": "unlisted",
+            "-5562513066675920489": "",
+            "-8631225869028427513": "",
+            "1": "legacy-animation",
+            "1987335868902504672": "",
+            "2022734720362471812": "Skin",
+            "2563688967975853262": "",
+            "3345940984474281207": "",
+            "3693563004649036361": "Arm",
+            "8537887127459452232": "Body"
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/legacy-animation/face.asset",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4615257749679061048"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/legacy.prefab",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4662634936016116161"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/unlisted.anim",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4826317543375862557"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/walk.anim",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-2829309711682841473"
+        }
+      ],
+      "evidence": {
+        "animation": {
+          "AnimationClip": 2
+        },
+        "scene": {
+          "GameObject": 4,
+          "Mesh": 1,
+          "SkinnedMeshRenderer": 1,
+          "Transform": 4
+        },
+        "listed": ["walk"]
+      }
+    },
+    "editor/6000.6.4f1/legacy-animation/lz4-notypetree/legacy-animation": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.6.4f1",
+      "files": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": {
+          "sha256": "e8a42c95a6118af4a5e96826ade7d39705ff7d8896ecb19e112723f6516effaf",
+          "size": 9247
+        }
+      },
+      "objects": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": [
+          {
+            "pathId": "-1548301857022800127",
+            "classId": 4,
+            "byteSize": 80
+          },
+          {
+            "pathId": "-2829309711682841473",
+            "classId": 74,
+            "byteSize": 3240
+          },
+          {
+            "pathId": "-4615257749679061048",
+            "classId": 43,
+            "byteSize": 812
+          },
+          {
+            "pathId": "-4662634936016116161",
+            "classId": 1,
+            "byteSize": 47
+          },
+          {
+            "pathId": "-4826317543375862557",
+            "classId": 74,
+            "byteSize": 3244
+          },
+          {
+            "pathId": "-5562513066675920489",
+            "classId": 4,
+            "byteSize": 68
+          },
+          {
+            "pathId": "-8631225869028427513",
+            "classId": 111,
+            "byteSize": 60
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 552
+          },
+          {
+            "pathId": "1987335868902504672",
+            "classId": 4,
+            "byteSize": 68
+          },
+          {
+            "pathId": "2022734720362471812",
+            "classId": 1,
+            "byteSize": 43
+          },
+          {
+            "pathId": "2563688967975853262",
+            "classId": 4,
+            "byteSize": 92
+          },
+          {
+            "pathId": "3345940984474281207",
+            "classId": 137,
+            "byteSize": 216
+          },
+          {
+            "pathId": "3693563004649036361",
+            "classId": 1,
+            "byteSize": 31
+          },
+          {
+            "pathId": "8537887127459452232",
+            "classId": 1,
+            "byteSize": 31
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-d497405b46c77a4719371c592f6ad3a0": {
+          "formatVersion": 23,
+          "unityVersion": "6000.6.4f1\n2",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": false,
+          "externals": [],
+          "types": [
+            {
+              "classId": 111,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "541f12f17fe2f8e8e2082e819a659a28",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 4,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "55ef5908c66860587f939791f59650e6",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 74,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "a1a069e8791c5cf85b0d667e7bd2303d",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 1,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "86e34eb8ee7642b089fb98c9d81dd9b0",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 43,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "e2111e61d01f991fffb89353e8fe9cd8",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": null,
+              "nodes": null
+            },
+            {
+              "classId": 137,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "f38b0a190a1ad8915eab70f842ddaff5",
+              "typeDependencies": null,
+              "nodes": null
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {},
+          "names": {
+            "-1548301857022800127": "",
+            "-2829309711682841473": "walk",
+            "-4615257749679061048": "face",
+            "-4662634936016116161": "legacy",
+            "-4826317543375862557": "unlisted",
+            "-5562513066675920489": "",
+            "-8631225869028427513": "",
+            "1": "legacy-animation",
+            "1987335868902504672": "",
+            "2022734720362471812": "Skin",
+            "2563688967975853262": "",
+            "3345940984474281207": "",
+            "3693563004649036361": "Arm",
+            "8537887127459452232": "Body"
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/legacy-animation/face.asset",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4615257749679061048"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/legacy.prefab",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4662634936016116161"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/unlisted.anim",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-4826317543375862557"
+        },
+        {
+          "path": "assets/fixtures/legacy-animation/walk.anim",
+          "file": "CAB-d497405b46c77a4719371c592f6ad3a0",
+          "pathId": "-2829309711682841473"
+        }
+      ],
+      "evidence": {
+        "animation": {
+          "AnimationClip": 2
+        },
+        "scene": {
+          "GameObject": 4,
+          "Mesh": 1,
+          "SkinnedMeshRenderer": 1,
+          "Transform": 4
+        },
+        "listed": ["walk"]
+      }
     }
   }
 }
