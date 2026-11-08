@@ -7,14 +7,59 @@
 // `<UnityType>`. Every renamed field cites its Unity name in its JSDoc.
 
 import type { BuildTarget } from "../serialized/BuildTarget.js";
-import type { ObjectReader, Vector3 } from "../serialized/ObjectReader.js";
+import type { ObjectReader, Quaternion, Vector3, XForm } from "../serialized/ObjectReader.js";
 import type { TypeTreeObject } from "../serialized/TypeTreeReader.js";
 import type {
   AssetBundle,
   AssetBundleScriptInfo,
   AssetInfo,
 } from "./AssetBundle.js";
+import type { Animator } from "./Animator.js";
+import type { OffsetPtr, ValueArrayConstant, ValueConstant } from "./animation.js";
+import type {
+  AnimatorController,
+  Blend1dDataConstant,
+  Blend2dDataConstant,
+  BlendDirectDataConstant,
+  BlendTreeConstant,
+  BlendTreeNodeConstant,
+  ConditionConstant,
+  ControllerConstant,
+  HumanPoseMask,
+  LayerConstant,
+  MotionNeighborList,
+  SelectorStateConstant,
+  SelectorTransitionConstant,
+  SkeletonMask,
+  SkeletonMaskElement,
+  StateConstant,
+  StateKey,
+  StateMachineBehaviourVectorDescription,
+  StateMachineConstant,
+  StateRange,
+  TransitionConstant,
+  ValueArray,
+} from "./AnimatorController.js";
+import type {
+  AnimationClipOverride,
+  AnimatorOverrideController,
+} from "./AnimatorOverrideController.js";
 import type { AudioClipData } from "./AudioClip.js";
+import type {
+  Avatar,
+  AvatarConstant,
+  Axes,
+  Hand,
+  Human,
+  HumanBone,
+  HumanDescription,
+  Limit,
+  Skeleton,
+  SkeletonBone,
+  SkeletonBoneLimit,
+  SkeletonNode,
+  SkeletonPose,
+} from "./Avatar.js";
 import type { EditorExtension } from "./EditorExtension.js";
 import type { CharacterInfo, Font, Rectf } from "./Font.js";
 import type {
@@ -1615,6 +1660,1041 @@ export function toMeshFields(data: MeshData): MeshFields {
     skin: data.skin,
     indices: data.indices,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Animator, AnimatorController, AnimatorOverrideController, Avatar (#303)
+
+/** The friendly form of {@link ValueConstant}. */
+export interface ValueConstantFields {
+  /** Unity: `m_ID`. The CRC32 of the parameter's name. */
+  id: number;
+  /**
+   * Unity: `m_Type`. The value's type (Unity's `ValueType`): 1 float, 3 int, 4 bool, 9 trigger, ...
+   */
+  type: number;
+  /** Unity: `m_Index`. The value's index in the `ValueArray` array of its type. */
+  index: number;
+}
+
+/** The friendly form of {@link ValueArrayConstant}. */
+export interface ValueArrayConstantFields {
+  /** Unity: `m_ValueArray`. */
+  valueArray: ValueConstantFields[];
+}
+
+/** The friendly form of {@link SkeletonMaskElement}. */
+export interface SkeletonMaskElementFields {
+  /** Unity: `m_PathHash`. */
+  pathHash: number;
+  /** Unity: `m_Weight`. */
+  weight: number;
+}
+
+/** The friendly form of {@link SkeletonMask}. */
+export interface SkeletonMaskFields {
+  /** Unity: `m_Data`. */
+  data: SkeletonMaskElementFields[];
+}
+
+/** The friendly form of {@link LayerConstant}. */
+export interface LayerConstantFields {
+  /** Unity: `m_StateMachineIndex`. */
+  stateMachineIndex: number;
+  /** Unity: `m_StateMachineSynchronizedLayerIndex`. */
+  stateMachineSynchronizedLayerIndex: number;
+  /** Unity: `m_BodyMask`. */
+  bodyMask: HumanPoseMask;
+  /** Unity: `m_SkeletonMask`. */
+  skeletonMask: OffsetPtr<SkeletonMaskFields>;
+  /** Unity: `m_Binding`. */
+  binding: number;
+  /**
+   * Unity: `(int&)m_LayerBlendingMode`. Unity's `AnimatorLayerBlendingMode`, 0 override, 1
+   * additive. The key is Unity's own node name, cast included, as `readTypeTree()` gives it.
+   */
+  layerBlendingMode: number;
+  /** Unity: `m_DefaultWeight`. */
+  defaultWeight: number;
+  /** Unity: `m_IKPass`. */
+  ikPass: boolean;
+  /** Unity: `m_SyncedLayerAffectsTiming`. */
+  syncedLayerAffectsTiming: boolean;
+}
+
+/** The friendly form of {@link ConditionConstant}. */
+export interface ConditionConstantFields {
+  /**
+   * Unity: `m_ConditionMode`. Unity's `AnimatorConditionMode`: 1 if, 2 if not, 3 greater, 4 less, 6
+   * equals, 7 not equal.
+   */
+  conditionMode: number;
+  /** Unity: `m_EventID`. The parameter, as the CRC32 of its name. */
+  eventID: number;
+  /** Unity: `m_EventThreshold`. */
+  eventThreshold: number;
+  /** Unity: `m_ExitTime`. */
+  exitTime: number;
+}
+
+/** The friendly form of {@link TransitionConstant}. */
+export interface TransitionConstantFields {
+  /** Unity: `m_ConditionConstantArray`. */
+  conditionConstantArray: OffsetPtr<ConditionConstantFields>[];
+  /** Unity: `m_DestinationState`. */
+  destinationState: number;
+  /** Unity: `m_FullPathID`. */
+  fullPathID: number;
+  /** Unity: `m_ID`. */
+  id: number;
+  /** Unity: `m_UserID`. */
+  userID: number;
+  /** Unity: `m_TransitionDuration`. */
+  transitionDuration: number;
+  /** Unity: `m_TransitionOffset`. */
+  transitionOffset: number;
+  /** Unity: `m_ExitTime`. */
+  exitTime: number;
+  /** Unity: `m_HasExitTime`. */
+  hasExitTime: boolean;
+  /** Unity: `m_HasFixedDuration`. */
+  hasFixedDuration: boolean;
+  /** Unity: `m_InterruptionSource`. Unity's `TransitionInterruptionSource`. */
+  interruptionSource: number;
+  /** Unity: `m_OrderedInterruption`. */
+  orderedInterruption: boolean;
+  /** Unity: `m_CanTransitionToSelf`. */
+  canTransitionToSelf: boolean;
+}
+
+/** The friendly form of {@link MotionNeighborList}. */
+export interface MotionNeighborListFields {
+  /** Unity: `m_NeighborArray`. */
+  neighborArray: number[];
+}
+
+/** The friendly form of {@link Blend2dDataConstant}. */
+export interface Blend2dDataConstantFields {
+  /** Unity: `m_ChildPositionArray`. */
+  childPositionArray: Vector2[];
+  /** Unity: `m_ChildMagnitudeArray`. */
+  childMagnitudeArray: number[];
+  /** Unity: `m_ChildPairVectorArray`. */
+  childPairVectorArray: Vector2[];
+  /** Unity: `m_ChildPairAvgMagInvArray`. */
+  childPairAvgMagInvArray: number[];
+  /** Unity: `m_ChildNeighborListArray`. */
+  childNeighborListArray: MotionNeighborListFields[];
+}
+
+/** The friendly form of {@link Blend1dDataConstant}. */
+export interface Blend1dDataConstantFields {
+  /** Unity: `m_ChildThresholdArray`. */
+  childThresholdArray: number[];
+}
+
+/** The friendly form of {@link BlendDirectDataConstant}. */
+export interface BlendDirectDataConstantFields {
+  /** Unity: `m_ChildBlendEventIDArray`. */
+  childBlendEventIDArray: number[];
+  /** Unity: `m_NormalizedBlendValues`. */
+  normalizedBlendValues: boolean;
+}
+
+/** The friendly form of {@link BlendTreeNodeConstant}. */
+export interface BlendTreeNodeConstantFields {
+  /**
+   * Unity: `m_BlendType`. Unity's `BlendTreeType`: 0 1D, 1 2D simple directional, 2 freeform
+   * directional, ...
+   */
+  blendType: number;
+  /** Unity: `m_BlendEventID`. */
+  blendEventID: number;
+  /** Unity: `m_BlendEventYID`. */
+  blendEventYID: number;
+  /** Unity: `m_ChildIndices`. */
+  childIndices: number[];
+  /** Unity: `m_Blend1dData`. */
+  blend1dData: OffsetPtr<Blend1dDataConstantFields>;
+  /** Unity: `m_Blend2dData`. */
+  blend2dData: OffsetPtr<Blend2dDataConstantFields>;
+  /** Unity: `m_BlendDirectData`. */
+  blendDirectData: OffsetPtr<BlendDirectDataConstantFields>;
+  /** Unity: `m_ClipID`. The clip's index in the controller's `m_AnimationClips`, for a leaf. */
+  clipID: number;
+  /** Unity: `m_Duration`. */
+  duration: number;
+  /** Unity: `m_CycleOffset`. */
+  cycleOffset: number;
+  /** Unity: `m_Mirror`. */
+  mirror: boolean;
+}
+
+/** The friendly form of {@link BlendTreeConstant}. */
+export interface BlendTreeConstantFields {
+  /** Unity: `m_NodeArray`. */
+  nodeArray: OffsetPtr<BlendTreeNodeConstantFields>[];
+}
+
+/** The friendly form of {@link StateConstant}. */
+export interface StateConstantFields {
+  /** Unity: `m_TransitionConstantArray`. */
+  transitionConstantArray: OffsetPtr<TransitionConstantFields>[];
+  /** Unity: `m_BlendTreeConstantIndexArray`. */
+  blendTreeConstantIndexArray: number[];
+  /** Unity: `m_BlendTreeConstantArray`. */
+  blendTreeConstantArray: OffsetPtr<BlendTreeConstantFields>[];
+  /** Unity: `m_NameID`. */
+  nameID: number;
+  /** Unity: `m_PathID`. */
+  pathID: number;
+  /** Unity: `m_FullPathID`. */
+  fullPathID: number;
+  /** Unity: `m_TagID`. */
+  tagID: number;
+  /** Unity: `m_SpeedParamID`. */
+  speedParamID: number;
+  /** Unity: `m_MirrorParamID`. */
+  mirrorParamID: number;
+  /** Unity: `m_CycleOffsetParamID`. */
+  cycleOffsetParamID: number;
+  /** Unity: `m_TimeParamID`. */
+  timeParamID: number;
+  /** Unity: `m_Speed`. */
+  speed: number;
+  /** Unity: `m_CycleOffset`. */
+  cycleOffset: number;
+  /** Unity: `m_IKOnFeet`. */
+  ikOnFeet: boolean;
+  /** Unity: `m_WriteDefaultValues`. */
+  writeDefaultValues: boolean;
+  /** Unity: `m_Loop`. */
+  loop: boolean;
+  /** Unity: `m_Mirror`. */
+  mirror: boolean;
+}
+
+/** The friendly form of {@link SelectorTransitionConstant}. */
+export interface SelectorTransitionConstantFields {
+  /** Unity: `m_Destination`. */
+  destination: number;
+  /** Unity: `m_ConditionConstantArray`. */
+  conditionConstantArray: OffsetPtr<ConditionConstantFields>[];
+}
+
+/** The friendly form of {@link SelectorStateConstant}. */
+export interface SelectorStateConstantFields {
+  /** Unity: `m_TransitionConstantArray`. */
+  transitionConstantArray: OffsetPtr<SelectorTransitionConstantFields>[];
+  /** Unity: `m_FullPathID`. */
+  fullPathID: number;
+  /** Unity: `m_IsEntry`. */
+  isEntry: boolean;
+}
+
+/** The friendly form of {@link StateMachineConstant}. */
+export interface StateMachineConstantFields {
+  /** Unity: `m_StateConstantArray`. */
+  stateConstantArray: OffsetPtr<StateConstantFields>[];
+  /** Unity: `m_AnyStateTransitionConstantArray`. */
+  anyStateTransitionConstantArray: OffsetPtr<TransitionConstantFields>[];
+  /** Unity: `m_SelectorStateConstantArray`. */
+  selectorStateConstantArray: OffsetPtr<SelectorStateConstantFields>[];
+  /** Unity: `m_DefaultState`. */
+  defaultState: number;
+  /** Unity: `m_SynchronizedLayerCount`. */
+  synchronizedLayerCount: number;
+  /** Unity: `m_EvaluateTransitionsOnStart`. Unity 6000.4 and later. */
+  evaluateTransitionsOnStart?: boolean;
+}
+
+/** The friendly form of {@link ValueArray}. */
+export interface ValueArrayFields {
+  /** Unity: `m_PositionValues`. */
+  positionValues: Vector3[];
+  /** Unity: `m_QuaternionValues`. */
+  quaternionValues: Vector4[];
+  /** Unity: `m_ScaleValues`. */
+  scaleValues: Vector3[];
+  /** Unity: `m_FloatValues`. */
+  floatValues: number[];
+  /** Unity: `m_IntValues`. */
+  intValues: number[];
+  /** Unity: `m_BoolValues`. */
+  boolValues: boolean[];
+  /**
+   * Unity: `m_EntityIdValues`. Unity 6000.2 and later. Always empty here: the reader refuses an
+   * object with entity ids (see {@link readAnimatorController}).
+   */
+  entityIdValues?: never[];
+}
+
+/** The friendly form of {@link ControllerConstant}. */
+export interface ControllerConstantFields {
+  /** Unity: `m_LayerArray`. */
+  layerArray: OffsetPtr<LayerConstantFields>[];
+  /** Unity: `m_StateMachineArray`. */
+  stateMachineArray: OffsetPtr<StateMachineConstantFields>[];
+  /** Unity: `m_Values`. The parameters. */
+  values: OffsetPtr<ValueArrayConstantFields>;
+  /** Unity: `m_DefaultValues`. */
+  defaultValues: OffsetPtr<ValueArrayFields>;
+}
+
+/** The friendly form of {@link StateKey}. */
+export interface StateKeyFields {
+  /** Unity: `m_StateID`. */
+  stateID: number;
+  /** Unity: `m_LayerIndex`. */
+  layerIndex: number;
+}
+
+/** The friendly form of {@link StateRange}. */
+export interface StateRangeFields {
+  /** Unity: `m_StartIndex`. */
+  startIndex: number;
+  /** Unity: `m_Count`. */
+  count: number;
+}
+
+/** The friendly form of {@link StateMachineBehaviourVectorDescription}. */
+export interface StateMachineBehaviourVectorDescriptionFields {
+  /** Unity: `m_StateMachineBehaviourRanges`. */
+  stateMachineBehaviourRanges: [StateKeyFields, StateRangeFields][];
+  /**
+   * Unity: `m_StateMachineBehaviourIndices`. Indices into the controller's
+   * `m_StateMachineBehaviours`.
+   */
+  stateMachineBehaviourIndices: number[];
+}
+
+/** The friendly form of {@link SkeletonNode}. */
+export interface SkeletonNodeFields {
+  /** Unity: `m_ParentId`. The parent's index in the skeleton; -1 for the root. */
+  parentId: number;
+  /** Unity: `m_AxesId`. The bone's index in `m_AxesArray`; -1 for none. */
+  axesId: number;
+}
+
+/** The friendly form of {@link Limit}. */
+export interface LimitFields {
+  /** Unity: `m_Min`. */
+  min: Vector3;
+  /** Unity: `m_Max`. */
+  max: Vector3;
+}
+
+/** The friendly form of {@link Axes}. */
+export interface AxesFields {
+  /** Unity: `m_PreQ`. */
+  preQ: Vector4;
+  /** Unity: `m_PostQ`. */
+  postQ: Vector4;
+  /** Unity: `m_Sgn`. */
+  sgn: Vector3;
+  /** Unity: `m_Limit`. */
+  limit: LimitFields;
+  /** Unity: `m_Length`. */
+  length: number;
+  /** Unity: `m_Type`. */
+  type: number;
+}
+
+/** The friendly form of {@link Skeleton}. */
+export interface SkeletonFields {
+  /** Unity: `m_Node`. */
+  node: SkeletonNodeFields[];
+  /** Unity: `m_ID`. Each bone's path hash, as `m_TOS` keys it. */
+  id: number[];
+  /** Unity: `m_AxesArray`. */
+  axesArray: AxesFields[];
+}
+
+/** The friendly form of {@link SkeletonPose}. */
+export interface SkeletonPoseFields {
+  /** Unity: `m_X`. */
+  x: XForm[];
+}
+
+/** The friendly form of {@link Hand}. */
+export interface HandFields {
+  /**
+   * Unity: `m_HandBoneIndex`. One skeleton index per finger bone; -1 for a bone the avatar lacks.
+   */
+  handBoneIndex: number[];
+}
+
+/** The friendly form of {@link Human}. */
+export interface HumanFields {
+  /** Unity: `m_RootX`. */
+  rootX: XForm;
+  /** Unity: `m_Skeleton`. */
+  skeleton: OffsetPtr<SkeletonFields>;
+  /** Unity: `m_SkeletonPose`. */
+  skeletonPose: OffsetPtr<SkeletonPoseFields>;
+  /** Unity: `m_LeftHand`. */
+  leftHand: OffsetPtr<HandFields>;
+  /** Unity: `m_RightHand`. */
+  rightHand: OffsetPtr<HandFields>;
+  /**
+   * Unity: `m_HumanBoneIndex`. One skeleton index per human bone; -1 for a bone the avatar lacks.
+   */
+  humanBoneIndex: number[];
+  /** Unity: `m_HumanBoneMass`. */
+  humanBoneMass: number[];
+  /** Unity: `m_Scale`. */
+  scale: number;
+  /** Unity: `m_ArmTwist`. */
+  armTwist: number;
+  /** Unity: `m_ForeArmTwist`. */
+  foreArmTwist: number;
+  /** Unity: `m_UpperLegTwist`. */
+  upperLegTwist: number;
+  /** Unity: `m_LegTwist`. */
+  legTwist: number;
+  /** Unity: `m_ArmStretch`. */
+  armStretch: number;
+  /** Unity: `m_LegStretch`. */
+  legStretch: number;
+  /** Unity: `m_FeetSpacing`. */
+  feetSpacing: number;
+  /** Unity: `m_HasLeftHand`. */
+  hasLeftHand: boolean;
+  /** Unity: `m_HasRightHand`. */
+  hasRightHand: boolean;
+  /** Unity: `m_HasTDoF`. */
+  hasTDoF: boolean;
+}
+
+/** The friendly form of {@link AvatarConstant}. */
+export interface AvatarConstantFields {
+  /** Unity: `m_AvatarSkeleton`. */
+  avatarSkeleton: OffsetPtr<SkeletonFields>;
+  /** Unity: `m_AvatarSkeletonPose`. */
+  avatarSkeletonPose: OffsetPtr<SkeletonPoseFields>;
+  /** Unity: `m_DefaultPose`. */
+  defaultPose: OffsetPtr<SkeletonPoseFields>;
+  /** Unity: `m_SkeletonNameIDArray`. */
+  skeletonNameIDArray: number[];
+  /** Unity: `m_Human`. */
+  human: OffsetPtr<HumanFields>;
+  /** Unity: `m_HumanSkeletonIndexArray`. */
+  humanSkeletonIndexArray: number[];
+  /** Unity: `m_HumanSkeletonReverseIndexArray`. */
+  humanSkeletonReverseIndexArray: number[];
+  /** Unity: `m_RootMotionBoneIndex`. */
+  rootMotionBoneIndex: number;
+  /** Unity: `m_RootMotionBoneX`. */
+  rootMotionBoneX: XForm;
+  /** Unity: `m_RootMotionSkeleton`. */
+  rootMotionSkeleton: OffsetPtr<SkeletonFields>;
+  /** Unity: `m_RootMotionSkeletonPose`. */
+  rootMotionSkeletonPose: OffsetPtr<SkeletonPoseFields>;
+  /** Unity: `m_RootMotionSkeletonIndexArray`. */
+  rootMotionSkeletonIndexArray: number[];
+}
+
+/** The friendly form of {@link SkeletonBoneLimit}. */
+export interface SkeletonBoneLimitFields {
+  /** Unity: `m_Min`. */
+  min: Vector3;
+  /** Unity: `m_Max`. */
+  max: Vector3;
+  /** Unity: `m_Value`. */
+  value: Vector3;
+  /** Unity: `m_Length`. */
+  length: number;
+  /** Unity: `m_Modified`. Whether the bone has limits of its own rather than Unity's defaults. */
+  modified: boolean;
+}
+
+/** The friendly form of {@link HumanBone}. */
+export interface HumanBoneFields {
+  /** Unity: `m_BoneName`. The transform's name. */
+  boneName: string;
+  /**
+   * Unity: `m_HumanName`. The human bone, by Unity's name (`"Hips"`, `"Left Thumb Proximal"`, ...).
+   */
+  humanName: string;
+  /** Unity: `m_Limit`. */
+  limit: SkeletonBoneLimitFields;
+}
+
+/** The friendly form of {@link SkeletonBone}. */
+export interface SkeletonBoneFields {
+  /** Unity: `m_Name`. */
+  name: string;
+  /** Unity: `m_ParentName`. */
+  parentName: string;
+  /** Unity: `m_Position`. */
+  position: Vector3;
+  /** Unity: `m_Rotation`. */
+  rotation: Quaternion;
+  /** Unity: `m_Scale`. */
+  scale: Vector3;
+}
+
+/** The friendly form of {@link HumanDescription}. */
+export interface HumanDescriptionFields {
+  /** Unity: `m_Human`. */
+  human: HumanBoneFields[];
+  /** Unity: `m_Skeleton`. */
+  skeleton: SkeletonBoneFields[];
+  /** Unity: `m_ArmTwist`. */
+  armTwist: number;
+  /** Unity: `m_ForeArmTwist`. */
+  foreArmTwist: number;
+  /** Unity: `m_UpperLegTwist`. */
+  upperLegTwist: number;
+  /** Unity: `m_LegTwist`. */
+  legTwist: number;
+  /** Unity: `m_ArmStretch`. */
+  armStretch: number;
+  /** Unity: `m_LegStretch`. */
+  legStretch: number;
+  /** Unity: `m_FeetSpacing`. */
+  feetSpacing: number;
+  /** Unity: `m_GlobalScale`. */
+  globalScale: number;
+  /** Unity: `m_RootMotionBoneName`. */
+  rootMotionBoneName: string;
+  /** Unity: `m_HasTranslationDoF`. */
+  hasTranslationDoF: boolean;
+  /** Unity: `m_HasExtraRoot`. */
+  hasExtraRoot: boolean;
+  /** Unity: `m_SkeletonHasParents`. */
+  skeletonHasParents: boolean;
+}
+
+/** The friendly form of {@link Animator}. */
+export interface AnimatorFields extends EditorExtensionFields {
+  /** Unity: `m_GameObject`. The GameObject it is attached to. */
+  gameObject: PPtr;
+  /** Unity: `m_Enabled`, a `UInt8`: `true` when it is not 0. */
+  enabled: boolean;
+  /** Unity: `m_Avatar`. */
+  avatar: PPtr;
+  /** Unity: `m_Controller`. The `AnimatorController` or `AnimatorOverrideController`. */
+  controller: PPtr;
+  /** Unity: `m_CullingMode`. 0 always animate, 1 cull update transforms, 2 cull completely. */
+  cullingMode: number;
+  /** Unity: `m_UpdateMode`. 0 normal, 1 animate physics (`Fixed`), 2 unscaled time. */
+  updateMode: number;
+  /** Unity: `m_ApplyRootMotion`. */
+  applyRootMotion: boolean;
+  /** Unity: `m_LinearVelocityBlending`. */
+  linearVelocityBlending: boolean;
+  /** Unity: `m_StabilizeFeet`. Unity 2020.3.43 to 2020.3, and 2021.2 and later. */
+  stabilizeFeet?: boolean;
+  /** Unity: `m_AnimatePhysics`. Unity 2023.1 and later. */
+  animatePhysics?: boolean;
+  /** Unity: `m_HasTransformHierarchy`. */
+  hasTransformHierarchy: boolean;
+  /** Unity: `m_AllowConstantClipSamplingOptimization`. */
+  allowConstantClipSamplingOptimization: boolean;
+  /**
+   * Unity: `m_KeepAnimatorControllerStateOnDisable`, or its later name
+   * `m_KeepAnimatorStateOnDisable` (see {@link Animator}): the one an object has.
+   */
+  keepAnimatorStateOnDisable: boolean;
+  /**
+   * Unity: `m_WriteDefaultValuesOnDisable`. Unity 2020.3.46 to 2020.3,
+   * 2021.3.20 to 2021.3, and 2022.2.9 and later.
+   */
+  writeDefaultValuesOnDisable?: boolean;
+}
+
+/**
+ * An `Animator` as {@link AnimatorFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAnimatorFields(data: Animator): AnimatorFields {
+  return defined({
+    ...editorExtension(data),
+    gameObject: data.m_GameObject,
+    enabled: data.m_Enabled !== 0,
+    avatar: data.m_Avatar,
+    controller: data.m_Controller,
+    cullingMode: data.m_CullingMode,
+    updateMode: data.m_UpdateMode,
+    applyRootMotion: data.m_ApplyRootMotion,
+    linearVelocityBlending: data.m_LinearVelocityBlending,
+    stabilizeFeet: data.m_StabilizeFeet,
+    animatePhysics: data.m_AnimatePhysics,
+    hasTransformHierarchy: data.m_HasTransformHierarchy,
+    allowConstantClipSamplingOptimization: data.m_AllowConstantClipSamplingOptimization,
+    // The reader sets exactly one of the two names.
+    keepAnimatorStateOnDisable: (data.m_KeepAnimatorStateOnDisable ??
+      data.m_KeepAnimatorControllerStateOnDisable)!,
+    writeDefaultValuesOnDisable: data.m_WriteDefaultValuesOnDisable,
+  });
+}
+
+/** The friendly form of {@link AnimatorController}. */
+export interface AnimatorControllerFields extends NamedObjectFields {
+  /** Unity: `m_EvaluateTransitionsOnStart`. Unity 6000.4 and later. */
+  evaluateTransitionsOnStart?: boolean;
+  /** Unity: `m_ControllerSize`. The byte size of the runtime controller blob. */
+  controllerSize: number;
+  /** Unity: `m_Controller`. Layers, state machines and parameters. */
+  controller: ControllerConstantFields;
+  /** Unity: `m_TOS`. Name hash (CRC32) to name, as `[hash, name]` pairs. */
+  tos: [number, string][];
+  /** Unity: `m_AnimationClips`. */
+  animationClips: PPtr[];
+  /** Unity: `m_StateMachineBehaviourVectorDescription`. */
+  stateMachineBehaviourVectorDescription: StateMachineBehaviourVectorDescriptionFields;
+  /** Unity: `m_StateMachineBehaviours`. */
+  stateMachineBehaviours: PPtr[];
+  /** Unity: `m_MultiThreadedStateMachine`. */
+  multiThreadedStateMachine: boolean;
+}
+
+/**
+ * An `AnimatorController` as {@link AnimatorControllerFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAnimatorControllerFields(data: AnimatorController): AnimatorControllerFields {
+  return defined({
+    ...namedObject(data),
+    evaluateTransitionsOnStart: data.m_EvaluateTransitionsOnStart,
+    controllerSize: data.m_ControllerSize,
+    controller: controllerConstant(data.m_Controller),
+    tos: data.m_TOS,
+    animationClips: data.m_AnimationClips,
+    stateMachineBehaviourVectorDescription: stateMachineBehaviourVectorDescription(
+      data.m_StateMachineBehaviourVectorDescription,
+    ),
+    stateMachineBehaviours: data.m_StateMachineBehaviours,
+    multiThreadedStateMachine: data.m_MultiThreadedStateMachine,
+  });
+}
+
+/** The friendly form of {@link AnimationClipOverride}. */
+export interface AnimationClipOverrideFields {
+  /** Unity: `m_OriginalClip`. The clip of the base controller. */
+  originalClip: PPtr;
+  /** Unity: `m_OverrideClip`. The clip played instead; a null pointer when not overridden. */
+  overrideClip: PPtr;
+}
+
+/** The friendly form of {@link AnimatorOverrideController}. */
+export interface AnimatorOverrideControllerFields extends NamedObjectFields {
+  /** Unity: `m_Controller`. The controller whose clips it overrides. */
+  controller: PPtr;
+  /** Unity: `m_Clips`. */
+  clips: AnimationClipOverrideFields[];
+}
+
+/**
+ * An `AnimatorOverrideController` as {@link AnimatorOverrideControllerFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAnimatorOverrideControllerFields(
+  data: AnimatorOverrideController,
+): AnimatorOverrideControllerFields {
+  return defined({
+    ...namedObject(data),
+    controller: data.m_Controller,
+    clips: data.m_Clips.map((clip: AnimationClipOverride) => ({
+      originalClip: clip.m_OriginalClip,
+      overrideClip: clip.m_OverrideClip,
+    })),
+  });
+}
+
+/** The friendly form of {@link Avatar}. */
+export interface AvatarFields extends NamedObjectFields {
+  /** Unity: `m_AvatarSize`. The byte size of the runtime avatar blob. */
+  avatarSize: number;
+  /** Unity: `m_Avatar`. Skeletons, poses and the humanoid part. */
+  avatar: AvatarConstantFields;
+  /** Unity: `m_TOS`. Path hash to transform path, as `[hash, path]` pairs. */
+  tos: [number, string][];
+  /** Unity: `m_HumanDescription`. How the avatar was built. */
+  humanDescription: HumanDescriptionFields;
+}
+
+/**
+ * An `Avatar` as {@link AvatarFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAvatarFields(data: Avatar): AvatarFields {
+  return defined({
+    ...namedObject(data),
+    avatarSize: data.m_AvatarSize,
+    avatar: avatarConstant(data.m_Avatar),
+    tos: data.m_TOS,
+    humanDescription: humanDescription(data.m_HumanDescription),
+  });
+}
+
+function valueConstant(data: ValueConstant): ValueConstantFields {
+  return {
+    id: data.m_ID,
+    type: data.m_Type,
+    index: data.m_Index,
+  };
+}
+
+function valueArrayConstant(data: ValueArrayConstant): ValueArrayConstantFields {
+  return {
+    valueArray: data.m_ValueArray.map(valueConstant),
+  };
+}
+
+function skeletonMaskElement(data: SkeletonMaskElement): SkeletonMaskElementFields {
+  return {
+    pathHash: data.m_PathHash,
+    weight: data.m_Weight,
+  };
+}
+
+function skeletonMask(data: SkeletonMask): SkeletonMaskFields {
+  return {
+    data: data.m_Data.map(skeletonMaskElement),
+  };
+}
+
+function layerConstant(data: LayerConstant): LayerConstantFields {
+  return {
+    stateMachineIndex: data.m_StateMachineIndex,
+    stateMachineSynchronizedLayerIndex: data.m_StateMachineSynchronizedLayerIndex,
+    bodyMask: data.m_BodyMask,
+    skeletonMask: { data: skeletonMask(data.m_SkeletonMask.data) },
+    binding: data.m_Binding,
+    layerBlendingMode: data["(int&)m_LayerBlendingMode"],
+    defaultWeight: data.m_DefaultWeight,
+    ikPass: data.m_IKPass,
+    syncedLayerAffectsTiming: data.m_SyncedLayerAffectsTiming,
+  };
+}
+
+function conditionConstant(data: ConditionConstant): ConditionConstantFields {
+  return {
+    conditionMode: data.m_ConditionMode,
+    eventID: data.m_EventID,
+    eventThreshold: data.m_EventThreshold,
+    exitTime: data.m_ExitTime,
+  };
+}
+
+function transitionConstant(data: TransitionConstant): TransitionConstantFields {
+  return {
+    conditionConstantArray: data.m_ConditionConstantArray.map((p) => ({
+      data: conditionConstant(p.data),
+    })),
+    destinationState: data.m_DestinationState,
+    fullPathID: data.m_FullPathID,
+    id: data.m_ID,
+    userID: data.m_UserID,
+    transitionDuration: data.m_TransitionDuration,
+    transitionOffset: data.m_TransitionOffset,
+    exitTime: data.m_ExitTime,
+    hasExitTime: data.m_HasExitTime,
+    hasFixedDuration: data.m_HasFixedDuration,
+    interruptionSource: data.m_InterruptionSource,
+    orderedInterruption: data.m_OrderedInterruption,
+    canTransitionToSelf: data.m_CanTransitionToSelf,
+  };
+}
+
+function motionNeighborList(data: MotionNeighborList): MotionNeighborListFields {
+  return {
+    neighborArray: data.m_NeighborArray,
+  };
+}
+
+function blend2dDataConstant(data: Blend2dDataConstant): Blend2dDataConstantFields {
+  return {
+    childPositionArray: data.m_ChildPositionArray,
+    childMagnitudeArray: data.m_ChildMagnitudeArray,
+    childPairVectorArray: data.m_ChildPairVectorArray,
+    childPairAvgMagInvArray: data.m_ChildPairAvgMagInvArray,
+    childNeighborListArray: data.m_ChildNeighborListArray.map(motionNeighborList),
+  };
+}
+
+function blend1dDataConstant(data: Blend1dDataConstant): Blend1dDataConstantFields {
+  return {
+    childThresholdArray: data.m_ChildThresholdArray,
+  };
+}
+
+function blendDirectDataConstant(data: BlendDirectDataConstant): BlendDirectDataConstantFields {
+  return {
+    childBlendEventIDArray: data.m_ChildBlendEventIDArray,
+    normalizedBlendValues: data.m_NormalizedBlendValues,
+  };
+}
+
+function blendTreeNodeConstant(data: BlendTreeNodeConstant): BlendTreeNodeConstantFields {
+  return {
+    blendType: data.m_BlendType,
+    blendEventID: data.m_BlendEventID,
+    blendEventYID: data.m_BlendEventYID,
+    childIndices: data.m_ChildIndices,
+    blend1dData: { data: blend1dDataConstant(data.m_Blend1dData.data) },
+    blend2dData: { data: blend2dDataConstant(data.m_Blend2dData.data) },
+    blendDirectData: { data: blendDirectDataConstant(data.m_BlendDirectData.data) },
+    clipID: data.m_ClipID,
+    duration: data.m_Duration,
+    cycleOffset: data.m_CycleOffset,
+    mirror: data.m_Mirror,
+  };
+}
+
+function blendTreeConstant(data: BlendTreeConstant): BlendTreeConstantFields {
+  return {
+    nodeArray: data.m_NodeArray.map((p) => ({ data: blendTreeNodeConstant(p.data) })),
+  };
+}
+
+function stateConstant(data: StateConstant): StateConstantFields {
+  return {
+    transitionConstantArray: data.m_TransitionConstantArray.map((p) => ({
+      data: transitionConstant(p.data),
+    })),
+    blendTreeConstantIndexArray: data.m_BlendTreeConstantIndexArray,
+    blendTreeConstantArray: data.m_BlendTreeConstantArray.map((p) => ({
+      data: blendTreeConstant(p.data),
+    })),
+    nameID: data.m_NameID,
+    pathID: data.m_PathID,
+    fullPathID: data.m_FullPathID,
+    tagID: data.m_TagID,
+    speedParamID: data.m_SpeedParamID,
+    mirrorParamID: data.m_MirrorParamID,
+    cycleOffsetParamID: data.m_CycleOffsetParamID,
+    timeParamID: data.m_TimeParamID,
+    speed: data.m_Speed,
+    cycleOffset: data.m_CycleOffset,
+    ikOnFeet: data.m_IKOnFeet,
+    writeDefaultValues: data.m_WriteDefaultValues,
+    loop: data.m_Loop,
+    mirror: data.m_Mirror,
+  };
+}
+
+function selectorTransitionConstant(
+  data: SelectorTransitionConstant,
+): SelectorTransitionConstantFields {
+  return {
+    destination: data.m_Destination,
+    conditionConstantArray: data.m_ConditionConstantArray.map((p) => ({
+      data: conditionConstant(p.data),
+    })),
+  };
+}
+
+function selectorStateConstant(data: SelectorStateConstant): SelectorStateConstantFields {
+  return {
+    transitionConstantArray: data.m_TransitionConstantArray.map((p) => ({
+      data: selectorTransitionConstant(p.data),
+    })),
+    fullPathID: data.m_FullPathID,
+    isEntry: data.m_IsEntry,
+  };
+}
+
+function stateMachineConstant(data: StateMachineConstant): StateMachineConstantFields {
+  return defined({
+    stateConstantArray: data.m_StateConstantArray.map((p) => ({ data: stateConstant(p.data) })),
+    anyStateTransitionConstantArray: data.m_AnyStateTransitionConstantArray.map((p) => ({
+      data: transitionConstant(p.data),
+    })),
+    selectorStateConstantArray: data.m_SelectorStateConstantArray.map((p) => ({
+      data: selectorStateConstant(p.data),
+    })),
+    defaultState: data.m_DefaultState,
+    synchronizedLayerCount: data.m_SynchronizedLayerCount,
+    evaluateTransitionsOnStart: data.m_EvaluateTransitionsOnStart,
+  });
+}
+
+function valueArray(data: ValueArray): ValueArrayFields {
+  return defined({
+    positionValues: data.m_PositionValues,
+    quaternionValues: data.m_QuaternionValues,
+    scaleValues: data.m_ScaleValues,
+    floatValues: data.m_FloatValues,
+    intValues: data.m_IntValues,
+    boolValues: data.m_BoolValues,
+    entityIdValues: data.m_EntityIdValues,
+  });
+}
+
+function controllerConstant(data: ControllerConstant): ControllerConstantFields {
+  return {
+    layerArray: data.m_LayerArray.map((p) => ({ data: layerConstant(p.data) })),
+    stateMachineArray: data.m_StateMachineArray.map((p) => ({
+      data: stateMachineConstant(p.data),
+    })),
+    values: { data: valueArrayConstant(data.m_Values.data) },
+    defaultValues: { data: valueArray(data.m_DefaultValues.data) },
+  };
+}
+
+function stateKey(data: StateKey): StateKeyFields {
+  return {
+    stateID: data.m_StateID,
+    layerIndex: data.m_LayerIndex,
+  };
+}
+
+function stateRange(data: StateRange): StateRangeFields {
+  return {
+    startIndex: data.m_StartIndex,
+    count: data.m_Count,
+  };
+}
+
+function stateMachineBehaviourVectorDescription(
+  data: StateMachineBehaviourVectorDescription,
+): StateMachineBehaviourVectorDescriptionFields {
+  return {
+    stateMachineBehaviourRanges: data.m_StateMachineBehaviourRanges.map(([key, range]) => [
+      stateKey(key),
+      stateRange(range),
+    ]),
+    stateMachineBehaviourIndices: data.m_StateMachineBehaviourIndices,
+  };
+}
+
+function skeletonNode(data: SkeletonNode): SkeletonNodeFields {
+  return {
+    parentId: data.m_ParentId,
+    axesId: data.m_AxesId,
+  };
+}
+
+function limit(data: Limit): LimitFields {
+  return {
+    min: data.m_Min,
+    max: data.m_Max,
+  };
+}
+
+function axes(data: Axes): AxesFields {
+  return {
+    preQ: data.m_PreQ,
+    postQ: data.m_PostQ,
+    sgn: data.m_Sgn,
+    limit: limit(data.m_Limit),
+    length: data.m_Length,
+    type: data.m_Type,
+  };
+}
+
+function skeleton(data: Skeleton): SkeletonFields {
+  return {
+    node: data.m_Node.map(skeletonNode),
+    id: data.m_ID,
+    axesArray: data.m_AxesArray.map(axes),
+  };
+}
+
+function skeletonPose(data: SkeletonPose): SkeletonPoseFields {
+  return {
+    x: data.m_X,
+  };
+}
+
+function hand(data: Hand): HandFields {
+  return {
+    handBoneIndex: data.m_HandBoneIndex,
+  };
+}
+
+function human(data: Human): HumanFields {
+  return {
+    rootX: data.m_RootX,
+    skeleton: { data: skeleton(data.m_Skeleton.data) },
+    skeletonPose: { data: skeletonPose(data.m_SkeletonPose.data) },
+    leftHand: { data: hand(data.m_LeftHand.data) },
+    rightHand: { data: hand(data.m_RightHand.data) },
+    humanBoneIndex: data.m_HumanBoneIndex,
+    humanBoneMass: data.m_HumanBoneMass,
+    scale: data.m_Scale,
+    armTwist: data.m_ArmTwist,
+    foreArmTwist: data.m_ForeArmTwist,
+    upperLegTwist: data.m_UpperLegTwist,
+    legTwist: data.m_LegTwist,
+    armStretch: data.m_ArmStretch,
+    legStretch: data.m_LegStretch,
+    feetSpacing: data.m_FeetSpacing,
+    hasLeftHand: data.m_HasLeftHand,
+    hasRightHand: data.m_HasRightHand,
+    hasTDoF: data.m_HasTDoF,
+  };
+}
+
+function avatarConstant(data: AvatarConstant): AvatarConstantFields {
+  return {
+    avatarSkeleton: { data: skeleton(data.m_AvatarSkeleton.data) },
+    avatarSkeletonPose: { data: skeletonPose(data.m_AvatarSkeletonPose.data) },
+    defaultPose: { data: skeletonPose(data.m_DefaultPose.data) },
+    skeletonNameIDArray: data.m_SkeletonNameIDArray,
+    human: { data: human(data.m_Human.data) },
+    humanSkeletonIndexArray: data.m_HumanSkeletonIndexArray,
+    humanSkeletonReverseIndexArray: data.m_HumanSkeletonReverseIndexArray,
+    rootMotionBoneIndex: data.m_RootMotionBoneIndex,
+    rootMotionBoneX: data.m_RootMotionBoneX,
+    rootMotionSkeleton: { data: skeleton(data.m_RootMotionSkeleton.data) },
+    rootMotionSkeletonPose: { data: skeletonPose(data.m_RootMotionSkeletonPose.data) },
+    rootMotionSkeletonIndexArray: data.m_RootMotionSkeletonIndexArray,
+  };
+}
+
+function skeletonBoneLimit(data: SkeletonBoneLimit): SkeletonBoneLimitFields {
+  return {
+    min: data.m_Min,
+    max: data.m_Max,
+    value: data.m_Value,
+    length: data.m_Length,
+    modified: data.m_Modified,
+  };
+}
+
+function humanBone(data: HumanBone): HumanBoneFields {
+  return {
+    boneName: data.m_BoneName,
+    humanName: data.m_HumanName,
+    limit: skeletonBoneLimit(data.m_Limit),
+  };
+}
+
+function skeletonBone(data: SkeletonBone): SkeletonBoneFields {
+  return {
+    name: data.m_Name,
+    parentName: data.m_ParentName,
+    position: data.m_Position,
+    rotation: data.m_Rotation,
+    scale: data.m_Scale,
+  };
+}
+
+function humanDescription(data: HumanDescription): HumanDescriptionFields {
+  return {
+    human: data.m_Human.map(humanBone),
+    skeleton: data.m_Skeleton.map(skeletonBone),
+    armTwist: data.m_ArmTwist,
+    foreArmTwist: data.m_ForeArmTwist,
+    upperLegTwist: data.m_UpperLegTwist,
+    legTwist: data.m_LegTwist,
+    armStretch: data.m_ArmStretch,
+    legStretch: data.m_LegStretch,
+    feetSpacing: data.m_FeetSpacing,
+    globalScale: data.m_GlobalScale,
+    rootMotionBoneName: data.m_RootMotionBoneName,
+    hasTranslationDoF: data.m_HasTranslationDoF,
+    hasExtraRoot: data.m_HasExtraRoot,
+    skeletonHasParents: data.m_SkeletonHasParents,
+  };
 }
 
 // ---------------------------------------------------------------------------

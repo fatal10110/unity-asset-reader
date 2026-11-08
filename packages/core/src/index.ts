@@ -57,8 +57,12 @@ export type { GLTextureSettings, StreamingInfo, Texture2D } from "./classes/Text
 export { TextureFormat } from "./classes/TextureFormat.js";
 export type { ObjectData, ObjectDataMap, Texture2DData } from "./classes/registry.js";
 export {
+  toAnimatorControllerFields,
+  toAnimatorFields,
+  toAnimatorOverrideControllerFields,
   toAssetBundleFields,
   toAudioClipFields,
+  toAvatarFields,
   toFontFields,
   toMaterialFields,
   toMeshFields,
@@ -74,7 +78,46 @@ export {
 } from "./classes/fields.js";
 export type {
   AABBFields,
+  AnimationClipOverrideFields,
+  AnimatorControllerFields,
+  AnimatorFields,
+  AnimatorOverrideControllerFields,
   AssetBundleFields,
+  AvatarFields,
+  AvatarConstantFields,
+  AxesFields,
+  Blend1dDataConstantFields,
+  Blend2dDataConstantFields,
+  BlendDirectDataConstantFields,
+  BlendTreeConstantFields,
+  BlendTreeNodeConstantFields,
+  ConditionConstantFields,
+  ControllerConstantFields,
+  HandFields,
+  HumanFields,
+  HumanBoneFields,
+  HumanDescriptionFields,
+  LayerConstantFields,
+  LimitFields,
+  MotionNeighborListFields,
+  SelectorStateConstantFields,
+  SelectorTransitionConstantFields,
+  SkeletonFields,
+  SkeletonBoneFields,
+  SkeletonBoneLimitFields,
+  SkeletonMaskFields,
+  SkeletonMaskElementFields,
+  SkeletonNodeFields,
+  SkeletonPoseFields,
+  StateConstantFields,
+  StateKeyFields,
+  StateMachineBehaviourVectorDescriptionFields,
+  StateMachineConstantFields,
+  StateRangeFields,
+  TransitionConstantFields,
+  ValueArrayFields,
+  ValueArrayConstantFields,
+  ValueConstantFields,
   AudioClipFields,
   BindingFields,
   BufferBindingFields,
@@ -216,3 +259,60 @@ export type {
 } from "./classes/Mesh.js";
 export { readSpriteAtlas } from "./classes/SpriteAtlas.js";
 export type { SpriteAtlas, SpriteAtlasData, SpriteInstanceData } from "./classes/SpriteAtlas.js";
+export { readHumanPose, readValueArrayConstant } from "./classes/animation.js";
+export type {
+  HandPose,
+  HumanGoal,
+  HumanPose,
+  OffsetPtr,
+  ValueArrayConstant,
+  ValueConstant,
+} from "./classes/animation.js";
+export { readAnimator } from "./classes/Animator.js";
+export type { Animator } from "./classes/Animator.js";
+export { readAnimatorController } from "./classes/AnimatorController.js";
+export type {
+  AnimatorController,
+  Blend1dDataConstant,
+  Blend2dDataConstant,
+  BlendDirectDataConstant,
+  BlendTreeConstant,
+  BlendTreeNodeConstant,
+  ConditionConstant,
+  ControllerConstant,
+  HumanPoseMask,
+  LayerConstant,
+  MotionNeighborList,
+  SelectorStateConstant,
+  SelectorTransitionConstant,
+  SkeletonMask,
+  SkeletonMaskElement,
+  StateConstant,
+  StateKey,
+  StateMachineBehaviourVectorDescription,
+  StateMachineConstant,
+  StateRange,
+  TransitionConstant,
+  ValueArray,
+} from "./classes/AnimatorController.js";
+export { readAnimatorOverrideController } from "./classes/AnimatorOverrideController.js";
+export type {
+  AnimationClipOverride,
+  AnimatorOverrideController,
+} from "./classes/AnimatorOverrideController.js";
+export { readAvatar } from "./classes/Avatar.js";
+export type {
+  Avatar,
+  AvatarConstant,
+  Axes,
+  Hand,
+  Human,
+  HumanBone,
+  HumanDescription,
+  Limit,
+  Skeleton,
+  SkeletonBone,
+  SkeletonBoneLimit,
+  SkeletonNode,
+  SkeletonPose,
+} from "./classes/Avatar.js";

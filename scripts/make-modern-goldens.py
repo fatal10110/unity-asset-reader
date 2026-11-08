@@ -112,8 +112,11 @@ def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
     textures, atlases, shaders, meshes = [], [], [], []
+    animation = {}
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
+        if obj.type.name in ("Animator", "AnimatorController", "AnimatorOverrideController", "Avatar"):
+            animation[obj.type.name] = animation.get(obj.type.name, 0) + 1
         if obj.type.name == "Mesh":
             tree = obj.read_typetree()
             shapes = tree["m_Shapes"]
@@ -165,6 +168,12 @@ def evidence(name, path):
         assert sorted(s["name"] for s in shaders) == ["UAR/ShaderVariants", "UAR/ShaderVariantsSecond"]
         assert all(s["platforms"] == [9, 18] for s in shaders)
         return {"shaders": sorted(shaders, key=lambda s: s["name"])}
+    if "/animator/" in name:
+        # The animator fixtures (#303): two Animators, a humanoid and a generic
+        # Avatar, one controller and one override controller.
+        assert animation == {"Animator": 2, "AnimatorController": 1,
+                             "AnimatorOverrideController": 1, "Avatar": 2}, animation
+        return {"animation": dict(sorted(animation.items()))}
     if "/signed-eac/" in name:
         # The signed EAC textures (#288); their bytes are checked against the
         # etc2comp payloads by packages/texture/tests/signed-eac.test.ts.
@@ -195,6 +204,8 @@ def main():
         ("shader-variants/lz4", "android"),
         # Signed EAC textures made by an editor script from etc2comp blocks (#288).
         ("signed-eac", "android"),
+        # Animator, AnimatorController, AnimatorOverrideController and Avatar (#303).
+        ("animator/lz4", "animator"), ("animator/lz4-notypetree", "animator"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

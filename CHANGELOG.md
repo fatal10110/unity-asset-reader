@@ -51,6 +51,23 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   decoding, `m_Shapes` (two blend shapes) against `readTypeTree()`. For a compressed vertex
   whose fourth weight Unity leaves out, the reader agrees with AssetStudio, `(31 - sum) / 31`;
   UnityPy gets it wrong. No code change.
+- Hand-written readers for `Avatar`, `AnimatorController`, `Animator` and
+  `AnimatorOverrideController` (`readAvatar`, `readAnimatorController`, `readAnimator`,
+  `readAnimatorOverrideController`), Unity 2019.1 to 6000.6 (#303), with their `asset.data`
+  shapes (`AvatarFields`, ...). Every field Unity writes, as `readTypeTree()` gives it, checked
+  on editor-built bundles from 2019.4, 2020.3, 6000.3 and 6000.6, typed and not, and at every
+  layout change from 2019.1 through UnityPy's TPK type trees: past AssetStudio, the avatar's
+  `m_HumanDescription`, the controller's behaviours and its 6000.2 and 6000.4 fields, and the
+  Animator's fields of 2023.1 with their patch-release backports (2020.3.43, 2021.3.16,
+  2022.1.24, 2022.2.9). Curves and muscle values are returned raw, not decoded. The structs
+  the animation classes share (`HumanPose`, `ValueArrayConstant`, `OffsetPtr`, ...) are
+  exported with `readHumanPose` and `readValueArrayConstant`.
+  **Behavior change:** these four classes were `"Other"` in `env.assets()`, with `asset.data`
+  and `obj.read()` the type tree's result. Now `asset.type` is their class name and `asset.data`
+  their friendly shape; `obj.read()` gives the same object as before for a file with type
+  trees, and now also reads one without (it threw `UnsupportedError`). It throws
+  `UnsupportedError` for a Unity version before 2019.1 (use `readTypeTree()`), and for a
+  6000.2+ controller with entity id parameter defaults, which no Unity version writes.
 
 ### 1.2.0 - 2026-10-29
 

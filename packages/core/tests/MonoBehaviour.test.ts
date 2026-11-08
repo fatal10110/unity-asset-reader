@@ -65,7 +65,9 @@ for (const name of FIXTURES) {
           ? ["RegistryData"]
           : name.includes("/spine/")
             ? ["SkeletonDataAsset", "SpineAtlasAsset", "UarOtherAtlasAsset"]
-            : ["FixtureData"];
+            : name.includes("/animator/")
+              ? ["FixtureBehaviour"] // a StateMachineBehaviour (#303)
+              : ["FixtureData"];
         assert.ok(classNames.includes(className), className);
       }
 

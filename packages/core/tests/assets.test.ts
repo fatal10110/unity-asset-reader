@@ -31,6 +31,10 @@ const KNOWN = new Set([
   "Sprite",
   "SpriteAtlas",
   "Mesh",
+  "Avatar",
+  "AnimatorController",
+  "Animator",
+  "AnimatorOverrideController",
 ]);
 
 /** Load a fixture as bare bytes, the way the usage block does. */
@@ -87,7 +91,12 @@ for (const name of EDITOR) {
       // UnityPy's peek_name() gives a Shader's empty m_Name; asset.name is its parsed
       // form's name, as AssetStudio's (#244, tested in Shader.test.ts).
       const names = g.serialized![asset.file]!.names;
-      if (asset.type !== "Shader") {
+      // Without a type tree a GameObject has no name here (the ponytail in
+      // asset.ts readName: its m_Name follows the component list); the
+      // animator bundles (#303) are the first stripped ones to hold any.
+      const stripped = !object.serializedType?.nodes?.length;
+      if (asset.classId === ClassID.GameObject && stripped) assert.equal(asset.name, "", where);
+      else if (asset.type !== "Shader") {
         assert.equal(asset.name, names[String(asset.pathId)], `${where} name`);
       }
       assert.equal(asset.path, pathOf.get(key(asset.file, asset.pathId)), `${where} path`);

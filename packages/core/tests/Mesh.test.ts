@@ -1078,7 +1078,7 @@ const typeTreeNodes = (nodes: GoldenNode[]): TypeTreeNode[] =>
   }));
 
 test("TPK has a Mesh tree at every gate this reader knows, from 2019.1 to 6000.6", () => {
-  const versions = ["2019.1a10", "2020.1a19", "2022.1a15", "6000.2a8", "6000.6a5"];
+  const versions = ["2019.1.0a10", "2020.1.0a19", "2022.1.0a15", "6000.2.0a8", "6000.6.0a5"];
   assert.deepEqual(Object.keys(TPK), versions);
 });
 
