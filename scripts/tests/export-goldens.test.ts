@@ -208,7 +208,11 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     29,
     "main's triangle; detail, compressed, skinned and skinned-compressed of the mesh bundles",
   );
-  assert.equal(exported("AudioClip"), 36, "both clips of every audio and adpcm bundle");
+  assert.equal(
+    exported("AudioClip"),
+    51,
+    "both clips of every audio and adpcm bundle, the five of every audiohdr bundle",
+  );
   assert.equal(exported("TextAsset"), 32);
   // Both shaders of the 2019.4 and 2020.3 Android and iOS bundles; the composite's
   // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259),

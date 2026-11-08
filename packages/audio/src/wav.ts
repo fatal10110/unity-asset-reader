@@ -32,8 +32,8 @@ const ADPCM: Partial<Record<Fsb5Codec, (sample: Fsb5Sample) => Int16Array>> = {
  * @param bytes the sound bank
  * @returns the WAV file, a new array
  * @throws {UnsupportedError} for any other codec (kind `"FSB5 codec"`, with
- *   its name: Vorbis, MPEG, ...), for a GCADPCM sample of more than one channel
- *   or an IMAADPCM one of more than two, and as {@link readFsb5} does
+ *   its name: Vorbis, MPEG, ...), for a GCADPCM sample of more than one
+ *   channel, and as {@link readFsb5} does
  * @throws {CorruptError} when the bank has no sample, its first sample has no
  *   channels, or its data is shorter than its frames need; and as
  *   {@link readFsb5} does

@@ -85,40 +85,46 @@ const IMA_FRAME_BYTES = 0x24;
 const IMA_FRAME_SAMPLES = 0x40;
 
 /**
- * Decode a mono or stereo IMAADPCM sample (FSB's Xbox IMA layout). A frame is
- * 0x24 bytes per channel: first each channel's 4-byte header (`Int16` first
- * sample, `UInt8` step index, a spare byte), then 4-byte groups of 8 nibbles,
- * low nibble first, one group per channel in turn. A frame decodes to 64
- * samples per channel: the header's, then 63 nibbles (the 64th is unused).
+ * Decode an IMAADPCM sample. A frame is 0x24 bytes per channel and decodes to
+ * 64 samples per channel: the header's, then 63 nibbles, low nibble first (the
+ * 64th is unused). Mono and stereo use FSB's Xbox IMA layout: first each
+ * channel's 4-byte header (`Int16` first sample, `UInt8` step index, a spare
+ * byte), then 4-byte groups of 8 nibbles, one group per channel in turn.
  *
- * @throws {UnsupportedError} for more than two channels, which Fmod5Sharp does
- *   not decode either
+ * More than two channels have another layout, which Fmod5Sharp does not decode
+ * (it refuses them) and which is FMOD's, as AssetStudio's WAV of Unity's
+ * 4-channel and 5.1 clips shows: first every channel's `Int16` first sample,
+ * then every channel's step index as a 16-bit word (its low byte read), then
+ * 2-byte groups of 4 nibbles, one group per channel in turn.
+ *
  * @throws {CorruptError} when the data holds fewer frames than `sampleCount`
  *   needs
  */
 export function decodeImaAdpcm(sample: Fsb5Sample): Int16Array {
   const { data, sampleCount, channels } = sample;
-  if (channels > 2) {
-    const hint = "only mono and stereo are decoded";
-    throw new UnsupportedError("IMAADPCM channel count", channels, hint);
-  }
   const frameBytes = IMA_FRAME_BYTES * channels;
   const frames = Math.ceil(sampleCount / IMA_FRAME_SAMPLES);
   checkSize("IMAADPCM", data, frames * frameBytes, sampleCount);
 
+  // Bytes of one channel's turn in a group: 4 (8 nibbles) in the Xbox layout,
+  // 2 (4 nibbles) for more than two channels.
+  const multi = channels > 2;
+  const group = multi ? 2 : 4;
   const out = new Int16Array(sampleCount * channels);
   for (let ch = 0; ch < channels; ch++) {
     for (let frame = 0; frame < frames; frame++) {
       const base = frame * frameBytes;
       const first = frame * IMA_FRAME_SAMPLES;
       const todo = Math.min(IMA_FRAME_SAMPLES, sampleCount - first);
-      const head = base + 4 * ch;
+      const head = base + (multi ? 2 : 4) * ch;
       let hist = ((data[head]! | (data[head + 1]! << 8)) << 16) >> 16;
-      let index = Math.min(data[head + 2]!, 88);
+      let index = Math.min(data[multi ? base + 2 * channels + 2 * ch : head + 2]!, 88);
       out[first * channels + ch] = hist;
       for (let s = 1; s < todo; s++) {
         const k = s - 1;
-        const at = base + 4 * channels + 4 * ch + 4 * channels * (k >> 3) + ((k & 7) >> 1);
+        const turn = Math.floor(k / (2 * group));
+        const at =
+          base + 4 * channels + group * ch + group * channels * turn + ((k % (2 * group)) >> 1);
         const nibble = (data[at]! >> ((k & 1) * 4)) & 0xf;
         const step = IMA_STEPS[index]!;
         let delta = step >> 3;

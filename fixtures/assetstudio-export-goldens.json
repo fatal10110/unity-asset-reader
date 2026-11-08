@@ -843,6 +843,90 @@
         }
       }
     },
+    "editor/2019.4.41f2/lz4/audiohdr": {
+      "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+        "-8122121886038081603": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "8dfb62d49c3b20de6307f05890f73b19558f1d2397ead05df80658a606025ab5",
+            "name": "surround-pcm",
+            "dataSize": 48192,
+            "dataSha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48044,
+            "sha256": "4cfd28eed6cf47512117999d4bf9ac7758414f01a5f66deff1b91f6a6a43f4b1"
+          }
+        },
+        "-8383618252683881118": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a59a611f7717fb1e41bdb3661a0d99f8ca4dce8c5b4dba0dbf5a60ea9af9d159",
+            "name": "quad-adpcm",
+            "dataSize": 9184,
+            "dataSha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32300,
+            "sha256": "5fd7e95f14419394b92d35863ac0c3adcf8234e63f9d327f3bfe628c1fa4aa35"
+          }
+        },
+        "-8509842910972635506": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "2f984b78bb03b9044b0083293d2a5202f4c9ff0c5648678292d9b9b956cd8162",
+            "name": "quad-pcm",
+            "dataSize": 32160,
+            "dataSha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32044,
+            "sha256": "3dfca246a3cdc242df9da8771cc87b380710298822b786c0212a15d943a3ea89"
+          }
+        },
+        "2165756370926172543": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "3c5a0a434b1da9aa69d7a1a3bd954a3ee94e3918d83fd9edb94c597c688978d8",
+            "name": "mono37800-pcm",
+            "dataSize": 8128,
+            "dataSha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 8044,
+            "sha256": "4ae80bf7d99019c8f6501cb5cfa12274ea122fe93cf2f6b0155251a05af0d7ba"
+          }
+        },
+        "2532760248045659024": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "786f06a0a1ffd512c4db97fa3b7a2db9aeeb5428d45cbe8e1973699e51733631",
+            "name": "surround-adpcm",
+            "dataSize": 13728,
+            "dataSha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48428,
+            "sha256": "65e396de1dc9a01ce3b185aff3e2e5cb2a764a1b9a6a2d7ca8fcee584c6f8e4e"
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/lz4/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
         "1371323451777357266": {
@@ -4667,6 +4751,90 @@
         }
       }
     },
+    "editor/2020.3.30f1/lz4/audiohdr": {
+      "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+        "-2405115209147083544": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "a9d3ab14766a383142125b19f82bc3bc93c7cf1b20e8ff43a787c2044940728d",
+            "name": "quad-adpcm",
+            "dataSize": 9184,
+            "dataSha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32300,
+            "sha256": "5fd7e95f14419394b92d35863ac0c3adcf8234e63f9d327f3bfe628c1fa4aa35"
+          }
+        },
+        "-2793825881307328923": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "51dfbae5702f6cfaecf741c163d6c18835b269b32294de3579dd23dc881a8836",
+            "name": "mono37800-pcm",
+            "dataSize": 8128,
+            "dataSha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 8044,
+            "sha256": "4ae80bf7d99019c8f6501cb5cfa12274ea122fe93cf2f6b0155251a05af0d7ba"
+          }
+        },
+        "-5534239237589278531": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "3eec2a7948697de23791e35f5f4b0cb1832ef4d0fbd7623cf7eb72b8897d186b",
+            "name": "surround-pcm",
+            "dataSize": 48192,
+            "dataSha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48044,
+            "sha256": "4cfd28eed6cf47512117999d4bf9ac7758414f01a5f66deff1b91f6a6a43f4b1"
+          }
+        },
+        "-8646877544363165655": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "17c0367ed8b450f02654b782aa7bfc4b7b80df0757f508485dfb32d9a4b6b82b",
+            "name": "surround-adpcm",
+            "dataSize": 13728,
+            "dataSha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48428,
+            "sha256": "65e396de1dc9a01ce3b185aff3e2e5cb2a764a1b9a6a2d7ca8fcee584c6f8e4e"
+          }
+        },
+        "1963493556990142968": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "7f670a5988247c326caa77a353c33def58cb0e99d7714cad9f535155dfcb8f3c",
+            "name": "quad-pcm",
+            "dataSize": 32160,
+            "dataSha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32044,
+            "sha256": "3dfca246a3cdc242df9da8771cc87b380710298822b786c0212a15d943a3ea89"
+          }
+        }
+      }
+    },
     "editor/2020.3.30f1/lz4/font": {
       "CAB-f874315c3b89a64dd6e39e5d4f0305e5": {
         "-3688452361012742923": {
@@ -7850,6 +8018,90 @@
           "wav": {
             "size": 11180,
             "sha256": "c6fc33f30830e45a14779bf0ea861d6f64f9b39839b08a861a502741a921a3bf"
+          }
+        }
+      }
+    },
+    "editor/6000.3.26f1/lz4/audiohdr": {
+      "CAB-f96da1a3ac0fe779f4306341e6446bda": {
+        "-5892188951707943365": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "e229234bad3f742904b520f6eff1fd4617ff9f51f4d56146fd7cb0c3b4c306dc",
+            "name": "mono37800-pcm",
+            "dataSize": 8128,
+            "dataSha256": "5c9a3ea133eff935621608a8d49c8d8ea70351733623e9d939b0f89f89e0b70e"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 8044,
+            "sha256": "4ae80bf7d99019c8f6501cb5cfa12274ea122fe93cf2f6b0155251a05af0d7ba"
+          }
+        },
+        "1402354457679396384": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 160,
+            "objectSha256": "b89d79190f4c29446ed7b66638b99a9dc5efbf48c1f6a4eb860aeb8896d0a7e0",
+            "name": "quad-pcm",
+            "dataSize": 32160,
+            "dataSha256": "3c1c0652812fae769e5bb5017ca576de93be6f81489995884515ab1cda6bd896"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32044,
+            "sha256": "3dfca246a3cdc242df9da8771cc87b380710298822b786c0212a15d943a3ea89"
+          }
+        },
+        "1771165743573361443": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 168,
+            "objectSha256": "96257744746291a796cb8b5afb960c44feca64386d160b8b35210255b12a27f3",
+            "name": "surround-adpcm",
+            "dataSize": 13728,
+            "dataSha256": "66ccf6e5b144c1a910b4c3cf15eaddfee57af4a79e85bb8b61025e6b0ca6055d"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48428,
+            "sha256": "65e396de1dc9a01ce3b185aff3e2e5cb2a764a1b9a6a2d7ca8fcee584c6f8e4e"
+          }
+        },
+        "7655883280247509112": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "7a2efd568c1d713f2ad4123bc3fe47b600d4c98613e928d48fa011c11be90919",
+            "name": "surround-pcm",
+            "dataSize": 48192,
+            "dataSha256": "269083a1f4ff6e71fa9e0ae87db17e5477c4311e24bb95ece6a02ce76b9140bb"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 48044,
+            "sha256": "4cfd28eed6cf47512117999d4bf9ac7758414f01a5f66deff1b91f6a6a43f4b1"
+          }
+        },
+        "8505327954294842418": {
+          "class": "AudioClip",
+          "input": {
+            "classId": 83,
+            "byteSize": 164,
+            "objectSha256": "90e9c1ab8dd3b9f0c69418e15344cc0434cc87f83ffea8294a8b124e0f227427",
+            "name": "quad-adpcm",
+            "dataSize": 9184,
+            "dataSha256": "a2fad0f884283af21a9d5c25d92cf3a96e8ca67bdc6d51eb9972c32814db65c1"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "wav": {
+            "size": 32300,
+            "sha256": "5fd7e95f14419394b92d35863ac0c3adcf8234e63f9d327f3bfe628c1fa4aa35"
           }
         }
       }
