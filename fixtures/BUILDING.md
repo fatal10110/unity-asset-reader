@@ -1178,9 +1178,10 @@ and FMOD's decode, and `decodeImaAdpcm()` follows it. AssetStudio's WAV for
 every clip is FMOD's decode,
 4000 frames for PCM16 and 4032 (63 whole IMA ADPCM frames) for IMAADPCM, and
 `fsb5ToWav()` equals it byte for byte. What Unity does not write for these
-clips stays on the hand-built banks: FADPCM, GCADPCM, `PCM8` and `PCM32`, a
-partial last IMA ADPCM frame, a step index above 88, and a `CHANNELS` chunk
-before a `DSPCOEFF` one.
+clips stays on the hand-built banks: FADPCM, GCADPCM, `PCM8` and `PCM32` (Unity
+writes `PCM16` whatever the source depth, see
+[Source bit depth](#source-bit-depth-296)), a partial last IMA ADPCM frame, a
+step index above 88, and a `CHANNELS` chunk before a `DSPCOEFF` one.
 
 | File | Bytes | sha256 |
 |---|---|---|
@@ -1297,6 +1298,88 @@ once per project. The log must hold one `FIXTURE-OK audiohdr lz4` line and a
 `Build/audiohdr-lz4/audiohdr` to `fixtures/bundles/editor/<editor
 version>/lz4/`. Then rerun `make-goldens.py` and `make-export-goldens.py`
 (section 17).
+
+### Source bit depth (#296)
+
+`fsb5ToWav()` writes FSB5 `PCM8` and `PCM32` as stored, but every PCM clip
+above came from a 16-bit WAV. A probe checked whether Unity keeps another
+source depth when a clip uses `AudioCompressionFormat.PCM`. It does not: no
+bundle is kept, and `PCM8` and `PCM32` stay on hand-built banks
+(`packages/audio/tests/wav.test.ts`).
+
+Four mono 22050 Hz WAVs of 4000 frames each, a 440 Hz sine at about half
+scale (0.78 for the 8-bit file), were imported with `PCM`, `DecompressOnLoad` and `Preserve Sample Rate`
+and built once into one `lz4` bundle per editor, in projects
+`uar-296-probe-<editor version>` for 2019.4.41f2, 2020.3.30f1 and 6000.3.26f1.
+Read with UnityPy 1.25.3, the three editors write the same thing:
+
+| Source WAV | `m_BitsPerSample` | `m_CompressionFormat` | FSB5 codec (header `mode`) | Samples |
+|---|---|---|---|---|
+| `mono-u8`, 8-bit unsigned | 16 | 0 (PCM) | `PCM16` (2) | (v - 128) << 8, exactly |
+| `mono-s24`, 24-bit | 16 | 0 (PCM) | `PCM16` (2) | the top 16 bits, exactly |
+| `mono-s32`, 32-bit integer | 16 | 0 (PCM) | `PCM16` (2) | the top 16 bits, exactly |
+| `mono-f32`, 32-bit float | 16 | 0 (PCM) | `PCM16` (2) | trunc(v * 32767), exactly |
+
+Every bank is FSB5 version 1, one sample, 8032 data bytes (4000 frames of
+16-bit, padded to 32). So Unity writes neither `PCM8`, `PCM24`, `PCM32` nor
+`PCMFLOAT` for these sources, and `fsb5ToWav()` keeps refusing `PCM24` and
+`PCMFLOAT` as before. The WAVs are byte-exact from `gen_audiodepth.py` with
+Python 3.12 (standard library only):
+
+```bash
+python3 gen_audiodepth.py <project>/Assets/Fixtures/audiodepth
+```
+
+| File | Bytes | sha256 |
+|---|---|---|
+| `mono-u8.wav` | 4044 | `7c9f3c71fb08228c29fed1e7131facc38479b59498f53e462f475b02d3588893` |
+| `mono-s24.wav` | 12044 | `79b3085839109e53c3d31d89f555d094e89ee8adcc087fa925ebb91b9ac33778` |
+| `mono-s32.wav` | 16044 | `546764a29340b0a0b53e90c075a2d1111dfd744ebef4ca96a5397f876ab14761` |
+| `mono-f32.wav` | 16044 | `80ac5c8556bb42201fa34db863f54183dbce3681777017314b921cb89d06643c` |
+
+`gen_audiodepth.py`:
+
+```python
+import hashlib, math, pathlib, struct, sys
+
+out = pathlib.Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
+names = sys.argv[2:] or ["mono-u8", "mono-s24", "mono-s32", "mono-f32"]
+RATE, FRAMES = 22050, 4000
+
+def sample(name, s):
+    # s is a 440 Hz sine in [-1, 1]; each depth stores it its own way (8-bit at 0.78, the rest near 0.5).
+    if name.endswith("-u8"):
+        return struct.pack("<B", 128 + round(100 * s))
+    if name.endswith("-s24"):
+        return struct.pack("<i", round(4000000 * s))[:3]
+    if name.endswith("-s32"):
+        return struct.pack("<i", round(1000000000 * s))
+    return struct.pack("<f", 0.5 * s)
+
+# name -> (format tag, bits): 1 integer PCM, 3 IEEE float.
+FORMATS = {"u8": (1, 8), "s24": (1, 24), "s32": (1, 32), "f32": (3, 32)}
+
+for name in names:
+    tag, bits = FORMATS[name.rsplit("-", 1)[1]]
+    data = b"".join(sample(name, math.sin(2 * math.pi * 440 * i / RATE)) for i in range(FRAMES))
+    fmt = struct.pack("<HHIIHH", tag, 1, RATE, RATE * bits // 8, bits // 8, bits)
+    riff = b"WAVE" + b"fmt " + struct.pack("<I", len(fmt)) + fmt \
+        + b"data" + struct.pack("<I", len(data)) + data
+    blob = b"RIFF" + struct.pack("<I", len(riff)) + riff
+    (out / (name + ".wav")).write_bytes(blob)
+    print(name + ".wav", len(blob), hashlib.sha256(blob).hexdigest())
+```
+
+Each probe project has `ProjectSettings/` and `Packages/` copied from the
+`uar-289-*` project of its editor, these four WAVs, and
+`Assets/Editor/BuildAudioDepth.cs`: `BuildAudioHdr.cs` above with the class
+`BuildAudioDepth`, the folder `Assets/Fixtures/audiodepth`, the bundle name
+`audiodepth` and `AudioCompressionFormat.PCM` for every clip. Build with
+`-executeMethod BuildAudioDepth.Build` (section 2); each log held one
+`FIXTURE-OK audiodepth lz4` line and four `FIXTURE-CLIP` lines of 1 channel,
+22050 Hz, 4000 frames. To read the codec, take each AudioClip's `m_Resource`
+bytes (UnityPy's `get_resource_data`) and the little-endian `UInt32` at byte
+24 of the bank, the codec field `readFsb5()` reads.
 
 ## 12. The `sprite` bundles (#34)
 
