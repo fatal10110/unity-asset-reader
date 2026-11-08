@@ -473,8 +473,9 @@ The editor only compresses a texture with mips when its sides are powers of
 two, hence 32x16; that is still not a whole number of 6x6, 10x10 or 12x12 ASTC
 blocks, so partial blocks are covered. A StandaloneWindows64 build refuses ETC
 Crunch, so the mobile formats go into an Android bundle (the editor needs the
-Android module). The editor does not compress signed EAC and has no ATC; see
-[`README.md`](README.md#oracle-notes) for how those are covered.
+Android module). The editor does not compress to signed EAC (section 21 makes
+those textures by script) and has no ATC; see
+[`README.md`](README.md#oracle-notes) for how ATC is covered.
 
 Any project will do; the committed bundles came from one holding only
 `Assets/Editor/BuildBlockTextures.cs`:
@@ -2115,7 +2116,7 @@ in c37af7d's `m_Skin`:
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
 | 42 Shader (`shader` and `shader-variants` bundles, section 18) | 23 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 11 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android `shader` bundles, and both shaders of the three `shader-variants` bundles (#283). The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
-| 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
+| 148 Texture2D | 105 PNG | 29 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
 For RG32, RGB48 and RGBA64 the method-level references of sections 13 and 15,
 which call the right `Decode*` method by name, stay the AssetStudio verdict.
@@ -3504,3 +3505,161 @@ neither (c37af7d cannot read format 23); there the derived weight is checked
 against AssetStudio's formula on the 31sts UnityPy unpacked.
 `packages/core/tests/MeshSkinned.test.ts` checks `read()`'s skin against both,
 `m_Shapes` against UnityPy's type-tree dump, and the source values above.
+
+## 21. The signed-EAC bundles (#288)
+
+`signed-eac/android` for **2019.4.41f2**, **2020.3.30f1**, **6000.3.26f1** and
+**6000.6.4f1**: one lz4 bundle (typed, Android target) per editor with two 32x16
+Texture2D, `42_EAC_R_SIGNED` and `44_EAC_RG_SIGNED`, no mips, readable, image
+data inline. The importer never compresses to signed EAC, but the `Texture2D`
+constructor accepts any compressed format the editor can decompress, and
+`LoadRawTextureData` takes the blocks as they are. So the blocks come from
+etc2comp, not from Unity, and the editor only stores them.
+
+### Image and blocks
+
+The image, `signed-eac.png`, is 32x16 RGBA in section 12's coordinate-color
+style: R identifies x, G identifies y.
+
+```python
+# signed-eac.png: 32x16 RGBA, R = x ramp, G = y ramp, B = 0, A = 255.
+# etc2comp maps 0..255 to signed -128..127 by subtracting 128, so each ramp
+# covers both signs.
+import struct, zlib, sys
+W, H = 32, 16
+rows = b""
+for y in range(H):
+    rows += b"\0" + b"".join(bytes((x * 255 // (W - 1), y * 255 // (H - 1), 0, 255)) for x in range(W))
+def chunk(t, d):
+    return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
+png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(rows, 9)) + chunk(b"IEND", b"")
+open(sys.argv[1], "wb").write(png)
+```
+
+The encoder is google/etc2comp (Apache-2.0) at commit
+`39422c1aa2f4889d636db5790af1d0be6ff3a226`, cloned and built outside the repo
+(R2; never committed). Without cmake, one g++ call builds `EtcTool`:
+
+```bash
+git clone https://github.com/google/etc2comp.git && cd etc2comp
+g++ -std=c++11 -pthread -O2 -w -IEtcLib/Etc -IEtcLib/EtcCodec -Ithird_party/lodepng \
+  EtcLib/Etc/*.cpp EtcLib/EtcCodec/*.cpp EtcTool/*.cpp third_party/lodepng/lodepng.cpp \
+  -o build/EtcTool
+mkdir out
+build/EtcTool signed-eac.png -format SIGNED_R11 -effort 100 -output out/SIGNED_R11.ktx
+build/EtcTool signed-eac.png -format SIGNED_RG11 -effort 100 -output out/SIGNED_RG11.ktx
+```
+
+`EtcTool` needs a directory in `-output`. Its encoder subtracts 128 from each
+8-bit channel (`EtcBlock4x4Encoding_R11.cpp`), so every ramp has negative and
+positive values. The payload is level 0 of the KTX (internal formats `0x9271`
+and `0x9273`): the bytes after the 64-byte header, the key-value data and the
+4-byte image size. Payload sha256 (rerunning gives the same bytes):
+
+| File | Bytes | sha256 |
+| --- | --- | --- |
+| `SIGNED_R11.bin` | 256 (32 blocks x 8) | `456a042fdde523e151d46a2850f22c9d4dd2c0b25eb8afcd63218cf4c24e8a49` |
+| `SIGNED_RG11.bin` | 512 (32 blocks x 16) | `7b7394deb2cd415e347c0af39506286b789f50d7047b03fbe8bdcd7f7fd5cd2b` |
+
+`packages/texture/tests/signed-eac.test.ts` checks every fixture's image data
+against these hashes.
+
+### Build
+
+Each project is a fresh copy holding `ProjectSettings/` and `Packages/` of an
+earlier fixture project of the same editor, the two payloads in `Payload/`
+(next to `Assets/`, so no importer touches them) and only
+`Assets/Editor/BuildSignedEac.cs`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// Signed EAC Texture2D assets made by script from etc2comp output (#288). The
+// importer never compresses to EAC_R_SIGNED or EAC_RG_SIGNED, but the Texture2D
+// constructor accepts them and LoadRawTextureData takes the encoded blocks.
+public static class BuildSignedEac
+{
+    const string Dir = "Assets/Fixtures/signed-eac";
+    const int W = 32, H = 16;
+    // By value: EAC_R_SIGNED, EAC_RG_SIGNED, with the etc2comp payload of each,
+    // read from Payload/ next to Assets/.
+    static readonly int[] Formats = { 42, 44 };
+    static readonly string[] Payloads = { "SIGNED_R11.bin", "SIGNED_RG11.bin" };
+
+    // 0: Apply(false, true); 1: Apply(false, false); 2: no Apply.
+    public static void Probe() { Emit("probe", new[] { 0, 1, 2 }); }
+    public static void Build() { Emit("android", new[] { 1 }); }
+
+    static void Emit(string bundle, int[] variants)
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/Fixtures")) AssetDatabase.CreateFolder("Assets", "Fixtures");
+        if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/Fixtures", "signed-eac");
+        var paths = new List<string>();
+        foreach (var v in variants)
+            for (int i = 0; i < Formats.Length; i++)
+            {
+                var format = (TextureFormat)Formats[i];
+                var name = Formats[i] + "_" + format + (variants.Length > 1 ? "_v" + v : "");
+                try
+                {
+                    var data = File.ReadAllBytes(Path.Combine("Payload", Payloads[i]));
+                    var tex = new Texture2D(W, H, format, false) { name = name };
+                    if (tex.format != format) throw new Exception("created as " + tex.format);
+                    tex.LoadRawTextureData(data);
+                    if (v == 0) tex.Apply(false, true);
+                    else if (v == 1) tex.Apply(false, false);
+                    var path = Dir + "/" + name + ".asset";
+                    AssetDatabase.DeleteAsset(path);
+                    AssetDatabase.CreateAsset(tex, path);
+                    paths.Add(path);
+                    Debug.Log("FIXTURE-TEX " + name + " " + tex.format + " " + W + "x" + H + " " + data.Length + " bytes, readable " + tex.isReadable);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("FIXTURE-SKIP " + name + ": " + e.Message);
+                }
+            }
+        AssetDatabase.SaveAssets();
+
+        var dir = Path.Combine("Build", "signed-eac-" + bundle);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = bundle, assetNames = paths.ToArray() } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.Android);
+        if (m == null) throw new Exception("build failed: signed-eac " + bundle);
+        Debug.Log("FIXTURE-OK signed-eac " + bundle + " -> " + dir);
+    }
+}
+```
+
+First a probe, in its own 6000.3.26f1 project, with
+`-executeMethod BuildSignedEac.Probe` (same command as section 2): all three
+variants kept format 42/44 and etc2comp's exact bytes in UnityPy, under
+`-nographics` too; `Apply(false, true)` moves the image data to the bundle's
+`.resS`, the other two keep it inline. The fixtures use `Apply(false, false)`
+(readable, inline, as section 8). Then each editor's project is built once with
+`-executeMethod BuildSignedEac.Build`: the log holds two `FIXTURE-TEX` lines,
+no `FIXTURE-SKIP`, and `FIXTURE-OK signed-eac android`. The 6000.6.4f1
+installation now has the Android module (compare section 13). Copy only
+`Build/signed-eac-android/android` to
+`fixtures/bundles/editor/<version>/signed-eac/android`.
+
+### Goldens
+
+In this order (`make-goldens.py` skips what `modern-goldens.json` holds):
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py ...   # the section 17 command
+```
+
+`make-modern-goldens.py` lists the 6000.6 bundle and checks its two texture
+names and size. UnityPy and AssetStudio agree on all six format 21/22
+textures (the UnityPy hash is of Unity's stored row order, bottom row first,
+the PNG's of top row first), so no golden has an `oracleNote`. AssetStudio
+c37af7d cannot read the 6000.6 bundle (format 23), so it has UnityPy's golden
+only. The synthetic signed EAC goldens of `make-goldens.py` stay.

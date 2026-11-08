@@ -295,6 +295,6 @@ test("every fixture Texture2D without an AssetStudio PNG has a known reason", ()
     }
     reasons.set(reason, (reasons.get(reason) ?? 0) + 1);
   }
-  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 27, "0x0": 9, R16_Alt: 5 });
-  assert.equal(exported.length + 27 + 9 + 5, textures.length);
+  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 29, "0x0": 9, R16_Alt: 5 });
+  assert.equal(exported.length + 29 + 9 + 5, textures.length);
 });
