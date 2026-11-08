@@ -1308,7 +1308,7 @@ bundle is kept, and `PCM8` and `PCM32` stay on hand-built banks
 (`packages/audio/tests/wav.test.ts`).
 
 Four mono 22050 Hz WAVs of 4000 frames each, a 440 Hz sine at about half
-scale, were imported with `PCM`, `DecompressOnLoad` and `Preserve Sample Rate`
+scale (0.78 for the 8-bit file), were imported with `PCM`, `DecompressOnLoad` and `Preserve Sample Rate`
 and built once into one `lz4` bundle per editor, in projects
 `uar-296-probe-<editor version>` for 2019.4.41f2, 2020.3.30f1 and 6000.3.26f1.
 Read with UnityPy 1.25.3, the three editors write the same thing:
@@ -1318,7 +1318,7 @@ Read with UnityPy 1.25.3, the three editors write the same thing:
 | `mono-u8`, 8-bit unsigned | 16 | 0 (PCM) | `PCM16` (2) | (v - 128) << 8, exactly |
 | `mono-s24`, 24-bit | 16 | 0 (PCM) | `PCM16` (2) | the top 16 bits, exactly |
 | `mono-s32`, 32-bit integer | 16 | 0 (PCM) | `PCM16` (2) | the top 16 bits, exactly |
-| `mono-f32`, 32-bit float | 16 | 0 (PCM) | `PCM16` (2) | v * 32768, within one step |
+| `mono-f32`, 32-bit float | 16 | 0 (PCM) | `PCM16` (2) | trunc(v * 32767), exactly |
 
 Every bank is FSB5 version 1, one sample, 8032 data bytes (4000 frames of
 16-bit, padded to 32). So Unity writes neither `PCM8`, `PCM24`, `PCM32` nor
@@ -1347,7 +1347,7 @@ names = sys.argv[2:] or ["mono-u8", "mono-s24", "mono-s32", "mono-f32"]
 RATE, FRAMES = 22050, 4000
 
 def sample(name, s):
-    # s is a 440 Hz sine in [-1, 1] at half scale; each depth stores it its own way.
+    # s is a 440 Hz sine in [-1, 1]; each depth stores it its own way (8-bit at 0.78, the rest near 0.5).
     if name.endswith("-u8"):
         return struct.pack("<B", 128 + round(100 * s))
     if name.endswith("-s24"):
