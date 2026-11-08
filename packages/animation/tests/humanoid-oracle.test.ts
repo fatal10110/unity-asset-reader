@@ -36,6 +36,13 @@ test("the oracle's inputs at the keys are the keys of the committed clips", () =
       const asset = [...env.assets("AnimationClip")].find((a) => a.name === name);
       assert.ok(asset, `${editor}: no clip ${name} in ${clip.bundle}`);
       const curves = new Map(clipCurves(env, asset.reader).float.map((c) => [c.attribute, c]));
+      // The oracle rebuilds each curve from its keys with flat tangents, so its midpoint
+      // inputs are the committed clip's only while every key's slopes are 0.
+      for (const [attribute, curve] of curves) {
+        for (const k of curve.keyframes) {
+          assert.ok(k.inSlope === 0 && k.outSlope === 0, `${editor} ${name} ${attribute}: slopes at ${k.time}`);
+        }
+      }
       const root = ["RootT.x", "RootT.y", "RootT.z", "RootQ.x", "RootQ.y", "RootQ.z", "RootQ.w"];
       const muscles = clip.driven.map((i) => binding(golden.muscleNames[i]!));
       assert.deepEqual(
