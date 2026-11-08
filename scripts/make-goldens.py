@@ -105,6 +105,13 @@ DUMPED_CLASSES = {
     221: "AnimatorOverrideController",
     # For its hardcoded reader (#302); the animation and animator fixtures hold them.
     74: "AnimationClip",
+    # For their hardcoded readers (#305); the scene fixtures hold them, and the
+    # animator fixtures GameObjects and Transforms.
+    1: "GameObject",
+    4: "Transform",
+    23: "MeshRenderer",
+    33: "MeshFilter",
+    137: "SkinnedMeshRenderer",
 }
 # Class id -> how to get at the raw bytes an object carries (#41), in the
 # `rawData` golden: its own field when inline, else its StreamedResource.

@@ -4783,3 +4783,448 @@ fails on format 23's type trees), and records why for the rest.
 
 `fixtures/tpk-trees.json` already has AnimationClip's trees (section 22); every
 fixture clip's type tree equals the TPK tree of its version.
+
+## 24. The `scene` bundles (#305)
+
+`scene/{lz4,lz4-notypetree}/scene` for **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**: one bundle per editor and kind, made from
+code by an editor script, for the `GameObject`, `Transform`, `MeshFilter`,
+`MeshRenderer` and `SkinnedMeshRenderer` readers, and as the oracle fixture of
+#304's clip curves. Each bundle holds:
+
+- `scene`, a prefab of ten GameObjects: the root `scene` with an `Animator`
+  (the generic avatar, the controller, culling mode 1); `Armature` with a
+  chain of five bones (`Hips`, `Spine`, `Chest`, `Neck`, `Head`), each at the
+  pose its bind pose inverts; `Skin`, a `SkinnedMeshRenderer` of the #285
+  `skinned` mesh (section 20) over the five bones, root bone `Hips`, blend
+  shape weights 25 and 60, quality 2 bones, update when offscreen, its own
+  bounds, two-sided shadows, probe anchor `Chest`, sorting order 3, priority
+  5, rendering layer mask 3; `Prop`, static, layer 4, tag `Player`, rotated
+  and scaled, with a `MeshFilter` of the same mesh and a `MeshRenderer` with
+  two materials, sorting order -2; and `Hidden`, inactive, under `Prop`;
+- `humanoid`, a prefab of the section 22 T-pose without fingers (22
+  GameObjects) with an `Animator` on its humanoid avatar;
+- `generic` (`AvatarBuilder.BuildGenericAvatar` of `scene`, root motion bone
+  `Hips`) and `human` (`BuildHumanAvatar`, every transform but the root a
+  human bone);
+- `controller`, three states playing the three clips in turn;
+- three clips: `move`, curves on child paths (`Armature/Hips` position,
+  `Armature/Hips/Spine` quaternion rotation, `Armature/Hips/Spine/Chest`
+  scale, `Prop`'s `m_IsActive`), so their path hashes resolve through the
+  generic avatar's `m_TOS`; `smile`, the `Skin` renderer's two blend shape
+  weights (`blendShape.smile`, `blendShape.blink`); and `muscle`, a humanoid
+  clip of three muscles (`Spine Front-Back`, `Left Arm Down-Up`,
+  `Right Forearm Stretch`) and `RootT.y` (`SetCurve("", typeof(Animator), ...)`);
+- the `skinned` Mesh.
+
+The renderers' material, an `Unlit/Color` one, goes in a bundle of its own,
+`scene-material`, which is not committed: the scene bundle holds an external
+pointer to it (`m_FileID` 1) and no shader. The script sets the
+`MeshRenderer`'s `additionalVertexStreams`, but the built object's
+`m_AdditionalVertexStreams` is a null pointer in all four editors.
+
+Each project is a fresh copy named `uar-305-scene-<editor version>`, holding
+`ProjectSettings/` and `Packages/` of the section 22 project of the same
+editor and only this file under `Assets/`.
+
+`Assets/Editor/BuildScene.cs`:
+
+```csharp
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// The scene fixtures (#305), created from code: a prefab "scene" whose root has
+// an Animator (a generic Avatar, a controller), a five-bone hierarchy skinning
+// a SkinnedMeshRenderer (the #285 skinned mesh, blend shape weights), a static
+// child with a MeshFilter and a MeshRenderer, and an inactive child; a prefab
+// "humanoid" (the #303 T-pose with a humanoid Avatar). Clips for #304: "move"
+// (curves on child paths), "smile" (blend shape weights) and "muscle"
+// (humanoid muscle curves). The renderers' material is in a bundle of its own,
+// so the scene bundle holds an external reference and no shader.
+public static class BuildScene
+{
+    const string Dir = "Assets/Fixtures/scene";
+
+    // name, parent, local position: a T-pose, root first (section 22).
+    static readonly (string, string, Vector3)[] Bones =
+    {
+        ("humanoid", null, Vector3.zero),
+        ("Hips", "humanoid", new Vector3(0f, 1f, 0f)),
+        ("LeftUpperLeg", "Hips", new Vector3(-0.1f, -0.05f, 0f)),
+        ("LeftLowerLeg", "LeftUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("LeftFoot", "LeftLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("LeftToes", "LeftFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("RightUpperLeg", "Hips", new Vector3(0.1f, -0.05f, 0f)),
+        ("RightLowerLeg", "RightUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("RightFoot", "RightLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("RightToes", "RightFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("Spine", "Hips", new Vector3(0f, 0.1f, 0f)),
+        ("Chest", "Spine", new Vector3(0f, 0.15f, 0f)),
+        ("Neck", "Chest", new Vector3(0f, 0.25f, 0f)),
+        ("Head", "Neck", new Vector3(0f, 0.1f, 0f)),
+        ("LeftShoulder", "Chest", new Vector3(-0.05f, 0.2f, 0f)),
+        ("LeftUpperArm", "LeftShoulder", new Vector3(-0.12f, 0f, 0f)),
+        ("LeftLowerArm", "LeftUpperArm", new Vector3(-0.28f, 0f, 0f)),
+        ("LeftHand", "LeftLowerArm", new Vector3(-0.25f, 0f, 0f)),
+        ("RightShoulder", "Chest", new Vector3(0.05f, 0.2f, 0f)),
+        ("RightUpperArm", "RightShoulder", new Vector3(0.12f, 0f, 0f)),
+        ("RightLowerArm", "RightUpperArm", new Vector3(0.28f, 0f, 0f)),
+        ("RightHand", "RightLowerArm", new Vector3(0.25f, 0f, 0f)),
+    };
+
+    public static void Build()
+    {
+        // Keep every vertex channel of the skinned mesh.
+        PlayerSettings.stripUnusedMeshComponents = false;
+        Directory.CreateDirectory(Dir);
+
+        var mesh = Skinned("skinned");
+        AssetDatabase.CreateAsset(mesh, Dir + "/skinned.asset");
+        var shader = Shader.Find("Unlit/Color") ?? Shader.Find("Hidden/InternalErrorShader");
+        var mat = new Material(shader) { name = "mat" };
+        AssetDatabase.CreateAsset(mat, Dir + "/mat.mat");
+
+        var move = new AnimationClip { name = "move" };
+        move.SetCurve("Armature/Hips", typeof(Transform), "localPosition.x", Keys(0f, 0f, 0.5f, 0.25f, 1f, 0f));
+        move.SetCurve("Armature/Hips", typeof(Transform), "localPosition.y", Keys(0f, 0f, 1f, 0.5f));
+        move.SetCurve("Armature/Hips", typeof(Transform), "localPosition.z", Keys(0f, 0.1f, 1f, -0.1f));
+        var q = Quaternion.Euler(0f, 0f, 30f);
+        move.SetCurve("Armature/Hips/Spine", typeof(Transform), "localRotation.x", Keys(0f, 0f, 1f, q.x));
+        move.SetCurve("Armature/Hips/Spine", typeof(Transform), "localRotation.y", Keys(0f, 0f, 1f, q.y));
+        move.SetCurve("Armature/Hips/Spine", typeof(Transform), "localRotation.z", Keys(0f, 0f, 1f, q.z));
+        move.SetCurve("Armature/Hips/Spine", typeof(Transform), "localRotation.w", Keys(0f, 1f, 1f, q.w));
+        move.SetCurve("Armature/Hips/Spine/Chest", typeof(Transform), "localScale.x", Keys(0f, 1f, 1f, 1.5f));
+        move.SetCurve("Armature/Hips/Spine/Chest", typeof(Transform), "localScale.y", Keys(0f, 1f, 0.5f, 0.75f, 1f, 1f));
+        move.SetCurve("Armature/Hips/Spine/Chest", typeof(Transform), "localScale.z", Keys(0f, 1f, 1f, 1f));
+        move.SetCurve("Prop", typeof(GameObject), "m_IsActive", Keys(0f, 1f, 0.5f, 0f, 1f, 1f));
+        AssetDatabase.CreateAsset(move, Dir + "/move.anim");
+
+        var smile = new AnimationClip { name = "smile" };
+        smile.SetCurve("Skin", typeof(SkinnedMeshRenderer), "blendShape.smile", Keys(0f, 0f, 0.5f, 100f, 1f, 25f));
+        smile.SetCurve("Skin", typeof(SkinnedMeshRenderer), "blendShape.blink", Keys(0f, 0f, 0.25f, 100f, 0.5f, 0f));
+        AssetDatabase.CreateAsset(smile, Dir + "/smile.anim");
+
+        var muscle = new AnimationClip { name = "muscle" };
+        muscle.SetCurve("", typeof(Animator), "Spine Front-Back", Keys(0f, 0f, 0.5f, 0.5f, 1f, -0.25f));
+        muscle.SetCurve("", typeof(Animator), "Left Arm Down-Up", Keys(0f, 0.25f, 1f, 0.75f));
+        muscle.SetCurve("", typeof(Animator), "Right Forearm Stretch", Keys(0f, 1f, 1f, 0.5f));
+        muscle.SetCurve("", typeof(Animator), "RootT.y", Keys(0f, 1f, 1f, 1.05f));
+        AssetDatabase.CreateAsset(muscle, Dir + "/muscle.anim");
+        foreach (var c in new[] { move, smile, muscle })
+            Debug.Log("FIXTURE-INFO clip " + c.name + " legacy=" + c.legacy + " human=" + c.humanMotion +
+                " curves=" + AnimationUtility.GetCurveBindings(c).Length);
+
+        var controller = AnimatorController.CreateAnimatorControllerAtPath(Dir + "/controller.controller");
+        var sm = controller.layers[0].stateMachine;
+        var sMove = sm.AddState("move");
+        sMove.motion = move;
+        var sSmile = sm.AddState("smile");
+        sSmile.motion = smile;
+        var sMuscle = sm.AddState("muscle");
+        sMuscle.motion = muscle;
+        sm.defaultState = sMove;
+        sMove.AddTransition(sSmile).hasExitTime = true;
+        sSmile.AddTransition(sMuscle).hasExitTime = true;
+        sMuscle.AddTransition(sMove).hasExitTime = true;
+        EditorUtility.SetDirty(controller);
+
+        var scene = Scene(mesh, mat);
+        var generic = AvatarBuilder.BuildGenericAvatar(scene, "Hips");
+        generic.name = "generic";
+        AssetDatabase.CreateAsset(generic, Dir + "/generic.asset");
+        Debug.Log("FIXTURE-INFO generic avatar valid=" + generic.isValid + " human=" + generic.isHuman);
+        var a = scene.AddComponent<Animator>();
+        a.avatar = generic;
+        a.runtimeAnimatorController = controller;
+        a.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+        Debug.Log("FIXTURE-INFO scene transforms=" + scene.GetComponentsInChildren<Transform>(true).Length);
+
+        var humanoid = Hierarchy(Bones);
+        var human = BuildHuman(humanoid);
+        var h = humanoid.AddComponent<Animator>();
+        h.avatar = human;
+        h.runtimeAnimatorController = controller;
+
+        PrefabUtility.SaveAsPrefabAsset(scene, Dir + "/scene.prefab");
+        PrefabUtility.SaveAsPrefabAsset(humanoid, Dir + "/humanoid.prefab");
+        Object.DestroyImmediate(scene);
+        Object.DestroyImmediate(humanoid);
+
+        AssetDatabase.SaveAssets();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static GameObject Scene(Mesh mesh, Material mat)
+    {
+        var root = new GameObject("scene");
+        var armature = new GameObject("Armature").transform;
+        armature.SetParent(root.transform, false);
+        // Five bones in a chain, each at the pose its bindpose inverts.
+        var names = new[] { "Hips", "Spine", "Chest", "Neck", "Head" };
+        var bones = new Transform[5];
+        for (int i = 0; i < 5; i++)
+        {
+            bones[i] = new GameObject(names[i]).transform;
+            bones[i].SetParent(i == 0 ? armature : bones[i - 1], false);
+            bones[i].position = new Vector3(0f, -0.75f * i, 0.1f * i);
+            bones[i].rotation = Quaternion.Euler(0f, 0f, 15f * i);
+        }
+
+        var skin = new GameObject("Skin");
+        skin.transform.SetParent(root.transform, false);
+        var smr = skin.AddComponent<SkinnedMeshRenderer>();
+        smr.sharedMesh = mesh;
+        smr.bones = bones;
+        smr.rootBone = bones[0];
+        smr.sharedMaterials = new[] { mat };
+        smr.quality = SkinQuality.Bone2;
+        smr.updateWhenOffscreen = true;
+        smr.skinnedMotionVectors = false;
+        smr.localBounds = new Bounds(new Vector3(0.5f, 1.5f, 0f), new Vector3(1.5f, 3f, 1.25f));
+        smr.SetBlendShapeWeight(0, 25f);
+        smr.SetBlendShapeWeight(1, 60f);
+        smr.shadowCastingMode = ShadowCastingMode.TwoSided;
+        smr.receiveShadows = false;
+        smr.lightProbeUsage = LightProbeUsage.Off;
+        smr.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+        smr.probeAnchor = bones[2];
+        smr.sortingOrder = 3;
+        smr.rendererPriority = 5;
+        smr.renderingLayerMask = 3u;
+        smr.allowOcclusionWhenDynamic = false;
+        smr.motionVectorGenerationMode = MotionVectorGenerationMode.ForceNoMotion;
+
+        var prop = new GameObject("Prop");
+        prop.transform.SetParent(root.transform, false);
+        prop.transform.localPosition = new Vector3(2f, 0f, 0f);
+        prop.transform.localRotation = Quaternion.Euler(0f, 30f, 0f);
+        prop.transform.localScale = new Vector3(2f, 0.5f, 1f);
+        prop.layer = 4;
+        prop.tag = "Player";
+        prop.isStatic = true;
+        prop.AddComponent<MeshFilter>().sharedMesh = mesh;
+        var mr = prop.AddComponent<MeshRenderer>();
+        mr.sharedMaterials = new[] { mat, mat };
+        mr.additionalVertexStreams = mesh;
+        mr.sortingOrder = -2;
+
+        var hidden = new GameObject("Hidden");
+        hidden.transform.SetParent(prop.transform, false);
+        hidden.SetActive(false);
+        return root;
+    }
+
+    static GameObject Hierarchy((string, string, Vector3)[] bones)
+    {
+        var made = new Dictionary<string, Transform>();
+        foreach (var (name, parent, pos) in bones)
+        {
+            var t = new GameObject(name).transform;
+            if (parent != null) t.SetParent(made[parent], false);
+            t.localPosition = pos;
+            made[name] = t;
+        }
+        return made[bones[0].Item1].gameObject;
+    }
+
+    static Avatar BuildHuman(GameObject root)
+    {
+        var all = root.GetComponentsInChildren<Transform>();
+        var desc = new HumanDescription
+        {
+            skeleton = all.Select(t => new SkeletonBone
+            {
+                name = t.name, position = t.localPosition, rotation = t.localRotation, scale = t.localScale,
+            }).ToArray(),
+            // Every bone but the root: the transform names are HumanBodyBones names.
+            human = all.Skip(1).Select(t =>
+            {
+                var b = (HumanBodyBones)System.Enum.Parse(typeof(HumanBodyBones), t.name);
+                return new HumanBone
+                {
+                    boneName = t.name, humanName = HumanTrait.BoneName[(int)b],
+                    limit = new HumanLimit { useDefaultValues = true },
+                };
+            }).ToArray(),
+            upperArmTwist = 0.5f, lowerArmTwist = 0.5f, upperLegTwist = 0.5f, lowerLegTwist = 0.5f,
+            armStretch = 0.05f, legStretch = 0.05f, feetSpacing = 0f, hasTranslationDoF = false,
+        };
+        var avatar = AvatarBuilder.BuildHumanAvatar(root, desc);
+        avatar.name = "human";
+        Debug.Log("FIXTURE-INFO human avatar valid=" + avatar.isValid + " human=" + avatar.isHuman);
+        if (!avatar.isValid || !avatar.isHuman) throw new System.Exception("humanoid avatar refused");
+        AssetDatabase.CreateAsset(avatar, Dir + "/human.asset");
+        return avatar;
+    }
+
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var keys = new Keyframe[tv.Length / 2];
+        for (int i = 0; i < keys.Length; i++) keys[i] = new Keyframe(tv[2 * i], tv[2 * i + 1]);
+        return new AnimationCurve(keys);
+    }
+
+    // The #285 "skinned" mesh (section 20), unchanged.
+    static BoneWeight Weight(params float[] pairs)
+    {
+        var w = new BoneWeight();
+        int n = pairs.Length / 2;
+        if (n > 0) { w.boneIndex0 = (int)pairs[0]; w.weight0 = pairs[1]; }
+        if (n > 1) { w.boneIndex1 = (int)pairs[2]; w.weight1 = pairs[3]; }
+        if (n > 2) { w.boneIndex2 = (int)pairs[4]; w.weight2 = pairs[5]; }
+        if (n > 3) { w.boneIndex3 = (int)pairs[6]; w.weight3 = pairs[7]; }
+        return w;
+    }
+
+    static Mesh Skinned(string name)
+    {
+        var mesh = new Mesh { name = name };
+        mesh.indexFormat = IndexFormat.UInt32;
+        mesh.vertices = new[]
+        {
+            new Vector3(0f, 0f, 0f), new Vector3(1f, 0f, 0.125f), new Vector3(0f, 1f, -0.25f),
+            new Vector3(1f, 1f, 0.5f), new Vector3(0f, 2f, 0.75f), new Vector3(1f, 2f, -0.5f),
+            new Vector3(0.25f, 3f, 0f), new Vector3(1.5f, 3f, 0.375f),
+        };
+        mesh.normals = new[]
+        {
+            new Vector3(0f, 0f, -1f), new Vector3(0.6f, 0f, -0.8f), new Vector3(0f, 0.6f, -0.8f),
+            new Vector3(0f, 1f, 0f), new Vector3(-0.8f, 0f, -0.6f), new Vector3(1f, 0f, 0f),
+            new Vector3(0f, -0.8f, -0.6f), new Vector3(0f, 0f, 1f),
+        };
+        mesh.tangents = new[]
+        {
+            new Vector4(1f, 0f, 0f, 1f), new Vector4(0.8f, 0f, 0.6f, 1f), new Vector4(1f, 0f, 0f, -1f),
+            new Vector4(0f, 0f, 1f, 1f), new Vector4(0.6f, 0f, -0.8f, -1f), new Vector4(0f, 1f, 0f, 1f),
+            new Vector4(1f, 0f, 0f, 1f), new Vector4(0f, 1f, 0f, -1f),
+        };
+        mesh.colors32 = new[]
+        {
+            new Color32(255, 0, 0, 255), new Color32(0, 255, 0, 255), new Color32(0, 0, 255, 255),
+            new Color32(255, 255, 0, 128), new Color32(0, 255, 255, 64), new Color32(255, 0, 255, 0),
+            new Color32(12, 34, 56, 78), new Color32(200, 150, 100, 50),
+        };
+        mesh.uv = new[]
+        {
+            new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0.25f), new Vector2(1f, 0.25f),
+            new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0.125f, 0.75f), new Vector2(0.875f, 1f),
+        };
+        mesh.uv2 = new[]
+        {
+            new Vector2(0.5f, 0.5f), new Vector2(0.75f, 0.5f), new Vector2(0.5f, 0.625f), new Vector2(0.75f, 0.625f),
+            new Vector2(0.5f, 0.75f), new Vector2(0.75f, 0.75f), new Vector2(0.5f, 0.875f), new Vector2(0.75f, 1f),
+        };
+        mesh.triangles = new[] { 0, 2, 1, 1, 2, 3, 2, 4, 3, 3, 4, 5, 4, 6, 5, 5, 6, 7 };
+        mesh.boneWeights = new[]
+        {
+            Weight(0, 1f),
+            Weight(1, 0.75f, 0, 0.25f),
+            Weight(2, 0.5f, 1, 0.5f),
+            Weight(3, 0.5f, 2, 0.3f, 1, 0.2f),
+            Weight(4, 0.6f, 2, 0.25f, 3, 0.15f),
+            Weight(3, 0.4f, 2, 0.3f, 1, 0.2f, 0, 0.1f),
+            Weight(1, 0.35f, 0, 0.3f, 4, 0.2f, 2, 0.15f),
+            Weight(4, 0.7f, 3, 0.1f, 0, 0.1f, 1, 0.1f),
+        };
+        mesh.bindposes = Enumerable.Range(0, 5)
+            .Select(i => Matrix4x4.TRS(new Vector3(0f, -0.75f * i, 0.1f * i),
+                Quaternion.Euler(0f, 0f, 15f * i), Vector3.one).inverse)
+            .ToArray();
+        AddShape(mesh, "smile", new[] { 50f, 100f }, 4);
+        AddShape(mesh, "blink", new[] { 25f, 50f, 100f }, 0);
+        Debug.Log("FIXTURE-INFO " + name + " bonesPerVertex=" + string.Join(",", mesh.GetBonesPerVertex().ToArray()) +
+            " shapes=" + mesh.blendShapeCount + " indexFormat=" + mesh.indexFormat);
+        return mesh;
+    }
+
+    static void AddShape(Mesh mesh, string shape, float[] weights, int first)
+    {
+        for (int f = 0; f < weights.Length; f++)
+        {
+            var dv = new Vector3[8];
+            var dn = new Vector3[8];
+            var dt = new Vector3[8];
+            float k = (f + 1) / (float)weights.Length;
+            for (int v = first; v < first + 4; v++)
+            {
+                dv[v] = new Vector3(0.125f * k, 0.25f * k * (v - first + 1), -0.0625f * k);
+                dn[v] = new Vector3(0f, 0.5f * k, -0.25f * k);
+                dt[v] = new Vector3(-0.25f * k, 0f, 0.125f * (v - first + 1));
+            }
+            mesh.AddBlendShapeFrame(shape, weights[f], dv, dn, dt);
+        }
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", name);
+        Directory.CreateDirectory(dir);
+        var assets = new[] { "scene.prefab", "humanoid.prefab", "controller.controller", "generic.asset",
+            "human.asset", "skinned.asset", "move.anim", "smile.anim", "muscle.anim" };
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "scene", assetNames = assets.Select(x => Dir + "/" + x).ToArray() },
+            // Not committed: it holds the material and its shader, so "scene" refers to them.
+            new AssetBundleBuild { assetBundleName = "scene-material", assetNames = new[] { Dir + "/mat.mat" } },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: " + name);
+        Debug.Log("FIXTURE-OK scene " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildScene.Build` (same command
+as section 2). The log must hold two `FIXTURE-OK scene` lines (`lz4`,
+`lz4-notypetree`) and these `FIXTURE-INFO` lines:
+
+```
+FIXTURE-INFO skinned bonesPerVertex=1,2,2,3,3,4,4,4 shapes=2 indexFormat=UInt32
+FIXTURE-INFO clip move legacy=False human=False curves=11
+FIXTURE-INFO clip smile legacy=False human=False curves=2
+FIXTURE-INFO clip muscle legacy=False human=True curves=4
+FIXTURE-INFO generic avatar valid=True human=False
+FIXTURE-INFO scene transforms=10
+FIXTURE-INFO human avatar valid=True human=True
+```
+
+Copy only these files:
+
+```
+Build/lz4/scene               ->  fixtures/bundles/editor/<editor version>/scene/lz4/scene
+Build/lz4-notypetree/scene    ->  fixtures/bundles/editor/<editor version>/scene/lz4-notypetree/scene
+```
+
+6000.6.4f1's build without type trees is committed too, in
+`modern-goldens.json` with its typed twin, as in section 22.
+
+Then rerun the goldens, `make-modern-goldens.py` first. Both now dump the five
+classes (`DUMPED_CLASSES` 1, 4, 23, 33 and 137), so the section 22 animator
+bundles' entries gain their GameObjects' and Transforms' dumps; no other entry
+changes. `make-modern-goldens.py` checks the 6000.6 bundles' counts (its
+`evidence`). `make-tpk-trees.py` adds the five classes' trees (it rewrites
+the whole file, so every class id is passed), and `make-export-goldens.py`
+adds the `skinned` Mesh of each bundle.
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221 1 4 23 33 137
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+Every fixture object of the five classes has the TPK tree of its version, so
+the stripped builds are read through it. The fixtures fill every array of the
+five classes (`m_Component`, `m_Children`, `m_Materials`, `m_Bones`,
+`m_BlendShapeWeights`); `packages/core/tests/SceneObjects.test.ts` reads each
+TPK layout from 2019.1 to 6000.6 filled. 2019.4.41f2 has none of the renderer
+fields from 2020.1 on, 2020.3.30f1 `m_RayTraceProcedural` and the
+`MeshRenderer`'s `m_EnlightenVertexStream`, and the 6000.x editors every field
+up to 6000.3's `m_MaskInteraction`.
