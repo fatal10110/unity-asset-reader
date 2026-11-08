@@ -128,7 +128,7 @@ def evidence(name, path):
             scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
         if obj.type.name == "Animation":
             components.append(obj.read_typetree())
-        if obj.type.name == "AnimationClip" and "/animation/" in name:
+        if obj.type.name == "AnimationClip" and ("/animation/" in name or "/humanoid/" in name):
             tree = obj.read_typetree()
             parts = tree["m_MuscleClip"]["m_Clip"]["data"]
             clips.append({"name": tree["m_Name"], "legacy": tree["m_Legacy"],
@@ -207,6 +207,16 @@ def evidence(name, path):
                              "Avatar": 2}, animation
         assert [mesh["name"] for mesh in meshes] == ["skinned"]
         return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items()))}
+    if "/humanoid/" in name:
+        # The humanoid oracle's input (#318): the "humanoid" prefab (22
+        # GameObjects, an Animator on its humanoid Avatar) and the "pose" clip,
+        # 95 muscles, RootT and RootQ, three keys each.
+        assert scene == {"GameObject": 22, "Transform": 22}, scene
+        assert animation == {"AnimationClip": 1, "Animator": 1, "Avatar": 1}, animation
+        assert [(c["name"], c["legacy"], c["streamed"] + c["dense"]) for c in clips] == [
+            ("pose", False, 102)], clips
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
+                "clips": clips}
     if "/legacy-animation/" in name:
         # The legacy-animation fixtures (#314): the "legacy" prefab (four
         # GameObjects, a SkinnedMeshRenderer), whose root's legacy Animation
@@ -293,6 +303,8 @@ def main():
         ("animation/lz4", "animation"), ("animation/lz4-notypetree", "animation"),
         # GameObject, Transform, MeshFilter, MeshRenderer, SkinnedMeshRenderer (#305).
         ("scene/lz4", "scene"), ("scene/lz4-notypetree", "scene"),
+        # The humanoid oracle's input (#318): a clip driving every muscle, typed only.
+        ("humanoid/lz4", "humanoid"),
         # The legacy Animation component (#314) and the clip it lists.
         ("legacy-animation/lz4", "legacy-animation"),
         ("legacy-animation/lz4-notypetree", "legacy-animation"),

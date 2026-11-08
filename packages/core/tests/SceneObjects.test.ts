@@ -71,17 +71,21 @@ const FIXTURES = [
 
 const loadName = (name: string): Env => load([{ name, data: loadFixture(name) }]);
 
-test("the scene, animator, legacy-animation and ui-animation bundles are the fixtures that hold the five classes", () => {
+test("the scene, animator, legacy-animation, ui-animation and humanoid bundles are the fixtures that hold the five classes", () => {
   // The animator bundles (#303) hold GameObjects and Transforms too, the
-  // legacy-animation ones (#314) a SkinnedMeshRenderer as well, the
-  // ui-animation ones (#315) GameObjects only (their Transforms are RectTransforms).
+  // legacy-animation ones (#314) a SkinnedMeshRenderer as well, and so do the
+  // humanoid oracle's (#318), those of goldens.json (6000.6's is not listed above);
+  // the ui-animation ones (#315) GameObjects only (their Transforms are RectTransforms).
   const others = FIXTURES.filter((name) => !SCENE.includes(name));
   const animator = EDITORS.flatMap((e) =>
     ["animator", "legacy-animation", "ui-animation"].flatMap((set) =>
       ["lz4", "lz4-notypetree"].map((kind) => `editor/${e}/${set}/${kind}/${set}`),
     ),
   );
-  assert.deepEqual(others, animator.sort());
+  const humanoid = EDITORS.filter((e) => e !== "6000.6.4f1").map(
+    (e) => `editor/${e}/humanoid/lz4/humanoid`,
+  );
+  assert.deepEqual(others, [...animator, ...humanoid].sort());
 });
 
 for (const name of FIXTURES) {

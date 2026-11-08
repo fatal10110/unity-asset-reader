@@ -520,6 +520,11 @@ scene readers.
   output float32 bit for bit on the Unity 2019.4, 2020.3 and 6000.3 scene fixtures, the skin and
   morph targets on 2019.4 and 2020.3 (AssetStudio reads no Unity 6000 renderer), and every editor
   up to 6000.6 exports the same file. Humanoid muscle curves and `m_IsActive` are skipped.
+- Oracle for the humanoid muscle-to-bone conversion to come (#318, no API change): Unity's own
+  `HumanPoseHandler.SetHumanPose` poses for the fixture humanoid, every muscle driven, at each
+  clip key and midpoint in all four fixture editors, recorded by
+  `scripts/make-humanoid-goldens.py` in `fixtures/humanoid-unity-goldens.json` (plan revision
+  2026-11-08e).
 
 ## texture2ddecoder-wasm
 
