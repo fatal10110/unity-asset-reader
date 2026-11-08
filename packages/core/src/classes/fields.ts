@@ -1944,10 +1944,10 @@ export interface ValueArrayFields {
   /** Unity: `m_BoolValues`. */
   boolValues: boolean[];
   /**
-   * Unity: `m_EntityIdValues`. Unity 6000.2 and later. Always empty here: the reader refuses an
-   * object with entity ids (see {@link readAnimatorController}).
+   * Unity: `m_EntityIdValues`. Unity 6000.2 and later. Each an `EntityId`: an `Int32` in 6000.2
+   * to 6000.4, a `UInt64` (`bigint`) from 6000.5 (see {@link readAnimatorController}).
    */
-  entityIdValues?: never[];
+  entityIdValues?: number[] | bigint[];
 }
 
 /** The friendly form of {@link ControllerConstant}. */

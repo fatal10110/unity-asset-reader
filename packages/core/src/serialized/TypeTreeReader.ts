@@ -19,6 +19,8 @@ const BYTE_TYPES = new Set(["UInt8", "SInt8", "char"]);
  *   `double`: `number`
  * - `SInt64`, `UInt64`, `long long`, `unsigned long long`, `FileSize`:
  *   `bigint`, always (D9)
+ * - `EntityId` without children (Unity 6000.2 and later): `number` when its
+ *   node is 4 bytes, `bigint` when it is 8 (see {@link readEntityId})
  * - `bool`: `boolean`; `string`: `string` (UTF-8)
  * - `TypelessData` and vectors of `UInt8` / `SInt8` / `char`: `Uint8Array`, a
  *   view into the object's bytes (R7)
@@ -88,7 +90,8 @@ interface Walk {
  * @returns the object's fields by name
  * @throws {UnsupportedError} when the file has no type tree for the object
  *   (built with `DisableWriteTypeTree`): the data is valid, but only a
- *   hand-written class reader can read it
+ *   hand-written class reader can read it. Of kind `"EntityId size"` for an
+ *   `EntityId` node without children whose `byteSize` is not 4 or 8
  * @throws {CorruptError} when the data runs out, holds a negative or impossible
  *   count, references a ref type the file does not declare, or ends after
  *   more or fewer bytes than the object's `byteSize`
@@ -253,6 +256,8 @@ function readValue(walk: Walk, t: Tree, i: number): TypeTreeValue {
         value = readReferencedObject(walk, t, i).value;
       } else if (node.type === "ManagedReferencesRegistry") {
         value = readRegistry(walk, t, i);
+      } else if (node.type === "EntityId" && child >= t.end[i]!) {
+        value = readEntityId(walk.reader, node);
       } else {
         value = readClass(walk, t, i);
       }
@@ -264,7 +269,34 @@ function readValue(walk: Walk, t: Tree, i: number): TypeTreeValue {
 }
 
 /**
- * Every child of node `i`, by name. A node without children reads as `{}`.
+ * A childless `EntityId` node (Unity 6000.2 and later, e.g. the elements of an
+ * `AnimatorController`'s `m_EntityIdValues`), read by its `byteSize`. Neither
+ * TPK nor the object's type tree gives it members, so the value is Unity's
+ * own: in 6000.2 to 6000.4 (4 bytes) an `Int32`, the instance id it replaces
+ * (`EntityId.Equals(int)`); from 6000.5 (8 bytes) a `UInt64`, its raw data
+ * (`EntityId.ToULong`, `GetRawData`), a `bigint` (D9).
+ *
+ * Deviation: UnityPy 1.25.4 reads it as a class with no children, `{}` of 0
+ * bytes, so a non-empty vector of them fails its end-of-object check;
+ * AssetStudio c37af7d has no `EntityId`. Any other node without children still
+ * reads as `{}`, as UnityPy reads it.
+ *
+ * @throws {UnsupportedError} of kind `"EntityId size"` when the node is
+ *   neither 4 nor 8 bytes
+ */
+function readEntityId(reader: ObjectReader, node: TypeTreeNode): number | bigint {
+  if (node.byteSize === 4) return reader.readInt32();
+  if (node.byteSize === 8) return reader.readUInt64();
+  throw new UnsupportedError(
+    "EntityId size",
+    node.byteSize,
+    `"${node.name}" of object ${reader.pathId}: Unity writes 4 or 8 bytes`,
+  );
+}
+
+/**
+ * Every child of node `i`, by name. A node without children reads as `{}`
+ * (but a childless `EntityId`, see {@link readEntityId}).
  *
  * A class with a `ManagedReferencesRegistry` field sets `classHasRegistry` for
  * the rest of itself and everything read under it, and clears it when it

@@ -74,8 +74,8 @@ export function tpkReader(
 /**
  * Little-endian bytes for a TPK tree, every value distinct and every array of
  * two elements, laid out as `readTypeTree()` reads them. An `EntityId` vector
- * gets `entityIds` elements of the node's size (0 by default: its node has no
- * children, so its bytes say nothing a tree can read).
+ * gets `entityIds` elements of the node's size, every byte of element `k` set
+ * to `k + 1` (0 by default: no Unity controller writes one).
  */
 export function filled(nodes: GoldenNode[], entityIds = 0): Uint8Array {
   const w = new Writer();
