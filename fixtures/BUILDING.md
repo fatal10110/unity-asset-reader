@@ -1891,6 +1891,8 @@ What it does, all inside `<external-harness>`:
    (the others are parameter entries, `m_ParameterBlobIndices`), and calls
    `ShaderConverter.ConvertSerializedShader`; Vulkan programs then get step
    4b's text. The entry carries `oracle`, and its `input` is UnityPy 1.25.4's.
+   The `shader-variants` bundles (section 18, #283) give it stages with
+   several variants, repeated across groups.
 5. Keeps an object's output only if AssetStudio read the same input as UnityPy:
    name, object size, the object bytes' sha256 (UnityPy 1.25.3, where it reads
    the fixture), texture format, size and image data hash, audio, font and video
@@ -1914,7 +1916,7 @@ that stops it), `font` or `video` (`size`,
 | 32 TextAsset | 32 files | |
 | 9 Font (`font` bundles, section 11) | 9 `.ttf` files, each `glyphs.ttf` to the byte | |
 | 9 VideoClip (`video` bundles, section 11) | 9 `.webm` files, each `clip.webm` to the byte | |
-| 36 Shader (`shader` bundles, section 18) | 17 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 5 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android bundles. The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
+| 42 Shader (`shader` and `shader-variants` bundles, section 18) | 23 `.shader` texts: 12 by `ExportShader`, the 2019.4 and 2020.3 Android and iOS ones; 11 by the composite of step 4c, `UAR/ShaderFixtureSecond` of the 6000.3.26f1 Android and iOS and the 6000.6.4f1 Android `shader` bundles, and both shaders of the three `shader-variants` bundles (#283). The Vulkan programs of the 2020.3 and 6000.x Android ones from the hybrid of step 4b | 14 Windows ones: Direct3D 11, not exported (see step 4). 5 `UAR/ShaderFixture` of 6000.x Android and iOS: its `Int` property `_Count` makes `ConvertSerializedShader` throw `ArgumentOutOfRangeException` |
 | 127 Sprite (section 12's `sprite` and the `legacy-probe`, `rotation-probe`, `split-alpha` and `variant` bundles of section 14) | 112 PNG, every 2019.4.41f2 and 6000.3.25f1 one; 19 with a `verdict` (below) | 15 in the 6000.6 bundles: SerializedFile format 23 |
 | 140 Texture2D | 99 PNG | 27 in the 6000.6 bundles: `c37af7d` cannot read SerializedFile format 23 at all. 9 dynamic-font "Font Texture"s: 0x0, no image data (`ExportTexture2D` returns false). 5 in formats 66 to 74 (ASTC_HDR_4x4, ASTC_HDR_12x12, RG32, RGB48, RGBA64): AssetStudio's `TextureFormat` enum has an extra `R16_Alt` at 66, so from there on it names and decodes the next format (Unity's RG32, 72, as ASTC_HDR_12x12) |
 
@@ -2324,6 +2326,145 @@ fixtures (section 13): `make-goldens.py` skips those bundles, and
 `packages/core/tests/modern-fixtures.test.ts` compares with `readTypeTree()`.
 The Shader reader's own check is `readTypeTree()` on every bundle
 (`packages/core/tests/Shader.test.ts`).
+
+### The `shader-variants` bundles (#283)
+
+One more pair of shaders for the composite oracle of section 17 step 4c:
+`UAR/ShaderFixture` has an `Int` property, which `c37af7d`'s converter
+throws on, so its Unity 6 builds, the only ones whose stages hold several
+variants in `m_PlayerSubPrograms`, have no golden. `UAR/ShaderVariants` is
+the same shader with `_Count` a `Float`, no `Int` property, and a
+`multi_compile` of two keywords: the first pass's stages list six variants
+per program type (three keyword states, instancing off and on) in four
+groups, three of them equal, so the golden checks the layout rule of plan
+section 5 revision 2026-11-08a (each distinct blob index and type, groups in
+order, at its first appearance) byte for byte. `UAR/ShaderVariantsSecond` is
+its fallback, dependency and `UsePass` target, as `UAR/ShaderFixtureSecond`
+is the first's.
+
+| Bundle | Editors |
+|---|---|
+| `shader-variants/lz4/android` (OpenGL ES 3 and Vulkan) | 6000.3.26f1, 6000.6.4f1 |
+| `shader-variants/lz4/ios` (Metal) | 6000.3.26f1 (6000.6.4f1 has no iOS module) |
+
+With type trees only, and no Windows build: Direct3D 11 programs never get
+text (section 17 step 4). Each editor built a fresh copy of the section 18
+project (`Assets/`, `ProjectSettings/`, `Packages/`, not `Library/`) holding
+only these files:
+
+```
+<project>/Assets/Fixtures/shader-variants/uar-variants.shader
+<project>/Assets/Fixtures/shader-variants/uar-variants-second.shader
+<project>/Assets/Editor/BuildShaderVariants.cs
+```
+
+`uar-variants.shader` is the `uar-fixture.shader` template above with the
+6000.x `CONSERVATIVE` and `RP_EDITOR` lines and these changes:
+
+- the header comment is
+  `// Shader variants fixture (#283): the #237 fixture shader under a new name,`
+  `// with _Count a Float (no Int property) and a multi_compile of two keywords,`
+  `// so a Unity 6 stage lists several blob indices in m_PlayerSubPrograms.`;
+- `Shader "UAR/ShaderVariants"`;
+- `_Count ("Count", Float) = 3`;
+- `#pragma multi_compile __ UAR_MULTI_A UAR_MULTI_B`;
+- in the first pass's `frag`, `#elif UAR_MULTI_B` with
+  `c.rgb -= _Emission.rgb;` before the `#endif` of `#if UAR_MULTI_A`;
+- `UAR/ShaderVariantsSecond` instead of `UAR/ShaderFixtureSecond` in the
+  `UsePass`, the `Dependency` and the `Fallback`.
+
+`uar-variants-second.shader`:
+
+```shaderlab
+// The second shader of the #283 fixture: the first one's fallback, dependency
+// and UsePass target.
+Shader "UAR/ShaderVariantsSecond"
+{
+    Properties
+    {
+        _Color ("Color", Color) = (0, 1, 0, 1)
+    }
+    SubShader
+    {
+        Pass
+        {
+            Name "Unlit"
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "UnityCG.cginc"
+            fixed4 _Color;
+            float4 vert(float4 v : POSITION) : SV_POSITION { return UnityObjectToClipPos(v); }
+            fixed4 frag() : SV_Target { return _Color; }
+            ENDCG
+        }
+    }
+    Fallback Off
+}
+```
+
+`Assets/Editor/BuildShaderVariants.cs`:
+
+```csharp
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+// The shader variants fixture (#283), built once per target with type trees.
+// A target whose build module is not installed is skipped and logged.
+public static class BuildShaderVariants
+{
+    const string Dir = "Assets/Fixtures/shader-variants";
+    static readonly string[] Shaders = { Dir + "/uar-variants.shader", Dir + "/uar-variants-second.shader" };
+
+    public static void Build()
+    {
+        // Keep the instancing variants; no material asks for instancing here.
+        var graphics = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
+        graphics.FindProperty("m_InstancingStripping").intValue = 2; // Keep All
+        graphics.ApplyModifiedProperties();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("android", BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3, GraphicsDeviceType.Vulkan }, lz4);
+        Emit("ios", BuildTarget.iOS, new[] { GraphicsDeviceType.Metal }, lz4);
+    }
+
+    static void Emit(string name, BuildTarget target, GraphicsDeviceType[] apis, BuildAssetBundleOptions opts)
+    {
+        var group = BuildPipeline.GetBuildTargetGroup(target);
+        if (!BuildPipeline.IsBuildTargetSupported(group, target))
+        {
+            Debug.Log("FIXTURE-SKIP shader-variants " + name + ": no " + target + " build module");
+            return;
+        }
+        PlayerSettings.SetUseDefaultGraphicsAPIs(target, false);
+        PlayerSettings.SetGraphicsAPIs(target, apis);
+        var dir = Path.Combine("Build", "shader-variants-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = "shaders", assetNames = Shaders } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, target);
+        if (m == null) throw new System.Exception("build failed: shader-variants " + name);
+        Debug.Log("FIXTURE-OK shader-variants " + name + " -> " + dir);
+    }
+}
+```
+
+Build with `-executeMethod BuildShaderVariants.Build` (section 2's command).
+The log must hold `FIXTURE-OK shader-variants android`, and for 6000.3.26f1
+`FIXTURE-OK shader-variants ios` (6000.6.4f1 logs `FIXTURE-SKIP`), and no
+`Shader error`. Copy only the bundle named `shaders`:
+
+```
+Build/shader-variants-<target>/shaders  ->  fixtures/bundles/editor/<editor version>/shader-variants/lz4/<target>
+```
+
+Before the committed builds, a throwaway 6000.3.26f1 build of the same files
+went through the composite oracle: every Shader got text, the GrabPass, the
+geometry stage and the stencil and blend state included, so the shader needed
+no simplifying. Then rerun the goldens in order: `make-goldens.py` adds the
+6000.3.26f1 bundles to `goldens.json`; `make-modern-goldens.py` adds the
+6000.6.4f1 one to `modern-goldens.json`, Shaders dumped; `make-export-goldens.py`
+(section 17) writes their composite text.
 
 ### `shader-layouts.json`
 
