@@ -9,7 +9,14 @@ import { ClassID } from "../serialized/ClassID.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
 import { baseName } from "../serialized/SerializedFile.js";
 import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
+import { readAnimator, type Animator } from "./Animator.js";
+import { readAnimatorController, type AnimatorController } from "./AnimatorController.js";
+import {
+  readAnimatorOverrideController,
+  type AnimatorOverrideController,
+} from "./AnimatorOverrideController.js";
 import { readAssetBundle, type AssetBundle } from "./AssetBundle.js";
+import { readAvatar, type Avatar } from "./Avatar.js";
 import { readMaterial, type Material } from "./Material.js";
 import { readMeshData, type MeshData } from "./Mesh.js";
 import { readShader, type Shader } from "./Shader.js";
@@ -24,7 +31,11 @@ import { readFont, type Font } from "./Font.js";
 import { readMovieTexture, type MovieTexture } from "./MovieTexture.js";
 import { readVideoClipData, type VideoClipData } from "./VideoClip.js";
 import {
+  toAnimatorControllerFields,
+  toAnimatorFields,
+  toAnimatorOverrideControllerFields,
   toAssetBundleFields,
+  toAvatarFields,
   toAudioClipFields,
   toFontFields,
   toMaterialFields,
@@ -38,7 +49,11 @@ import {
   toTextAssetFields,
   toTexture2DFields,
   toVideoClipFields,
+  type AnimatorControllerFields,
+  type AnimatorFields,
+  type AnimatorOverrideControllerFields,
   type AssetBundleFields,
+  type AvatarFields,
   type AudioClipFields,
   type FontFields,
   type MaterialFields,
@@ -113,6 +128,10 @@ export interface ObjectDataMap {
   Sprite: Sprite;
   SpriteAtlas: SpriteAtlas;
   Mesh: MeshData;
+  Avatar: Avatar;
+  AnimatorController: AnimatorController;
+  Animator: Animator;
+  AnimatorOverrideController: AnimatorOverrideController;
 }
 
 /**
@@ -136,6 +155,10 @@ export interface AssetDataMap {
   Sprite: SpriteFields;
   SpriteAtlas: SpriteAtlasFields;
   Mesh: MeshFields;
+  Avatar: AvatarFields;
+  AnimatorController: AnimatorControllerFields;
+  Animator: AnimatorFields;
+  AnimatorOverrideController: AnimatorOverrideControllerFields;
 }
 
 /**
@@ -180,6 +203,10 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   Sprite: readSprite,
   SpriteAtlas: readSpriteAtlas,
   Mesh: readMeshData,
+  Avatar: readAvatar,
+  AnimatorController: readAnimatorController,
+  Animator: readAnimator,
+  AnimatorOverrideController: readAnimatorOverrideController,
 };
 
 /** {@link CLASS_READERS} by class id, and the class name each id has there. */
@@ -254,6 +281,10 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   Sprite: toSpriteFields,
   SpriteAtlas: toSpriteAtlasFields,
   Mesh: toMeshFields,
+  Avatar: toAvatarFields,
+  AnimatorController: toAnimatorControllerFields,
+  Animator: toAnimatorFields,
+  AnimatorOverrideController: toAnimatorOverrideControllerFields,
 };
 
 /**

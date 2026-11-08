@@ -261,8 +261,9 @@ trees (`BuildAssetBundleOptions.DisableWriteTypeTree`). The table lists the main
 `asset.data` (the type in brackets); the JSDoc of each type has every field, with its Unity name.
 "From" is the first Unity version whose layout the reader knows. The other readers refuse an older
 version; `Texture2D` has no floor: it reads any older version with its oldest layout. Unity 2019.1
-is the supported floor: a reader added since that decision (`Mesh`) starts there, and the older
-readers keep the older layouts they already had.
+is the supported floor: a reader added since that decision (`Mesh`, `Avatar`, `AnimatorController`,
+`Animator`, `AnimatorOverrideController`) starts there, and the older readers keep the older
+layouts they already had.
 
 | Class | Main fields of `asset.data` | From | Fixture |
 |---|---|---|---|
@@ -280,9 +281,14 @@ readers keep the older layouts they already had.
 | `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
 | `MovieTexture` (`MovieTextureFields`) | `movieData` (the Ogg Theora file), `loop`, `audioClip` | 3.4 | No, unit tests only |
 | `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles, offset by its `baseVertex`, which AssetStudio leaves out), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
+| `Avatar` (`AvatarFields`) | `avatar`: the runtime avatar (skeletons, poses, the humanoid part with its bones, hands and muscle setup); `tos` (path hash to transform path); `humanDescription`: the bones and settings it was built from | 2019.1 | Yes, and 6000.6 |
+| `AnimatorController` (`AnimatorControllerFields`) | `controller`: layers (with their masks), state machines (states, transitions with their conditions, blend trees, entry and exit selectors) and parameters with their defaults; `tos` (name hash to name), `animationClips`, `stateMachineBehaviours` | 2019.1 | Yes, and 6000.6 |
+| `Animator` (`AnimatorFields`) | `avatar`, `controller` (pointers), `gameObject`, `enabled`, `cullingMode`, `updateMode`, `applyRootMotion` and the other flags | 2019.1 | Yes, and 6000.6 |
+| `AnimatorOverrideController` (`AnimatorOverrideControllerFields`) | `controller`, and `clips`: each original clip with the clip that overrides it | 2019.1 | Yes, and 6000.6 |
 
-"Yes" is all three fixture editors. Every other class (`GameObject`, `Transform`, `AnimationClip`,
-...) comes from its type tree. In a bundle without type trees, `obj.read()`
+"Yes" is all three fixture editors. The animation classes' nested runtime structs keep their raw
+arrays: curves and muscle values are not decoded. Every other class (`GameObject`, `Transform`,
+`AnimationClip`, ...) comes from its type tree. In a bundle without type trees, `obj.read()`
 throws `UnsupportedError` for them. The class readers are for player builds; see
 [Not supported](#not-supported) for the editor files they refuse.
 
@@ -294,6 +300,7 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
 | **Tested** `Shader` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: DX11, GLES3 and Vulkan builds, and Metal from 2020.3 and 6000.3, against `readTypeTree()`; every Shader layout from 2019.1 to 6000.6 against UnityPy's reading of a synthetic object |
 | **Tested** `Mesh` skin and blend shapes | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a mesh with up to four bone influences per vertex and two blend shapes, plain and compressed (not 2020.3), against UnityPy's decoded skin and AssetStudio's (not 6000.6), and `readTypeTree()` |
+| **Tested** `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a humanoid and a generic avatar, a controller with two layers, a mask, a sub-state machine, 1D, 2D and direct blend trees and behaviours, an override controller, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the Animator's patch-release gates included) against Unity's own type trees |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
@@ -339,6 +346,10 @@ and throws `UnsupportedError` (kind `"Unity version"`) otherwise:
 | `Font` | Read, format 16 and later |
 | `MovieTexture` | Refused |
 | `Mesh` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Avatar` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AnimatorController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Animator` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AnimatorOverrideController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 
 The version-stripped fixtures, in formats 21 and 22, hold a `TextAsset`, a `Material`,
 `AudioClip`s, a `VideoClip`, a `Font`, the font's `Texture2D` and the bundle's `AssetBundle`.
@@ -358,12 +369,15 @@ Each of these throws `UnsupportedError` naming what it found:
   version-stripped file where the bytes do not decide the layout
   ([Version-stripped files](#version-stripped-files)). `readTypeTree()` still works on such files.
 - An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
-  `MonoScript`, `MonoBehaviour`, `Shader`, `Sprite`, `SpriteAtlas`, `AudioClip` or `Mesh`, or by
+  `MonoScript`, `MonoBehaviour`, `Shader`, `Sprite`, `SpriteAtlas`, `AudioClip`, `Mesh`, `Avatar`,
+  `AnimatorController`, `Animator` or `AnimatorOverrideController`, or by
   `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
 - A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
   format Unity does not define, bone weights in an integer format or more than four per vertex
   (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
   `baseVertex` takes an index past the vertices throws `CorruptError`.
+- An `AnimatorController` (Unity 6000.2 and later) whose parameter defaults hold entity ids
+  (kind `"EntityId values"`): no type tree says what one holds, and no Unity controller writes one.
 
 Out of scope for this package: decoding audio or video; exporting meshes (OBJ, glTF); writing or repacking bundles;
 image encoding. Texture and sprite pixels, and PNG encoding, are in
@@ -414,7 +428,7 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | `readTypeTree(reader)` | Read an object into a plain JS object by walking its type tree |
 | `TypeTreeObject`, `TypeTreeValue` | What `readTypeTree` returns; the JSDoc lists each Unity type's JS shape |
 | `ClassID`, `classIdName(id)` | Unity class ids by name (`ClassID.Texture2D === 28`), and back |
-| `Vector3`, `Quaternion`, `XForm` | Shapes read by `ObjectReader.readVector3` / `readXForm` |
+| `Vector3`, `Quaternion`, `XForm` | Shapes read by `ObjectReader.readVector3` / `readXForm` (and by the animation readers' `float3`, `float4` and `xform` fields) |
 
 ### Class readers
 
@@ -438,6 +452,11 @@ Call one yourself only to read an object as a specific class.
 | `readFont` | `Font`, `CharacterInfo`, `Rectf` |
 | `readMovieTexture` | `MovieTexture` |
 | `readMesh`, `GfxPrimitiveType` | `Mesh`, `CompressedMesh`, `PackedFloatVector`, `PackedIntVector`, `MinMaxAABB`, `VariableBoneCountWeights`, `MeshLodInfo`, `MeshLodRange`, `LodSelectionCurve`; `MeshData` (with `VertexBoneWeights`) is what `obj.read()` returns |
+| `readHumanPose`, `readValueArrayConstant` | `HumanPose`, `HumanGoal`, `HandPose`, `ValueArrayConstant`, `ValueConstant`, `OffsetPtr`: structs the animation classes share |
+| `readAvatar` | `Avatar`, `AvatarConstant`, `Skeleton`, `SkeletonNode`, `SkeletonPose`, `Axes`, `Limit`, `Human`, `Hand`, `HumanDescription`, `HumanBone`, `SkeletonBone`, `SkeletonBoneLimit` |
+| `readAnimatorController` | `AnimatorController`, `ControllerConstant`, `LayerConstant`, `HumanPoseMask`, `SkeletonMask`, `SkeletonMaskElement`, `StateMachineConstant`, `StateConstant`, `TransitionConstant`, `ConditionConstant`, `BlendTreeConstant`, `BlendTreeNodeConstant`, `Blend1dDataConstant`, `Blend2dDataConstant`, `BlendDirectDataConstant`, `MotionNeighborList`, `SelectorStateConstant`, `SelectorTransitionConstant`, `ValueArray`, `StateMachineBehaviourVectorDescription`, `StateKey`, `StateRange` |
+| `readAnimator` | `Animator` |
+| `readAnimatorOverrideController` | `AnimatorOverrideController`, `AnimationClipOverride` |
 
 ### `asset.data` shapes
 
@@ -447,6 +466,7 @@ it; `env.assets()` calls them for you.
 | Export | Result types |
 |---|---|
 | `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toShaderFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `ShaderFields` (`SerializedShaderFields`, `SerializedPropertyFields`, `SerializedSubShaderFields`, `SerializedPassFields`, `SerializedShaderStateFields`, `SerializedProgramFields`, `SerializedSubProgramFields`, `SerializedPlayerSubProgramFields`, `ProgramParametersFields`, `VectorParameterFields`, `MatrixParameterFields`, `StructParameterFields`, `TextureParameterFields`, `BufferBindingFields`, `ConstantBufferFields`, `UAVParameterFields`, `SamplerParameterFields`, `BindingFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
+| `toAvatarFields`, `toAnimatorControllerFields`, `toAnimatorFields`, `toAnimatorOverrideControllerFields` | `AvatarFields`, `AnimatorControllerFields`, `AnimatorFields`, `AnimatorOverrideControllerFields` (`AnimationClipOverrideFields`, `ValueConstantFields`, `ValueArrayConstantFields`, `SkeletonMaskElementFields`, `SkeletonMaskFields`, `LayerConstantFields`, `ConditionConstantFields`, `TransitionConstantFields`, `MotionNeighborListFields`, `Blend2dDataConstantFields`, `Blend1dDataConstantFields`, `BlendDirectDataConstantFields`, `BlendTreeNodeConstantFields`, `BlendTreeConstantFields`, `StateConstantFields`, `SelectorTransitionConstantFields`, `SelectorStateConstantFields`, `StateMachineConstantFields`, `ValueArrayFields`, `ControllerConstantFields`, `StateKeyFields`, `StateRangeFields`, `StateMachineBehaviourVectorDescriptionFields`, `SkeletonNodeFields`, `LimitFields`, `AxesFields`, `SkeletonFields`, `SkeletonPoseFields`, `HandFields`, `HumanFields`, `AvatarConstantFields`, `SkeletonBoneLimitFields`, `HumanBoneFields`, `SkeletonBoneFields`, `HumanDescriptionFields`) |
 | `toMonoBehaviourFields(data, obj)` | `MonoBehaviourFields`; it takes the object too, whose type tree tells whether `data` holds the script's fields |
 | `EditorExtensionFields`, `NamedObjectFields`, `TextureFields` | The fields every class, every named class and every texture starts with |
 

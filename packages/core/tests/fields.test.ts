@@ -34,6 +34,9 @@ const EDITOR = [
   // 6000.6's Shader layout (#237); these are in no golden set.
   "editor/6000.6.4f1/shader/lz4/windows",
   "editor/6000.6.4f1/shader/lz4/android",
+  // 6000.6's animator classes (#303), in modern-goldens.json.
+  "editor/6000.6.4f1/animator/lz4/animator",
+  "editor/6000.6.4f1/animator/lz4-notypetree/animator",
 ];
 
 /** The renames beyond the rule, as the fields' JSDoc documents them; `null` drops the key. */
@@ -54,6 +57,15 @@ const RENAMES: Record<string, string | null> = {
   // A Shader's (#237): the rule would make these `lOD` and `uAVParams`.
   m_LOD: "lod",
   m_UAVParams: "uavParams",
+  // The animation classes' (#303): the rule would make these `iD`, `tOS`,
+  // `iKPass` and `iKOnFeet`; the node name with its cast; and the Animator's
+  // field under its later name, whichever of the two the object has.
+  m_ID: "id",
+  m_TOS: "tos",
+  m_IKPass: "ikPass",
+  m_IKOnFeet: "ikOnFeet",
+  "(int&)m_LayerBlendingMode": "layerBlendingMode",
+  m_KeepAnimatorControllerStateOnDisable: "keepAnimatorStateOnDisable",
 };
 
 /** The rule: `m_Width` -> `width`, `Width` -> `width`, `m_sRGB` -> `sRGB`. */
@@ -94,6 +106,10 @@ function expected(type: string, low: Record<string, unknown>, reader: ObjectRead
     }
     return out;
   }
+  if (type === "Animator") {
+    // A Behaviour's m_Enabled, a UInt8, as MonoBehaviourFields has it (#303).
+    return { ...(renamed(low) as object), enabled: low.m_Enabled !== 0 };
+  }
   return renamed(low);
 }
 
@@ -121,8 +137,12 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
   assert.deepStrictEqual(
     [...seen].sort(),
     [
+      "Animator",
+      "AnimatorController",
+      "AnimatorOverrideController",
       "AssetBundle",
       "AudioClip",
+      "Avatar",
       "Font",
       "Material",
       "Mesh",

@@ -53,6 +53,10 @@ const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.Sprite,
   ClassID.SpriteAtlas,
   ClassID.Mesh,
+  ClassID.Avatar,
+  ClassID.AnimatorController,
+  ClassID.Animator,
+  ClassID.AnimatorOverrideController,
 ]);
 /** Whether a fixture holds an object of a class without a hardcoded reader. */
 const hasOthers = (name: string): boolean =>

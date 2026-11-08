@@ -62,6 +62,8 @@ function readField(reader: ObjectReader, [, type, name]: GoldenNode, want: unkno
   let expected = want;
   if (type === "string") actual = reader.readAlignedString();
   else if (type === "int") actual = reader.readInt32();
+  // An Avatar's m_AvatarSize, an AnimatorController's m_ControllerSize (#303).
+  else if (type === "unsigned int") actual = reader.readUInt32();
   else if (type === "bool") actual = reader.readUInt8() !== 0;
   // By bit pattern, as the golden has it (plan §5): a Font's m_LineSpacing (#41).
   else if (type === "float") actual = `f32:${reader.readUInt32().toString(16).padStart(8, "0")}`;
