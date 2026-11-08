@@ -1556,6 +1556,254 @@
         }
       }
     },
+    "editor/2019.4.41f2/legacy-animation/lz4-notypetree/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-304393693257938726": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 776,
+            "objectSha256": "1d4571cbab4607a62f98737395256efa18b29335cdf3255306b4484c6df22336",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-5684268117199673315": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5904,
+            "sha256": "b0d64dbd75cca76656c8fc939daa41efe56aeebd72fa5ee36dfdb73d26e0e58a",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.smile",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.blink",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        },
+        "2752147732761787177": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
+    "editor/2019.4.41f2/legacy-animation/lz4/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-304393693257938726": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 776,
+            "objectSha256": "b4b4bd2525260e803841af80e5728d64fc43c47febdb786ee6fac8e91df3c50c",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-5684268117199673315": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5904,
+            "sha256": "b0d64dbd75cca76656c8fc939daa41efe56aeebd72fa5ee36dfdb73d26e0e58a",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.smile",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.blink",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        },
+        "2752147732761787177": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
     "editor/2019.4.41f2/legacy-probe/sprites": {
       "CAB-a16ea31b80f3996fc0c4193e6011c5f2": {
         "-1049345792541073956": {
@@ -7796,6 +8044,254 @@
         }
       }
     },
+    "editor/2020.3.30f1/legacy-animation/lz4-notypetree/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-8309234693438055": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 780,
+            "objectSha256": "f522ffd8c24aba263be923cfb8e3bcddd54ec8fb5cb82ae9c17e77d972967593",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-8901494179715669252": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5904,
+            "sha256": "b0d64dbd75cca76656c8fc939daa41efe56aeebd72fa5ee36dfdb73d26e0e58a",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.smile",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.blink",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        },
+        "-9192138094451454580": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
+    "editor/2020.3.30f1/legacy-animation/lz4/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-8309234693438055": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 780,
+            "objectSha256": "c2747d8dec0b0fa1faf46ccebc2dd5e06e35d0ea1fd22ba937b59f73391e47ec",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-8901494179715669252": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5904,
+            "sha256": "b0d64dbd75cca76656c8fc939daa41efe56aeebd72fa5ee36dfdb73d26e0e58a",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.smile",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.blink",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        },
+        "-9192138094451454580": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          }
+        }
+      }
+    },
     "editor/2020.3.30f1/lz4-notypetree/adpcm": {
       "CAB-333a25f4ea19566c1a144e5e562221f1": {
         "2295068750607241059": {
@@ -13171,6 +13667,268 @@
         }
       }
     },
+    "editor/6000.3.26f1/legacy-animation/lz4-notypetree/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-2604622177471456466": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 812,
+            "objectSha256": "9037a1cda5373c51bfacceba93f5dbf5bc5a65afcf5bd6e6390a669bf5a4b3a1",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-6402588021184761142": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "unreadObjects": {
+            "SkinnedMeshRenderer": 1
+          }
+        },
+        "8642249178810422839": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5911,
+            "sha256": "480910902606f8ecace363fe204dda783369ef7e105f7754c6b7d53e134b2b93",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "unreadObjects": {
+            "SkinnedMeshRenderer": 1
+          },
+          "verdict": "c37af7d's Renderer reader fails on this file's SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's unreadObjects), so CustomCurveResolver finds no renderer and leaves each blend shape attribute as its CRC-32 (blendShape.<hash>); unity-asset-reader-animation reads the renderer and names it from the mesh's channel (blendShape.<name>); the golden is compared with each name replaced by its CRC-32"
+        }
+      }
+    },
+    "editor/6000.3.26f1/legacy-animation/lz4/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-2604622177471456466": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 812,
+            "objectSha256": "9037a1cda5373c51bfacceba93f5dbf5bc5a65afcf5bd6e6390a669bf5a4b3a1",
+            "name": "face"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-6402588021184761142": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3224,
+            "objectSha256": "410fed876bc55a1659896ec348475e1a2f659128e4073e6a2a5ba40159fedee4",
+            "name": "unlisted"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5962,
+            "sha256": "49b96ea53430163b78fdccc76234c326b7e688552163ca2592a1d8e5afebf652",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "path_3015751433",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "path_2073732236",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "path_3015751433",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "path_2722875168",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "unreadObjects": {
+            "SkinnedMeshRenderer": 1
+          }
+        },
+        "8642249178810422839": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3220,
+            "objectSha256": "3dbb9eccd6062fb4230bd1acc9e31a986d17a60b78e5b95c39453c257cf28ac4",
+            "name": "walk"
+          },
+          "inputOracle": "goldens.json; object bytes: UnityPy 1.25.3",
+          "anim": {
+            "size": 5911,
+            "sha256": "480910902606f8ecace363fe204dda783369ef7e105f7754c6b7d53e134b2b93",
+            "curves": {
+              "rotation": [
+                {
+                  "path": "Body/Arm",
+                  "keys": "000000000000000000000000000000003f8000007f8000007f8000007f8000007f800000000000000000000000000000000000003f800000000000003ec3ef16000000003f6c835e7f800000000000007f8000000000000000000000000000000000000000000000"
+                }
+              ],
+              "euler": [],
+              "position": [
+                {
+                  "path": "Body",
+                  "keys": "0000000000000000000000003dcccccd7f8000007f8000007f8000000000000000000000000000003f0000003e8000003e80000000000000000000003f400000be99999a000000003f400000be99999a3f800000000000003f000000bdcccccd000000000000000000000000000000000000000000000000"
+                }
+              ],
+              "scale": [],
+              "float": [
+                {
+                  "path": "Body/Arm",
+                  "attribute": "m_IsActive",
+                  "classId": 1,
+                  "keys": "000000003f80000000000000000000003f0000000000000000000000000000003f8000003f8000000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.42599183",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003f00000042c8000000000000000000003f80000041c800000000000000000000"
+                },
+                {
+                  "path": "Skin",
+                  "attribute": "blendShape.842569181",
+                  "classId": 137,
+                  "keys": "000000000000000000000000000000003e80000042c8000000000000000000003f000000000000000000000000000000"
+                }
+              ],
+              "pptr": []
+            },
+            "compressedRotationCurves": 0,
+            "events": []
+          },
+          "unreadObjects": {
+            "SkinnedMeshRenderer": 1
+          },
+          "verdict": "c37af7d's Renderer reader fails on this file's SkinnedMeshRenderer (it lacks fields Unity 6000 writes; the entry's unreadObjects), so CustomCurveResolver finds no renderer and leaves each blend shape attribute as its CRC-32 (blendShape.<hash>); unity-asset-reader-animation reads the renderer and names it from the mesh's channel (blendShape.<name>); the golden is compared with each name replaced by its CRC-32"
+        }
+      }
+    },
     "editor/6000.3.26f1/lz4-notypetree/adpcm": {
       "CAB-333a25f4ea19566c1a144e5e562221f1": {
         "1318902803100645839": {
@@ -15276,6 +16034,78 @@
             "classId": 74,
             "byteSize": 2500,
             "name": "walk"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        }
+      }
+    },
+    "editor/6000.6.4f1/legacy-animation/lz4-notypetree/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-2829309711682841473": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3240,
+            "name": "walk"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: Assets CAB-d497405b46c77a4719371c592f6ad3a0"
+        },
+        "-4615257749679061048": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 812,
+            "objectSha256": "82a316e7c6bdc20e3e628f11aacfec5080452a7c70063730a00db90ced4842ae",
+            "name": "face"
+          },
+          "inputOracle": "modern-goldens.json; object bytes: UnityPy 1.25.3",
+          "obj": {
+            "size": 180,
+            "sha256": "c2b37eec9a1211c3ae84374313cc95df099373efc3c49965ad7c4e5e3950f234"
+          }
+        },
+        "-4826317543375862557": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3244,
+            "name": "unlisted"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: Assets CAB-d497405b46c77a4719371c592f6ad3a0"
+        }
+      }
+    },
+    "editor/6000.6.4f1/legacy-animation/lz4/legacy-animation": {
+      "CAB-d497405b46c77a4719371c592f6ad3a0": {
+        "-2829309711682841473": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3240,
+            "name": "walk"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-4615257749679061048": {
+          "class": "Mesh",
+          "input": {
+            "classId": 43,
+            "byteSize": 812,
+            "name": "face"
+          },
+          "inputOracle": "modern-goldens.json",
+          "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."
+        },
+        "-4826317543375862557": {
+          "class": "AnimationClip",
+          "input": {
+            "classId": 74,
+            "byteSize": 3244,
+            "name": "unlisted"
           },
           "inputOracle": "modern-goldens.json",
           "exportError": "AssetStudio did not load the object: System.IO.EndOfStreamException: Unable to read beyond the end of the stream."

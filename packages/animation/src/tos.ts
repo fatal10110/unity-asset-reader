@@ -1,5 +1,6 @@
 // Ported from AssetStudio.Utility/YAML/AnimationClipExtensions.cs (MIT, © Perfare / RazTools / Razviar)
 import type {
+  Animation,
   AnimationClip,
   Animator,
   AnimatorController,
@@ -23,6 +24,7 @@ export const CLASS = {
   Avatar: 90,
   AnimatorController: 91,
   Animator: 95,
+  Animation: 111,
   SkinnedMeshRenderer: 137,
 } as const;
 
@@ -94,6 +96,17 @@ function animatorContainsClip(scene: Scene, animator: ObjectReader, clip: Object
   return scene
     .read<AnimatorController>(controller)
     .m_AnimationClips.some((ptr) => scene.tryGet(ptr, controller, CLASS.AnimationClip) === clip);
+}
+
+/**
+ * Whether the legacy `Animation` component lists the clip in `m_Animations`
+ * (upstream `IsAnimationContainsClip`); its default clip `m_Animation` does
+ * not count, as upstream.
+ */
+function animationContainsClip(scene: Scene, animation: ObjectReader, clip: ObjectReader): boolean {
+  return scene
+    .read<Animation>(animation)
+    .m_Animations.some((ptr) => scene.tryGet(ptr, animation, CLASS.AnimationClip) === clip);
 }
 
 /**
@@ -172,14 +185,15 @@ function animatorTOS(scene: Scene, animator: ObjectReader): Map<number, string> 
  *
  * - every `Avatar` (90), whatever it animates: its `m_TOS`;
  * - every `Animator` (95) whose `AnimatorController` lists the clip: its
- *   Avatar's `m_TOS`, then its hierarchy (`BuildTOS`).
+ *   Avatar's `m_TOS`, then its hierarchy (`BuildTOS`);
+ * - every legacy `Animation` (111) that lists the clip: its GameObject's
+ *   hierarchy (upstream `AddAnimationTOS`), when the GameObject is loaded.
  *
  * Each adds only the hashes the bindings use; the search stops once there is
- * a path per binding. Upstream's third source, an `Animation` (111) listing
- * the clip, is left out: core has no `Animation` reader.
+ * a path per binding.
  *
- * ponytail: a legacy `Animation` component's hierarchy names no paths. Upgrade:
- * an `Animation` reader in core, then its `m_GameObject`'s `buildTOS` (#314).
+ * @throws {Error} when a GameObject whose hierarchy is walked has no
+ *   Transform (see {@link buildTOS})
  */
 export function findTOS(
   scene: Scene,
@@ -194,21 +208,29 @@ export function findTOS(
       const avatar = scene.tryGet(scene.read<Animator>(obj).m_Avatar, obj, CLASS.Avatar);
       if (avatar && addTOS(clip, avatarTOS(scene, avatar), tos)) return tos;
       if (addTOS(clip, animatorTOS(scene, obj), tos)) return tos;
+    } else if (obj.type === CLASS.Animation && animationContainsClip(scene, obj, clipObj)) {
+      const go = scene.tryGet(scene.read<Animation>(obj).m_GameObject, obj, CLASS.GameObject);
+      if (go && addTOS(clip, buildTOS(scene, go), tos)) return tos;
     }
   }
   return tos;
 }
 
 /**
- * The GameObjects that play the clip (upstream `FindRoots`): each loaded
- * `Animator`'s, in file order, whose controller lists it. The `Animation`
- * branch is left out, as in {@link findTOS}.
+ * The GameObjects that play the clip (upstream `FindRoots`), in file order:
+ * each loaded `Animator`'s whose controller lists it, and each legacy
+ * `Animation`'s that lists it.
  */
 export function findRoots(scene: Scene, clipObj: ObjectReader): ObjectReader[] {
   const roots: ObjectReader[] = [];
   for (const obj of scene.env.objects) {
-    if (obj.type !== CLASS.Animator || !animatorContainsClip(scene, obj, clipObj)) continue;
-    const go = scene.tryGet(scene.read<Animator>(obj).m_GameObject, obj, CLASS.GameObject);
+    let gameObject: PPtr;
+    if (obj.type === CLASS.Animator && animatorContainsClip(scene, obj, clipObj)) {
+      gameObject = scene.read<Animator>(obj).m_GameObject;
+    } else if (obj.type === CLASS.Animation && animationContainsClip(scene, obj, clipObj)) {
+      gameObject = scene.read<Animation>(obj).m_GameObject;
+    } else continue;
+    const go = scene.tryGet(gameObject, obj, CLASS.GameObject);
     if (go) roots.push(go);
   }
   return roots;

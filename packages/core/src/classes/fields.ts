@@ -29,6 +29,7 @@ import type {
   StreamedClip,
   Vector3Curve,
 } from "./AnimationClip.js";
+import type { Animation } from "./AnimationComponent.js";
 import type { Animator } from "./Animator.js";
 import type {
   HandPose,
@@ -2258,6 +2259,48 @@ export function toAnimatorFields(data: Animator): AnimatorFields {
     keepAnimatorStateOnDisable: (data.m_KeepAnimatorStateOnDisable ??
       data.m_KeepAnimatorControllerStateOnDisable)!,
     writeDefaultValuesOnDisable: data.m_WriteDefaultValuesOnDisable,
+  });
+}
+
+/** The friendly form of {@link Animation}, a legacy `Animation` component (#314). */
+export interface AnimationFields extends EditorExtensionFields {
+  /** Unity: `m_GameObject`. The GameObject it is attached to. */
+  gameObject: PPtr;
+  /** Unity: `m_Enabled`, a `UInt8`: `true` when it is not 0. */
+  enabled: boolean;
+  /** Unity: `m_Animation`. The default clip. */
+  clip: PPtr;
+  /** Unity: `m_Animations`. The clips it can play. */
+  clips: PPtr[];
+  /** Unity: `m_WrapMode`. 0 default, 1 once, 2 loop, 4 ping-pong, 8 clamp forever. */
+  wrapMode: number;
+  /** Unity: `m_PlayAutomatically`. */
+  playAutomatically: boolean;
+  /** Unity: `m_AnimatePhysics`. */
+  animatePhysics: boolean;
+  /** Unity: `m_UpdateMode`. Unity 2023.1 and later. */
+  updateMode?: number;
+  /** Unity: `m_CullingType`. 0 always animate, 1 based on renderers. */
+  cullingType: number;
+}
+
+/**
+ * An `Animation` as {@link AnimationFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toAnimationFields(data: Animation): AnimationFields {
+  return defined({
+    ...editorExtension(data),
+    gameObject: data.m_GameObject,
+    enabled: data.m_Enabled !== 0,
+    clip: data.m_Animation,
+    clips: data.m_Animations,
+    wrapMode: data.m_WrapMode,
+    playAutomatically: data.m_PlayAutomatically,
+    animatePhysics: data.m_AnimatePhysics,
+    updateMode: data.m_UpdateMode,
+    cullingType: data.m_CullingType,
   });
 }
 
