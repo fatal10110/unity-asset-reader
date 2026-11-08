@@ -1,3 +1,4 @@
+import { readGameObjectName } from "./classes/GameObject.js";
 import { readMonoBehaviour } from "./classes/MonoBehaviour.js";
 import { readNamedObject } from "./classes/NamedObject.js";
 import { readShader } from "./classes/Shader.js";
@@ -183,8 +184,8 @@ export function makeAsset(
 
 /**
  * `m_Name` as cheaply as the object allows: through the type tree as far as
- * `m_Name`; without one, the `NamedObject` header or a `MonoBehaviour`'s
- * header; otherwise `""`. A `Shader` is named by its parsed form.
+ * `m_Name`; without one, the `NamedObject` header, a `MonoBehaviour`'s or a
+ * `GameObject`'s header; otherwise `""`. A `Shader` is named by its parsed form.
  */
 function readName(reader: ObjectReader): string {
   if (reader.type === ClassID.Shader) {
@@ -202,8 +203,7 @@ function readName(reader: ObjectReader): string {
   if (nodes && nodes.length > 0) return readTypeTreeName(reader) ?? "";
   if (NAMED_CLASSES.has(reader.type)) return readNamedObject(reader).m_Name;
   if (reader.type === ClassID.MonoBehaviour) return readMonoBehaviour(reader).m_Name;
-  // ponytail: a GameObject's m_Name follows its component list, whose layout
-  // needs a ported reader; add one when a stripped bundle needs the names.
+  if (reader.type === ClassID.GameObject) return readGameObjectName(reader);
   return "";
 }
 

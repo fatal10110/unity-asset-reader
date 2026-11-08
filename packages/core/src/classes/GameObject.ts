@@ -53,15 +53,40 @@ export function readGameObject(reader: ObjectReader): GameObject {
   // Filled in field order, so the keys come out in the order Unity wrote them.
   const out: Partial<GameObject> = readEditorExtension(reader);
   assumingLayout(reader, "GameObject", () => {
-    out.m_Component = readArray(reader, "GameObject", "m_Component", (r) => ({
-      component: readPPtr(r),
-    }));
-    out.m_Layer = reader.readUInt32();
-    out.m_Name = readStringField(reader, "GameObject", "m_Name");
+    readHeader(reader, out);
     out.m_Tag = reader.readUInt16();
     out.m_IsActive = readBool(reader);
     endOfObject(reader, "GameObject");
   });
   // Every field was set above.
   return out as GameObject;
+}
+
+/**
+ * A `GameObject`'s `m_Name` without a type tree: its header only, as
+ * upstream's reader goes (the components, the layer, the name), so nothing
+ * after the name has to fit. Internal: `asset.name`'s reader for a bundle
+ * built without type trees (#308).
+ *
+ * @param reader the object's reader, rewound first and left just past `m_Name`
+ * @throws {UnsupportedError} as {@link readGameObject} refuses a version or an
+ *   editor file, and of kind `"Unity version"` when an unknown version's
+ *   header does not fit 2019's layout
+ * @throws {CorruptError} when the object ends before its name, with the
+ *   version known
+ */
+export function readGameObjectName(reader: ObjectReader): string {
+  animationLayoutVersion(reader, "GameObject");
+  const out: Partial<GameObject> = readEditorExtension(reader);
+  assumingLayout(reader, "GameObject", () => readHeader(reader, out));
+  return out.m_Name!;
+}
+
+/** `m_Component`, `m_Layer` and `m_Name`, the fields upstream reads, into `out`. */
+function readHeader(reader: ObjectReader, out: Partial<GameObject>): void {
+  out.m_Component = readArray(reader, "GameObject", "m_Component", (r) => ({
+    component: readPPtr(r),
+  }));
+  out.m_Layer = reader.readUInt32();
+  out.m_Name = readStringField(reader, "GameObject", "m_Name");
 }

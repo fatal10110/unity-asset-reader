@@ -31,6 +31,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- `asset.name` of a GameObject in a bundle built without type trees is its `m_Name`, read
+  from the GameObject header (components, layer, name) as upstream reads it (#308). It was
+  `""`.
 - `readTypeTree()` reads a childless `EntityId` node (Unity 6000.2 and later) by its
   `byteSize`: an `Int32` (`number`) when it is 4 bytes (6000.2 to 6000.4), a `UInt64`
   (`bigint`) when it is 8 (6000.5 on), and refuses any other size (`UnsupportedError`, kind
