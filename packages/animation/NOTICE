@@ -1,0 +1,19 @@
+unity-asset-reader-animation
+Copyright (c) 2026 fatal10110
+
+This product is a derivative work: its AnimationClip curve decoding is
+hand-ported from the project below. Its copyright notice is kept per the MIT
+License, and every ported source file carries a one-line attribution to the
+file it was ported from.
+
+AssetStudio -- https://github.com/Razviar/assetstudio (MIT)
+  Copyright (c) Perfare, RazTools, Razviar
+  Source of truth for the curves (AssetStudio.Utility/YAML/
+  AnimationClipConverter.cs, AnimationClipExtensions.cs,
+  CustomCurveResolver.cs, MuscleHelper.cs; AssetStudio/Classes/
+  AnimationClip.cs, StreamedClip.ReadData; AssetStudio/7zip/Common/CRC.cs),
+  and the oracle of their test goldens (its .anim export).
+
+UnityPy -- https://github.com/K0lb3/UnityPy (MIT)
+  Copyright (c) K0lb3
+  Oracle that names the inputs of the test goldens.

@@ -10,7 +10,16 @@ import { test } from "node:test";
 import { reverseRows, sha256 } from "../../fixtures/helpers.js";
 
 interface Entry {
-  class: "Texture2D" | "Mesh" | "AudioClip" | "TextAsset" | "Shader" | "Sprite" | "Font" | "VideoClip";
+  class:
+    | "Texture2D"
+    | "Mesh"
+    | "AudioClip"
+    | "TextAsset"
+    | "Shader"
+    | "Sprite"
+    | "Font"
+    | "VideoClip"
+    | "AnimationClip";
   input: Record<string, string | number>;
   inputOracle: string;
   png?: { width: number; height: number; rgbaSha256: string };
@@ -20,10 +29,12 @@ interface Entry {
   shader?: { size: number; sha256: string };
   font?: { size: number; sha256: string; extension: string };
   video?: { size: number; sha256: string; extension: string };
+  anim?: { size: number; sha256: string; curves: Record<string, unknown[]>; events: unknown[] };
   exportError?: string;
   objWithoutBaseVertex?: { size: number; sha256: string };
   alphaTexture?: string;
   variantAtlas?: string;
+  unreadObjects?: Record<string, number>;
   verdict?: string;
 }
 
@@ -61,6 +72,7 @@ const CLASSES: Record<number, Entry["class"]> = {
   43: "Mesh",
   48: "Shader",
   49: "TextAsset",
+  74: "AnimationClip",
   83: "AudioClip",
   128: "Font",
   213: "Sprite",
@@ -75,11 +87,12 @@ const OUTPUT = {
   Sprite: "png",
   Font: "font",
   VideoClip: "video",
+  AnimationClip: "anim",
 } as const;
 
 /**
- * Every Texture2D, Mesh, Shader, TextAsset, AudioClip, Sprite, Font and VideoClip the UnityPy
- * goldens list, with its export entry.
+ * Every Texture2D, Mesh, Shader, TextAsset, AnimationClip, AudioClip, Sprite, Font and VideoClip
+ * the UnityPy goldens list, with its export entry.
  */
 function objects() {
   const out = [];
@@ -152,7 +165,8 @@ test("each entry carries the UnityPy input it was matched on", () => {
 test("each entry holds its class's export or an exportError, never both", () => {
   for (const o of all) {
     const e = o.entry!;
-    const outputs = (["png", "obj", "wav", "bytes", "shader", "font", "video"] as const).filter((k) => e[k]);
+    const kinds = ["png", "obj", "wav", "bytes", "shader", "font", "video", "anim"] as const;
+    const outputs = kinds.filter((k) => e[k]);
     if (e.exportError) assert.deepEqual(outputs, [], at(o));
     else assert.deepEqual(outputs, [OUTPUT[o.cls]], at(o));
   }
@@ -176,6 +190,16 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
         where,
       );
       assert.ok(o.fixture.includes("/6000.") || o.fixture.endsWith("/windows"), where);
+    } else if (o.cls === "AnimationClip") {
+      // c37af7d reads 6000.6's (format 23) clips without type trees, but without
+      // GenericBinding's metaData (6000.5), so their bindings come out misread and
+      // Convert() throws on them; with type trees it cannot load the file at all.
+      assert.equal(o.source, "modern-goldens.json", where);
+      assert.match(
+        exportError!,
+        /^(AssetStudio did not load the object: |ArgumentException: )/,
+        where,
+      );
     } else if (o.source === "modern-goldens.json") {
       // c37af7d cannot read SerializedFile format 23's (6000.6) type trees.
       assert.match(exportError!, /^AssetStudio did not load the object: /, where);
@@ -231,13 +255,20 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   );
   assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");
   assert.equal(exported("VideoClip"), 9, "the video bundles of 2019.4, 2020.3 and 6000.3");
+  assert.equal(
+    exported("AnimationClip"),
+    104,
+    "the 17 clips of the animation, animator and scene bundles of 2019.4, 2020.3 and 6000.3, " +
+      "typed and not (#304), and 6000.6.4f1's legacy and dense clips without type trees, " +
+      "whose bindings c37af7d misreads harmlessly (none, or one Transform binding)",
+  );
 });
 
 test("a verdict sits next to a Sprite golden exactly where decodeSprite differs by design", () => {
   // fixtures/BUILDING.md section 17: GetImage() ignores an ETC1 split alpha
   // texture (decodeSprite merges it, #152), and AssetsManager moves a sprite
   // off its variant atlas (decodeSprite cuts the variant, #153).
-  const verdicts = all.filter((o) => o.entry!.verdict);
+  const verdicts = all.filter((o) => o.entry!.verdict && o.cls !== "AnimationClip");
   for (const o of verdicts) {
     const e = o.entry!;
     assert.equal(o.cls, "Sprite", at(o));
@@ -315,4 +346,21 @@ test("ExportTexture2D agrees with section 15's executed DecodeRG16", () => {
   assert.ok(o?.entry!.png, "no RG16 export golden");
   const topDown = reverseRows(Uint8Array.from(Buffer.from(reference.rgbaHex, "hex")), reference.width);
   assert.equal(o.entry!.png.rgbaSha256, sha256(topDown));
+});
+
+test("an AnimationClip golden has a verdict exactly where AssetStudio missed its renderer", () => {
+  // fixtures/BUILDING.md section 17 (#304): c37af7d's Renderer reader fails on
+  // Unity 6000's SkinnedMeshRenderer, so its blend shape attributes stay CRC-32s.
+  const clips = all.filter((o) => o.cls === "AnimationClip" && o.entry!.anim);
+  const withVerdict = clips.filter((o) => o.entry!.verdict);
+  for (const o of withVerdict) {
+    assert.match(o.entry!.verdict!, /^c37af7d's Renderer reader fails on this file's/, at(o));
+    assert.ok(o.entry!.unreadObjects?.SkinnedMeshRenderer, at(o));
+    assert.equal(o.fixture.split("/")[1], "6000.3.26f1", at(o));
+  }
+  assert.deepEqual(
+    withVerdict.map((o) => o.entry!.input.name),
+    ["smile", "smile"],
+    "the 6000.3.26f1 scene bundles' blend shape clip, typed and not",
+  );
 });

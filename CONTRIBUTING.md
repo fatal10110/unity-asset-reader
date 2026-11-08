@@ -309,6 +309,7 @@ For feature requests, describe:
     ├── audio/                    # unity-asset-reader-audio
     ├── spine/                    # unity-asset-reader-spine
     ├── shader/                   # unity-asset-reader-shader
+    ├── animation/                # unity-asset-reader-animation
     └── decoder/                  # texture2ddecoder-wasm
         ├── src/                  # TypeScript source (index.ts)
         ├── tests/                # index.test.ts, samples.test.ts

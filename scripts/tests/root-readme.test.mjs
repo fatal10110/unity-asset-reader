@@ -8,7 +8,7 @@ import { test } from "node:test";
 const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 
-const PACKAGES = ["core", "texture", "node", "mesh", "audio", "spine", "shader", "decoder"];
+const PACKAGES = ["core", "texture", "node", "mesh", "audio", "spine", "shader", "animation", "decoder"];
 const manifest = (pkg) => JSON.parse(read(`packages/${pkg}/package.json`));
 
 /** The "Choose your packages" section of the root README, up to the next `##` heading. */
@@ -20,7 +20,7 @@ function guide() {
   return readme.slice(start, end === -1 ? undefined : end);
 }
 
-test("the package guide names all 8 packages by their npm names", () => {
+test("the package guide names all 9 packages by their npm names", () => {
   const section = guide();
   for (const pkg of PACKAGES) {
     const { name } = manifest(pkg);
@@ -41,7 +41,7 @@ test("each package's guide entry links its README and says what it does not do",
 
 test("feature packages peer on the core, and the texture package brings the decoder", () => {
   const core = manifest("core").name;
-  for (const pkg of ["texture", "node", "mesh", "audio", "spine", "shader"]) {
+  for (const pkg of ["texture", "node", "mesh", "audio", "spine", "shader", "animation"]) {
     assert.ok(manifest(pkg).peerDependencies?.[core], `${pkg} lists ${core} as a peer`);
   }
   assert.ok(manifest("texture").dependencies?.[manifest("decoder").name]);

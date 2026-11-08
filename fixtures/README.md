@@ -8,7 +8,7 @@ bundles/          M1 container fixtures (generated, see below)
 bundles/editor/   editor-built bundles, one folder per Unity version and build variant
 BUILDING.md       how the editor-built bundles were made, and how to rebuild them
 goldens.json      what the oracle says each fixture unpacks to and contains
-assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip, TextAsset, Shader
+assetstudio-export-goldens.json  what AssetStudio exports for each Texture2D, Mesh, AudioClip, TextAsset, Shader, AnimationClip
 tpk-trees.json    Unity's player type trees of a class from 2019.1, from UnityPy's TPK
 shader-layouts.json  UnityPy's synthetic Shader objects, one per type tree layout (#237)
 helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shapes
