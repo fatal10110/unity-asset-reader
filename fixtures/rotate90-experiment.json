@@ -3333,5 +3333,613 @@
         }
       ]
     }
+  ],
+  "scriptablePackerProbes": [
+    {
+      "editorVersion": "6000.3.26f1",
+      "packer": "scriptable-v2 Rotate90Packer",
+      "bundle": "Build/packer/sprites",
+      "bundleSha256": "9dd5ccbce0cd1143aa6cd0f156dd73ce00146c685b403261354b5ec9a2cfa268",
+      "builderSha256": {
+        "BuildPackerProbe.cs": "a0eb92f9bcec439ff46852b41dfdd6b33fff7a23fafbcd0340eebf64f0014e65",
+        "Rotate90Packer.cs": "095f1d65931c65ef8a7a2eda7659095a0be2161d28f6b22ba6a95550b4c12649"
+      },
+      "serializedFormat": [
+        22
+      ],
+      "requestedTransforms": {
+        "0": 1,
+        "1": 2,
+        "2": 2,
+        "3": 1,
+        "4": 6
+      },
+      "rotations": {
+        "0": 12
+      },
+      "rotate90Candidates": [],
+      "everyOpaquePixelUnturned": true,
+      "entries": [
+        {
+          "sprite": "t00",
+          "sourceSize": [
+            13,
+            47
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 1,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            320,
+            13,
+            47
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 611,
+          "opaquePixelsAtOwnPosition": 611
+        },
+        {
+          "sprite": "t01",
+          "sourceSize": [
+            47,
+            13
+          ],
+          "requestedTransform": 1,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            320,
+            47,
+            13
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 306,
+          "opaquePixelsAtOwnPosition": 306
+        },
+        {
+          "sprite": "t02",
+          "sourceSize": [
+            19,
+            37
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            192,
+            19,
+            37
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 461,
+          "opaquePixelsAtOwnPosition": 461
+        },
+        {
+          "sprite": "t03",
+          "sourceSize": [
+            37,
+            19
+          ],
+          "requestedTransform": 2,
+          "settingsRaw": 1,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            192,
+            37,
+            19
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 703,
+          "opaquePixelsAtOwnPosition": 703
+        },
+        {
+          "sprite": "t04",
+          "sourceSize": [
+            23,
+            41
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            192,
+            23,
+            41
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 472,
+          "opaquePixelsAtOwnPosition": 472
+        },
+        {
+          "sprite": "t05",
+          "sourceSize": [
+            41,
+            23
+          ],
+          "requestedTransform": 3,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            192,
+            41,
+            23
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 593,
+          "opaquePixelsAtOwnPosition": 593
+        },
+        {
+          "sprite": "t06",
+          "sourceSize": [
+            33,
+            49
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 1,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            64,
+            33,
+            49
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 1617,
+          "opaquePixelsAtOwnPosition": 1617
+        },
+        {
+          "sprite": "t07",
+          "sourceSize": [
+            49,
+            33
+          ],
+          "requestedTransform": 0,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            64,
+            49,
+            33
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 809,
+          "opaquePixelsAtOwnPosition": 809
+        },
+        {
+          "sprite": "t08",
+          "sourceSize": [
+            35,
+            43
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            64,
+            35,
+            43
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 959,
+          "opaquePixelsAtOwnPosition": 959
+        },
+        {
+          "sprite": "t09",
+          "sourceSize": [
+            43,
+            35
+          ],
+          "requestedTransform": 1,
+          "settingsRaw": 1,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            64,
+            43,
+            35
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 1505,
+          "opaquePixelsAtOwnPosition": 1505
+        },
+        {
+          "sprite": "t10",
+          "sourceSize": [
+            7,
+            53
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            320,
+            7,
+            53
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 186,
+          "opaquePixelsAtOwnPosition": 186
+        },
+        {
+          "sprite": "t11",
+          "sourceSize": [
+            53,
+            7
+          ],
+          "requestedTransform": 2,
+          "settingsRaw": 65,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            320,
+            53,
+            7
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 243,
+          "opaquePixelsAtOwnPosition": 243
+        }
+      ]
+    },
+    {
+      "editorVersion": "6000.6.4f1",
+      "packer": "scriptable-v2 Rotate90Packer",
+      "bundle": "Build/packer/sprites",
+      "bundleSha256": "d53046ef1dcfb54a9239508b0867163f9f14180644d4b693f52b26f355d37963",
+      "builderSha256": {
+        "BuildPackerProbe.cs": "a0eb92f9bcec439ff46852b41dfdd6b33fff7a23fafbcd0340eebf64f0014e65",
+        "Rotate90Packer.cs": "095f1d65931c65ef8a7a2eda7659095a0be2161d28f6b22ba6a95550b4c12649"
+      },
+      "serializedFormat": [
+        23
+      ],
+      "requestedTransforms": {
+        "0": 1,
+        "1": 2,
+        "2": 2,
+        "3": 1,
+        "4": 6
+      },
+      "rotations": {
+        "0": 12
+      },
+      "rotate90Candidates": [],
+      "everyOpaquePixelUnturned": true,
+      "entries": [
+        {
+          "sprite": "t00",
+          "sourceSize": [
+            13,
+            47
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3073,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            320,
+            13,
+            47
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 611,
+          "opaquePixelsAtOwnPosition": 611
+        },
+        {
+          "sprite": "t01",
+          "sourceSize": [
+            47,
+            13
+          ],
+          "requestedTransform": 1,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            320,
+            47,
+            13
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 306,
+          "opaquePixelsAtOwnPosition": 306
+        },
+        {
+          "sprite": "t02",
+          "sourceSize": [
+            19,
+            37
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            192,
+            19,
+            37
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 461,
+          "opaquePixelsAtOwnPosition": 461
+        },
+        {
+          "sprite": "t03",
+          "sourceSize": [
+            37,
+            19
+          ],
+          "requestedTransform": 2,
+          "settingsRaw": 3073,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            192,
+            37,
+            19
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 703,
+          "opaquePixelsAtOwnPosition": 703
+        },
+        {
+          "sprite": "t04",
+          "sourceSize": [
+            23,
+            41
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            192,
+            23,
+            41
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 472,
+          "opaquePixelsAtOwnPosition": 472
+        },
+        {
+          "sprite": "t05",
+          "sourceSize": [
+            41,
+            23
+          ],
+          "requestedTransform": 3,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            192,
+            41,
+            23
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 593,
+          "opaquePixelsAtOwnPosition": 593
+        },
+        {
+          "sprite": "t06",
+          "sourceSize": [
+            33,
+            49
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3073,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            64,
+            64,
+            33,
+            49
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 1617,
+          "opaquePixelsAtOwnPosition": 1617
+        },
+        {
+          "sprite": "t07",
+          "sourceSize": [
+            49,
+            33
+          ],
+          "requestedTransform": 0,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            192,
+            64,
+            49,
+            33
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 809,
+          "opaquePixelsAtOwnPosition": 809
+        },
+        {
+          "sprite": "t08",
+          "sourceSize": [
+            35,
+            43
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            64,
+            35,
+            43
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 959,
+          "opaquePixelsAtOwnPosition": 959
+        },
+        {
+          "sprite": "t09",
+          "sourceSize": [
+            43,
+            35
+          ],
+          "requestedTransform": 1,
+          "settingsRaw": 3073,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            64,
+            43,
+            35
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 1505,
+          "opaquePixelsAtOwnPosition": 1505
+        },
+        {
+          "sprite": "t10",
+          "sourceSize": [
+            7,
+            53
+          ],
+          "requestedTransform": 4,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            320,
+            320,
+            7,
+            53
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 186,
+          "opaquePixelsAtOwnPosition": 186
+        },
+        {
+          "sprite": "t11",
+          "sourceSize": [
+            53,
+            7
+          ],
+          "requestedTransform": 2,
+          "settingsRaw": 3137,
+          "packed": true,
+          "rotation": 0,
+          "textureRect": [
+            448,
+            320,
+            53,
+            7
+          ],
+          "atlasDimensions": [
+            512,
+            512
+          ],
+          "opaquePixels": 243,
+          "opaquePixelsAtOwnPosition": 243
+        }
+      ]
+    }
   ]
 }
