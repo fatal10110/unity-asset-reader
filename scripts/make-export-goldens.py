@@ -10,7 +10,9 @@ of the eight exported classes:
              the PNG it writes is decoded back to RGBA in the harness
   Sprite     AssetStudio.CLI  Exporter.ExportSprite(item, dir, ImageFormat.Png),
              Sprite.GetImage(); the PNG decoded back to RGBA the same way
-  Mesh       AssetStudio.CLI  Exporter.ExportMesh(item, dir), the .obj file
+  Mesh       AssetStudio.CLI  Exporter.ExportMesh(item, dir), the .obj file; for a
+             skinned Mesh also its decoded m_Skin (`skin`, weights as float32
+             bits), the cross-check of UnityPy's skin goldens (#285)
   AudioClip  AssetStudio.Utility  new AudioClipConverter(clip).ConvertToWav()
   TextAsset  AssetStudio.CLI  Exporter.ExportTextAsset(item, dir), the file it writes
   Shader     AssetStudio.CLI  Exporter.ExportShader(item, dir), the .shader file
@@ -763,6 +765,15 @@ public static class Program {
                         }
                         case Mesh mesh: {
                             input["name"] = mesh.m_Name;
+                            // The skin the Mesh reader decoded (ProcessData: the vertex data's
+                            // weight and index channels, or DecompressCompressedMesh), as float32
+                            // bits: the executed cross-check of UnityPy's skin goldens (#285).
+                            if (mesh.m_Skin != null && mesh.m_Skin.Count > 0) {
+                                result["skin"] = new Dictionary<string, object> {
+                                    ["boneWeights"] = mesh.m_Skin.Select(bw => bw.weight.Select(wt => "f32:" + ((uint)BitConverter.SingleToInt32Bits(wt)).ToString("x8")).ToList()).ToList(),
+                                    ["boneIndices"] = mesh.m_Skin.Select(bw => bw.boneIndex.ToList()).ToList(),
+                                };
+                            }
                             if (!(bool)exportMesh.Invoke(null, new object[] { item, outDir })) {
                                 result["exportError"] = "ExportMesh returned false";
                                 break;
@@ -1330,7 +1341,7 @@ def main() -> None:
         if result.get("oracle") == "composite":
             entry["oracle"] = COMPOSITE
         for output in [*OUTPUTS, "exportError", "objWithoutBaseVertex", "alphaTexture",
-                       "variantAtlas"]:
+                       "variantAtlas", "skin"]:
             if output in result:
                 entry[output] = result[output]
         verdicts = [text for field, text in [("alphaTexture", ALPHA_VERDICT),

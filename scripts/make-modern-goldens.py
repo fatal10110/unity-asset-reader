@@ -111,9 +111,16 @@ def packed_sprite_goldens(path):
 def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
-    textures, atlases, shaders = [], [], []
+    textures, atlases, shaders, meshes = [], [], [], []
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
+        if obj.type.name == "Mesh":
+            tree = obj.read_typetree()
+            shapes = tree["m_Shapes"]
+            meshes.append({"name": tree["m_Name"],
+                           "blendShapes": [channel["name"] for channel in shapes["channels"]],
+                           "frames": [channel["frameCount"] for channel in shapes["channels"]],
+                           "indexFormat": tree["m_IndexFormat"]})
         if obj.type.name == "Shader":
             tree = obj.read_typetree()
             shaders.append({"name": tree["m_ParsedForm"]["m_Name"], "platforms": tree["platforms"]})
@@ -143,6 +150,13 @@ def evidence(name, path):
         want = [4] if name.endswith("/windows") else [9, 18]
         assert all(s["platforms"] == want for s in shaders)
         return {"shaders": sorted(shaders, key=lambda s: s["name"])}
+    if "/mesh/" in name:
+        # The skinned meshes (#285): two blend shapes, 32-bit indices; the
+        # skin itself is checked by make-goldens.py's skin_golden.
+        assert [mesh["name"] for mesh in meshes] == [name.split("/")[-1][len("mesh-"):]]
+        assert all(m["blendShapes"] == ["smile", "blink"] and m["frames"] == [2, 3]
+                   and m["indexFormat"] == 1 for m in meshes)
+        return {"meshes": meshes}
     if "/more-plain/" in name:
         assert set(textures) == {"R8", "RG16", "RG32", "RGB48", "RGBA64", "R8_SIGNED",
                                  "RG16_SIGNED", "RGB24_SIGNED", "RGBA32_SIGNED", "R16_SIGNED",
@@ -162,13 +176,15 @@ def main():
         ("sprite-v2", "sprites"), ("sprite-v2-rect", "sprites"),
         # The shader bundles built with type trees (#237), Shader dumped too.
         ("shader/lz4", "windows"), ("shader/lz4", "android"),
+        # The skinned meshes (#285), typed only; their skins as make-goldens.py.
+        ("mesh/lz4", "mesh-skinned"), ("mesh/lz4", "mesh-skinned-compressed"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,
         "_generator": "scripts/make-modern-goldens.py",
         "_status": ("Format-23 metadata and generic dumps supported; 6000.6 packed sprites have "
                     "UnityPy crops through a stand-in sprite (#229); the signed plain formats "
-                    "remain candidates."),
+                    "remain candidates; the skinned meshes have UnityPy MeshHelper's skin (#285)."),
         "fixtures": {},
     }
     for name in paths:
