@@ -82,15 +82,16 @@ const where = (s: (typeof sprites)[number]) =>
 
 test("the export goldens hold AssetStudio's ExportSprite PNGs", () => {
   assert.match(exportGoldens.methods.Sprite!, /^AssetStudio\.CLI\.Exporter\.ExportSprite\(/);
-  // Every 2019.4.41f2 and 6000.3.25f1 fixture Sprite, 17 of them split alpha.
-  assert.equal(exported.length, 112);
+  // Every 2019.4.41f2 and 6000.3.25f1 fixture Sprite, 17 of them split alpha, and the
+  // animation bundles' two of 2019.4, 2020.3 and 6000.3.26f1, typed and not (#302).
+  assert.equal(exported.length, 124);
   assert.equal(splitAlpha.length, 17);
   for (const s of splitAlpha) assert.equal(s.fixture, "editor/2019.4.41f2/split-alpha/sprites");
   assert.deepEqual(variant.map((s) => [s.fixture, s.entry.input.name, s.entry.variantAtlas]), [
     ["editor/2019.4.41f2/variant/sprites", "r_a", "half"],
     ["editor/2019.4.41f2/variant/sprites", "r_b", "half"],
   ]);
-  assert.equal(plain.length, 112 - 17 - 2);
+  assert.equal(plain.length, 124 - 17 - 2);
 });
 
 test(
@@ -209,6 +210,7 @@ test("every fixture Sprite without an AssetStudio PNG has a known reason", () =>
     }
     reasons.set(reason, (reasons.get(reason) ?? 0) + 1);
   }
-  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 15 });
-  assert.equal(exported.length + 15, sprites.length);
+  // Of them, 6000.6.4f1's animation bundles' four (#302).
+  assert.deepEqual(Object.fromEntries(reasons), { "format 23": 19 });
+  assert.equal(exported.length + 19, sprites.length);
 });

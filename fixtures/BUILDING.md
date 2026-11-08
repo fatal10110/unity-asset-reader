@@ -4773,7 +4773,13 @@ checks the table above for the 6000.6 bundles (its `evidence`).
 ```bash
 <modern-oracle>/bin/python scripts/make-modern-goldens.py
 .venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
 ```
+
+`make-export-goldens.py` (section 17) adds the two sprites and their textures
+of each bundle: AssetStudio's PNGs for 2019.4, 2020.3 and 6000.3.26f1; for
+6000.6.4f1 it loads only the textures of the build without type trees (it
+fails on format 23's type trees), and records why for the rest.
 
 `fixtures/tpk-trees.json` already has AnimationClip's trees (section 22); every
 fixture clip's type tree equals the TPK tree of its version.
