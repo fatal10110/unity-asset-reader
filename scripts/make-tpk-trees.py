@@ -13,7 +13,7 @@ Output: fixtures/tpk-trees.json, `classes[<class id>][<first version>]`, each
 tree in pre-order as `[level, type, name, byteSize, metaFlag]` (the goldens'
 node form). Run with the oracle venv:
 
-    .venv-oracle/bin/python scripts/make-tpk-trees.py 43 90 91 95 221
+    .venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221
 """
 import json
 import pathlib

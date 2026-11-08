@@ -4429,9 +4429,12 @@ which fill every array:
   `readTypeTree()` reads it as `{}` of 0 bytes; the fixtures' vectors are
   empty, and the reader refuses a non-empty one;
 - the Animator layouts of the patch releases no fixture editor is
-  (2020.3.43 and 46, 2021.3.16 and 20, 2022.1.24, 2022.2.9) and the 6000.4
-  controller field `m_EvaluateTransitionsOnStart`. The 2020.3.30f1 Animator
-  predates the 2020.3 backports; the 6000.x ones have every 2023.1 field.
+  (2020.3.43 and 46, 2021.3.16 and 20, 2022.1.24, 2022.2.9). The 2020.3.30f1
+  Animator predates the 2020.3 backports; the 6000.x ones have every 2023.1
+  field.
+
+The controller field `m_EvaluateTransitionsOnStart` (6000.4+, at the top and
+per state machine) is in the 6000.6.4f1 fixtures; 6000.3.26f1 predates it.
 
 A build without type trees writes the generic avatar's `m_TOS` (a map) in
 another order than its typed twin; the test compares the stripped objects
