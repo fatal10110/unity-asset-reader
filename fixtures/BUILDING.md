@@ -5490,8 +5490,8 @@ compression nor root motion baking is in the golden; a port checks its own
 curve evaluation against the inputs separately. `bodyPosition` is in
 `HumanPose`'s normalized units (divided by the Avatar's human scale). The
 script writes the editor's float32 values exactly, the sha256 of each bundle
-it read, and the comparison tolerance of plan section 5 (`_tolerance`, 1e-4
-absolute per component; a quaternion matches its negation).
+it read, and how plan section 5 compares it (`_comparison`: within the
+tolerance the owner sets on #319, a quaternion matching its negation).
 
 The oracle does not build a bundle, so it may be rerun, and it reproduces the
 golden byte for byte. Through `heavy --lock unity` (it runs the four editors):

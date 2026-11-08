@@ -45,14 +45,11 @@ CLIPS = {
     "pose": "editor/{version}/humanoid/lz4/humanoid",
     "muscle": "editor/{version}/scene/lz4/scene",
 }
-# How close a reimplementation must come to these values (plan section 5).
-TOLERANCE = {
-    "localRotation": 1e-4,
-    "localPosition": 1e-4,
-    "note": ("Absolute, per component. A quaternion matches its negation (q and -q are "
-             "the same rotation). The recorded values themselves are Unity's float32 "
-             "results, exact; the tolerance is the comparison bound."),
-}
+# How a reimplementation is compared with these values (plan section 5). The bound
+# itself is the owner's decision on #319, so the golden carries no number of its own.
+COMPARISON = ("Within the tolerance the owner sets on #319, not by float32 bits; a "
+              "quaternion matches its negation (q and -q are the same rotation). The "
+              "recorded values themselves are Unity's float32 results, exact.")
 
 ORACLE_CS = r"""
 using System;
@@ -283,7 +280,7 @@ def main():
                    "Avatar's normalized units (divided by the human scale); local positions in "
                    "metres, rotations as quaternions x, y, z, w, all in each transform's parent "
                    "space; bones in GetComponentsInChildren order, root first"),
-        "_tolerance": TOLERANCE,
+        "_comparison": COMPARISON,
         "muscleNames": editors[EDITORS[0]]["muscleNames"],
         "editors": {v: {"clips": d["clips"]} for v, d in editors.items()},
     }

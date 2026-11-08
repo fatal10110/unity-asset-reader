@@ -30,7 +30,7 @@ const golden = JSON.parse(
   readFileSync(new URL("../../fixtures/humanoid-unity-goldens.json", import.meta.url), "utf8"),
 ) as {
   _generator: string;
-  _tolerance: { localRotation: number; localPosition: number };
+  _comparison: string;
   muscleNames: string[];
   editors: Record<string, { clips: Record<string, Clip> }>;
 };
@@ -55,7 +55,7 @@ test("the golden holds both humanoid clips for every fixture editor, at keys and
   assert.deepEqual(Object.keys(golden.editors), EDITORS);
   assert.equal(golden.muscleNames.length, 95);
   assert.ok(golden.muscleNames.includes("Left Arm Twist In-Out"));
-  assert.ok(golden._tolerance.localRotation > 0 && golden._tolerance.localPosition > 0);
+  assert.match(golden._comparison, /#319/);
   for (const { editor, name, clip } of clips()) {
     const at = `${editor} ${name}`;
     assert.deepEqual(Object.keys(golden.editors[editor]!.clips), ["pose", "muscle"], at);
