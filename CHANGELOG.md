@@ -31,6 +31,14 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ### 1.3.0 - Unreleased
 
+- `GltfWriter`: a sync, dependency-free writer of binary glTF 2.0 files (`.glb`), moved from
+  `unity-asset-reader-mesh` and extended (#317). It writes accessors, meshes, nodes with
+  translation, rotation and scale, skins (joints, inverse bind matrices, `JOINTS_0` /
+  `WEIGHTS_0`), morph targets (`POSITION`, `NORMAL`, `TANGENT` deltas, default weights) and
+  animations (`LINEAR`, `STEP` and `CUBICSPLINE` samplers), checks the references and the
+  spec's counting rules (`UnsupportedError`), and knows nothing about Unity. Types:
+  `GltfAccessor`, `GltfAccessorType`, `GltfComponentArray`, `GltfMesh`, `GltfPrimitive`,
+  `GltfNode`, `GltfSkin`, `GltfAnimation`, `GltfAnimationChannel`, `GltfAnimationSampler`.
 - `asset.name` of a GameObject in a bundle built without type trees is its `m_Name`, read
   from the GameObject header (components, layer, name) as upstream reads it (#308). It was
   `""`, and stays `""` for a GameObject the GameObject reader refuses (before Unity 2019.1, an
@@ -346,6 +354,9 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ### 1.0.1 - Unreleased
 
+- `meshToGltf` is written with core's new `GltfWriter` instead of the package's own glTF code;
+  its output is unchanged byte for byte on every fixture mesh. Needs the next core (1.3.0), and
+  the peer range is raised at release (#317).
 - `meshToObj` and `meshToGltf` draw a submesh with a `baseVertex` on the vertices it offsets
   its indices to, through core's `MeshData.indices` (#257); a 16-bit mesh that offset takes to
   index 65535 or above is written with 32-bit glTF indices. The OBJ equals AssetStudio's for

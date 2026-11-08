@@ -44,5 +44,8 @@
   "dependencies": {
     "fflate": "^0.8.3",
     "lzma1": "^0.3.0"
+  },
+  "devDependencies": {
+    "gltf-validator": "2.0.0-dev.3.10"
   }
 }
