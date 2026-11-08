@@ -59,6 +59,7 @@ const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.AnimatorOverrideController,
   ClassID.AnimationClip,
   ClassID.Animation,
+  ClassID.RectTransform,
   ClassID.GameObject,
   ClassID.Transform,
   ClassID.MeshFilter,

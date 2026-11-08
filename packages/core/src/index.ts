@@ -94,6 +94,7 @@ export {
   toTextAssetFields,
   toTexture2DFields,
   toTransformFields,
+  toRectTransformFields,
   toVideoClipFields,
 } from "./classes/fields.js";
 export type {
@@ -125,6 +126,7 @@ export type {
   RendererFields,
   SkinnedMeshRendererFields,
   TransformFields,
+  RectTransformFields,
   AvatarConstantFields,
   AxesFields,
   Blend1dDataConstantFields,
@@ -385,6 +387,8 @@ export { readGameObject } from "./classes/GameObject.js";
 export type { ComponentPair, GameObject } from "./classes/GameObject.js";
 export { readTransform } from "./classes/Transform.js";
 export type { Transform } from "./classes/Transform.js";
+export { readRectTransform } from "./classes/RectTransform.js";
+export type { RectTransform } from "./classes/RectTransform.js";
 export { readMeshFilter } from "./classes/MeshFilter.js";
 export type { MeshFilter } from "./classes/MeshFilter.js";
 export { readMeshRenderer, readSkinnedMeshRenderer } from "./classes/Renderer.js";
