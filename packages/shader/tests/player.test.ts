@@ -67,8 +67,9 @@ test("exactly the Shaders with variants in m_PlayerSubPrograms have the composit
     assert.equal(!!s.entry.oracle?.startsWith("composite (plan section 5, revision 2026-11-08a)"), players, s.fixture);
     if (players) composite++;
   }
-  // Every 6000.3.26f1 and 6000.6.4f1 Shader; none of 2019.4 or 2020.3.
-  assert.equal(composite, 16);
+  // Every 6000.3.26f1 and 6000.6.4f1 Shader (the shader-variants ones too, #283);
+  // none of 2019.4 or 2020.3.
+  assert.equal(composite, 22);
 });
 
 test("Unity 6 GLES, Vulkan and Metal programs: one SubProgram per blob index and type, no hw_tier", () => {

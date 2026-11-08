@@ -207,8 +207,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("AudioClip"), 36, "both clips of every audio and adpcm bundle");
   assert.equal(exported("TextAsset"), 32);
   // Both shaders of the 2019.4 and 2020.3 Android and iOS bundles; the composite's
-  // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259).
-  assert.equal(exported("Shader"), 17);
+  // UAR/ShaderFixtureSecond of the 6000.3 Android and iOS and 6000.6 Android ones (#259),
+  // and both shaders of the shader-variants bundles of the same three (#283).
+  assert.equal(exported("Shader"), 23);
   assert.equal(exported("Texture2D"), 99);
   assert.equal(exported("Sprite"), 112, "every 2019.4.41f2 and 6000.3.25f1 fixture Sprite");
   assert.equal(exported("Font"), 9, "the font bundles of 2019.4, 2020.3 and 6000.3");

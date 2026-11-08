@@ -104,8 +104,9 @@ test("the goldens list the Vulkan stages of 2019.4 (encoding 0), 2020.3 and 6000
       ),
     ),
   ];
-  // 8 by ExportShader; 3 6000.x Android UAR/ShaderFixtureSecond by the composite (#259).
-  assert.equal(WITH_STAGES.length, 11);
+  // 8 by ExportShader; by the composite, 3 6000.x Android UAR/ShaderFixtureSecond
+  // (#259) and both shaders of the 6000.x Android shader-variants bundles (#283).
+  assert.equal(WITH_STAGES.length, 15);
   assert.deepEqual(encodings("2019.4.41f2"), [0]);
   assert.deepEqual(encodings("2020.3.30f1"), [1]);
   assert.deepEqual(encodings("6000.3.26f1"), [1]);

@@ -89,7 +89,8 @@ Full JSDoc is in the bundled `index.d.ts`.
 - [AssetStudio](https://github.com/Razviar/assetstudio) (MIT, © Perfare, RazTools, Razviar):
   `shaderToText()` is hand-ported from its `AssetStudio.Utility/ShaderConverter.cs` and
   `SpirVShaderConverter.cs`, and the SMOL-V decoder from its `AssetStudio.Utility/Smolv/`; the
-  output is tested against AssetStudio's own `.shader` files.
+  output is tested against AssetStudio's own `.shader` files, and Unity 6 shaders, several
+  keyword variants per stage included, against its converter's text in the composite oracle.
 - [CSspv](https://github.com/Anteru/csspv) (BSD-2-Clause, © 2017 Matthäus G. Chajdas): the SPIR-V
   disassembler is hand-ported from it, as AssetStudio vendors it in `AssetStudio.Utility/CSspv/`.
 - [smol-v](https://github.com/aras-p/smol-v) (MIT or public domain, © 2016-2018 Aras Pranckevicius): the
