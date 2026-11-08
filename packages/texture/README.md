@@ -188,6 +188,13 @@ the same `load()`.
 With `decodeSprite`'s `{ tightMesh: true }`, pixels outside a tight-packed sprite's mesh become
 transparent, as AssetStudio does. The default, and `decodeImage`, return the whole rectangle.
 
+A sprite packed into a variant `SpriteAtlas` (`m_IsVariant`, a scaled copy of a master atlas) is
+cut from that variant by default, as its pointer says and UnityPy does. AssetStudio's loader
+moves it to its master atlas when that is loaded; `decodeSprite`'s `{ preferMasterAtlas: true }`
+does the same: walking the loaded atlases in load order, the first one that has render data
+(`m_RenderDataMap`), lists the sprite in `m_PackedSprites` and is not a variant cuts it. A variant loaded without its master keeps the
+variant. `decodeImage` and `imageInfo` always use the sprite's own atlas.
+
 From Unity 6000.6 a `SpriteAtlas` holds its packed sprites itself (each `renderDataMap` entry's
 `spriteInstanceData`), and the bundle has no `Sprite` objects for them. `packedSprites(atlas)`
 lists them as `PackedSprite`s (`{ type: "PackedSprite", name, atlas, index }`), which
@@ -213,6 +220,7 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2, 6000.
 | Cut from its own texture, inline or in the `.resS` | Yes, at any rectangle and pivot, with a border |
 | Packed into a `SpriteAtlas` (Sprite Atlas V1 fixtures), tight or rectangle packing | Yes, when the atlas is loaded |
 | Packed into a Unity 6000.6 `SpriteAtlas` (V1 and V2 fixtures, tight or rectangle packing, a half-scale variant) | Yes, as a `PackedSprite` (`packedSprites`). A `Sprite` object that points at a 6000.6 atlas, which no fixture has, is refused. No 6000.6 fixture has an alpha texture: split alpha is tested on a patched entry only |
+| Packed into a variant `SpriteAtlas` (2019.4.41f2 half-scale variant) | Cut from the variant by default; from its loaded master atlas with `decodeSprite`'s `{ preferMasterAtlas: true }`, equal to AssetStudio's PNG |
 | Packer rotation `FlipHorizontal`, `FlipVertical`, `Rotate180` | Undone |
 | Packer rotation `Rotate90` | Undone as AssetStudio does; no fixture ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)) |
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
@@ -324,7 +332,7 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `InitTextureOptions` | `{ wasmPath?, locateFile? }`, passed to `texture2ddecoder-wasm`'s `initialize` |
 | `decodeTexture2D(texture)` | A `Texture2D`, as `obj.read()` returns it, to RGBA, top row first |
 | `decodeSprite(obj, env, options?)` | A `Sprite` (or a `PackedSprite`) to RGBA, top row first, cut out of its texture or atlas |
-| `DecodeSpriteOptions` | `{ tightMesh?, decodedTextures? }` |
+| `DecodeSpriteOptions` | `{ tightMesh?, preferMasterAtlas?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
 | `encodePng(image)` | An `RgbaImage`, top row first, to a PNG file (8-bit RGBA, uncompressed deflate), sync |
