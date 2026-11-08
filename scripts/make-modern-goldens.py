@@ -108,15 +108,31 @@ def packed_sprite_goldens(path):
     return out
 
 
+# An AnimationClip's legacy curve arrays.
+CURVE_ARRAYS = ("m_RotationCurves", "m_CompressedRotationCurves", "m_EulerCurves",
+                "m_PositionCurves", "m_ScaleCurves", "m_FloatCurves", "m_PPtrCurves")
+
+
 def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
-    textures, atlases, shaders, meshes = [], [], [], []
+    textures, atlases, shaders, meshes, clips = [], [], [], [], []
     animation = {}
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
-        if obj.type.name in ("Animator", "AnimatorController", "AnimatorOverrideController", "Avatar"):
+        if obj.type.name in ("AnimationClip", "Animator", "AnimatorController",
+                             "AnimatorOverrideController", "Avatar"):
             animation[obj.type.name] = animation.get(obj.type.name, 0) + 1
+        if obj.type.name == "AnimationClip" and "/animation/" in name:
+            tree = obj.read_typetree()
+            parts = tree["m_MuscleClip"]["m_Clip"]["data"]
+            clips.append({"name": tree["m_Name"], "legacy": tree["m_Legacy"],
+                          "streamed": parts["m_StreamedClip"]["curveCount"],
+                          "discrete": parts["m_StreamedClip"]["discreteCurveCount"],
+                          "dense": parts["m_DenseClip"]["m_CurveCount"],
+                          "constant": len(parts["m_ConstantClip"]["data"]),
+                          "curves": sum(len(tree[k]) for k in CURVE_ARRAYS),
+                          "events": len(tree["m_Events"])})
         if obj.type.name == "Mesh":
             tree = obj.read_typetree()
             shapes = tree["m_Shapes"]
@@ -171,9 +187,29 @@ def evidence(name, path):
     if "/animator/" in name:
         # The animator fixtures (#303): two Animators, a humanoid and a generic
         # Avatar, one controller and one override controller.
-        assert animation == {"Animator": 2, "AnimatorController": 1,
+        # And the eight clips of the controller (one linear localPosition.y curve each).
+        assert animation == {"AnimationClip": 8, "Animator": 2, "AnimatorController": 1,
                              "AnimatorOverrideController": 1, "Avatar": 2}, animation
         return {"animation": dict(sorted(animation.items()))}
+    if "/animation/" in name:
+        # The animation fixtures (#302): one legacy clip, whose curves stay in
+        # the curve arrays, and five Mecanim clips, whose curves land in the
+        # streamed, dense and constant parts of m_MuscleClip (the sprite swap
+        # is 6000.x's one discrete curve), the curve arrays emptied.
+        assert animation == {"AnimationClip": 6}, animation
+        clips.sort(key=lambda c: c["name"])
+        want = {  # name: (legacy, streamed, discrete, dense, constant, curves, events)
+            "constant": (False, 0, 0, 0, 4, 0, 0),
+            "dense": (False, 0, 0, 3, 0, 0, 0),
+            "dense60": (False, 0, 0, 4, 0, 0, 0),
+            "legacy": (True, 0, 0, 0, 0, 7, 2),
+            "mecanim": (False, 18, 1, 0, 0, 0, 2),
+            "mixed": (False, 3, 0, 3, 1, 0, 0),
+        }
+        got = {c["name"]: (c["legacy"], c["streamed"], c["discrete"], c["dense"], c["constant"],
+                           c["curves"], c["events"]) for c in clips}
+        assert got == want, got
+        return {"animation": dict(sorted(animation.items())), "clips": clips}
     if "/signed-eac/" in name:
         # The signed EAC textures (#288); their bytes are checked against the
         # etc2comp payloads by packages/texture/tests/signed-eac.test.ts.
@@ -206,6 +242,8 @@ def main():
         ("signed-eac", "android"),
         # Animator, AnimatorController, AnimatorOverrideController and Avatar (#303).
         ("animator/lz4", "animator"), ("animator/lz4-notypetree", "animator"),
+        # AnimationClip (#302): legacy, streamed, dense and constant clips.
+        ("animation/lz4", "animation"), ("animation/lz4-notypetree", "animation"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

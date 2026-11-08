@@ -4440,3 +4440,340 @@ A build without type trees writes the generic avatar's `m_TOS` (a map) in
 another order than its typed twin; the test compares the stripped objects
 with `readTypeTree()` through the TPK tree of their version, and with the
 twin with `m_TOS` sorted.
+
+## 23. The `animation` bundles (#302)
+
+`animation/{lz4,lz4-notypetree}/animation` for **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**: one bundle per editor and kind, made from
+code by an editor script, for the `AnimationClip` reader. The clips are bound
+to the paths of a generated hierarchy (`Body`, `Body/Arm`, `Body/Arm/Tip`, not
+in the bundle). Each bundle holds six clips, their two sprites (with their
+textures) and the `FixtureProps` MonoScript, which the curves pull in:
+
+- `legacy` (`m_Legacy`): position, quaternion rotation (`localRotation`),
+  euler rotation (`localEulerAnglesRaw`), scale, two float curves (a
+  `SpriteRenderer` colour and a script field) and a sprite swap
+  (`AnimationUtility.SetObjectReferenceCurve`: `SetCurve` cannot make a curve
+  of object references), a few keys each, and two events;
+- `mecanim`: the same curves and events, a root (`""`) position curve and clip
+  settings (loop time, loop blend, height from feet, mirror, cycle offset,
+  level, orientation offset);
+- `dense` and `dense60`: a key every frame (30 per second for 1 s, 60 per
+  second for 2 s), `m_UseHighQualityCurve` off;
+- `constant`: flat curves only;
+- `mixed`: a sparse curve, three keyed every frame and a flat one,
+  `m_UseHighQualityCurve` off.
+
+Where each clip's curves land, as UnityPy reads them (the same in all four
+editors but for the split count):
+
+| Clip | Curve arrays | Streamed curves | Dense curves | Constant curves | Bindings | Events |
+|---|---|---|---|---|---|---|
+| `legacy` | all six kinds, `m_MuscleClipSize` 0 | 0 | 0 | 0 | 0 | 2 |
+| `mecanim` | emptied | 19 (6000.x: 18, and the sprite swap as `discreteCurveCount` 1) | 0 | 0 | 8, 3 `pptrCurveMapping` | 2 |
+| `dense` | emptied | 0 | 3 | 0 | 1 | 0 |
+| `dense60` | emptied | 0 | 4 | 0 | 2 | 0 |
+| `constant` | emptied | 0 | 0 | 4 | 2 | 0 |
+| `mixed` | emptied | 3 | 3 | 1 | 3 | 0 |
+
+So a Mecanim clip empties the curve arrays (`m_RotationCurves`, `m_EulerCurves`,
+`m_PositionCurves`, `m_ScaleCurves`, `m_FloatCurves`, `m_PPtrCurves`) and keeps
+its events; a legacy clip keeps them and leaves `m_MuscleClip` empty.
+
+The dense part took a probe. The first 2019.4.41f2 copy,
+`uar-302-animation-2019.4.41f2`, ran the script below without `LowQuality`:
+every curve keyed every frame still went to the streamed part, `m_DenseClip`
+empty (`m_CurveCount` 0). With `m_UseHighQualityCurve` off (no API sets it; a
+`SerializedObject` does), a second copy, `uar-302-animation-2019.4.41f2-b`, put
+them in the dense part; its build is the committed 2019.4.41f2 one, and the
+other three editors ran the final script once each. The first copy's bundles
+are not committed.
+
+What no fixture clip fills, left to the TPK layouts of
+`packages/core/tests/AnimationClip.test.ts`, which fill every array at every
+TPK version: `m_CompressedRotationCurves` (a `.anim` asset has no compression
+setting) and `m_MuscleClip.m_ValueArrayReferencePose`. Also left to them: the
+layouts of the versions no fixture editor is (2022.1 `isIntCurve`, 2022.2 the
+curves' `flags` and `isSerializeReferenceCurve`, the split curve count of
+2022.3.19, 2023.2.8 and 2023.3, not 2023.1). 6000.3.26f1 and 6000.6.4f1 have
+the 2022.x fields and the split count; only 6000.6.4f1 has `GenericBinding`'s
+`metaData` (6000.5+).
+
+Each project is a fresh copy named `uar-302-animation-<editor version>`,
+holding `ProjectSettings/` and `Packages/` of the section 22 project of the
+same editor and only these two files under `Assets/`.
+
+`Assets/Scripts/FixtureProps.cs` (a runtime script, so its field is animatable):
+
+```csharp
+using UnityEngine;
+
+// A MonoBehaviour with an animatable field for the animation fixtures (#302),
+// so a float curve and its binding name a script.
+public class FixtureProps : MonoBehaviour
+{
+    public float amount;
+}
+```
+
+`Assets/Editor/BuildAnimation.cs`:
+
+```csharp
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+// The animation fixtures (#302), created from code: AnimationClips bound to the
+// paths of a generated hierarchy (rig/Body/Arm/Tip), with position, quaternion
+// and euler rotation, scale, float (a SpriteRenderer colour and a script field)
+// and PPtr (sprite swap) curves, and events. One legacy clip; Mecanim clips
+// whose curves land in the streamed (sparse keys), dense (a key every frame)
+// and constant (flat) parts of m_MuscleClip.
+public static class BuildAnimation
+{
+    const string Dir = "Assets/Fixtures/animation";
+
+    public static void Build()
+    {
+        Directory.CreateDirectory(Dir);
+        var rig = new GameObject("rig").transform;
+        var body = Child(rig, "Body");
+        var arm = Child(body, "Arm");
+        var tip = Child(arm, "Tip");
+        body.gameObject.AddComponent<FixtureProps>();
+        tip.gameObject.AddComponent<SpriteRenderer>();
+        var paths = new[] { body, arm, tip }.Select(t => AnimationUtility.CalculateTransformPath(t, rig)).ToArray();
+        string b = paths[0], a = paths[1], t3 = paths[2];
+        var red = Png("red", new Color32(255, 0, 0, 255));
+        var blue = Png("blue", new Color32(0, 0, 255, 255));
+
+        // legacy: every curve kind, sparse keys, events; m_Legacy keeps the curve arrays.
+        var legacy = NewClip("legacy", true);
+        legacy.wrapMode = WrapMode.Loop;
+        Sparse(legacy, b, a, t3, red, blue);
+        Events(legacy, red);
+        Save(legacy);
+
+        // mecanim: the same curves, events and clip settings, plus a root curve.
+        var mecanim = NewClip("mecanim", false);
+        Sparse(mecanim, b, a, t3, red, blue);
+        mecanim.SetCurve("", typeof(Transform), "localPosition.z", Keys(0f, 0f, 0.5f, 0.75f, 1f, 2f));
+        Events(mecanim, red);
+        var s = AnimationUtility.GetAnimationClipSettings(mecanim);
+        s.loopTime = true;
+        s.loopBlend = true;
+        s.loopBlendOrientation = true;
+        s.loopBlendPositionY = true;
+        s.keepOriginalPositionY = true;
+        s.heightFromFeet = true;
+        s.mirror = true;
+        s.cycleOffset = 0.25f;
+        s.level = 0.125f;
+        s.orientationOffsetY = 15f;
+        AnimationUtility.SetAnimationClipSettings(mecanim, s);
+        Save(mecanim);
+
+        // dense: a key every frame (30 per second for 1 s, then 60 for 2 s), and
+        // m_UseHighQualityCurve off.
+        var dense = NewClip("dense", false);
+        dense.frameRate = 30f;
+        foreach (var c in new[] { "x", "y", "z" })
+            dense.SetCurve(b, typeof(Transform), "localPosition." + c, PerFrame(30f, 1f, c.Length + c[0]));
+        LowQuality(dense);
+        Save(dense);
+        var dense60 = NewClip("dense60", false);
+        dense60.frameRate = 60f;
+        foreach (var c in new[] { "x", "y", "z" })
+            dense60.SetCurve(a, typeof(Transform), "localScale." + c, PerFrame(60f, 2f, c[0]));
+        dense60.SetCurve(b, typeof(FixtureProps), "amount", PerFrame(60f, 2f, 7));
+        LowQuality(dense60);
+        Save(dense60);
+
+        // constant: flat curves only.
+        var constant = NewClip("constant", false);
+        foreach (var c in new[] { "x", "y", "z" })
+            constant.SetCurve(b, typeof(Transform), "localPosition." + c, Flat(0.5f + c[0] - 'x', 1f));
+        constant.SetCurve(t3, typeof(SpriteRenderer), "m_Color.a", Flat(0.75f, 1f));
+        Save(constant);
+
+        // mixed: one clip with streamed, dense and constant curves, m_UseHighQualityCurve off.
+        var mixed = NewClip("mixed", false);
+        mixed.frameRate = 30f;
+        mixed.SetCurve(b, typeof(Transform), "localPosition.x", Keys(0f, 0f, 0.4f, 1f, 1f, -0.5f));
+        mixed.SetCurve(a, typeof(Transform), "localScale.x", PerFrame(30f, 1f, 3));
+        mixed.SetCurve(a, typeof(Transform), "localScale.y", PerFrame(30f, 1f, 4));
+        mixed.SetCurve(a, typeof(Transform), "localScale.z", PerFrame(30f, 1f, 5));
+        mixed.SetCurve(b, typeof(FixtureProps), "amount", Flat(2.5f, 1f));
+        LowQuality(mixed);
+        Save(mixed);
+
+        Object.DestroyImmediate(rig.gameObject);
+        AssetDatabase.SaveAssets();
+        var lz4 = BuildAssetBundleOptions.ChunkBasedCompression;
+        Emit("lz4", lz4);
+        Emit("lz4-notypetree", lz4 | BuildAssetBundleOptions.DisableWriteTypeTree);
+    }
+
+    static Transform Child(Transform parent, string name)
+    {
+        var t = new GameObject(name).transform;
+        t.SetParent(parent, false);
+        return t;
+    }
+
+    static AnimationClip NewClip(string name, bool legacy)
+    {
+        return new AnimationClip { name = name, legacy = legacy };
+    }
+
+    // m_UseHighQualityCurve off (no API sets it): the build may then sample a
+    // curve into the dense part instead of streaming its keys.
+    static void LowQuality(AnimationClip clip)
+    {
+        var so = new SerializedObject(clip);
+        so.FindProperty("m_UseHighQualityCurve").boolValue = false;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void Save(AnimationClip clip)
+    {
+        AssetDatabase.CreateAsset(clip, Dir + "/" + clip.name + ".anim");
+        Debug.Log("FIXTURE-INFO clip " + clip.name + " legacy=" + clip.legacy +
+            " curves=" + AnimationUtility.GetCurveBindings(clip).Length +
+            " pptr=" + AnimationUtility.GetObjectReferenceCurveBindings(clip).Length +
+            " events=" + AnimationUtility.GetAnimationEvents(clip).Length);
+    }
+
+    // Every curve kind with a few keys: position, quaternion rotation, euler
+    // rotation, scale, two float curves and a sprite swap.
+    static void Sparse(AnimationClip clip, string b, string a, string t, Sprite red, Sprite blue)
+    {
+        clip.SetCurve(b, typeof(Transform), "localPosition.x", Keys(0f, 0f, 0.5f, 1f, 1f, 0.25f));
+        clip.SetCurve(b, typeof(Transform), "localPosition.y", Keys(0f, 1f, 0.25f, 1.5f, 1f, 1f));
+        clip.SetCurve(b, typeof(Transform), "localPosition.z", Keys(0f, 0f, 1f, -1f));
+        var q = Quaternion.Euler(0f, 90f, 30f);
+        clip.SetCurve(a, typeof(Transform), "localRotation.x", Keys(0f, 0f, 1f, q.x));
+        clip.SetCurve(a, typeof(Transform), "localRotation.y", Keys(0f, 0f, 1f, q.y));
+        clip.SetCurve(a, typeof(Transform), "localRotation.z", Keys(0f, 0f, 1f, q.z));
+        clip.SetCurve(a, typeof(Transform), "localRotation.w", Keys(0f, 1f, 1f, q.w));
+        foreach (var c in new[] { "x", "y", "z" })
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(t, typeof(Transform), "localEulerAnglesRaw." + c),
+                Keys(0f, 0f, 0.5f, 45f + c[0] - 'x', 1f, 90f));
+        clip.SetCurve(b, typeof(Transform), "localScale.x", Keys(0f, 1f, 0.5f, 2f, 1f, 1f));
+        clip.SetCurve(b, typeof(Transform), "localScale.y", Keys(0f, 1f, 1f, 0.5f));
+        clip.SetCurve(b, typeof(Transform), "localScale.z", Keys(0f, 1f, 1f, 1.5f));
+        clip.SetCurve(t, typeof(SpriteRenderer), "m_Color.a", Keys(0f, 1f, 0.5f, 0.25f, 1f, 1f));
+        clip.SetCurve(b, typeof(FixtureProps), "amount", Keys(0f, 0f, 0.75f, 3f, 1f, 1f));
+        AnimationUtility.SetObjectReferenceCurve(clip, EditorCurveBinding.PPtrCurve(t, typeof(SpriteRenderer), "m_Sprite"),
+            new[]
+            {
+                new ObjectReferenceKeyframe { time = 0f, value = red },
+                new ObjectReferenceKeyframe { time = 0.5f, value = blue },
+                new ObjectReferenceKeyframe { time = 1f, value = red },
+            });
+    }
+
+    static void Events(AnimationClip clip, Sprite red)
+    {
+        AnimationUtility.SetAnimationEvents(clip, new[]
+        {
+            new AnimationEvent { time = 0.25f, functionName = "Step", stringParameter = "left", floatParameter = 0.5f, intParameter = 3 },
+            new AnimationEvent
+            {
+                time = 0.75f, functionName = "Swap", objectReferenceParameter = red,
+                messageOptions = SendMessageOptions.DontRequireReceiver,
+            },
+        });
+    }
+
+    // (time, value) pairs.
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var c = new AnimationCurve();
+        for (int i = 0; i < tv.Length; i += 2) c.AddKey(tv[i], tv[i + 1]);
+        return c;
+    }
+
+    static AnimationCurve PerFrame(float fps, float seconds, int seed)
+    {
+        int n = Mathf.RoundToInt(fps * seconds);
+        var keys = new Keyframe[n + 1];
+        for (int i = 0; i <= n; i++)
+            keys[i] = new Keyframe(i / fps, Mathf.Sin(i * 0.37f + seed) * (1f + 0.1f * (i % 3)));
+        return new AnimationCurve(keys);
+    }
+
+    static AnimationCurve Flat(float value, float seconds)
+    {
+        return new AnimationCurve(new Keyframe(0f, value), new Keyframe(seconds, value));
+    }
+
+    static Sprite Png(string name, Color32 color)
+    {
+        var path = Dir + "/" + name + ".png";
+        var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+        tex.SetPixels32(Enumerable.Repeat(color, 16).ToArray());
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        AssetDatabase.ImportAsset(path);
+        var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+        imp.textureType = TextureImporterType.Sprite;
+        imp.spriteImportMode = SpriteImportMode.Single;
+        imp.mipmapEnabled = false;
+        imp.textureCompression = TextureImporterCompression.Uncompressed;
+        imp.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    static void Emit(string name, BuildAssetBundleOptions opts)
+    {
+        var dir = Path.Combine("Build", name);
+        Directory.CreateDirectory(dir);
+        var assets = new[] { "legacy", "mecanim", "dense", "dense60", "constant", "mixed" };
+        var builds = new[]
+        {
+            new AssetBundleBuild { assetBundleName = "animation", assetNames = assets.Select(x => Dir + "/" + x + ".anim").ToArray() },
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, opts, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: " + name);
+        Debug.Log("FIXTURE-OK animation " + name + " -> " + dir);
+    }
+}
+```
+
+Build each project once, with `-executeMethod BuildAnimation.Build` (same
+command as section 2). The log must hold two `FIXTURE-OK animation` lines
+(`lz4`, `lz4-notypetree`) and these `FIXTURE-INFO` lines:
+
+```
+FIXTURE-INFO clip legacy legacy=True curves=15 pptr=1 events=2
+FIXTURE-INFO clip mecanim legacy=False curves=18 pptr=1 events=2
+FIXTURE-INFO clip dense legacy=False curves=3 pptr=0 events=0
+FIXTURE-INFO clip dense60 legacy=False curves=4 pptr=0 events=0
+FIXTURE-INFO clip constant legacy=False curves=4 pptr=0 events=0
+FIXTURE-INFO clip mixed legacy=False curves=7 pptr=0 events=0
+```
+
+Copy only these files:
+
+```
+Build/lz4/animation               ->  fixtures/bundles/editor/<editor version>/animation/lz4/animation
+Build/lz4-notypetree/animation    ->  fixtures/bundles/editor/<editor version>/animation/lz4-notypetree/animation
+```
+
+6000.6.4f1's build without type trees is committed too, in
+`modern-goldens.json` with its typed twin, as in section 22.
+
+Then rerun the goldens, `make-modern-goldens.py` first. Both now dump
+`AnimationClip` (`DUMPED_CLASSES` 74), so the section 22 animator bundles'
+entries gain their eight clips' dumps (and `make-modern-goldens.py`'s
+evidence counts them); no other entry changes. `make-modern-goldens.py`
+checks the table above for the 6000.6 bundles (its `evidence`).
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+```
+
+`fixtures/tpk-trees.json` already has AnimationClip's trees (section 22); every
+fixture clip's type tree equals the TPK tree of its version.

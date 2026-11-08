@@ -103,6 +103,8 @@ DUMPED_CLASSES = {
     91: "AnimatorController",
     95: "Animator",
     221: "AnimatorOverrideController",
+    # For its hardcoded reader (#302); the animation and animator fixtures hold them.
+    74: "AnimationClip",
 }
 # Class id -> how to get at the raw bytes an object carries (#41), in the
 # `rawData` golden: its own field when inline, else its StreamedResource.
