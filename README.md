@@ -17,28 +17,41 @@ You do not need Unity, .NET, or a native application installed.
 | Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
 | Load files or folders from disk | Add `unity-asset-reader-node` |
 | Export meshes as OBJ or glTF | Add `unity-asset-reader-mesh` |
-| Convert audio clips to WAV | Add `unity-asset-reader-audio` |
+| Convert audio clips to WAV (or Vorbis clips to Ogg) | Add `unity-asset-reader-audio` |
 | Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
 | Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
 
-The texture package installs `texture2ddecoder-wasm` automatically.
+Every package except `texture2ddecoder-wasm` builds on the core: the feature packages list
+`unity-asset-reader` as a peer dependency, so install it next to them. The texture package
+installs `texture2ddecoder-wasm` automatically.
 
 - **[Core](packages/core/README.md):** unpack bundles, list assets, and read their data.
   Use `load(bytes)` for bytes you already have or `await open(url)` to fetch a file.
+  It does not decode textures to pixels or audio to WAV, does not export meshes, and does
+  not read the disk; it throws `UnsupportedError` on a compression, container or Unity
+  version it does not read.
 - **[Textures](packages/texture/README.md):** convert `Texture2D` and `Sprite` assets to
-  RGBA pixels with `await decodeImage(asset)`.
+  RGBA pixels with `await decodeImage(asset)`. It does not decode mip levels past the first,
+  `Cubemap`, `Texture2DArray` or `Texture3D` assets, or a few formats such as `DXT3` and
+  `ARGBFloat` (see [Texture formats](packages/texture/README.md#texture-formats)).
 - **[Node.js](packages/node/README.md):** load a file or folder with `loadPath()`, including
-  split bundles and resource sidecars.
+  split bundles and resource sidecars. It does not run in browsers, does not stream (each file
+  is read whole), and does not look up dependency bundles itself: pass them, or their folder.
 - **[Meshes](packages/mesh/README.md):** write a `Mesh` as Wavefront OBJ text with
   `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`.
+  It does not export materials, bones, blend shapes or UV channels past the first.
 - **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
   `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound; Vorbis sound to Ogg with
-  `fsb5ToOgg()`, given its setup header (none ships with the package).
+  `fsb5ToOgg()`, given its setup header (none ships with the package). It does not convert
+  MPEG, ATRAC9, XMA, Opus or other console codecs, or clips from before Unity 5.0, which hold
+  their file as it is.
 - **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
-  page textures with `spineSkeletons(env)`.
+  page textures with `spineSkeletons(env)`. It does not parse the skeleton data or atlas text
+  (both come back as stored), or read bundles built without type trees.
 - **[Shaders](packages/shader/README.md):** write a `Shader` as the inspection text AssetStudio
-  exports, with `shaderToText()`: OpenGL and Metal source, SPIR-V disassembly.
+  exports, with `shaderToText()`: OpenGL and Metal source, SPIR-V disassembly. It does not
+  write Direct3D programs, and its text is not a shader Unity can compile.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
