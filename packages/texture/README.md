@@ -191,8 +191,8 @@ transparent, as AssetStudio does. The default, and `decodeImage`, return the who
 A sprite packed into a variant `SpriteAtlas` (`m_IsVariant`, a scaled copy of a master atlas) is
 cut from that variant by default, as its pointer says and UnityPy does. AssetStudio's loader
 moves it to its master atlas when that is loaded; `decodeSprite`'s `{ preferMasterAtlas: true }`
-does the same: walking the loaded atlases in load order, the first one that lists the sprite in
-`m_PackedSprites` and is not a variant cuts it. A variant loaded without its master keeps the
+does the same: walking the loaded atlases in load order, the first one that has render data
+(`m_RenderDataMap`), lists the sprite in `m_PackedSprites` and is not a variant cuts it. A variant loaded without its master keeps the
 variant. `decodeImage` and `imageInfo` always use the sprite's own atlas.
 
 From Unity 6000.6 a `SpriteAtlas` holds its packed sprites itself (each `renderDataMap` entry's

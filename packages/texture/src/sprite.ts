@@ -1,5 +1,6 @@
 // Ported from AssetStudio.Utility/SpriteHelper.cs (MIT, © Perfare / RazTools / Razviar)
 // Ported from AssetStudio/Classes/Mesh.cs (MIT, © Perfare / RazTools / Razviar)
+// Ported from AssetStudio/AssetsManager.cs (MIT, © Perfare / RazTools / Razviar): the post-load SpriteAtlas walk, see masterAtlases
 // Ported from UnityPy/export/SpriteHelper.py (MIT, © K0lb3): the alpha texture merge, see mergeAlpha
 // Derived from SixLabors/ImageSharp.Drawing src/ImageSharp.Drawing/Shapes/Rasterization/*.cs @ v1.0.0-beta15 (Apache-2.0, © Six Labors): the triangle fill at the end of this file, see there
 
@@ -338,7 +339,11 @@ export function locateSprite(
   const atlas = atlasPointer ? env.resolve(atlasPointer, obj) : undefined;
   if (atlasPointer && atlas?.status === "found") {
     const ownAtlas = resolveOrThrow(env, atlasPointer, obj, `${what}'s atlas`, ClassID.SpriteAtlas);
-    const atlasObj = (preferMasterAtlas && masterAtlases(env).get(obj)) || ownAtlas;
+    const atlasObj =
+      (preferMasterAtlas &&
+        ownAtlas.read<SpriteAtlas>().m_IsVariant &&
+        masterAtlases(env).get(obj)) ||
+      ownAtlas;
     const data = atlasObj.read<SpriteAtlas>();
     if (!data.m_PackedSprites) {
       // 6000.6+: the atlas holds its sprites (spriteInstanceData), which packedSprites()
