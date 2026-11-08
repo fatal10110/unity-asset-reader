@@ -61,8 +61,8 @@ except the CSspv port below (BSD 2-Clause).
 
 Fmod5Sharp -- https://github.com/SamboyCoding/Fmod5Sharp (MIT)
   Copyright (c) 2021 Sam Byass
-  The FSB5 parser and the ADPCM decoders of packages/audio are hand-ported
-  from it.
+  The FSB5 parser, the ADPCM decoders and the Vorbis to Ogg rebuild of
+  packages/audio are hand-ported from it.
 
 python-fsb5 -- https://github.com/HearthSim/python-fsb5 (MIT)
   Copyright (c) 2016 Simon Pinfold
