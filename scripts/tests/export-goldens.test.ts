@@ -205,8 +205,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
     all.filter((o) => o.cls === cls && !o.entry!.exportError).length;
   assert.equal(
     exported("Mesh"),
-    29,
-    "main's triangle; detail, compressed, skinned and skinned-compressed of the mesh bundles",
+    36,
+    "main's triangle; detail, compressed, skinned and skinned-compressed of the mesh bundles; " +
+      "the scene bundles' skinned mesh (#305), but 6000.6.4f1's typed one",
   );
   assert.equal(
     exported("AudioClip"),
