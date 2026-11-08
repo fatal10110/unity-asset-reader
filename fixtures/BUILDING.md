@@ -5499,3 +5499,72 @@ only to a clip with a named path on a blend shape curve.
 Every fixture `Animation` has the TPK tree of its version, so the stripped
 builds are read through it; `packages/core/tests/AnimationComponent.test.ts`
 reads each TPK layout from 2019.1 to 6000.6 with two listed clips.
+
+## 27. The scene export oracle: AssetStudio's ModelConverter (#306)
+
+No new bundle: `sceneToGltf()` (unity-asset-reader-animation) is checked on
+the section 24 `scene` bundles against what AssetStudio's FBX export converts
+before it writes FBX. `scripts/make-export-goldens.py` (section 17) runs, for
+every `scene` bundle (`MODEL_ROOTS`), `new ModelConverter(Animator, Options,
+clips)` (`AssetStudio.Utility/ModelConverter.cs:84`, c37af7d) on the Animator
+of the GameObject `scene`, before the bundle's clips are exported (the
+`.anim` export's `Convert()` replaces a clip's curve lists). The options are
+those of the GUI's "Export Animator" without materials: game `Normal` (the
+ACL branches read it), `uvs` `UV0` to `UV7` on, `exportMaterials` false,
+empty `materials` and `texs` (ConvertMaterial returns before it reads them).
+
+The constructor runs twice:
+
+- with no clip, for the frames (`RootFrame`: name, local position, rotation
+  and scale as `SetFrame` converts them), the meshes (each `ImportedMesh`'s
+  path, converted vertex positions and bones, each bone's path and
+  `convert * bindpose * convert` matrix) and the morphs (each channel's
+  frames: full weight, and per vertex its index, morphed position, normal and
+  tangent);
+- then with every AnimationClip of the Animator's file, in file order, for the
+  keyframe tracks (per clip and path the translations, rotations, scalings
+  and blend shape keys, each key's time and value).
+
+The first call cannot be stopped by a clip: an euler binding (m_EulerCurves,
+or binding attribute 4) calls `Fbx.EulerToQuaternion`, the native FBX SDK,
+whose static constructor loads a library the harness does not have. The scene
+clips have no euler binding (a fixture clip for this oracle must not use
+`localEulerAnglesRaw`), and the euler to quaternion conversion of
+`sceneToGltf()` has no oracle: it follows `Quaternion.Euler` and is checked
+on synthetic angles only (`packages/animation/tests/gltf-cubic.test.ts`).
+
+Every float is dumped as its float32 bits, 8 hex digits, into the golden's
+`models`: fixture -> SerializedFile -> the Animator's path id. A matrix is
+written in Unity's order, `e00 e01 e02 e03 e10 ...`, the order
+`Matrix4x4(float[])` reads it in.
+
+What the oracle covers per editor:
+
+- **2019.4.41f2** and **2020.3.30f1**, both builds: frames, both meshes
+  (`Skin` with its five bones and two morph channels, `Prop` unskinned) and
+  the `move` and `smile` tracks (`muscle` has humanoid bindings only, which
+  ModelConverter skips).
+- **6000.3.26f1**, both builds: c37af7d's Renderer reader fails on Unity
+  6000's `MeshRenderer` and `SkinnedMeshRenderer` (`unreadObjects`), so
+  ModelConverter converts no mesh, no bones and no morphs, and names no blend
+  shape track; the dump gets a `verdict`. Its frames and transform tracks are
+  compared; its skin and morphs equal the 2019.4 export's by the cross-editor
+  test, the Mesh being the same.
+- **6000.6.4f1**: c37af7d reads no format-23 type tree, so its typed build has
+  no dump; the build without type trees has the frames only: its renderers
+  and two of its clips are unread (the `verdict` again), and the call with
+  the clips fails (`animationsError`). The cross-editor test covers it.
+
+Regenerate with section 17's command:
+
+```bash
+.venv-oracle/bin/python scripts/make-export-goldens.py --source <external-source> --smolv <external-smolv> --modern-python <modern-oracle>/bin/python --project <external-harness> --dotnet <dotnet-executable>
+```
+
+The tests (`packages/animation/tests/gltf.test.ts`) compare the node TRS with
+the frames, the skin's joint order and inverse bind matrices with the bones,
+the morph targets with the last frame of each channel (glTF has no in-between
+frames: base plus delta in float32 equals the morphed position), and the
+sampler values at the keys with the tracks, float32 bit for bit; a zero's sign
+is not compared (JSON numbers carry none, and the bind poses are C# sums of
+products).
