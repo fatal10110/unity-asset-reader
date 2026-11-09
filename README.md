@@ -58,9 +58,10 @@ installs `texture2ddecoder-wasm` automatically.
 - **[Animation](packages/animation/README.md):** decode an `AnimationClip` into the curves
   AssetStudio's `.anim` export holds, with `clipCurves(env, clip)`: per curve its path,
   attribute and keyframes, and the clip's events. `sceneToGltf(env, root, { clips })` exports a
-  scene (nodes, skinned meshes, blend shapes) with its clips as a glTF 2.0 `.glb`, humanoid clips
-  converted to bone rotations. It does not write `.anim` YAML, and a humanoid clip's root
-  (Hips) position is not written.
+  scene (nodes, skinned meshes, blend shapes) with its clips as a glTF 2.0 `.glb`, a humanoid
+  clip's muscles (fingers aside) and `RootQ` converted to bone rotations. It does not write `.anim` YAML, and
+  of a humanoid clip it does not convert the body position (the Hips keep their own position),
+  the finger muscles or the root motion.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -209,11 +210,10 @@ Each of these throws `UnsupportedError`, naming what it found:
 - Meshes: a submesh of lines or points, a vertex format Unity does not define.
 - Audio: Vorbis without a setup header table from the caller (none ships), and the other FSB5
   codecs that are not PCM, ADPCM or Vorbis (MPEG, ATRAC9, XMA, ...);
-  IMA ADPCM of more than two channels and GCADPCM of more than one; sound that is not an FSB5
+  GCADPCM of more than one channel; sound that is not an FSB5
   bank (`AudioClip`s from before Unity 5.0).
-- Shader text: Direct3D programs (they need Windows' D3DCompiler), shaders that list their
-  variants in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.2 and later, Unity 6), and `Int`
-  properties, on which AssetStudio fails too.
+- Shader text: Direct3D programs (they need Windows' D3DCompiler), and `Int` properties, on which
+  AssetStudio fails too.
 
 Not provided at all: decoding video; exporting models as FBX; mip levels other than the first; the
 `Cubemap`, `Texture2DArray` and `Texture3D` classes; JPEG encoding; writing or

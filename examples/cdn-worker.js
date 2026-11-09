@@ -12,13 +12,13 @@ const LOCAL = new URL(import.meta.url).searchParams.has("local");
 const CDN = "https://cdn.jsdelivr.net/npm";
 // Each package has its own version (#192). These are the published ones
 // (checked live, #150). jsDelivr's `/+esm` build of the texture package fixes
-// its imports to one exact version each: `unity-asset-reader@1.0.0` and
-// `texture2ddecoder-wasm@1.2.3`. CORE_VERSION must be that same version, or
+// its imports to one exact version each: `unity-asset-reader@1.3.0` and
+// `texture2ddecoder-wasm@1.2.6`. CORE_VERSION must be that same version, or
 // the Worker loads two copies of core. DECODER_VERSION is pinned to it too, so
 // the WASM glue comes from the decoder release whose JS the texture package runs.
-const CORE_VERSION = "1.0.0";
-const TEXTURE_VERSION = "1.0.0";
-const DECODER_VERSION = "1.2.3";
+const CORE_VERSION = "1.3.0";
+const TEXTURE_VERSION = "1.3.0";
+const DECODER_VERSION = "1.2.6";
 
 /** Base URL of a package: jsDelivr, or the local stand-in (which ignores versions). */
 const packageUrl = (name, version) => (LOCAL ? `/npm/${name}` : `${CDN}/${name}@${version}`);

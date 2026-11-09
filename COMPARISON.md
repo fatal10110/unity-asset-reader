@@ -2,8 +2,9 @@
 
 Feature and format checklist based on the package documentation collected for the original
 README comparison on **2026-09-29**; the rows for Unity 6000.6, variant atlases, 16-bit formats,
-the Unity version override and external dependencies were checked on **2026-10-16**. This is a
-documentation snapshot, not a compatibility test.
+the Unity version override and external dependencies were checked on **2026-10-16**; the
+animation and skinned-model rows on **2026-11-09** (`unityfs-js` 0.2.9, `node-asset-studio-mod-js`
+0.1.7). This is a documentation snapshot, not a compatibility test.
 
 **✓** = documented support. **✗** = unsupported or not documented in the cited sources.
 A ✗ does not prove that an undocumented feature is absent.
@@ -73,24 +74,39 @@ Unity parsing uses no WASM; its compressed texture decoder does.
 | Encode PNG images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Decode audio to WAV / OGG / MP3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Export skinned models (bones and skin weights) | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Read AnimationClip curves as data | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Export models with their animation clips | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Convert humanoid (muscle) clips to bone rotations | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Export Spine | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Export shader inspection text | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Edit assets and repack bundles | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
-Our library converts audio to WAV only, and only PCM and ADPCM clips (`unity-asset-reader-audio`):
-not Vorbis yet. It exposes raw video and font bytes and does not decode video.
+Our library converts PCM and ADPCM clips to WAV, and Vorbis clips to Ogg when the caller supplies
+the Vorbis setup header table, of which none ships (`unity-asset-reader-audio`); it converts no
+other codec. It exposes raw video and font bytes and does not decode video.
 Our library exports a Mesh as Wavefront OBJ through `unity-asset-reader-mesh`'s `meshToObj()`,
 byte for byte AssetStudio's OBJ for every fixture mesh, and as binary glTF 2.0 (`.glb`) through
 `meshToGltf()`; it writes no FBX.
+Our library's skinned and animated models come from `unity-asset-reader-animation`'s
+`sceneToGltf()`: a GameObject's hierarchy, skinned meshes and blend shapes with its clips, as
+glTF 2.0. Its `clipCurves()` returns a clip's decoded keyframes (streamed, dense and constant),
+paths and events as data; it writes no `.anim` YAML. Humanoid clips become bone rotations, checked
+against the Unity editor; their body position (`RootT`), finger muscles and root motion are not
+converted. Studio JS and Studio CLI export animated models as FBX (Studio JS's `fbxAnimation`,
+the CLI's `--fbx-animation`); Studio JS lists humanoid muscle retargeting as unsupported, and
+AssetStudioMod does not document it. unityfs-js exports a `SkinnedMeshRenderer` as a `.glb`
+skeleton model and names no animation clip.
 Exporting Spine means grouping each spine-unity skeleton's data, atlas text and page textures
 (`unity-asset-reader-spine`), from files built with type trees.
 Our library writes a Shader as AssetStudio's inspection text through `unity-asset-reader-shader`'s
 `shaderToText()`: OpenGL and Metal source and SPIR-V disassembly, byte for byte AssetStudio's
-`.shader` file for the fixture shaders. It refuses Direct3D programs, which need Windows'
-D3DCompiler, and the variant lists of Unity 2021.3.10+ / 2022.2+ / 6000 builds
-(`m_PlayerSubPrograms`), which AssetStudio's converter does not read.
+`.shader` file for the fixture shaders. It also writes the variant lists of Unity 2021.3.10+ /
+2022.2+ / 6000 builds (`m_PlayerSubPrograms`), which AssetStudio's converter does not read, and
+disassembles Unity 2020.3's newer SMOL-V encoding. It refuses Direct3D programs, which need
+Windows' D3DCompiler.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
 `unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row
