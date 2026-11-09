@@ -1,8 +1,13 @@
 # Quick Start Guide
 
-Get up and running with `texture2ddecoder-wasm` in 3 simple steps!
+This guide gets `texture2ddecoder-wasm` running in Node.js, in a browser with no install, or in a
+bundled web app. Pick the section that matches your project.
 
-## 🚀 For Node.js Projects
+- [Node.js](#for-nodejs-projects): install and call a decode function.
+- [Browser from a CDN](#quick-browser-demo-cdn---no-install): no install, no build tools.
+- [Browser with build tools](#for-browser-projects-with-build-tools): copy the WASM files, then initialize.
+
+## For Node.js Projects
 
 ```bash
 # 1. Install
@@ -21,13 +26,13 @@ const decoded = await decode_bc1(textureData, 512, 512);
 console.log("Decoded!", decoded);
 ```
 
-**That's it!** No configuration needed for Node.js. ✅
+That is all. Node.js needs no configuration.
 
 ---
 
-## ⚡ Quick Browser Demo (CDN - No Install!)
+## Quick Browser Demo (CDN - No Install)
 
-Want to try it instantly without any setup? Use jsDelivr CDN:
+To try it with no setup, load the library from the jsDelivr CDN:
 
 ```html
 <!DOCTYPE html>
@@ -38,12 +43,12 @@ Want to try it instantly without any setup? Use jsDelivr CDN:
       import {
         initialize,
         decode_bc1,
-      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/dist/index.mjs";
+      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/dist/index.mjs";
 
       // Initialize with CDN path
       await initialize({
         wasmPath:
-          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
       });
 
       console.log("Ready to decode!");
@@ -53,18 +58,18 @@ Want to try it instantly without any setup? Use jsDelivr CDN:
 </html>
 ```
 
-**See:** [examples/cdn-example.html](examples/cdn-example.html) for a complete working demo!
+For a complete working demo, see [examples/cdn-example.html](examples/cdn-example.html).
 
-**Perfect for:**
+Good for:
 
-- 🎯 Quick prototypes
-- 🎨 Demos and testing
-- 📚 Learning and exploration
-- 🚀 No build tools needed
+- Quick prototypes
+- Demos and testing
+- Learning and exploration
+- Projects with no build tools
 
 ---
 
-## 🌐 For Browser Projects (with Build Tools)
+## For Browser Projects (with Build Tools)
 
 ### Step 1: Install
 
@@ -74,7 +79,7 @@ npm install texture2ddecoder-wasm
 
 ### Step 2: Copy WASM Files
 
-Copy the WASM files to your public directory:
+Copy the WASM files into your public directory:
 
 ```bash
 npx texture2ddecoder-copy-wasm public/wasm
@@ -96,7 +101,7 @@ const decoded = await decode_bc1(textureData, 512, 512);
 
 ---
 
-## 📦 Framework-Specific Quick Start
+## Framework-Specific Quick Start
 
 ### Vite + React
 
@@ -203,7 +208,7 @@ npx texture2ddecoder-copy-wasm static/wasm
 
 ---
 
-## 🎯 Common Patterns
+## Common Patterns
 
 ### Pattern 1: Initialize Once
 
@@ -280,11 +285,11 @@ export const decoderService = TextureDecoderService.getInstance();
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### "Cannot find WASM files"
 
-✅ **Solution:** Make sure WASM files are copied and accessible
+**Solution:** Make sure the WASM files are copied and reachable.
 
 ```bash
 # Check if files exist
@@ -297,7 +302,7 @@ npx texture2ddecoder-copy-wasm public/wasm
 
 ### "MIME type mismatch"
 
-✅ **Solution:** Configure your dev server
+**Solution:** Configure your dev server.
 
 ```javascript
 // vite.config.js
@@ -312,7 +317,7 @@ export default {
 
 ### "Module not found in Node.js"
 
-✅ **Solution:** Just call initialize without parameters
+**Solution:** Call `initialize` without parameters.
 
 ```javascript
 // Node.js - don't specify path
@@ -324,7 +329,7 @@ await initialize({ wasmPath: "/wasm" }); // ✅ Correct
 
 ### "Works in dev but not in production"
 
-✅ **Solution:** Ensure WASM files are included in build
+**Solution:** Make sure the WASM files are part of your build.
 
 ```json
 // package.json
@@ -338,7 +343,7 @@ await initialize({ wasmPath: "/wasm" }); // ✅ Correct
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 - **Detailed configurations:** [BUNDLER_GUIDE.md](BUNDLER_GUIDE.md)
 - **API reference:** [README.md#api-reference](README.md#api-reference)
@@ -347,13 +352,13 @@ await initialize({ wasmPath: "/wasm" }); // ✅ Correct
 
 ---
 
-## 💡 Pro Tips
+## Tips
 
-1. **Initialize early** - Call `initialize()` during app startup, not right before decode
-2. **Cache the module** - Only initialize once per application lifecycle
-3. **Lazy load** - For large apps, dynamically import the decoder only when needed
-4. **Check environment** - Use different paths for dev vs production if needed
-5. **Preload WASM** - Add preload hints for faster loading:
+1. **Initialize early.** Call `initialize()` at app startup, not right before a decode.
+2. **Initialize once.** One call per application lifecycle is enough.
+3. **Lazy load.** In a large app, import the decoder only when it is needed.
+4. **Check the environment.** Use different paths for development and production if needed.
+5. **Preload the WASM.** A preload hint speeds up loading:
    ```html
    <link
      rel="preload"
@@ -365,8 +370,7 @@ await initialize({ wasmPath: "/wasm" }); // ✅ Correct
 
 ---
 
-## 🎉 You're All Set!
+## Done
 
-The decoder is now ready to handle BC1-7, ETC, PVRTC, ASTC, and more texture formats at native speed with WebAssembly!
-
-**Happy decoding! 🚀**
+The decoder now handles BC1-7, ETC, PVRTC, ASTC and the other supported formats. See the
+[README](README.md#supported-formats) for the full list.

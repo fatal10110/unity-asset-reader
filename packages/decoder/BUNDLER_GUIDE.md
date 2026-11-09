@@ -1,8 +1,32 @@
 # Bundler Configuration Guide
 
-This guide provides comprehensive setup instructions for using `texture2ddecoder-wasm` with various JavaScript bundlers and frameworks.
+This guide shows how to use `texture2ddecoder-wasm` with each common bundler and framework. Every
+setup follows the same three steps: install the package, copy its WASM files where your app can
+fetch them, and call `initialize()` with the path. Each section below is a short checklist plus the
+config you need.
 
-## 🆕 Recommended Approach
+## Pick your setup
+
+| You use | Go to |
+| --- | --- |
+| No bundler (plain HTML, CodePen, a demo) | [CDN Usage](#cdn-usage-no-bundler) |
+| Node.js | [General Principles](#general-principles) (no path needed) |
+| Vite (plain, React or Vue) | [Vite](#vite) |
+| Webpack 5 | [Webpack 5](#webpack-5) |
+| Next.js (App Router or Pages Router) | [Next.js](#nextjs) |
+| Create React App | [Create React App](#create-react-app-cra) |
+| Rollup | [Rollup](#rollup) |
+| Parcel | [Parcel](#parcel) |
+| esbuild | [esbuild](#esbuild) |
+| SvelteKit | [SvelteKit](#sveltekit) |
+| Angular | [Angular](#angular) |
+| Astro | [Astro](#astro) |
+| Nuxt 3 | [Nuxt 3](#nuxt-3) |
+| Remix | [Remix](#remix) |
+| Something is not working | [Troubleshooting](#troubleshooting) |
+| Making it faster | [Performance Tips](#performance-tips) |
+
+## The recommended approach
 
 **Starting with v1.2.0**, the library uses a simple URL-based API inspired by ffmpeg.wasm:
 
@@ -15,37 +39,25 @@ import { initialize } from "texture2ddecoder-wasm";
 await initialize({ wasmPath: "/wasm" });
 ```
 
-**Benefits:**
+Why it works well:
 
-- ✅ Simple, clean API - no module factory imports needed
-- ✅ Works seamlessly with modern frameworks (React, Vue, Svelte)
-- ✅ SSR-compatible (Next.js, Nuxt, SvelteKit)
-- ✅ CDN-friendly for quick prototyping
-- ✅ Same pattern as popular libraries like ffmpeg.wasm
-
-## Table of Contents
-
-- [CDN Usage (No Bundler)](#cdn-usage-no-bundler)
-- [General Principles](#general-principles)
-- [Vite](#vite)
-- [Webpack 5](#webpack-5)
-- [Next.js](#nextjs)
-- [Create React App](#create-react-app-cra)
-- [Rollup](#rollup)
-- [Parcel](#parcel)
-- [esbuild](#esbuild)
-- [SvelteKit](#sveltekit)
-- [Angular](#angular)
-- [Astro](#astro)
-- [Nuxt 3](#nuxt-3)
-- [Remix](#remix)
-- [Troubleshooting](#troubleshooting)
+- The API is simple and clean: no module factory imports are needed.
+- It works with modern frameworks (React, Vue, Svelte).
+- It is SSR-compatible (Next.js, Nuxt, SvelteKit).
+- It is CDN-friendly for quick prototyping.
+- It is the same pattern as popular libraries like ffmpeg.wasm.
 
 ---
 
 ## CDN Usage (No Bundler)
 
-The fastest way to get started - no installation or build tools required!
+The fastest way to get started: no installation or build tools required.
+
+Checklist:
+
+1. Import `initialize` and the decode functions from the jsDelivr URL.
+2. Pass the CDN `wasm` folder as `wasmPath`.
+3. Serve the page over HTTP (see the [CDN example README](examples/cdn-example-README.md)).
 
 ### Basic Usage
 
@@ -61,12 +73,12 @@ The fastest way to get started - no installation or build tools required!
       import {
         initialize,
         decode_bc1,
-      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/dist/index.mjs";
+      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/dist/index.mjs";
 
       // Point to WASM files on CDN
       await initialize({
         wasmPath:
-          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
       });
 
       // Ready to decode!
@@ -81,8 +93,8 @@ The fastest way to get started - no installation or build tools required!
 **Specific version (recommended for production):**
 
 ```
-https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/dist/index.mjs
-https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm/
+https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/dist/index.mjs
+https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm/
 ```
 
 **Latest version (good for development):**
@@ -101,10 +113,10 @@ https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2/dist/index.mjs  // Latest
 
 ### Benefits
 
-✅ **Zero setup** - No npm, no build tools, just HTML  
-✅ **Global CDN** - Fast loading from jsDelivr's worldwide network  
-✅ **Cached** - Shared cache across websites using the same version  
-✅ **Always available** - No need to host WASM files yourself
+- **Zero setup:** no npm, no build tools, just HTML.
+- **Global CDN:** fast loading from jsDelivr's worldwide network.
+- **Cached:** the cache is shared across websites that use the same version.
+- **Always available:** you do not host the WASM files yourself.
 
 ### Use Cases
 
@@ -116,11 +128,11 @@ https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2/dist/index.mjs  // Latest
 
 ### Complete Example
 
-See [examples/cdn-example.html](../examples/cdn-example.html) for a full working demo with UI.
+See [examples/cdn-example.html](examples/cdn-example.html) for a full working demo with UI.
 
 ### Alternative CDNs
 
-You can also use other npm-based CDNs:
+You can also use other npm-based CDNs.
 
 **unpkg:**
 
@@ -128,21 +140,21 @@ You can also use other npm-based CDNs:
 import {
   initialize,
   decode_bc1,
-} from "https://unpkg.com/texture2ddecoder-wasm@1.2.1/dist/index.mjs";
+} from "https://unpkg.com/texture2ddecoder-wasm@1.2.6/dist/index.mjs";
 await initialize({
-  wasmPath: "https://unpkg.com/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://unpkg.com/texture2ddecoder-wasm@1.2.6/wasm",
 });
 ```
 
-**esm.sh:**
+**esm.sh** (the WASM files still come from jsDelivr in this example):
 
 ```javascript
 import {
   initialize,
   decode_bc1,
-} from "https://esm.sh/texture2ddecoder-wasm@1.2.1";
+} from "https://esm.sh/texture2ddecoder-wasm@1.2.6";
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 ```
 
@@ -150,7 +162,7 @@ await initialize({
 
 ## General Principles
 
-Regardless of which bundler you use, there are a few universal principles:
+These four rules hold for every bundler. The sections below only show how to apply them.
 
 ### 1. WASM Files Must Be Served Statically
 
@@ -159,6 +171,9 @@ WebAssembly modules cannot be bundled into JavaScript files. They must be:
 - Copied to your public/static directory
 - Served as separate files via HTTP(S)
 - Accessible at runtime
+
+The package ships a helper that does the copy: `npx texture2ddecoder-copy-wasm public/wasm`. Most
+sections below use a plain `cp` or a bundler plugin instead; the result is the same.
 
 ### 2. Initialize with the Correct Path
 
@@ -172,11 +187,11 @@ await initialize();
 
 ### 3. Environment Detection
 
-The library automatically detects whether it's running in:
+The library automatically detects whether it is running in:
 
-- **Browser** - Loads WASM via fetch/script tag
-- **Node.js** - Loads WASM from filesystem
-- **Web Worker** - Loads WASM with Worker-compatible methods
+- **Browser:** loads WASM via fetch/script tag
+- **Node.js:** loads WASM from the filesystem
+- **Web Worker:** loads WASM with Worker-compatible methods
 
 ### 4. Keep Node.js Built-ins External
 
@@ -189,6 +204,9 @@ external: ["path", "fs", "crypto", "module"];
 ---
 
 ## Vite
+
+Checklist: install, copy the WASM files into `public/wasm`, then call
+`initialize({ wasmPath: "/wasm" })`.
 
 ### Setup
 
@@ -292,6 +310,9 @@ onMounted(async () => {
 
 ## Webpack 5
 
+Checklist: enable `asyncWebAssembly`, treat `.wasm` as an asset, copy the package's `wasm` folder
+into `dist/wasm`, then call `initialize({ wasmPath: "/wasm" })`.
+
 ### Full Configuration
 
 ```javascript
@@ -392,6 +413,9 @@ module.exports = {
 ---
 
 ## Next.js
+
+Checklist: configure webpack in `next.config.js`, copy the WASM files into `public/wasm`, and
+initialize only in the browser (inside `useEffect`, or a component loaded with `ssr: false`).
 
 ### App Router (Next.js 13+)
 
@@ -514,6 +538,9 @@ export default function TextureDecoder() {
 
 ## Create React App (CRA)
 
+Checklist: CRA hides its webpack config, so either use `react-app-rewired` to copy the files in the
+build, or copy them into `public/` yourself.
+
 ### Using react-app-rewired
 
 1. **Install dependencies:**
@@ -595,6 +622,9 @@ Add a postinstall script:
 
 ## Rollup
 
+Checklist: keep Node.js built-ins external and copy the `wasm` folder into `dist/wasm` with
+`rollup-plugin-copy`.
+
 ```javascript
 // rollup.config.js
 import typescript from "@rollup/plugin-typescript";
@@ -649,6 +679,9 @@ export default {
 
 ## Parcel
 
+Checklist: install `parcel-reporter-static-files-copy`, add it to `.parcelrc`, and list the WASM
+folder under `staticFiles` in `package.json`.
+
 ```bash
 # Install dependencies
 npm install texture2ddecoder-wasm
@@ -680,6 +713,9 @@ npm install parcel-reporter-static-files-copy --save-dev
 ---
 
 ## esbuild
+
+Checklist: keep Node.js built-ins external and copy the `wasm` folder into `dist/wasm` in an
+`onEnd` hook.
 
 ```javascript
 // build.js
@@ -735,6 +771,9 @@ esbuild
 
 ## SvelteKit
 
+Checklist: copy the WASM files into `static/`, exclude the package from Vite's dependency
+optimization, and initialize in `onMount`.
+
 ```bash
 # Copy WASM to static
 cp -r node_modules/texture2ddecoder-wasm/wasm static/
@@ -770,14 +809,14 @@ export default config;
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { initialize, decode_bc1, type Uint8Array } from 'texture2ddecoder-wasm';
+  import { initialize, decode_bc1 } from 'texture2ddecoder-wasm';
 
   let isReady = false;
   let error: string | null = null;
 
   onMount(async () => {
     try {
-      await initialize('/wasm');
+      await initialize({ wasmPath: "/wasm" });
       isReady = true;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Unknown error';
@@ -797,6 +836,9 @@ export default config;
 ---
 
 ## Angular
+
+Checklist: copy the WASM files into `src/assets/wasm`, add the `wasm` folder to the `assets` of
+both `build` and `test` in `angular.json`, and initialize once from a service.
 
 ```bash
 # Copy WASM to assets
@@ -856,7 +898,7 @@ export class TextureDecoderService {
 
   async ensureInitialized(): Promise<void> {
     if (!this.initialized) {
-      await initialize("/wasm");
+      await initialize({ wasmPath: "/wasm" });
       this.initialized = true;
     }
   }
@@ -895,6 +937,8 @@ export class TextureViewerComponent implements OnInit {
 
 ## Astro
 
+Checklist: copy the WASM files into `public/` and initialize in a client-side `<script>`.
+
 ```bash
 # Copy WASM to public
 cp -r node_modules/texture2ddecoder-wasm/wasm public/
@@ -920,7 +964,7 @@ cp -r node_modules/texture2ddecoder-wasm/wasm public/
       const statusEl = document.getElementById('status');
 
       try {
-        await initialize('/wasm');
+        await initialize({ wasmPath: "/wasm" });
         statusEl.textContent = 'Texture decoder ready!';
       } catch (error) {
         statusEl.textContent = `Error: ${error.message}`;
@@ -933,6 +977,9 @@ cp -r node_modules/texture2ddecoder-wasm/wasm public/
 ---
 
 ## Nuxt 3
+
+Checklist: copy the WASM files into `public/`, exclude the package from Vite's dependency
+optimization, and import it dynamically in `onMounted` so it never runs on the server.
 
 ```bash
 # Copy WASM to public
@@ -965,7 +1012,7 @@ const error = ref<string | null>(null);
 onMounted(async () => {
   try {
     const { initialize } = await import("texture2ddecoder-wasm");
-    await initialize("/wasm");
+    await initialize({ wasmPath: "/wasm" });
     isReady.value = true;
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Unknown error";
@@ -986,6 +1033,9 @@ onMounted(async () => {
 
 ## Remix
 
+Checklist: copy the WASM files into `public/` and import the package dynamically inside
+`useEffect` to avoid SSR problems.
+
 ```bash
 # Copy WASM to public
 cp -r node_modules/texture2ddecoder-wasm/wasm public/
@@ -1001,7 +1051,7 @@ export default function Index() {
   useEffect(() => {
     // Dynamic import to avoid SSR issues
     import("texture2ddecoder-wasm").then(async ({ initialize }) => {
-      await initialize("/wasm");
+      await initialize({ wasmPath: "/wasm" });
       setIsReady(true);
     });
   }, []);
@@ -1015,6 +1065,9 @@ export default function Index() {
 ---
 
 ## Troubleshooting
+
+Find your error message below. Most problems come down to the WASM files not being served from
+the path you gave `initialize()`.
 
 ### Issue: "Cannot find module 'texture2ddecoder-wasm'"
 
@@ -1185,7 +1238,7 @@ ls build/wasm/
 
 ### 1. Lazy Loading
 
-Only load WASM when actually needed:
+Only load WASM when you need it:
 
 ```typescript
 // Don't initialize on app start
@@ -1209,7 +1262,7 @@ let initialized = false;
 
 export async function ensureDecoder() {
   if (!initialized) {
-    await initialize("/wasm");
+    await initialize({ wasmPath: "/wasm" });
     initialized = true;
   }
 }
@@ -1251,4 +1304,5 @@ app.use(
 
 ## Contributing
 
-Found an issue with these configurations or want to add a new bundler? Please [open an issue](https://github.com/fatal10110/unity-asset-reader/issues) or submit a pull request!
+Found a problem with these configurations, or want to add a new bundler? [Open an
+issue](https://github.com/fatal10110/unity-asset-reader/issues) or submit a pull request.

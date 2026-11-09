@@ -1,11 +1,64 @@
 # Releasing
 
-Maintainer procedure for publishing to npm. The versioning policy is at the top of
-[CHANGELOG.md](CHANGELOG.md).
+This is the maintainer procedure for publishing the packages to npm. The versioning policy is at
+the top of [CHANGELOG.md](CHANGELOG.md).
 
-Every package has its own version, and **a release is a version bump**: change the `version` in
-the package's `package.json` and its `CHANGELOG.md` section, open a PR (its dry run shows what
-will publish), merge, and the [Release workflow](.github/workflows/release.yml) publishes it.
+Every package has its own version, and **a release is a version bump**. In short:
+
+- Change the `version` in the package's `package.json` and its `CHANGELOG.md` section.
+- Open a PR. Its dry run shows what will publish.
+- Merge. The [Release workflow](.github/workflows/release.yml) publishes the package.
+
+Releases are published by the workflow, never from a laptop.
+
+<a id="steps"></a>
+
+## Release in 6 steps
+
+1. **Bump**, in a PR to `main`, for each package that ships:
+   ```bash
+   npm version <version> --no-git-tag-version -w <name>
+   npm install --package-lock-only
+   ```
+   - `CHANGELOG.md`: in the package's section, `### <version> - Unreleased` becomes
+     `### <version> - <YYYY-MM-DD>`. `scripts/tests/release.test.mjs` fails when the section has
+     no dated heading for the version on disk.
+   - When a package needs a new version of another package of this repo, raise its range too.
+     For example: the texture package's `texture2ddecoder-wasm` range; a feature package's peer
+     range on `unity-asset-reader` after a new core major; or its `^<major>.<minor>.0` minimum
+     when it needs something a newer core minor adds.
+   - Bump both packages in the same PR; the workflow publishes the dependency first. Or release
+     the dependency in an earlier PR. The plan refuses a package whose peer minimum is neither
+     on npm nor in the same run.
+   - The docs for the release are in the PR or already on `main` (package READMEs, QUICK_START,
+     bundler guide). A tarball without a README shows an empty page on npmjs.com.
+2. **Check the PR's Release run.** A PR that changes a `packages/*/package.json` runs the
+   workflow as a dry run:
+   - Its notice lists exactly the `name@version`s the merge will publish.
+   - Then it runs the whole gate and `npm publish --dry-run` for each.
+   - It fails when a package needs a range that neither npm nor an earlier package of the same
+     release satisfies.
+3. **Merge** once CI and the dry run are green. The push to `main` runs the workflow for real: it
+   publishes the packages whose version changed in that push, then tags each one
+   `<name>@<version>`.
+4. **Watch the Release run** (Actions → Release). If it fails, see
+   [When a release fails](#when-a-release-fails).
+5. **GitHub release**, optional, from the tag, with the version's `CHANGELOG.md` section as notes:
+   ```bash
+   gh release create <name>@<version> --title "<name> <version>" --notes-file <file with that section>
+   ```
+6. **After the publish.**
+   - Update `examples/cdn-worker.js`. `TEXTURE_VERSION` is the published texture package.
+     `CORE_VERSION` and `DECODER_VERSION` are the exact versions its jsDelivr `/+esm` build
+     imports (`curl https://cdn.jsdelivr.net/npm/unity-asset-reader-texture@<v>/+esm`).
+   - Check the live jsDelivr path: `CDN_LIVE=1 npm run test:smoke` (#150).
+   - The next change to a package opens a new `### <next version> - Unreleased` heading in its
+     section of `CHANGELOG.md`, without touching the `version`: that would publish it.
+
+Since merging a version change publishes, a `version` changes only in a release PR, never in a
+feature PR.
+
+## Packages and publish order
 
 | Package | Directory | Publish order |
 |---|---|---|
@@ -19,59 +72,28 @@ will publish), merge, and the [Release workflow](.github/workflows/release.yml) 
 | `unity-asset-reader-shader` | `packages/shader` | 8 |
 | `unity-asset-reader-animation` | `packages/animation` | 9 |
 
-A new package is added to `PACKAGE_DIRS` in `scripts/check-release.mjs` (after what it depends
-on) and to this table, at version `0.0.0` (`UNRELEASED`), which the workflow never publishes:
-merging it publishes nothing. Its `CHANGELOG.md` section starts with a `### 1.0.0 - Unreleased`
-heading, which `scripts/tests/release.test.mjs` requires. Its first release is a bump like any
-other, to `1.0.0`; npm has no package of that name yet, so it cannot have a trusted publisher and
-needs a token once, as in [Bootstrap](#bootstrap-the-first-publish-with-a-token).
+### Adding a new package
 
-Releases are published by the workflow, never from a laptop. It publishes with
-[trusted publishing](https://docs.npmjs.com/trusted-publishers): npm authenticates the job by its
-GitHub OIDC token, so the repo holds no npm token, and npm attaches a
-[provenance statement](https://docs.npmjs.com/generating-provenance-statements) to every package
-by itself. The only exception is the first publish, authenticated by a token, below.
+1. Add it to `PACKAGE_DIRS` in `scripts/check-release.mjs`, after what it depends on, and to the
+   table above.
+2. Give it version `0.0.0` (`UNRELEASED`). The workflow never publishes that version, so merging
+   the new package publishes nothing.
+3. Start its `CHANGELOG.md` section with a `### 1.0.0 - Unreleased` heading, which
+   `scripts/tests/release.test.mjs` requires.
 
-## Steps
+Its first release is a bump like any other, to `1.0.0`. npm has no package of that name yet, so
+it cannot have a trusted publisher and needs a token once, as in
+[Bootstrap](#bootstrap-the-first-publish-with-a-token).
 
-1. **Bump**, in a PR to `main`, for each package that ships:
-   ```bash
-   npm version <version> --no-git-tag-version -w <name>
-   npm install --package-lock-only
-   ```
-   - `CHANGELOG.md`: in the package's section, `### <version> - Unreleased` becomes
-     `### <version> - <YYYY-MM-DD>`. `scripts/tests/release.test.mjs` fails when the section has
-     no dated heading for the version on disk.
-   - When a package needs a new version of another package of this repo, raise its range too
-     (the texture package's `texture2ddecoder-wasm` range, a feature package's peer range on
-     `unity-asset-reader` after a new core major, or its `^<major>.<minor>.0` minimum when it
-     needs something a newer core minor adds). Bump both in the same PR; the workflow publishes
-     the dependency first. Or release the dependency in an earlier PR. The plan refuses a package
-     whose peer minimum is neither on npm nor in the same run.
-   - The docs for the release are in the PR or already on `main` (package READMEs, QUICK_START,
-     bundler guide). A tarball without a README shows an empty page on npmjs.com.
-2. **Check the PR's Release run.** A PR that changes a `packages/*/package.json` runs the
-   workflow as a dry run: its notice lists exactly the `name@version`s the merge will publish,
-   then it runs the whole gate and `npm publish --dry-run` for each. It fails when a package needs
-   a range that neither npm nor an earlier package of the same release satisfies.
-3. **Merge** once CI and the dry run are green. The push to `main` runs the workflow for real: it
-   publishes the packages whose version changed in that push, then tags each one
-   `<name>@<version>`.
-4. **Watch the Release run** (Actions → Release). If it fails, see [When a release
-   fails](#when-a-release-fails).
-5. **GitHub release**, optional, from the tag, with the version's `CHANGELOG.md` section as notes:
-   ```bash
-   gh release create <name>@<version> --title "<name> <version>" --notes-file <file with that section>
-   ```
-6. **After the publish.** `examples/cdn-worker.js`: `TEXTURE_VERSION` is the published texture
-   package, and `CORE_VERSION` and `DECODER_VERSION` are the exact versions its jsDelivr `/+esm`
-   build imports (`curl https://cdn.jsdelivr.net/npm/unity-asset-reader-texture@<v>/+esm`).
-   Then check the live jsDelivr path: `CDN_LIVE=1 npm run test:smoke` (#150). The next change to a package opens a new
-   `### <next version> - Unreleased` heading in its section of `CHANGELOG.md`, without touching
-   the `version`: that would publish it.
+## How the workflow authenticates
 
-Since merging a version change publishes, a `version` changes only in a release PR, never in a
-feature PR.
+The workflow publishes with [trusted publishing](https://docs.npmjs.com/trusted-publishers):
+
+- npm authenticates the job by its GitHub OIDC token, so the repo holds no npm token.
+- npm attaches a [provenance statement](https://docs.npmjs.com/generating-provenance-statements)
+  to every package by itself.
+- The only exception is the first publish, authenticated by a token
+  ([Bootstrap](#bootstrap-the-first-publish-with-a-token)).
 
 ## What the workflow does
 
@@ -86,35 +108,48 @@ feature PR.
 A change to anything else, docs included, does not run it. In every case a `name@version` that is
 already on npm is dropped, so a run with nothing left ends green with a notice.
 
+A run has four stages:
+
 1. **Plan** (`scripts/check-release.mjs`), before anything is built: the packages to release, in
-   publish order. It fails when one of them has a range on another package of this repo
-   (`dependencies`, `peerDependencies`) that no version on npm satisfies and no package published
-   earlier in the same run satisfies either, naming the package, the range and what npm has.
-   Nothing is published then.
-2. **Gate:** `npm ci`, `npm run build:wasm` (Docker, the pinned emsdk of #57; the decoder tarball
-   ships `wasm/`), then the root `npm run verify` split into steps with `REQUIRE_WASM=1` (nothing
-   may skip): the decoder's build and tests, one build-and-test step per reader package, the
-   `scripts/tests`, `check:browser` and the no-C# guard. The submodule is checked out.
+   publish order.
+   - It fails when one of them has a range on another package of this repo (`dependencies`,
+     `peerDependencies`) that no version on npm satisfies and no package published earlier in
+     the same run satisfies either.
+   - The error names the package, the range and what npm has. Nothing is published then.
+2. **Gate:** builds and tests everything, with the submodule checked out.
+   - `npm ci`, then `npm run build:wasm` (Docker, the pinned emsdk of #57; the decoder tarball
+     ships `wasm/`).
+   - Then the root `npm run verify`, split into steps, with `REQUIRE_WASM=1` (nothing may skip):
+     the decoder's build and tests, one build-and-test step per reader package, the
+     `scripts/tests`, `check:browser` and the no-C# guard.
 3. **Publish** each package, in order, with `npm publish -w <name> --access public
-   --ignore-scripts` on Node 22 and `npm@^11.5.1` (trusted publishing needs npm CLI 11.5.1 or
-   later and Node 22.14.0 or later, [npm docs](https://docs.npmjs.com/trusted-publishers), checked
-   2026-09-28). `--ignore-scripts` skips `prepublishOnly`, which would rerun the whole gate once
-   per package: the tarballs are the `dist/` and `wasm/` the gate built and tested. A
-   `name@version` already on npm is skipped.
-4. **Tag** each package that got published, also when a later one failed: an annotated tag
-   `<name>@<version>` (for example `texture2ddecoder-wasm@1.2.3`) on the released commit, pushed
-   by a separate `tag` job, the only one with `contents: write`. An existing tag is skipped. Tags
-   are records only; nothing runs on them.
+   --ignore-scripts` on Node 22 and `npm@^11.5.1`.
+   - Trusted publishing needs npm CLI 11.5.1 or later and Node 22.14.0 or later
+     ([npm docs](https://docs.npmjs.com/trusted-publishers), checked 2026-09-28).
+   - `--ignore-scripts` skips `prepublishOnly`, which would rerun the whole gate once per
+     package. The tarballs are the `dist/` and `wasm/` the gate built and tested.
+   - A `name@version` already on npm is skipped.
+4. **Tag** each package that got published, also when a later one failed.
+   - The tag is an annotated tag `<name>@<version>` (for example `texture2ddecoder-wasm@1.2.3`)
+     on the released commit.
+   - A separate `tag` job pushes it; it is the only job with `contents: write`.
+   - An existing tag is skipped. Tags are records only; nothing runs on them.
 
 The plan and the gate are one composite action (`.github/actions/release-gate`), used by both the
-dry-run job and the publish job, so a PR's dry run plans and gates exactly like the push that
+dry-run job and the publish job. So a PR's dry run plans and gates exactly like the push that
 publishes it. Runs of the same ref queue (`concurrency.queue: max`); none is cancelled or dropped.
+
+### Why a branch cannot publish
 
 npm's trusted publisher checks the repository, the workflow file name and the environment, not
 the ref. The `npm` environment admits only the `main` branch (see
-[One-time setup](#github-environment-npm)), so a run on any other branch, including one that edits
-its own copy of `release.yml`, either names no environment, which npm refuses, or names `npm`,
-which GitHub does not start there.
+[One-time setup](#github-environment-npm)). So a run on any other branch, including one that
+edits its own copy of `release.yml`, fails one of two ways:
+
+- it names no environment, which npm refuses; or
+- it names `npm`, which GitHub does not start there.
+
+### Old decoder tags
 
 The decoder's releases before 1.2.3 were tagged `v1.0.1` ... `v1.2.2`. Those tags stay as they
 are; the `<name>@<version>` tags never collide with them.
@@ -137,9 +172,9 @@ are; the `<name>@<version>` tags never collide with them.
 
 ### GitHub environment `npm`
 
-Settings → Environments → *New environment* `npm` (or edit the existing one), then under
-*Deployment branches and tags* choose *Selected branches and tags* and have exactly one rule: type
-**branch**, pattern `main`. No tag rules.
+1. Settings → Environments → *New environment* `npm` (or edit the existing one).
+2. Under *Deployment branches and tags*, choose *Selected branches and tags*.
+3. Have exactly one rule: type **branch**, pattern `main`. No tag rules.
 
 GitHub creates the `npm` environment by itself the first time a job names it, but then with no
 branch rule, so any branch could deploy to it. Create it, or add the `main` rule to it, before the
@@ -147,21 +182,28 @@ first run of the workflow.
 
 ### Protect `main`
 
-A push to `main` that changes a version publishes, so only reviewed changes may reach it: Settings
-→ Rules → Rulesets → *New branch ruleset* targeting the default branch, with *Require a pull
-request before merging*, *Require status checks to pass* (the CI checks) and *Block force pushes*,
-bypassed by no one (or only by maintainers).
+A push to `main` that changes a version publishes, so only reviewed changes may reach it.
+Settings → Rules → Rulesets → *New branch ruleset* targeting the default branch, with:
+
+- *Require a pull request before merging*
+- *Require status checks to pass* (the CI checks)
+- *Block force pushes*
+- bypassed by no one (or only by maintainers)
 
 If a tag ruleset restricts creating tags, add the *GitHub Actions* app to its bypass list, or the
 tag job cannot push the release tags.
 
 ### Trusted publisher, per package
 
-npm links a trusted publisher to a package that **already exists** on the registry: the setting
-lives in the package's own settings page (npmjs.com → the package → Settings → Trusted
-publishing), and the `npm trust` command (npm 11.15.0 or later) requires that "the package you're
-configuring must already exist on the npm registry"
-([npm trust](https://docs.npmjs.com/cli/v11/commands/npm-trust/), checked 2026-09-27).
+npm links a trusted publisher only to a package that **already exists** on the registry:
+
+- The setting lives in the package's own settings page (npmjs.com → the package → Settings →
+  Trusted publishing).
+- The `npm trust` command (npm 11.15.0 or later) requires that "the package you're configuring
+  must already exist on the npm registry"
+  ([npm trust](https://docs.npmjs.com/cli/v11/commands/npm-trust/), checked 2026-09-27).
+
+For the first release this meant:
 
 - `unity-asset-reader`, `unity-asset-reader-texture` and `unity-asset-reader-node` are new names,
   so they can only be linked after the bootstrap publish below.
@@ -186,13 +228,17 @@ npm trust github <name> --file release.yml --repo fatal10110/unity-asset-reader 
 ```
 
 npm does not validate the entry when it is saved; a typo shows up as `ENEEDAUTH` at publish time.
+
 Then, per package, Settings → Publishing access → *Require two-factor authentication and disallow
-tokens*: trusted publishing keeps working, and no leaked token can publish.
+tokens*. Trusted publishing keeps working, and no leaked token can publish.
 
 ### Bootstrap: the first publish, with a token
 
+This section and the next were written before the first release (2026-09-28). A package that is
+not on npm yet still needs a token for its first publish, as described here.
+
 None of the three reader names is on npm yet, so none can have a trusted publisher yet, and the
-first publish needs a token. The ways to do it, least bad first:
+first publish needs a token. The options, least bad first:
 
 | Option | Cost |
 |---|---|
@@ -204,18 +250,26 @@ Do the first. See the next section for the order.
 
 ## The first release: decoder 1.2.3, then readers 1.0.0
 
-The versions are on `main` already (`texture2ddecoder-wasm` 1.2.3, the three readers 1.0.0), so no
-push will release them: the first release is a manual run. It publishes all four in one run, in
-order: `texture2ddecoder-wasm@1.2.3` first (it carries the BC3 fix #137 and the Worker fix #149,
-which the texture package's `^1.2.3` range and goldens rely on), then the readers.
+The versions are on `main` already (`texture2ddecoder-wasm` 1.2.3, the three readers 1.0.0), so
+no push will release them: the first release is a manual run. It publishes all four in one run,
+in order:
 
-Before it: set up the `npm` environment with its `main` branch rule and protect `main` (above).
-If the environment does not exist yet, the first run creates it, without the rule. The repository
-secret `NPM_TOKEN` is added already. It must hold a granular access token that can publish all
-four names: *Read and write*, *All packages* (three names are new), *Bypass 2FA* ticked (a CI job
-cannot answer a 2FA prompt). The publish step writes it to the job's `~/.npmrc` as a reference to
-the environment variable, never the value, only when the secret is set, and warns. The `dry-run`
-job never reads it.
+1. `texture2ddecoder-wasm@1.2.3` first. It carries the BC3 fix #137 and the Worker fix #149,
+   which the texture package's `^1.2.3` range and goldens rely on.
+2. Then the readers.
+
+Before it:
+
+- Set up the `npm` environment with its `main` branch rule and protect `main` (above). If the
+  environment does not exist yet, the first run creates it, without the rule.
+- The repository secret `NPM_TOKEN` is added already. It must hold a granular access token that
+  can publish all four names: *Read and write*, *All packages* (three names are new), *Bypass
+  2FA* ticked (a CI job cannot answer a 2FA prompt).
+- The publish step writes the token to the job's `~/.npmrc` as a reference to the environment
+  variable, never the value, only when the secret is set, and warns. The `dry-run` job never
+  reads it.
+
+The release:
 
 1. **`NPM_TOKEN` repository secret** (already added). Optionally, a dry run first: Actions →
    Release → *Run workflow* on `main`, `dry_run` ticked. Its notice must list
@@ -235,13 +289,14 @@ whether or not the secret is still set, because npm tries the OIDC token before 
 
 ## After the repo rename
 
-The repo is now `fatal10110/unity-asset-reader` (plan D8, #199). Before the next release:
+The repo is now `fatal10110/unity-asset-reader` (plan D8, #199). Before the next release, update:
 
-- `repository.url` in every `package.json`. GitHub redirects the old URL, but npm checks
-  provenance against `repository.url`, which has to be the repository the job runs in. Keep each
-  package's `repository.directory`. Changing it is not a version change, so it publishes nothing.
-  The updated metadata reaches npm with each package's next release; already-published versions
-  keep the old URL.
-- Each package's trusted publisher. It names the repository, so it has to name the new one. npm's
-  docs say an existing connection cannot be changed, only deleted and added again
+- **`repository.url` in every `package.json`.** GitHub redirects the old URL, but npm checks
+  provenance against `repository.url`, which has to be the repository the job runs in.
+  - Keep each package's `repository.directory`.
+  - Changing it is not a version change, so it publishes nothing.
+  - The updated metadata reaches npm with each package's next release; already-published
+    versions keep the old URL.
+- **Each package's trusted publisher.** It names the repository, so it has to name the new one.
+  npm's docs say an existing connection cannot be changed, only deleted and added again
   ([npm docs](https://docs.npmjs.com/trusted-publishers)); do that per package.

@@ -1,13 +1,17 @@
 # unity-asset-reader
 
-A browser-first reader for Unity AssetBundles and SerializedFiles. It unpacks containers
-(UnityFS, UnityWeb, UnityRaw, `UnityWebData`, gzip) and reads the objects inside them, and it
-runs the same way in browsers, Web Workers and Node.js.
+Read Unity AssetBundles and SerializedFiles in JavaScript. A SerializedFile is the file that
+holds Unity's objects: a node inside a bundle, or a player build's `.assets` file. Give this
+package the bytes, and it unpacks the container, lists every object inside and reads each one
+into plain JavaScript data.
 
-- **Isomorphic.** It has no `node:*` import and no DOM. Input is a `Uint8Array`, or anything
-  `open()` can fetch or read (a URL, a `Response`, a `Blob`).
-- **Synchronous parsing.** `load()` returns the unpacked files straight away. Only `open()`, which
-  fetches or reads the bytes first, is `async`; nothing in the parse path is (see
+It is browser-first and runs the same way in browsers, Web Workers and Node.js. It opens these
+containers: UnityFS, UnityWeb, UnityRaw, `UnityWebData` and gzip.
+
+- **Isomorphic: runs anywhere.** It has no `node:*` import and no DOM. Input is a `Uint8Array`,
+  or anything `open()` can fetch or read (a URL, a `Response`, a `Blob`).
+- **Synchronous parsing.** `load()` returns the unpacked files straight away. Only `open()` is
+  `async`, because it fetches or reads the bytes first. Nothing in the parse path is `async` (see
   [Run it in a Worker](#run-it-in-a-worker)).
 - **No WASM.** Its only dependencies are two small, pure-JS decompressors,
   [`fflate`](https://www.npmjs.com/package/fflate) and [`lzma1`](https://www.npmjs.com/package/lzma1).
@@ -30,9 +34,12 @@ npm install unity-asset-reader
 ```
 
 Types are included. For Node.js versions, CommonJS and bundlers, see
-[Requirements](#requirements) and the [Bundler Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/BUNDLER_GUIDE.md).
+[Requirements](#requirements) and the
+[Bundler Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/BUNDLER_GUIDE.md).
 
-## Usage
+## Quick start
+
+Load a bundle, list what is in it, and read the assets you care about:
 
 ```ts
 import { load, open } from "unity-asset-reader";
@@ -62,48 +69,120 @@ const icon = env.get("Assets/UI/Icon.png"); // by the path the asset had in the 
 for (const sprite of env.assets("Sprite")) sprite.data.rect; // filtered and typed
 ```
 
-- **`load(input, options?)`** takes one file or an array of files. Each is bytes or `{ name, data }`.
-  A file without a name is called `input 0`, `input 1`, ... after its place. That is fine for a bundle,
-  whose contents carry their own names, but give loose files (a `.resS`, a `sharedassets0.assets`)
-  their real names: resources and pointers between files are found by name.
-- **`await open(source)`** gets the bytes first, then calls `load()`. A `string` or `URL` is
-  fetched, a `Request` is fetched as it is, a `Response` or `Blob` / `File` is read, and bytes or
-  `{ name, data }` pass through; an array mixes them. A file is named after the last segment of
-  its URL's path (decoded, without the query) or its `File.name`. A response that is not OK throws
-  an `Error` naming the URL and the status. Pass `{ fetch }` to fetch with your own headers or
-  credentials: `open(url, { fetch: (input) => fetch(input, { headers }) })`.
-  Both `load()` and `open()` accept `{ unityVersion }` for
-  [version-stripped files](#version-stripped-files).
-- **`env.assets(...types)`** yields every object as an `Asset`: plain data with `type`, `typeName`,
-  `classId`, `name`, `path`, `pathId`, `file`, `byteSize`, `data`, the low-level `reader` and the
-  `env` that loaded it.
-  `type` is the class name for the classes with a class reader (see [Classes](#classes)) and
-  `"Other"` for the rest, whose name is in `typeName`. A `switch (asset.type)` narrows `data`;
-  `env.assets("Texture2D", "Sprite")` keeps only those types and narrows too. Assets have no
-  methods: what you can turn one into is a function that takes it.
-- **`name`, `path` and `data` are read when you first use them, then kept.** `name` is `m_Name`,
-  read only as far as that field (`""` for a class without one). Without type trees a `GameObject`
-  is named from its header, and `""` where the [GameObject reader](#classes) refuses it. A `Shader`'s is its parsed form's name (`"UAR/ShaderFixture"`), by
-  AssetStudio's formula, since Unity leaves its `m_Name` empty; that reads the whole shader. A
-  shader the [Shader reader](#classes) refuses or cannot fit keeps its `m_Name`, usually `""`.
-  `path` is the first `m_Container` path of any loaded `AssetBundle` that points at the asset, or
-  `undefined`. `data` is what `obj.read()` returns (below), in the
-  TypeScript-style shape of [Classes](#classes) for a class with a class reader, and as its type
-  tree reads it (under Unity's names) for `"Other"`. A read that fails throws when you access it,
-  with the file, class and path id in the message, and is tried again on the next access.
-- **`asset.data` field names are camelCase without Unity's `m_` prefix**: `width` for
-  `m_Width`, `format` for `m_TextureFormat`. Each field's JSDoc names the Unity field it comes
-  from, so the Unity documentation still applies. Pointers stay `PPtr`s (`{ m_FileID, m_PathID }`,
-  follow them with `env.resolve`), 64-bit values stay `bigint`, and a field that only some Unity
-  versions have is optional. The low-level `obj.read()` keeps Unity's names; the `toXFields`
-  functions (`toTexture2DFields(obj.read())`, ...) turn its result into the same shape.
-- **`env.get(path)`** finds the asset a container path names. Unity stores those paths in lower
-  case, and the lookup ignores case. A path that lists several assets (a texture and its sprites)
-  gives the first one; filter `env.assets()` by `path` for the rest.
+What the example uses:
 
-### Low-level API
+- `load()` takes bytes and returns an `Env` at once. `open()` fetches or reads the bytes first.
+- `env.assets()` yields every object as an `Asset`. A `switch (asset.type)` narrows `asset.data`
+  to that class's shape.
+- `"Other"` is every class without a hand-written reader. Its `data` comes from the object's
+  **type tree**: the description of each class's fields that Unity stores in the file, by
+  default.
+- `env.get(path)` finds an asset by the path it had in the Unity project.
 
-The objects themselves, as `env.assets()` sees them:
+The sections below cover each step in more detail.
+
+## Common tasks
+
+### Load bytes, files or URLs
+
+**`load(input, options?)`** takes one file or an array of files. Each file is bytes or
+`{ name, data }`.
+
+- A file without a name is called `input 0`, `input 1`, ... after its place.
+- That is fine for a bundle, whose contents carry their own names.
+- Give loose files (a `.resS`, a `sharedassets0.assets`) their real names: resources and pointers
+  between files are found by name.
+
+**`await open(source)`** gets the bytes first, then calls `load()`:
+
+- A `string` or `URL` is fetched. A `Request` is fetched as it is.
+- A `Response` or `Blob` / `File` is read.
+- Bytes or `{ name, data }` pass through.
+- An array mixes them.
+- A file is named after the last segment of its URL's path (decoded, without the query) or its
+  `File.name`.
+- A response that is not OK throws an `Error` naming the URL and the status.
+
+To fetch with your own headers or credentials, pass `{ fetch }`:
+
+```js
+const env = await open(url, { fetch: (input) => fetch(input, { headers }) });
+```
+
+Both `load()` and `open()` accept `{ unityVersion }` for
+[version-stripped files](#version-stripped-files).
+
+### List and filter assets
+
+**`env.assets(...types)`** yields every object as an `Asset`. An `Asset` is plain data with
+`type`, `typeName`, `classId`, `name`, `path`, `pathId`, `file`, `byteSize`, `data`, the
+low-level `reader` and the `env` that loaded it.
+
+- `type` is the class name for the classes with a class reader (see [Classes](#classes)), and
+  `"Other"` for the rest. Their name is in `typeName`.
+- A `switch (asset.type)` narrows `data`.
+- `env.assets("Texture2D", "Sprite")` keeps only those types, and narrows too.
+- Assets have no methods. What you can turn one into is a function that takes it.
+
+### Read an asset's name, path and data
+
+`name`, `path` and `data` are read when you first use them, then kept.
+
+- **`name`** is `m_Name`, read only as far as that field (`""` for a class without one).
+  - Without type trees, a `GameObject` is named from its header, and is `""` where the
+    [GameObject reader](#classes) refuses it.
+  - A `Shader`'s name is its parsed form's name (`"UAR/ShaderFixture"`), by AssetStudio's
+    formula, since Unity leaves its `m_Name` empty. That reads the whole shader.
+  - A shader the [Shader reader](#classes) refuses or cannot fit keeps its `m_Name`, usually
+    `""`.
+- **`path`** is the first `m_Container` path of any loaded `AssetBundle` that points at the
+  asset, or `undefined`.
+- **`data`** is what `obj.read()` returns (see
+  [Read objects at the low level](#read-objects-at-the-low-level)). For a class with a class
+  reader, it has the TypeScript-style shape of [Classes](#classes). For `"Other"`, it is what the
+  type tree reads, under Unity's names.
+- **A read that fails** throws when you access it, with the file, class and path id in the
+  message. It is tried again on the next access.
+
+**`asset.data` field names are camelCase, without Unity's `m_` prefix**: `width` for `m_Width`,
+`format` for `m_TextureFormat`. Each field's JSDoc names the Unity field it comes from, so the
+Unity documentation still applies.
+
+- Pointers stay `PPtr`s (`{ m_FileID, m_PathID }`). Follow them with `env.resolve`.
+- 64-bit values stay `bigint`.
+- A field that only some Unity versions have is optional.
+- The low-level `obj.read()` keeps Unity's names. The `toXFields` functions
+  (`toTexture2DFields(obj.read())`, ...) turn its result into the same shape as `asset.data`.
+
+### Find an asset by its project path
+
+**`env.get(path)`** finds the asset a container path names. Unity stores those paths in lower
+case, and the lookup ignores case. A path that lists several assets (a texture and its sprites)
+gives the first one; filter `env.assets()` by `path` for the rest.
+
+### Follow a pointer to another object
+
+Objects point at each other with a `PPtr` (`{ m_FileID, m_PathID }`), for example a material's
+shader. **`env.resolve(pptr, obj)`** follows one:
+
+```ts
+import { classIdName } from "unity-asset-reader";
+
+for (const material of env.assets("Material")) {
+  const result = env.resolve(material.data.shader, material.reader);
+  if (result.status === "found") console.log(material.name, classIdName(result.object.type));
+  else if (result.status === "fileNotLoaded") console.log("load", result.fileName, "too");
+}
+```
+
+It returns `{ status: "found", object }`, or a reason why not (`"null"`, `"fileNotLoaded"` with
+the file name to load, ...). A dangling pointer is a result, never an exception.
+`resolveOrThrow()` is the variant for a pointer that must lead somewhere (see
+[Loading](#loading)).
+
+### Read objects at the low level
+
+Below `env.assets()` sit the unpacked files and the raw objects themselves:
 
 ```ts
 import { load, ClassID, classIdName, textAssetString, type TextAsset } from "unity-asset-reader";
@@ -126,41 +205,45 @@ for (const obj of env.objects) {
 }
 ```
 
-- **`env.files`** lists every file after unpacking. Nested containers are opened too: a gzip
-  wrapper, a bundle inside a `UnityWebData` file. A SerializedFile or a `.resS` is kept under its
-  own path. That covers the "just unpack it" use case.
-- **`env.objects`** lists every object of every SerializedFile in `env.files`. The files are parsed
-  the first time you read `env.objects` (or call `env.resolve` / `env.readResource`), not by
-  `load()`. So a file this library cannot parse does not stop you from unpacking.
+- **`env.files`** lists every file after unpacking. That covers the "just unpack it" use case.
+  - Nested containers are opened too: a gzip wrapper, a bundle inside a `UnityWebData` file.
+  - A SerializedFile or a `.resS` is kept under its own path.
+- **`env.objects`** lists every object of every SerializedFile in `env.files`.
+  - The files are parsed the first time you read `env.objects` (or call `env.resolve` /
+    `env.readResource`), not by `load()`.
+  - So a file this library cannot parse does not stop you from unpacking.
 - **`obj.read()`** reads an object with the class reader for its class, if there is one (see
-  [Classes](#classes)). Otherwise it reads the object's type tree. The result type is the union
-  `ObjectData`. Narrow it yourself after checking `obj.type`, for example
-  `obj.read<TextAsset>()`. Nothing checks it at run time.
-- **`obj.readTypeTree()`** reads any object into a plain JS object by walking its type tree. That
-  works for every class, including your own `MonoBehaviour`/`ScriptableObject` fields, as long as
-  the bundle was built with type trees (the Unity default).
-- **`env.resolve(pptr, obj)`** follows a pointer (`{ m_FileID, m_PathID }`) to the object it names.
-  It returns `{ status: "found", object }`, or a reason why not (`"null"`, `"fileNotLoaded"` with
-  the file name to load, ...). A dangling pointer is a result, never an exception.
-- **`env.readResource(ref, obj)`** reads bulk data that an object keeps in a `.resS` / `.resource`
-  file. `obj.read()` already does that for `Texture2D`, `AudioClip` and `VideoClip`
+  [Classes](#classes)). Otherwise it reads the object's type tree.
+  - The result type is the union `ObjectData`.
+  - Narrow it yourself after checking `obj.type`, for example `obj.read<TextAsset>()`. Nothing
+    checks it at run time.
+- **`obj.readTypeTree()`** reads any object into a plain JS object by walking its type tree.
+  That works for every class, including your own `MonoBehaviour`/`ScriptableObject` fields, as
+  long as the bundle was built with type trees (the Unity default).
+- **`env.resolve(pptr, obj)`** follows a pointer (see
+  [Follow a pointer to another object](#follow-a-pointer-to-another-object)).
+- **`env.readResource(ref, obj)`** reads bulk data that an object keeps in a `.resS` /
+  `.resource` file. `obj.read()` already does that for `Texture2D`, `AudioClip` and `VideoClip`
   (`imageData`, `audioData`, `videoData`).
 
 Returned bytes are views into your input or into the decompressed blocks, never copies. A small
-view keeps its whole buffer alive, so copy it (`data.slice()`) if you want to keep a small piece
-and let the rest be garbage-collected.
+view keeps its whole buffer alive. To keep a small piece and let the rest be garbage-collected,
+copy it (`data.slice()`).
 
-### Loading several files
+### Load several files together
 
 Pass every file in one `load()` call: a bundle and its dependency bundles, or a player build's
-`sharedassets0.assets` with its `.resS`. Then pointers between them resolve, and each object finds
-its resource files. File names are matched by their last path component, ignoring case, as Unity
-does. To keep two builds apart, load each one with its own `load()`.
+`sharedassets0.assets` with its `.resS`. Then pointers between them resolve, and each object
+finds its resource files.
 
-In Node.js, [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` reads a file with its
-sidecars, or a whole folder, and calls `load()` for you.
+- File names are matched by their last path component, ignoring case, as Unity does.
+- To keep two builds apart, load each one with its own `load()`.
 
-## Run it in a Worker
+In Node.js,
+[`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s
+`loadPath()` reads a file with its sidecars, or a whole folder, and calls `load()` for you.
+
+### Run it in a Worker
 
 Parsing is synchronous, so a big bundle blocks the thread it runs on until it is done. In a
 browser, run the reader in a Web Worker and post plain data back to the page:
@@ -188,15 +271,19 @@ const bytes = await file.arrayBuffer();
 worker.postMessage({ name: file.name, bytes }, [bytes]); // transfer, do not copy
 ```
 
-[`examples/cdn.html`](https://github.com/fatal10110/unity-asset-reader/blob/main/examples/cdn.html) is a complete page built this way, with no bundler.
-The [Bundler Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/BUNDLER_GUIDE.md) has the setup for Vite and Next.js.
+- [`examples/cdn.html`](https://github.com/fatal10110/unity-asset-reader/blob/main/examples/cdn.html)
+  is a complete page built this way, with no bundler.
+- The [Bundler Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/BUNDLER_GUIDE.md)
+  has the setup for Vite and Next.js.
 
-## 64-bit values and JSON
+### 64-bit values and JSON
 
 Every 64-bit integer is a `bigint`: path ids (`obj.pathId`, `m_PathID`), and every `SInt64` /
-`UInt64` field a type tree holds. That holds even when the value is small, so a field's type never
-depends on its value. File offsets and sizes are plain `number`s. Anything at or above 2^53 is
-refused with an error rather than rounded.
+`UInt64` field a type tree holds.
+
+- That holds even when the value is small, so a field's type never depends on its value.
+- File offsets and sizes are plain `number`s. Anything at or above 2^53 is refused with an error
+  rather than rounded.
 
 `JSON.stringify` throws on a `bigint`. Pass a replacer that writes it as a decimal string:
 
@@ -213,16 +300,21 @@ function unityJsonReplacer(_key, value) {
 JSON.stringify(obj.readTypeTree(), unityJsonReplacer, 2);
 ```
 
-The `Uint8Array` branch is optional. Without it, a byte array (`TypelessData`, `byte[]`, a
-`TextAsset`'s `m_Script`) becomes `{"0":…,"1":…}`. Also note that JSON has no `NaN`, `Infinity`
-or `-0`: `JSON.stringify` writes `null`, `null` and `0` for float fields that hold them.
+- The `Uint8Array` branch is optional. Without it, a byte array (`TypelessData`, `byte[]`, a
+  `TextAsset`'s `m_Script`) becomes `{"0":…,"1":…}`.
+- JSON has no `NaN`, `Infinity` or `-0`. `JSON.stringify` writes `null`, `null` and `0` for float
+  fields that hold them.
 
-## Errors
+### Errors
 
-An error from `load()` or `env.objects` names the path down to the bad bytes
-(`a.bundle: CAB-1a2b…: ...`); an asset's `name` or `data` adds the class and path id
-(`a.bundle: CAB-1a2b…: Texture2D -2966962111441417370: ...`). Three classes let you tell the cases
-apart:
+Every error says where the problem is:
+
+- An error from `load()` or `env.objects` names the path down to the bad bytes
+  (`a.bundle: CAB-1a2b…: ...`).
+- An asset's `name` or `data` adds the class and path id
+  (`a.bundle: CAB-1a2b…: Texture2D -2966962111441417370: ...`).
+
+Three error classes let you tell the cases apart:
 
 | Class | Meaning | Useful fields |
 |---|---|---|
@@ -231,187 +323,6 @@ apart:
 | `ResourceNotFoundError` | An object's data is in a `.resS` / `.resource` file that was not passed to `load()`. Load it too. | `path`, `fileName` |
 
 Nothing returns partial or garbage data without an error.
-
-## Supported
-
-Each row is checked against the code. In "Tested on", "fixture" means a bundle built by the Unity editor
-([`fixtures/`](https://github.com/fatal10110/unity-asset-reader/blob/main/fixtures/README.md)),
-"generated" a container written by UnityPy's bundle writer around made-up bytes, and "unit test" a
-hand-written byte layout in this package's tests.
-
-### Containers and compression
-
-| Input | Support | Tested on |
-|---|---|---|
-| UnityFS | Formats 6, 7 and 8. Blocks info at the end (flag `0x80`), 2019.4+ block padding (flag `0x200`), the 16-byte header padding of format 7 and of 2019.4.15+ format 6 | Fixtures (formats 7 and 8), generated (format 6) |
-| UnityWeb, UnityRaw (legacy web player bundles) | The old level layout and the format 6 archive layout, LZMA-compressed (UnityWeb) or not (UnityRaw) | Generated (formats 2 and 3), unit tests (formats 4 and 6) |
-| `UnityWebData1.0` (WebGL `.data`) | Yes, and a bundle inside it is opened too | Generated |
-| A gzip-wrapped file | Unwrapped, then opened as whatever is inside | Generated |
-| A loose SerializedFile (`.assets`, `level0`, `globalgamemanagers`) | Yes | Fixtures' SerializedFile nodes, read on their own |
-| `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
-| Split files (`.split0`, `.split1`, ...) | Pass the joined file to `load()`; [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` joins them | Unit tests of `-node` |
-| Bundle block compression | None, LZMA, LZ4, LZ4HC (LZ4HC blocks decode as LZ4) | Fixtures (none, LZMA, LZ4), generated |
-| SerializedFile format versions | 2 to 23, little- and big-endian. See [Unity versions](#unity-versions) | Fixtures (21, 22, 23), unit tests (6, 8, 15; format-23 blob validation) |
-
-### Classes
-
-`obj.readTypeTree()` reads **any class** from a file with type trees. `obj.read()` uses a
-hand-written reader for the classes below. Those readers also work on bundles built without type
-trees (`BuildAssetBundleOptions.DisableWriteTypeTree`). The table lists the main fields of
-`asset.data` (the type in brackets); the JSDoc of each type has every field, with its Unity name.
-"From" is the first Unity version whose layout the reader knows. The other readers refuse an older
-version; `Texture2D` has no floor: it reads any older version with its oldest layout. Unity 2019.1
-is the supported floor: a reader added since that decision (`Mesh`, `Avatar`, `AnimatorController`,
-`Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`,
-`RectTransform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer`) starts there, and the older readers keep the older
-layouts they already had.
-
-| Class | Main fields of `asset.data` | From | Fixture |
-|---|---|---|---|
-| `AssetBundle` (`AssetBundleFields`) | `container`: asset path to object, the bundle's table of contents; `preloadTable`, `dependencies` | 3.4 | Yes |
-| `TextAsset` (`TextAssetFields`) | `bytes`: the file as stored; `text`: those bytes decoded as UTF-8 (on first use) | 3.4 | Yes |
-| `MonoBehaviour` (`MonoBehaviourFields`) | `script` (the `MonoScript` pointer), `gameObject`, `enabled`, `name`, and `fields`: every field of the script, with a type tree only | Any | Yes |
-| `MonoScript` (`MonoScriptFields`) | `className`, `namespace`, `assemblyName` | 3.4 | Yes |
-| `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
-| `Shader` (`ShaderFields`) | `parsedForm`: the parsed ShaderLab (`name`, properties, sub-shaders, passes, render state, keywords, each variant's parameters); `platforms` and `compressedBlob`: every platform's compiled programs, LZ4-compressed, not decoded | 2019.1 | 2019.4, 2020.3, 6000.3.26f1, 6000.6 |
-| `Texture2D` (`Texture2DFields`) | `width`, `height`, `format` (a `TextureFormat`), `mipCount`, `textureSettings`, `platform` and `imageData`, still encoded (inline or from the `.resS`). Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | Any (gates from 2.6; tested from 3.4) | Yes |
-| `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3, 6000.6 |
-| `SpriteAtlas` (`SpriteAtlasFields`) | `renderDataMap`; before 6000.6 also `packedSprites`, from 6000.6 each entry holds its sprite instead (`spriteInstanceData`: name, rect, pivot, border, mesh) | 2017.1 | 2019.4, 6000.3, 6000.6 |
-| `AudioClip` (`AudioClipFields`) | `channels`, `frequency`, `length`, `compressionFormat` and `audioData`: the sound bank as stored (usually FSB5), not decoded | 3.4 | Yes |
-| `VideoClip` (`VideoClipFields`) | `width`, `height`, `frameRate`, `frameCount` and `videoData`: the video file as imported (e.g. WebM, MP4), not decoded | 5.6 | Yes |
-| `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
-| `MovieTexture` (`MovieTextureFields`) | `movieData` (the Ogg Theora file), `loop`, `audioClip` | 3.4 | No, unit tests only |
-| `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles, offset by its `baseVertex`, which AssetStudio leaves out), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
-| `Avatar` (`AvatarFields`) | `avatar`: the runtime avatar (skeletons, poses, the humanoid part with its bones, hands and muscle setup); `tos` (path hash to transform path); `humanDescription`: the bones and settings it was built from | 2019.1 | Yes, and 6000.6 |
-| `AnimatorController` (`AnimatorControllerFields`) | `controller`: layers (with their masks), state machines (states, transitions with their conditions, blend trees, entry and exit selectors) and parameters with their defaults; `tos` (name hash to name), `animationClips`, `stateMachineBehaviours` | 2019.1 | Yes, and 6000.6 |
-| `Animator` (`AnimatorFields`) | `avatar`, `controller` (pointers), `gameObject`, `enabled`, `cullingMode`, `updateMode`, `applyRootMotion` and the other flags | 2019.1 | Yes, and 6000.6 |
-| `AnimatorOverrideController` (`AnimatorOverrideControllerFields`) | `controller`, and `clips`: each original clip with the clip that overrides it | 2019.1 | Yes, and 6000.6 |
-| `AnimationClip` (`AnimationClipFields`) | `legacy`; a legacy clip's curves (`positionCurves`, `rotationCurves`, `eulerCurves`, `scaleCurves`, `floatCurves`, `pptrCurves`); a Mecanim clip's `muscleClip` (its streamed, dense and constant parts, raw, and its loop settings) and `clipBindingConstant` (what each curve animates); `sampleRate`, `wrapMode`, `events` | 2019.1 | Yes, and 6000.6 |
-| `Animation` (`AnimationFields`) | A legacy `Animation` component: `clip` (the default one) and `clips` (pointers), `gameObject`, `enabled`, `wrapMode`, `playAutomatically`, `animatePhysics`, `cullingType`, `updateMode` (2023.1+) | 2019.1 | Yes, and 6000.6 |
-| `GameObject` (`GameObjectFields`) | `component` (each `{ component }` pointer, the `Transform` first), `layer`, `name`, `tag`, `isActive` | 2019.1 | Yes, and 6000.6 |
-| `Transform` (`TransformFields`) | `gameObject`, `localRotation`, `localPosition`, `localScale`, `children`, `father` (pointers to the parent and child `Transform`s) | 2019.1 | Yes, and 6000.6 |
-| `RectTransform` (`RectTransformFields`) | A UI element's `Transform`: the `Transform` fields, then `anchorMin`, `anchorMax`, `anchoredPosition`, `sizeDelta`, `pivot` | 2019.1 | Yes, and 6000.6 |
-| `MeshFilter` (`MeshFilterFields`) | `gameObject`, `mesh` | 2019.1 | Yes, and 6000.6 |
-| `MeshRenderer` (`MeshRendererFields`) | `materials`, `gameObject`, `enabled`, the shadow, probe, lightmap and sorting settings, `additionalVertexStreams` | 2019.1 | Yes, and 6000.6 |
-| `SkinnedMeshRenderer` (`SkinnedMeshRendererFields`) | `mesh`, `bones`, `rootBone`, `blendShapeWeights`, `aabb`, `quality`, and the renderer fields as `MeshRenderer` | 2019.1 | Yes, and 6000.6 |
-
-"Yes" is all three fixture editors. The animation classes' nested runtime structs keep their raw
-arrays: curves and muscle values are not decoded. Every other class (`Camera`, `Light`,
-`Canvas`, ...) comes from its type tree. In a bundle without type trees, `obj.read()`
-throws `UnsupportedError` for them. The class readers are for player builds; see
-[Not supported](#not-supported) for the editor files they refuse.
-
-### Unity versions
-
-| | Unity versions |
-|---|---|
-| **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
-| **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
-| **Tested** `Shader` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: DX11, GLES3 and Vulkan builds, and Metal from 2020.3 and 6000.3, against `readTypeTree()`; every Shader layout from 2019.1 to 6000.6 against UnityPy's reading of a synthetic object |
-| **Tested** `Mesh` skin and blend shapes | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a mesh with up to four bone influences per vertex and two blend shapes, plain and compressed (not 2020.3), against UnityPy's decoded skin and AssetStudio's (not 6000.6), and `readTypeTree()` |
-| **Tested** `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a humanoid and a generic avatar, a controller with two layers, a mask, a sub-state machine, 1D, 2D and direct blend trees and behaviours, an override controller, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the Animator's patch-release gates included) against Unity's own type trees |
-| **Tested** `AnimationClip` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy clip with every curve kind and Mecanim clips whose curves land in the streamed, dense and constant parts, with bindings, a sprite swap and events, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the split curve count's patch-release gates included) against Unity's own type trees |
-| **Tested** `GameObject`, `Transform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: two prefabs (a skinned hierarchy with a mesh renderer and a humanoid one), typed and without type trees, and the animator fixtures' GameObjects and Transforms, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
-| **Tested** `Animation` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy `Animation` component listing a Mecanim clip, every field away from its default, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
-| **Tested** `RectTransform` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a Canvas with three children, their anchors set, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
-| Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
-| Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
-
-A class reader reads a version newer than its newest gate (6000.6) with the newest layout it
-knows. `readTypeTree()` does not depend on the Unity version, so it reads every format from 2 to
-23. Format 23's type-tree content hashes and blob headers follow UnityPy 1.25.4; AssetStudio
-does not yet handle that layout. A zero-length blob has no embedded tree, so a generic dump
-of an object using it throws `UnsupportedError`, as it does when type trees are disabled.
-
-A SerializedFile of format 6 or older records no Unity version. In a bundle it takes the
-bundle's `unityRevision`. A loose one has version `[0, 0, 0, 0]`, and the class readers treat it
-as a version-stripped file (below).
-
-### Version-stripped files
-
-A bundle built with `AssetBundleStripUnityVersion` records `"0.0.0"` as its Unity version, in
-the bundle header and in each SerializedFile. If you know the editor that built it, pass
-`load(bytes, { unityVersion: "2019.4.41f2" })` or
-`await open(url, { unityVersion: "2019.4.41f2" })`. This fallback fills a missing or stripped
-version after trying the enclosing bundle's revision. It preserves recorded versions and
-usable bundle revisions, and also applies to loose files below SerializedFile format 7.
-The option must name an editor (`major.minor.patch` with an optional build suffix and custom
-postfix, such as `2021.3.15f1c1`); invalid strings, including `"0.0.0"`, throw `RangeError`,
-and non-strings throw `TypeError`.
-
-Without a usable version, `readTypeTree()` reads it as usual. Each class
-reader reads such an object only when its bytes or the SerializedFile format leave one layout,
-and throws `UnsupportedError` (kind `"Unity version"`) otherwise:
-
-| Class | Version-stripped |
-|---|---|
-| `AssetBundle` | Read, format 16 and later |
-| `TextAsset` | Read, format 7 and later |
-| `MonoBehaviour` | Read |
-| `MonoScript` | Refused |
-| `Material` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `Shader` | Read in format 21 (Unity 2019.3 and 2019.4), refused otherwise |
-| `Texture2D` | Refused |
-| `Sprite` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `SpriteAtlas` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `AudioClip` | Read, format 18 and later |
-| `VideoClip` | Read, format 21 and later |
-| `Font` | Read, format 16 and later |
-| `MovieTexture` | Refused |
-| `Mesh` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `Avatar` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `AnimatorController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `Animator` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `AnimatorOverrideController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `AnimationClip` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `Animation` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `GameObject` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `Transform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `RectTransform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `MeshFilter` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `MeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-| `SkinnedMeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
-
-The version-stripped fixtures, in formats 21 and 22, hold a `TextAsset`, a `Material`,
-`AudioClip`s, a `VideoClip`, a `Font`, the font's `Texture2D` and the bundle's `AssetBundle`.
-The other rows are unit tests.
-
-### Not supported
-
-Each of these throws `UnsupportedError` naming what it found:
-
-- Compression: LZHAM, brotli (a WebGL build's `.br` files: decompress them first), zstd.
-- Containers: `UnityArchive`, zip archives (extract the zip first).
-- Encrypted bundles (UnityCN and other game-specific encryption), and the containers of games
-  that modified the format.
-- One bundle that unpacks to more than `0x7fffffff` bytes (2 GiB).
-- A class reader for a version it has no layout for: before its "From" version in
-  [Classes](#classes) (`Texture2D` has none), or a
-  version-stripped file where the bytes do not decide the layout
-  ([Version-stripped files](#version-stripped-files)). `readTypeTree()` still works on such files.
-- An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
-  `MonoScript`, `MonoBehaviour`, `Shader`, `Sprite`, `SpriteAtlas`, `AudioClip`, `Mesh`, `Avatar`,
-  `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`,
-  `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` or `SkinnedMeshRenderer`, or by `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
-- A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
-  format Unity does not define, bone weights in an integer format or more than four per vertex
-  (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
-  `baseVertex` takes an index past the vertices throws `CorruptError`.
-
-Out of scope for this package: decoding audio or video; converting meshes to OBJ or glTF (the
-[glTF writer](#gltf-writer) here only writes what it is given); writing or repacking bundles;
-image encoding. Texture and sprite pixels, and PNG encoding, are in
-[`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md).
-
-## Requirements
-
-- **Browsers:** any browser with ES2020 (`bigint`) and `TextDecoder`. Every current browser has
-  both.
-- **Node.js:** 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and
-  `require`. `lzma1` is published as ES modules only, so `require("unity-asset-reader")` needs a
-  Node.js that can `require()` an ES module
-  ([#172](https://github.com/fatal10110/unity-asset-reader/issues/172)). CI tests on 20.19.0
-  and 22.12.0.
 
 ## API reference
 
@@ -452,8 +363,8 @@ bundled `index.d.ts`, so your editor shows it on hover.
 
 ### Class readers
 
-Each `readX(reader)` reads one class from the object's first byte. `obj.read()` calls them for you.
-Call one yourself only to read an object as a specific class.
+Each `readX(reader)` reads one class from the object's first byte. `obj.read()` calls them for
+you. Call one yourself only to read an object as a specific class.
 
 | Export | Result types |
 |---|---|
@@ -488,7 +399,7 @@ Call one yourself only to read an object as a specific class.
 ### `asset.data` shapes
 
 Each `toXFields(data)` turns what `obj.read()` returns for class `X` into what `asset.data` is for
-it; `env.assets()` calls them for you.
+it. `env.assets()` calls them for you.
 
 | Export | Result types |
 |---|---|
@@ -523,10 +434,13 @@ For tools that work below `load()`:
 ### glTF writer
 
 The building blocks of a binary glTF 2.0 file (`.glb`), for the feature packages that export
-models (`meshToGltf()` in
+models. `meshToGltf()` in
 [`unity-asset-reader-mesh`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/mesh/README.md)
-is built on it). It follows the glTF 2.0 specification and knows nothing about Unity: what goes
-in, and how Unity's left-handed space is converted, is the caller's choice. Sync, no dependency.
+is built on it.
+
+- It follows the glTF 2.0 specification and knows nothing about Unity.
+- What goes in, and how Unity's left-handed space is converted, is the caller's choice.
+- Sync, no dependency.
 
 | Export | What |
 |---|---|
@@ -536,6 +450,229 @@ in, and how Unity's left-handed space is converted, is the caller's choice. Sync
 | `GltfNode` | A node: `mesh`, `skin`, `children`, `translation`, `rotation`, `scale`, `weights` |
 | `GltfSkin` | `joints` and their `inverseBindMatrices`, for meshes with `JOINTS_0` and `WEIGHTS_0` |
 | `GltfAnimation`, `GltfAnimationChannel`, `GltfAnimationSampler` | Channels targeting a node's `translation`, `rotation`, `scale` or `weights`, sampled `LINEAR`, `STEP` or `CUBICSPLINE` |
+
+## Supported
+
+What this package reads: containers and compression, classes, Unity versions and
+version-stripped files. Each row is checked against the code.
+
+In the "Tested on" column:
+
+- "fixture" means a bundle built by the Unity editor
+  ([`fixtures/`](https://github.com/fatal10110/unity-asset-reader/blob/main/fixtures/README.md));
+- "generated" means a container written by UnityPy's bundle writer around made-up bytes;
+- "unit test" means a hand-written byte layout in this package's tests.
+
+### Containers and compression
+
+| Input | Support | Tested on |
+|---|---|---|
+| UnityFS | Formats 6, 7 and 8. Blocks info at the end (flag `0x80`), 2019.4+ block padding (flag `0x200`), the 16-byte header padding of format 7 and of 2019.4.15+ format 6 | Fixtures (formats 7 and 8), generated (format 6) |
+| UnityWeb, UnityRaw (legacy web player bundles) | The old level layout and the format 6 archive layout, LZMA-compressed (UnityWeb) or not (UnityRaw) | Generated (formats 2 and 3), unit tests (formats 4 and 6) |
+| `UnityWebData1.0` (WebGL `.data`) | Yes, and a bundle inside it is opened too | Generated |
+| A gzip-wrapped file | Unwrapped, then opened as whatever is inside | Generated |
+| A loose SerializedFile (`.assets`, `level0`, `globalgamemanagers`) | Yes | Fixtures' SerializedFile nodes, read on their own |
+| `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
+| Split files (`.split0`, `.split1`, ...) | Pass the joined file to `load()`; [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` joins them | Unit tests of `-node` |
+| Bundle block compression | None, LZMA, LZ4, LZ4HC (LZ4HC blocks decode as LZ4) | Fixtures (none, LZMA, LZ4), generated |
+| SerializedFile format versions | 2 to 23, little- and big-endian. See [Unity versions](#unity-versions) | Fixtures (21, 22, 23), unit tests (6, 8, 15; format-23 blob validation) |
+
+### Classes
+
+`obj.readTypeTree()` reads **any class** from a file with type trees. `obj.read()` uses a
+hand-written reader, a *class reader*, for the classes below. Those readers also work on bundles
+built without type trees (`BuildAssetBundleOptions.DisableWriteTypeTree`).
+
+How to read the table:
+
+- **Main fields of `asset.data`** lists the main fields, with the type in brackets. The JSDoc of
+  each type has every field, with its Unity name.
+- **From** is the first Unity version whose layout the reader knows. The other readers refuse an
+  older version. `Texture2D` has no floor: it reads any older version with its oldest layout.
+- **Fixture** "Yes" is all three fixture editors.
+
+Unity 2019.1 is the supported floor. A reader added since that decision (`Mesh`, `Avatar`,
+`AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`,
+`GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer`)
+starts there. The older readers keep the older layouts they already had.
+
+| Class | Main fields of `asset.data` | From | Fixture |
+|---|---|---|---|
+| `AssetBundle` (`AssetBundleFields`) | `container`: asset path to object, the bundle's table of contents; `preloadTable`, `dependencies` | 3.4 | Yes |
+| `TextAsset` (`TextAssetFields`) | `bytes`: the file as stored; `text`: those bytes decoded as UTF-8 (on first use) | 3.4 | Yes |
+| `MonoBehaviour` (`MonoBehaviourFields`) | `script` (the `MonoScript` pointer), `gameObject`, `enabled`, `name`, and `fields`: every field of the script, with a type tree only | Any | Yes |
+| `MonoScript` (`MonoScriptFields`) | `className`, `namespace`, `assemblyName` | 3.4 | Yes |
+| `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
+| `Shader` (`ShaderFields`) | `parsedForm`: the parsed ShaderLab (`name`, properties, sub-shaders, passes, render state, keywords, each variant's parameters); `platforms` and `compressedBlob`: every platform's compiled programs, LZ4-compressed, not decoded | 2019.1 | 2019.4, 2020.3, 6000.3.26f1, 6000.6 |
+| `Texture2D` (`Texture2DFields`) | `width`, `height`, `format` (a `TextureFormat`), `mipCount`, `textureSettings`, `platform` and `imageData`, still encoded (inline or from the `.resS`). Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | Any (gates from 2.6; tested from 3.4) | Yes |
+| `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3, 6000.6 |
+| `SpriteAtlas` (`SpriteAtlasFields`) | `renderDataMap`; before 6000.6 also `packedSprites`, from 6000.6 each entry holds its sprite instead (`spriteInstanceData`: name, rect, pivot, border, mesh) | 2017.1 | 2019.4, 6000.3, 6000.6 |
+| `AudioClip` (`AudioClipFields`) | `channels`, `frequency`, `length`, `compressionFormat` and `audioData`: the sound bank as stored (usually FSB5), not decoded | 3.4 | Yes |
+| `VideoClip` (`VideoClipFields`) | `width`, `height`, `frameRate`, `frameCount` and `videoData`: the video file as imported (e.g. WebM, MP4), not decoded | 5.6 | Yes |
+| `Font` (`FontFields`) | `fontData`: the TrueType/OpenType file; `fontNames`, `fontSize`, `characterRects` | 3.4 | Yes |
+| `MovieTexture` (`MovieTextureFields`) | `movieData` (the Ogg Theora file), `loop`, `audioClip` | 3.4 | No, unit tests only |
+| `Mesh` (`MeshFields`) | `subMeshes`, `vertexData`, `compressedMesh`, `indexBuffer`, `streamData`, and decoded as AssetStudio does: `vertexCount`, `vertices`, `normals`, `tangents`, `colors`, `uv` (UV0 to UV7), `skin` (bone weights), `indices` (each submesh's triangles, offset by its `baseVertex`, which AssetStudio leaves out), the vertex data read from the `.resS` when streamed | 2019.1 | Yes |
+| `Avatar` (`AvatarFields`) | `avatar`: the runtime avatar (skeletons, poses, the humanoid part with its bones, hands and muscle setup); `tos` (path hash to transform path); `humanDescription`: the bones and settings it was built from | 2019.1 | Yes, and 6000.6 |
+| `AnimatorController` (`AnimatorControllerFields`) | `controller`: layers (with their masks), state machines (states, transitions with their conditions, blend trees, entry and exit selectors) and parameters with their defaults; `tos` (name hash to name), `animationClips`, `stateMachineBehaviours` | 2019.1 | Yes, and 6000.6 |
+| `Animator` (`AnimatorFields`) | `avatar`, `controller` (pointers), `gameObject`, `enabled`, `cullingMode`, `updateMode`, `applyRootMotion` and the other flags | 2019.1 | Yes, and 6000.6 |
+| `AnimatorOverrideController` (`AnimatorOverrideControllerFields`) | `controller`, and `clips`: each original clip with the clip that overrides it | 2019.1 | Yes, and 6000.6 |
+| `AnimationClip` (`AnimationClipFields`) | `legacy`; a legacy clip's curves (`positionCurves`, `rotationCurves`, `eulerCurves`, `scaleCurves`, `floatCurves`, `pptrCurves`); a Mecanim clip's `muscleClip` (its streamed, dense and constant parts, raw, and its loop settings) and `clipBindingConstant` (what each curve animates); `sampleRate`, `wrapMode`, `events` | 2019.1 | Yes, and 6000.6 |
+| `Animation` (`AnimationFields`) | A legacy `Animation` component: `clip` (the default one) and `clips` (pointers), `gameObject`, `enabled`, `wrapMode`, `playAutomatically`, `animatePhysics`, `cullingType`, `updateMode` (2023.1+) | 2019.1 | Yes, and 6000.6 |
+| `GameObject` (`GameObjectFields`) | `component` (each `{ component }` pointer, the `Transform` first), `layer`, `name`, `tag`, `isActive` | 2019.1 | Yes, and 6000.6 |
+| `Transform` (`TransformFields`) | `gameObject`, `localRotation`, `localPosition`, `localScale`, `children`, `father` (pointers to the parent and child `Transform`s) | 2019.1 | Yes, and 6000.6 |
+| `RectTransform` (`RectTransformFields`) | A UI element's `Transform`: the `Transform` fields, then `anchorMin`, `anchorMax`, `anchoredPosition`, `sizeDelta`, `pivot` | 2019.1 | Yes, and 6000.6 |
+| `MeshFilter` (`MeshFilterFields`) | `gameObject`, `mesh` | 2019.1 | Yes, and 6000.6 |
+| `MeshRenderer` (`MeshRendererFields`) | `materials`, `gameObject`, `enabled`, the shadow, probe, lightmap and sorting settings, `additionalVertexStreams` | 2019.1 | Yes, and 6000.6 |
+| `SkinnedMeshRenderer` (`SkinnedMeshRendererFields`) | `mesh`, `bones`, `rootBone`, `blendShapeWeights`, `aabb`, `quality`, and the renderer fields as `MeshRenderer` | 2019.1 | Yes, and 6000.6 |
+
+- The animation classes' nested runtime structs keep their raw arrays: curves and muscle values
+  are not decoded.
+- Every other class (`Camera`, `Light`, `Canvas`, ...) comes from its type tree. In a bundle
+  without type trees, `obj.read()` throws `UnsupportedError` for them.
+- The class readers are for player builds. See [Not supported](#not-supported) for the editor
+  files they refuse.
+
+### Unity versions
+
+- A class reader reads a version newer than its newest gate (6000.6) with the newest layout it
+  knows.
+- `readTypeTree()` does not depend on the Unity version, so it reads every format from 2 to 23.
+- Format 23's type-tree content hashes and blob headers follow UnityPy 1.25.4. AssetStudio does
+  not yet handle that layout.
+- A zero-length blob has no embedded tree. So a generic dump of an object using it throws
+  `UnsupportedError`, as it does when type trees are disabled.
+- A SerializedFile of format 6 or older records no Unity version. In a bundle, it takes the
+  bundle's `unityRevision`. A loose one has version `[0, 0, 0, 0]`, and the class readers treat
+  it as a version-stripped file (below).
+
+The editors and formats each part is tested on are listed in
+[How it is tested](#how-it-is-tested).
+
+### Version-stripped files
+
+A bundle built with `AssetBundleStripUnityVersion` records `"0.0.0"` as its Unity version, in
+the bundle header and in each SerializedFile. If you know the editor that built it, pass its
+version:
+
+```ts
+const env = load(bytes, { unityVersion: "2019.4.41f2" });
+const web = await open(url, { unityVersion: "2019.4.41f2" });
+```
+
+- This fallback fills a missing or stripped version after trying the enclosing bundle's
+  revision.
+- It preserves recorded versions and usable bundle revisions.
+- It also applies to loose files below SerializedFile format 7.
+- The option must name an editor: `major.minor.patch` with an optional build suffix and custom
+  postfix, such as `2021.3.15f1c1`.
+- Invalid strings, including `"0.0.0"`, throw `RangeError`. Non-strings throw `TypeError`.
+
+Without a usable version, `readTypeTree()` reads the file as usual. Each class reader reads such
+an object only when its bytes or the SerializedFile format leave one layout. Otherwise it throws
+`UnsupportedError` (kind `"Unity version"`):
+
+| Class | Version-stripped |
+|---|---|
+| `AssetBundle` | Read, format 16 and later |
+| `TextAsset` | Read, format 7 and later |
+| `MonoBehaviour` | Read |
+| `MonoScript` | Refused |
+| `Material` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Shader` | Read in format 21 (Unity 2019.3 and 2019.4), refused otherwise |
+| `Texture2D` | Refused |
+| `Sprite` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `SpriteAtlas` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AudioClip` | Read, format 18 and later |
+| `VideoClip` | Read, format 21 and later |
+| `Font` | Read, format 16 and later |
+| `MovieTexture` | Refused |
+| `Mesh` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Avatar` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AnimatorController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Animator` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AnimatorOverrideController` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `AnimationClip` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Animation` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `GameObject` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `Transform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `RectTransform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `MeshFilter` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `MeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `SkinnedMeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+
+The version-stripped fixtures, in formats 21 and 22, hold a `TextAsset`, a `Material`,
+`AudioClip`s, a `VideoClip`, a `Font`, the font's `Texture2D` and the bundle's `AssetBundle`.
+The other rows are unit tests.
+
+## Not supported
+
+Each of these throws `UnsupportedError` naming what it found:
+
+- Compression: LZHAM, brotli (a WebGL build's `.br` files: decompress them first), zstd.
+- Containers: `UnityArchive`, zip archives (extract the zip first).
+- Encrypted bundles (UnityCN and other game-specific encryption), and the containers of games
+  that modified the format.
+- One bundle that unpacks to more than `0x7fffffff` bytes (2 GiB).
+- A class reader for a version it has no layout for:
+  - before its "From" version in [Classes](#classes) (`Texture2D` has none);
+  - a version-stripped file where the bytes do not decide the layout
+    ([Version-stripped files](#version-stripped-files)).
+
+  `readTypeTree()` still works on such files.
+- An editor file (`BuildTarget.NoTarget`), read by a class reader that reads player data only:
+  - the readers of `Texture2D`, `MovieTexture`, `MonoScript`, `MonoBehaviour`, `Shader`,
+    `Sprite`, `SpriteAtlas`, `AudioClip`, `Mesh`, `Avatar`, `AnimatorController`, `Animator`,
+    `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`,
+    `RectTransform`, `MeshFilter`, `MeshRenderer` and `SkinnedMeshRenderer`;
+  - `Material`'s reader, from Unity 2022.1 on.
+
+  `readTypeTree()` reads editor files.
+- A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
+  format Unity does not define, bone weights in an integer format or more than four per vertex
+  (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
+  `baseVertex` takes an index past the vertices throws `CorruptError`.
+
+Out of scope for this package:
+
+- decoding audio or video;
+- converting meshes to OBJ or glTF (the [glTF writer](#gltf-writer) here only writes what it is
+  given);
+- writing or repacking bundles;
+- image encoding.
+
+Texture and sprite pixels, and PNG encoding, are in
+[`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md).
+
+## How it is tested
+
+Bundles built by the Unity editor from our own projects (the fixtures) are read and compared with
+what UnityPy reads from the same files. The class readers are also checked against
+`readTypeTree()` and, where noted, against AssetStudio and Unity's own type trees.
+
+| | Unity versions |
+|---|---|
+| **Tested** on editor-built fixtures | **2019.4.41f2, 2020.3.30f1 and 6000.3.25f1**: SerializedFile formats 21 and 22, UnityFS formats 7 and 8, LZ4, LZMA and uncompressed blocks, with and without type trees, and version-stripped |
+| **Tested** format-23 metadata, generic type-tree dumps, `Sprite` and `SpriteAtlas` | **6000.6.4f1**: five fixtures, compared with UnityPy 1.25.4. `unity-asset-reader-texture` cuts the sprites such an atlas holds (`packedSprites()`) |
+| **Tested** `Shader` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: DX11, GLES3 and Vulkan builds, and Metal from 2020.3 and 6000.3, against `readTypeTree()`; every Shader layout from 2019.1 to 6000.6 against UnityPy's reading of a synthetic object |
+| **Tested** `Mesh` skin and blend shapes | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a mesh with up to four bone influences per vertex and two blend shapes, plain and compressed (not 2020.3), against UnityPy's decoded skin and AssetStudio's (not 6000.6), and `readTypeTree()` |
+| **Tested** `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a humanoid and a generic avatar, a controller with two layers, a mask, a sub-state machine, 1D, 2D and direct blend trees and behaviours, an override controller, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the Animator's patch-release gates included) against Unity's own type trees |
+| **Tested** `AnimationClip` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy clip with every curve kind and Mecanim clips whose curves land in the streamed, dense and constant parts, with bindings, a sprite swap and events, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the split curve count's patch-release gates included) against Unity's own type trees |
+| **Tested** `GameObject`, `Transform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: two prefabs (a skinned hierarchy with a mesh renderer and a humanoid one), typed and without type trees, and the animator fixtures' GameObjects and Transforms, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
+| **Tested** `Animation` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy `Animation` component listing a Mecanim clip, every field away from its default, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
+| **Tested** `RectTransform` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a Canvas with three children, their anchors set, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
+| Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals (see [Version-stripped files](#version-stripped-files) and [Not supported](#not-supported)); SerializedFile formats 6, 8 and 15 |
+| Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
+
+## Requirements
+
+- **Browsers:** any browser with ES2020 (`bigint`) and `TextDecoder`. Every current browser has
+  both.
+- **Node.js:** 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and
+  `require`.
+  - `lzma1` is published as ES modules only, so `require("unity-asset-reader")` needs a Node.js
+    that can `require()` an ES module
+    ([#172](https://github.com/fatal10110/unity-asset-reader/issues/172)).
+  - CI tests on 20.19.0 and 22.12.0.
 
 ## Acknowledgements
 

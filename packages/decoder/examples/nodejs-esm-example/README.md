@@ -1,6 +1,7 @@
 # Node.js ESM Example
 
-This example demonstrates how to use `texture2ddecoder-wasm` in a modern Node.js environment using ES6 modules (`import/export`).
+This example shows how to use `texture2ddecoder-wasm` from Node.js with ES modules
+(`import`/`export`). It decodes BC1, BC3, ETC2 and ASTC data and shows how to read and write files.
 
 ## Features
 
@@ -8,7 +9,7 @@ This example demonstrates how to use `texture2ddecoder-wasm` in a modern Node.js
 - No build tools required
 - Automatic WASM initialization
 - Examples of BC1, BC3, ETC2, and ASTC decoding
-- Instructions for file I/O with async/await
+- File I/O with async/await
 
 ## Setup
 
@@ -100,7 +101,7 @@ await image.writeAsync('output.png');
 
 ## Supported Formats
 
-This library supports all major texture compression formats:
+The library decodes these texture compression formats:
 
 - **BC1-7** (DXT1, DXT5, etc.) - DirectX texture compression
 - **ETC1/2** - Ericsson Texture Compression

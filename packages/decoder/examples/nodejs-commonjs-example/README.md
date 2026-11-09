@@ -1,6 +1,7 @@
 # Pure Node.js CommonJS Example
 
-This example demonstrates how to use `texture2ddecoder-wasm` in a traditional Node.js environment using CommonJS (`require`).
+This example shows how to use `texture2ddecoder-wasm` from Node.js with CommonJS (`require`). It
+decodes BC1 and BC3 data, then an ETC2 file, and shows how to read and write files.
 
 ## Features
 
@@ -8,7 +9,7 @@ This example demonstrates how to use `texture2ddecoder-wasm` in a traditional No
 - No build tools required
 - Automatic WASM initialization
 - Examples of BC1, BC3 decoding
-- Instructions for file I/O
+- File I/O
 
 ## Setup
 
@@ -35,28 +36,34 @@ The example includes three demonstrations:
 ```javascript
 const { decode_bc1 } = require('texture2ddecoder-wasm');
 
-const bc1Data = new Uint8Array([...]);
-const decoded = await decode_bc1(bc1Data, width, height);
+(async () => {
+  const bc1Data = new Uint8Array([...]);
+  const decoded = await decode_bc1(bc1Data, width, height);
+})();
 ```
 
 ### 2. BC3 (DXT5) Decoding
 ```javascript
 const { decode_bc3 } = require('texture2ddecoder-wasm');
 
-const bc3Data = new Uint8Array([...]);
-const decoded = await decode_bc3(bc3Data, width, height);
+(async () => {
+  const bc3Data = new Uint8Array([...]);
+  const decoded = await decode_bc3(bc3Data, width, height);
+})();
 ```
 
 ### 3. Working with Files
 ```javascript
 const fs = require('fs');
 
-// Read texture file
-const textureData = fs.readFileSync('texture.bin');
-const decoded = await decode_bc1(textureData, width, height);
+(async () => {
+  // Read texture file
+  const textureData = fs.readFileSync('texture.bin');
+  const decoded = await decode_bc1(textureData, width, height);
 
-// Save raw BGRA output
-fs.writeFileSync('output.raw', decoded);
+  // Save raw BGRA output
+  fs.writeFileSync('output.raw', decoded);
+})();
 ```
 
 ## Integration with Image Libraries
@@ -67,19 +74,23 @@ The decoded output is in BGRA format (4 bytes per pixel). You can use it with po
 ```javascript
 const sharp = require('sharp');
 
-await sharp(decoded, {
-  raw: { width, height, channels: 4 }
-})
-.toFile('output.png');
+(async () => {
+  await sharp(decoded, {
+    raw: { width, height, channels: 4 }
+  })
+  .toFile('output.png');
+})();
 ```
 
 ### Using jimp
 ```javascript
 const Jimp = require('jimp');
 
-const image = new Jimp(width, height);
-image.bitmap.data = Buffer.from(decoded);
-await image.writeAsync('output.png');
+(async () => {
+  const image = new Jimp(width, height);
+  image.bitmap.data = Buffer.from(decoded);
+  await image.writeAsync('output.png');
+})();
 ```
 
 ## Requirements

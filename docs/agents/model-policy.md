@@ -1,7 +1,9 @@
 # Agent model policy
 
-Optimize for correctly completed issues per subscription usage window. The roles below are
-hypotheses to test here, not measured facts about this repository.
+Which model each agent role runs on, and the rules for changing that.
+
+- Goal: optimize for correctly completed issues per subscription usage window.
+- The roles below are hypotheses to test here, not measured facts about this repository.
 
 | Role | Model | Why |
 | --- | --- | --- |

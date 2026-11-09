@@ -68,15 +68,15 @@ The full list with reasons is in the rules doc; these cannot be undone after the
 
 ## 4. Commands
 
-From the repo root: `npm ci && npm run verify` (build every package, test, `check:browser`,
-no-C# guard; about a minute). One package: `npm run build -w unity-asset-reader`,
-`npm test -w unity-asset-reader-texture`, one file: `npx tsx --test <file>`. Decoder WASM
-(`build:wasm` needs Docker; only when C++ or bindings changed):
-`npm run build:wasm -w texture2ddecoder-wasm && npm test -w texture2ddecoder-wasm`. Without a
-built WASM the texture decode tests skip locally; CI's `decoder` job runs them.
-
-Tests: `tsx --test`, no frameworks. Style: TS strict, 2 spaces, double quotes, semicolons, JSDoc
-on exports.
+- All, from the repo root: `npm ci && npm run verify` (build every package, test,
+  `check:browser`, no-C# guard; about a minute).
+- One package: `npm run build -w unity-asset-reader`, `npm test -w unity-asset-reader-texture`.
+  One file: `npx tsx --test <file>`.
+- Decoder WASM (`build:wasm` needs Docker; only when C++ or bindings changed):
+  `npm run build:wasm -w texture2ddecoder-wasm && npm test -w texture2ddecoder-wasm`. Without a
+  built WASM the texture decode tests skip locally; CI's `decoder` job runs them.
+- Tests: `tsx --test`, no frameworks. Style: TS strict, 2 spaces, double quotes, semicolons,
+  JSDoc on exports.
 
 ## 5. Tools
 

@@ -1,8 +1,16 @@
 # unity-asset-reader: implementation rules
 
-Condensed, checkable form of [the plan](unity-asset-reader-plan.md) and [CONTRIBUTING](../CONTRIBUTING.md). The plan wins on conflict; if the two disagree, fix this file in the same PR.
+This is the condensed, checkable form of [the plan](unity-asset-reader-plan.md) and
+[CONTRIBUTING](../CONTRIBUTING.md): the rules every change is written and reviewed against. Each
+rule has an ID so reviews can cite it.
 
-Used by humans and by the `.claude/skills/` workflows (`implement-issue`, `review-implementation`, `fix-pr-comments`, and `waves`, which runs the other three for several issues at once). Each rule has an ID so reviews can cite it.
+- **The plan wins on conflict.** If this file and the plan disagree, fix this file in the same
+  PR.
+- **Who uses it:** humans, and the `.claude/skills/` workflows: `implement-issue`,
+  `review-implementation`, `fix-pr-comments`, and `waves`, which runs the other three for several
+  issues at once.
+- **How strict:** a hard rule (R1-R14) blocks merge; a design rule needs a reason in the PR when
+  broken.
 
 ## Hard rules (a violation blocks merge)
 
@@ -25,30 +33,50 @@ Used by humans and by the `.claude/skills/` workflows (`implement-issue`, `revie
 
 ## Design rules (a violation needs a reason in the PR)
 
-- **Scope = the issue.** Implement its Tasks and Acceptance, nothing adjacent. Found something else worth doing? Open a follow-up issue.
-- **Port behavior, not structure.** Match what upstream does on the same bytes; do not reproduce C# class hierarchies, streams or helper layers that TS does not need.
-- **No speculative abstraction.** No interface with one implementation, no options nobody asked for, no plugin hooks before the M6 item that needs them (that is why `ByteSource` waits for #51).
-- **Layout follows plan §2.** New packages, top-level folders or entry points need a plan change first.
-- **Core or feature package?** Reading Unity bytes into fields, or needed by two packages → core. WASM, pixels, `fs`, heavy or optional deps → feature package. Do not create a shared helper package for code only one package uses.
-- **Errors carry context:** file name, offset, expected vs actual. `write N bytes but expected M`, not `decode failed`.
+- **Scope = the issue.** Implement its Tasks and Acceptance, nothing adjacent. Found something else
+  worth doing? Open a follow-up issue.
+- **Port behavior, not structure.** Match what upstream does on the same bytes. Do not reproduce C#
+  class hierarchies, streams or helper layers that TS does not need.
+- **No speculative abstraction.** No interface with one implementation, no options nobody asked for,
+  no plugin hooks before the M6 item that needs them (that is why `ByteSource` waits for #51).
+- **Layout follows plan §2.** New packages, top-level folders or entry points need a plan change
+  first.
+- **Core or feature package?**
+  - Reading Unity bytes into fields, or needed by two packages → core.
+  - WASM, pixels, `fs`, heavy or optional deps → feature package.
+  - Do not create a shared helper package for code only one package uses.
+- **Errors carry context:** file name, offset, expected vs actual. `write N bytes but expected M`,
+  not `decode failed`.
 - Deliberate shortcut with a known ceiling → `// ponytail: <ceiling>, <upgrade path>` comment.
 
 ## Code style (from CONTRIBUTING + `.editorconfig` + `tsconfig.json`)
 
-- TypeScript, `strict` plus `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. No `any` unless commented why. No `// @ts-ignore`.
+- TypeScript, `strict` plus `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. No
+  `any` unless commented why. No `// @ts-ignore`.
 - 2 spaces, LF, final newline, double quotes, semicolons, lines ≤ 100 when practical.
-- `camelCase` functions/variables, `PascalCase` classes/types, `UPPER_SNAKE_CASE` constants. Unity field names read from data keep Unity's spelling (`m_Name`, `m_PathID`) in the class readers and `obj.read()`; only the `asset.data` shapes (`src/classes/fields.ts`, #184) rename them, citing the Unity name in each field's JSDoc.
+- `camelCase` functions/variables, `PascalCase` classes/types, `UPPER_SNAKE_CASE` constants.
+- Unity field names read from data keep Unity's spelling (`m_Name`, `m_PathID`) in the class readers
+  and `obj.read()`. Only the `asset.data` shapes (`src/classes/fields.ts`, #184) rename them, citing
+  the Unity name in each field's JSDoc.
 - JSDoc on every exported symbol: what it does, params, what it throws.
-- Comment density like the surrounding code: explain *why* and format quirks (version gates, alignment), not what the next line does. Version gates cite the Unity version: `// 2019.4+: blocksInfo padded to 16`.
+- Comment density like the surrounding code: explain *why* and format quirks (version gates,
+  alignment), not what the next line does. Version gates cite the Unity version:
+  `// 2019.4+: blocksInfo padded to 16`.
 
 ## Tests
 
-- Runner: `tsx --test`, files in `packages/<pkg>/tests/**/*.test.ts`; shared fixtures and goldens in root `fixtures/`.
+- Runner: `tsx --test`, files in `packages/<pkg>/tests/**/*.test.ts`; shared fixtures and goldens in
+  root `fixtures/`.
 - Each Acceptance bullet of the issue maps to at least one test that fails when the behavior breaks.
-- Codec/parser tests include the unhappy path the issue names (truncated input, wrong size, bad magic).
-- Fixture-based tests compare against committed goldens under the normalization in plan §5 (int64 → decimal string, floats by float32 bits).
-- No test frameworks, no mocks of our own code, no snapshot files generated by the code under test (R12).
-- Exception: the Playwright tests of `examples/cdn.html` and of the GitHub Pages demo `docs/index.html` (plan §5, #209), in `examples/tests/`, run by `npm run test:smoke` in the CI `decoder` job.
+- Codec/parser tests include the unhappy path the issue names (truncated input, wrong size, bad
+  magic).
+- Fixture-based tests compare against committed goldens under the normalization in plan §5 (int64 →
+  decimal string, floats by float32 bits).
+- No test frameworks, no mocks of our own code, no snapshot files generated by the code under test
+  (R12).
+- Exception: the Playwright tests of `examples/cdn.html` and of the GitHub Pages demo
+  `docs/index.html` (plan §5, #209), in `examples/tests/`, run by `npm run test:smoke` in the CI
+  `decoder` job.
 
 ## Verification (run before every push; reviewers rerun it)
 
@@ -56,12 +84,41 @@ Used by humans and by the `.claude/skills/` workflows (`implement-issue`, `revie
 npm ci && npm run verify
 ```
 
-From the repo root. `verify` = build every package (TS only, no Docker) + test + `check:browser` + the no-C# guard (`git ls-files '*.cs' '*.csproj' '*.sln'` prints nothing). If `packages/decoder/` changed, also run its `npm test -w texture2ddecoder-wasm` with `wasm/` built locally (`build:wasm`, needs Docker).
+Run it from the repo root. `verify` =
+
+- build every package (TS only, no Docker),
+- test,
+- `check:browser`,
+- the no-C# guard (`git ls-files '*.cs' '*.csproj' '*.sln'` prints nothing).
+
+If `packages/decoder/` changed, also run its `npm test -w texture2ddecoder-wasm` with `wasm/` built
+locally (`build:wasm`, needs Docker).
 
 ## Git and PRs
 
-- Branch from up-to-date `main`: `feature/<issue>-<slug>`, `fix/<issue>-<slug>`, `docs/<issue>-<slug>`.
-- Commits: imperative subject ≤ 50 chars, optional `type:` prefix (`feat:`, `fix:`, `docs:`, `test:`, `chore:`), body explains why. One logical change per commit.
-- One issue per PR. The one exception is a `waves` lane the user approved with several issues in the run's plan (they would otherwise conflict or redo the same fixture build); its PR closes each and says so under **Deviations**. PR body contains `Closes #<issue>`, an Acceptance table (criterion → test or evidence), the verification output summary, and a **Deviations** section (write "None" if none).
-- Versions: every package versions on its own (plan D7). Changing a package's `version` on `main` publishes it (plan D8, [RELEASING.md](../RELEASING.md)), so a version changes only in a release PR, together with that package's `CHANGELOG.md` entry; `scripts/tests/release.test.mjs` fails when the entry is missing. Never change a version in a feature PR.
-- Never push to `main`, never force-push a branch under review, never merge your own PR from a skill. The one exception is `waves`: the user's invocation of it authorizes its merge agent to squash-merge a PR once its review agent found nothing left to fix on the reviewed head, and CI is green on the head it merges: the reviewed head, or that head plus only GitHub's own update-branch merges from `main`.
+- Branch from up-to-date `main`: `feature/<issue>-<slug>`, `fix/<issue>-<slug>`,
+  `docs/<issue>-<slug>`.
+- Commits: imperative subject ≤ 50 chars, optional `type:` prefix (`feat:`, `fix:`, `docs:`,
+  `test:`, `chore:`), body explains why. One logical change per commit.
+- One issue per PR.
+  - The one exception is a `waves` lane the user approved with several issues in the run's plan
+    (they would otherwise conflict or redo the same fixture build). Its PR closes each and says so
+    under **Deviations**.
+- PR body contains:
+  - `Closes #<issue>`;
+  - an Acceptance table (criterion → test or evidence);
+  - the verification output summary;
+  - a **Deviations** section (write "None" if none).
+- Versions: every package versions on its own (plan D7).
+  - Changing a package's `version` on `main` publishes it (plan D8,
+    [RELEASING.md](../RELEASING.md)). So a version changes only in a release PR, together with that
+    package's `CHANGELOG.md` entry; `scripts/tests/release.test.mjs` fails when the entry is
+    missing.
+  - Never change a version in a feature PR.
+- Never push to `main`, never force-push a branch under review, never merge your own PR from a
+  skill.
+  - The one exception is `waves`: the user's invocation of it authorizes its merge agent to
+    squash-merge a PR once its review agent found nothing left to fix on the reviewed head, and CI
+    is green on the head it merges.
+  - The head it merges is the reviewed head, or that head plus only GitHub's own update-branch
+    merges from `main`.

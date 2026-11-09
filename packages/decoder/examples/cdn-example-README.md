@@ -1,12 +1,13 @@
 # CDN Example - README
 
-## Quick Start
+`cdn-example.html` is a single page that loads `texture2ddecoder-wasm` from the jsDelivr CDN. It
+needs no install and no build tools. Serve it over HTTP and open it in a browser.
 
-This example demonstrates using `texture2ddecoder-wasm` loaded directly from jsDelivr CDN without any build tools.
+## Quick Start
 
 ### How to Run
 
-**⚠️ Important:** You must serve this file via an HTTP server. Opening it directly with `file://` will cause CORS errors.
+**Important:** Serve the file over HTTP. Opening it with `file://` causes CORS errors.
 
 #### Option 1: Python HTTP Server (Recommended)
 
@@ -53,18 +54,18 @@ php -S localhost:8000
 
 ## Features
 
-- ✅ **Zero Installation**: No npm packages needed
-- ✅ **CDN Loading**: Library and WASM loaded from jsDelivr
-- ✅ **Real Texture**: Loads and decodes actual 400x400 ETC2 RGBA image
-- ✅ **Interactive**: Test multiple texture formats (BC1, BC3, ETC1, ASTC)
-- ✅ **Visual Output**: Displays decoded images on canvas
+- **Zero installation:** no npm packages needed.
+- **CDN loading:** the library and the WASM load from jsDelivr.
+- **Real texture:** loads and decodes an actual 400x400 ETC2 RGBA image.
+- **Interactive:** test several texture formats (BC1, BC3, ETC1, ASTC).
+- **Visual output:** shows the decoded images on a canvas.
 
 ## What It Does
 
 1. Loads `texture2ddecoder-wasm` from jsDelivr CDN
 2. Initializes WASM module from CDN
 3. Provides buttons to test different texture decoders
-4. **"Load Real ETC2 Image"** button loads `compressed_etc2_rgba_400x400.bin` and displays it
+4. The **"Load Real ETC2 Image"** button loads `compressed_etc2_rgba_400x400.bin` and shows it
 
 ## Troubleshooting
 
@@ -74,7 +75,7 @@ php -S localhost:8000
 Access to fetch at 'file://...' has been blocked by CORS policy
 ```
 
-**Solution:** You're opening the file directly. Use an HTTP server as shown above.
+**Solution:** You opened the file directly. Use an HTTP server as shown above.
 
 ### File Not Found (404)
 
@@ -99,4 +100,4 @@ python -m http.server 8000  # ✅
 
 ## Next Steps
 
-For a better development experience with HMR and build tools, try the [Vite CDN Example](vite-cdn-example/).
+For hot reload (HMR) and build tools, try the [Vite CDN Example](vite-cdn-example/).
