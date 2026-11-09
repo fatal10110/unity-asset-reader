@@ -1,7 +1,7 @@
 {
   "name": "unity-asset-reader-animation",
   "version": "1.0.0",
-  "description": "AnimationClip curves for unity-asset-reader: decoded as AssetStudio's .anim export holds them.",
+  "description": "AnimationClip curves and animated glTF scenes for unity-asset-reader: clips decoded as AssetStudio's .anim export holds them, and scenes with skins, blend shapes and clips (humanoid included) exported to glTF 2.0.",
   "license": "MIT",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -31,6 +31,10 @@
     "animationclip",
     "animation",
     "curves",
+    "gltf",
+    "glb",
+    "skinned-mesh",
+    "humanoid",
     "browser"
   ],
   "peerDependencies": {

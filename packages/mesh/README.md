@@ -12,8 +12,8 @@ browsers, Workers, Node.js.
 npm install unity-asset-reader unity-asset-reader-mesh
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.2.0`, the first core to decode a mesh's vertices),
-so your app has exactly one copy of the parser.
+`unity-asset-reader` is a peer dependency (`^1.3.0`, the first core with the shared glTF writer and
+`formatSingle`), so your app has exactly one copy of the parser.
 
 ## Usage
 

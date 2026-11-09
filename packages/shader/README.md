@@ -13,8 +13,8 @@ anywhere `unity-asset-reader` does, browsers, Workers, Node.js.
 npm install unity-asset-reader unity-asset-reader-shader
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.2.0`, the first core with a `Shader` reader), so
-your app has exactly one copy of the parser.
+`unity-asset-reader` is a peer dependency (`^1.3.0`, the first core with `formatSingle`), so your
+app has exactly one copy of the parser.
 
 ## Usage
 

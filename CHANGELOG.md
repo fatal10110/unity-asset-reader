@@ -128,8 +128,8 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   `asset.data` their friendly shape; `obj.read()` gives the same object as before for a file
   with type trees, and now also reads one without (it threw `UnsupportedError`). It throws
   `UnsupportedError` for a Unity version before 2019.1 (use `readTypeTree()`) and for an editor
-  file. `RectTransform` stays `"Other"`, and `asset.name` of a `GameObject` in a bundle without
-  type trees is still `""`.
+  file. `RectTransform` stayed `"Other"` and `asset.name` of a `GameObject` in a bundle without
+  type trees stayed `""` in this change; both are addressed in this release by #315 and #308.
 
 ### 1.2.0 - 2026-10-29
 
@@ -380,7 +380,7 @@ First release. Peer: `unity-asset-reader@^1`.
   compression (#253).
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
   is unchanged. Needs core 1.3.0; the peer range is now `^1.3.0` (#261).
-- `meshToObj` writes floats about seven times faster through the next core's `formatSingle`
+- `meshToObj` writes floats about seven times faster through core 1.3.0's `formatSingle`
   (a 100k-vertex mesh with UV0 and normals: 0.5 s instead of 3.5 s); the output is unchanged
   (#252).
 - The OBJ equals AssetStudio's for skinned fixture meshes with two blend shapes, tangents,
@@ -466,7 +466,7 @@ First release. Peer: `unity-asset-reader@^1`.
 - Peer: `unity-asset-reader@^1.3.0`, the first core with `formatSingle`.
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
   is unchanged. Needs core 1.3.0; the peer range is now `^1.3.0` (#261).
-- Writing floats is faster through the next core's `formatSingle`; the output is unchanged
+- Writing floats is faster through core 1.3.0's `formatSingle`; the output is unchanged
   (#252).
 - Vulkan programs of Unity 2020.3 and later, stored in SMOL-V encoding version 1, are now decoded
   (as aras-p/smol-v decodes them) and disassembled, where the text used to read
@@ -523,8 +523,9 @@ scene readers.
   as AssetStudio's `ModelConverter` converts it: the nodes and the values at the keys match its
   output float32 bit for bit on the Unity 2019.4, 2020.3 and 6000.3 scene fixtures, the skin and
   morph targets on 2019.4 and 2020.3 (AssetStudio reads no Unity 6000 renderer), and every editor
-  up to 6000.6 exports the same file. Humanoid muscle curves and `m_IsActive` are skipped.
-- Oracle for the humanoid muscle-to-bone conversion to come (#318, no API change): Unity's own
+  up to 6000.6 exports the same file. `m_IsActive` is skipped; humanoid muscle curves are
+  converted by #319 (below).
+- Oracle for the humanoid muscle-to-bone conversion of #319 (#318, no API change): Unity's own
   `HumanPoseHandler.SetHumanPose` poses for the fixture humanoid, every muscle driven, at each
   clip key and midpoint in all four fixture editors, recorded by
   `scripts/make-humanoid-goldens.py` in `fixtures/humanoid-unity-goldens.json` (plan revision
