@@ -31,7 +31,7 @@ test("gltf-validator is for the tests only: not a dependency, not in dist", () =
   const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   assert.deepEqual(manifest.dependencies, undefined);
   assert.deepEqual(manifest.optionalDependencies, undefined);
-  assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^1.2.0" });
+  assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^1.3.0" });
   assert.ok(manifest.devDependencies["gltf-validator"]);
   for (const file of ["index.mjs", "index.cjs", "index.d.ts"]) {
     const text = readFileSync(dist(file), "utf8");

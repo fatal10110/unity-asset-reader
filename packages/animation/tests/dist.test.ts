@@ -33,7 +33,6 @@ test("gltf-validator is for the tests only: not a dependency, not in dist", () =
 
 test("no runtime dependency: core is a peer at the first release with the readers", () => {
   const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-  assert.equal(manifest.version, "0.0.0");
   assert.equal(manifest.dependencies, undefined);
   assert.equal(manifest.optionalDependencies, undefined);
   assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^1.3.0" });

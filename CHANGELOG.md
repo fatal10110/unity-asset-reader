@@ -7,9 +7,9 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 - **Every package versions on its own**: `unity-asset-reader`, `unity-asset-reader-texture`,
   `unity-asset-reader-node`, `unity-asset-reader-mesh`, `unity-asset-reader-audio`,
-  `unity-asset-reader-spine`, `unity-asset-reader-shader` and `texture2ddecoder-wasm` each have
-  their own version, and a package is published only when its version changes. Changing the `version` in a package's
-  `package.json` on `main` is the release.
+  `unity-asset-reader-spine`, `unity-asset-reader-shader`, `unity-asset-reader-animation` and
+  `texture2ddecoder-wasm` each have their own version, and a package is published only when its
+  version changes. Changing the `version` in a package's `package.json` on `main` is the release.
 - Each follows [semver](https://semver.org/). For the reader packages the public API is what the
   package's `dist/index.d.ts` exports. One exception, a maintainer decision (core 1.1.0, #232):
   an exported type that narrows only for input earlier versions refused, such as a field made
@@ -29,7 +29,7 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
 
 ## unity-asset-reader
 
-### 1.3.0 - Unreleased
+### 1.3.0 - 2026-11-09
 
 - A hand-written reader for the legacy `Animation` component (`readAnimation`), Unity 2019.1 to
   6000.6 (#314), with its `asset.data` shape (`toAnimationFields`, `AnimationFields`). AssetStudio
@@ -255,8 +255,9 @@ First release. The core: isomorphic, synchronous, no WASM.
 
 ## unity-asset-reader-texture
 
-### 1.3.0 - Unreleased
+### 1.3.0 - 2026-11-09
 
+- Peer: `unity-asset-reader@^1.3.0`, the first core with `resolveOrThrow`.
 - `decodeSprite`'s new `preferMasterAtlas` option cuts a sprite of a variant `SpriteAtlas` from
   the loaded atlas AssetStudio's loader moves it to, its master atlas, so the result equals
   AssetStudio's `ExportSprite` PNG (#294). Off by default: without it the sprite is cut from its
@@ -366,18 +367,19 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-mesh
 
-### 1.0.1 - Unreleased
+### 1.0.1 - 2026-11-09
 
+- Peer: `unity-asset-reader@^1.3.0`, the first core with `formatSingle` and `GltfWriter`.
 - `meshToGltf` is written with core's new `GltfWriter` instead of the package's own glTF code;
-  its output is unchanged byte for byte on every fixture mesh. Needs the next core (1.3.0), and
-  the peer range is raised at release (#317).
+  its output is unchanged byte for byte on every fixture mesh. Needs core 1.3.0; the peer range
+  is now `^1.3.0` (#317).
 - `meshToObj` and `meshToGltf` draw a submesh with a `baseVertex` on the vertices it offsets
   its indices to, through core's `MeshData.indices` (#257); a 16-bit mesh that offset takes to
   index 65535 or above is written with 32-bit glTF indices. The OBJ equals AssetStudio's for
   the new fixture meshes with UV0, normals, scientific-notation floats, two submeshes and mesh
   compression (#253).
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
-  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
+  is unchanged. Needs core 1.3.0; the peer range is now `^1.3.0` (#261).
 - `meshToObj` writes floats about seven times faster through the next core's `formatSingle`
   (a 100k-vertex mesh with UV0 and normals: 0.5 s instead of 3.5 s); the output is unchanged
   (#252).
@@ -400,7 +402,7 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
 
 ## unity-asset-reader-audio
 
-### 1.1.0 - Unreleased
+### 1.1.0 - 2026-11-09
 
 - `fsb5ToOgg(bytes, headers)` rebuilds an FSB5 Vorbis sample as an Ogg Vorbis file, as
   Fmod5Sharp's `FmodVorbisRebuilder` does. FMOD leaves the Vorbis setup header out of its banks
@@ -439,8 +441,9 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-spine
 
-### 1.0.1 - Unreleased
+### 1.0.1 - 2026-11-09
 
+- Peer: `unity-asset-reader@^1.3.0`, the first core with `resolveOrThrow`.
 - Tests for a split build (atlas asset, Material and page in a second bundle) and for an atlas
   asset of another type; no code change (#254).
 - Skeleton data follows its pointers with core's `resolveOrThrow`; the errors and their messages
@@ -458,10 +461,11 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-shader
 
-### 1.0.1 - Unreleased
+### 1.1.0 - 2026-11-09
 
+- Peer: `unity-asset-reader@^1.3.0`, the first core with `formatSingle`.
 - Floats are written through core's `formatSingle` instead of the package's own copy; the output
-  is unchanged. Needs the next core (1.3.0), and the peer range is raised at release (#261).
+  is unchanged. Needs core 1.3.0; the peer range is now `^1.3.0` (#261).
 - Writing floats is faster through the next core's `formatSingle`; the output is unchanged
   (#252).
 - Vulkan programs of Unity 2020.3 and later, stored in SMOL-V encoding version 1, are now decoded
@@ -493,7 +497,7 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ## unity-asset-reader-animation
 
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-11-09
 
 First release (version 0.0.0 until then: plan revision 2026-11-08c). Peer:
 `unity-asset-reader@^1.3.0`, the first core with the `AnimationClip`, `Avatar`, `Animator` and
