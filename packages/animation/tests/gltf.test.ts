@@ -502,7 +502,7 @@ test("the four editors' scenes export the same glTF, typed and not, 6000.6 inclu
   }
 });
 
-test("muscle curves and m_IsActive are skipped: the humanoid clip writes no animation", () => {
+test("on a generic Avatar muscle curves and m_IsActive are skipped: the humanoid clip writes no animation", () => {
   const gltf = exportOf(fixture("2019.4.41f2", "lz4"));
   const names = gltf.json.animations.map((a) => a.name);
   assert.deepEqual(names.sort(), ["move", "smile"]);

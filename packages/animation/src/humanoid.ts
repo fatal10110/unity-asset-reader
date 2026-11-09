@@ -16,6 +16,9 @@
 //   https://docs.unity3d.com/ScriptReference/HumanDescription.html
 
 import type { Avatar, Axes, Human } from "unity-asset-reader";
+import type { FloatCurve } from "./converter.js";
+import { evaluate } from "./cubic.js";
+import { MUSCLE_COUNT, muscleIndex } from "./muscle.js";
 
 /** A quaternion as x, y, z, w. */
 export type Quat = [number, number, number, number];
@@ -315,4 +318,99 @@ export function basisQuat(x: Vec3, y: Vec3, z: Vec3): Quat {
   }
   const s = Math.sqrt(1 + z[2] - x[0] - y[1]) * 2;
   return [(z[0] + x[2]) / s, (z[1] + y[2]) / s, s / 4, (x[1] - y[0]) / s];
+}
+
+/** The class id of the Animator, which holds a clip's humanoid curves. */
+const CLASS_ANIMATOR = 95;
+const ROOT_Q = ["RootQ.x", "RootQ.y", "RootQ.z", "RootQ.w"];
+
+/** A humanoid clip sampled on an Avatar's human bones: see {@link sampleHumanoid}. */
+export interface HumanoidSamples {
+  /** The sample times, seconds, float32, ascending. */
+  times: number[];
+  /** Each human bone the avatar has: its `m_Human.m_Skeleton` node and its rotation per time. */
+  bones: { node: number; rotations: Quat[] }[];
+}
+
+/**
+ * Sample a clip's humanoid curves as each human bone's local rotation
+ * ({@link humanRotations}), in Unity space.
+ *
+ * The conversion is not linear in the muscles, so the curves' tangents do not
+ * carry over: the clip is sampled at its `m_SampleRate` from 0 to its last
+ * key, and at every key, for linear interpolation between the samples. A
+ * muscle without a curve is 0 and a missing `RootQ` the identity, as
+ * `HumanPose` defaults them; each sample's rotation keeps the hemisphere of
+ * the one before, so interpolating takes the short way. The muscles are found
+ * by index ({@link muscleIndex}), `RootQ` gives the body rotation; `RootT`
+ * (the body position, see {@link humanRotations}), the motion curves
+ * (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...), the finger
+ * muscles (the fingers are not converted) and the translation DoFs are left
+ * out.
+ *
+ * @param avatar the Avatar, with a human description
+ * @param curves the clip's float curves ({@link clipCurves}'s `float`)
+ * @param sampleRate the clip's `m_SampleRate`, samples per second
+ * @returns the samples, or `undefined` when the clip has no muscle or
+ *   `RootQ` curve or the Avatar no Hips
+ */
+export function sampleHumanoid(
+  avatar: Avatar,
+  curves: FloatCurve[],
+  sampleRate: number,
+): HumanoidSamples | undefined {
+  const human = avatar.m_Avatar.m_Human.data;
+  if ((human.m_HumanBoneIndex[HIPS] ?? -1) < 0) return undefined;
+  const muscles: (FloatCurve | undefined)[] = [];
+  const rootQ: (FloatCurve | undefined)[] = [];
+  for (const c of curves) {
+    if (c.classId !== CLASS_ANIMATOR || c.path !== "" || c.keyframes.length === 0) continue;
+    const m = muscleIndex(c.attribute);
+    if (m >= 0) muscles[m] = c;
+    const q = ROOT_Q.indexOf(c.attribute);
+    if (q >= 0) rootQ[q] = c;
+  }
+  const used = [...muscles, ...rootQ].filter((c): c is FloatCurve => c !== undefined);
+  if (used.length === 0) return undefined;
+
+  const times = new Set<number>();
+  let end = 0;
+  for (const c of used) {
+    for (const k of c.keyframes) {
+      // As float32, the sampler's input type: two times the same there are one sample.
+      times.add(Math.fround(k.time));
+      end = Math.max(end, k.time);
+    }
+  }
+  if (sampleRate > 0) {
+    for (let i = 0; i / sampleRate <= end; i++) times.add(Math.fround(i / sampleRate));
+  }
+  const sorted = [...times].sort((a, b) => a - b);
+
+  const bones: HumanoidSamples["bones"] = [];
+  for (let bone = 0; bone < BONES; bone++) {
+    const node = human.m_HumanBoneIndex[bone] ?? -1;
+    if (node >= 0) bones.push({ node, rotations: [] });
+  }
+  const values = new Array<number>(MUSCLE_COUNT);
+  for (const t of sorted) {
+    for (let m = 0; m < MUSCLE_COUNT; m++) {
+      const c = muscles[m];
+      values[m] = c ? evaluate(c.keyframes, t) : 0;
+    }
+    const q = ROOT_Q.map((_, i) => {
+      const c = rootQ[i];
+      return c ? evaluate(c.keyframes, t) : i === 3 ? 1 : 0;
+    }) as Quat;
+    const rotations = humanRotations(avatar, { muscles: values, bodyRotation: q });
+    for (const b of bones) {
+      let r = rotations[b.node]!;
+      const prev = b.rotations[b.rotations.length - 1];
+      if (prev && prev[0] * r[0] + prev[1] * r[1] + prev[2] * r[2] + prev[3] * r[3] < 0) {
+        r = [-r[0], -r[1], -r[2], -r[3]];
+      }
+      b.rotations.push(r);
+    }
+  }
+  return { times: sorted, bones };
 }

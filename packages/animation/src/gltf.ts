@@ -4,13 +4,15 @@
 // right-handed space is ModelConverter's (SetFrame, the bind poses, the morph
 // vertices, the keyframe tracks), the glTF and its cubic splines are not
 // upstream's. The mesh conversion is meshToGltf's (unity-asset-reader-mesh),
-// which this package cannot import (R14).
+// which this package cannot import (R14). A humanoid clip's bone rotations
+// are not upstream's either: humanoid.ts derives them.
 
 import {
   CorruptError,
   GltfWriter,
   UnsupportedError,
   type Animator,
+  type Avatar,
   type Env,
   type GameObject,
   type GltfAnimationChannel,
@@ -31,15 +33,29 @@ import {
   type Sampled,
   type ScalarKey,
 } from "./cubic.js";
+import { qconj, qmul, sampleHumanoid, type Quat } from "./humanoid.js";
 import { children, CLASS, Scene } from "./tos.js";
 
 const MESH_FILTER = 33;
 const SKINNED = CLASS.SkinnedMeshRenderer;
 
-/** A clip to write as one glTF animation: its name and its curves. */
+/** A clip to write as one glTF animation: its name, its curves and its `m_SampleRate`. */
 export interface SceneClip {
   name: string;
   curves: Curves;
+  sampleRate: number;
+}
+
+/**
+ * Where an Avatar's human skeleton is in the glTF: per `m_Human.m_Skeleton`
+ * node its glTF node (-1 when no node has its path), and the rotation of the
+ * nodes between it and its human parent's node (mirrored, `undefined` when
+ * there are none).
+ */
+interface HumanTarget {
+  avatar: Avatar;
+  nodes: number[];
+  between: (Quat | undefined)[];
 }
 
 /** A converted mesh: its glTF index and the full weight of each morph target. */
@@ -138,6 +154,7 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
   };
   const rootIndex = walk(rootGo, rootTransform, "");
   if (parent) parent.children = [rootIndex];
+  const human = animator && humanTarget(scene, animator, nodes, byPath, rootIndex);
 
   // Each node's renderer: a SkinnedMeshRenderer, or a MeshRenderer with its MeshFilter.
   const meshes = new Map<number, WrittenMesh>();
@@ -214,7 +231,7 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
 
   // The clips, named as ConvertAnimations names them: a repeated name gets _1, _2, ...
   const names = new Set<string>();
-  for (const { name, curves } of clips) {
+  for (const { name, curves, sampleRate } of clips) {
     let unique = name;
     for (let i = 1; names.has(unique); i++) unique = `${name}_${i}`;
     names.add(unique);
@@ -232,15 +249,20 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
       });
       channels.push({ sampler: samplers.length - 1, target: { node, path } });
     };
+    // A humanoid clip's human bones: their rotations from the muscles replace
+    // any Transform curve of theirs, so that no node and path get two channels.
+    const humanoid = human ? humanoidChannels(human, curves, sampleRate) : [];
+    const posed = new Set(humanoid.map((h) => h.node));
+    for (const { node, sampled } of humanoid) add(node, "rotation", sampled);
     const rotated = new Set<string>();
     for (const c of curves.position) {
       const node = byPath.get(c.path);
-      if (node === undefined || c.keyframes.length === 0) continue;
+      if (node === undefined || c.keyframes.length === 0 || posed.has(node)) continue;
       add(node, "translation", sampleCurves(split(c.keyframes, (v) => mirror(v.x, v.y, v.z))));
     }
     for (const c of curves.rotation) {
       const node = byPath.get(c.path);
-      if (node === undefined || c.keyframes.length === 0) continue;
+      if (node === undefined || c.keyframes.length === 0 || posed.has(node)) continue;
       rotated.add(c.path);
       const sampled = sampleCurves(split(c.keyframes, (q) => [q.x, -q.y, -q.z, q.w]));
       add(node, "rotation", normalizeRotation(sampled));
@@ -249,6 +271,7 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
       const node = byPath.get(c.path);
       // A path with a quaternion curve keeps it; Unity animates one of the two.
       if (node === undefined || c.keyframes.length === 0 || rotated.has(c.path)) continue;
+      if (posed.has(node)) continue;
       const sampled = eulerSamples(sampleCurves(split(c.keyframes, (v) => [v.x, v.y, v.z])));
       for (const s of sampled.samples) {
         for (const part of [s.value, s.inTangent, s.outTangent]) {
@@ -260,7 +283,7 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
     }
     for (const c of curves.scale) {
       const node = byPath.get(c.path);
-      if (node === undefined || c.keyframes.length === 0) continue;
+      if (node === undefined || c.keyframes.length === 0 || posed.has(node)) continue;
       add(node, "scale", sampleCurves(split(c.keyframes, (v) => [v.x, v.y, v.z])));
     }
     // Blend shape weights: one channel per node, every morph target of its mesh,
@@ -298,6 +321,72 @@ export function writeScene(env: Env, root: ObjectReader, clips: SceneClip[]): Ui
 
   gltf.addScene([ancestors.length > 0 ? 0 : rootIndex]);
   return gltf.toGlb();
+}
+
+/**
+ * The Animator's human skeleton in the glTF, from its Avatar: each human
+ * skeleton node by its path (`m_ID` in `m_TOS`), the skeleton's root the
+ * Animator's own node. `undefined` without an Avatar with a Hips (a generic
+ * one).
+ */
+function humanTarget(
+  scene: Scene,
+  animator: ObjectReader,
+  nodes: GltfNode[],
+  byPath: Map<string, number>,
+  rootIndex: number,
+): HumanTarget | undefined {
+  const ptr = scene.tryGet(scene.read<Animator>(animator).m_Avatar, animator, CLASS.Avatar);
+  if (!ptr) return undefined;
+  const avatar = scene.read<Avatar>(ptr);
+  const human = avatar.m_Avatar.m_Human.data;
+  if ((human.m_HumanBoneIndex[0] ?? -1) < 0) return undefined;
+  const tos = new Map(avatar.m_TOS);
+  const skeleton = human.m_Skeleton.data;
+  const target = skeleton.m_Node.map((node, i) => {
+    if (node.m_ParentId < 0) return rootIndex;
+    const path = tos.get(skeleton.m_ID[i]!);
+    return (path === undefined ? undefined : byPath.get(path)) ?? -1;
+  });
+  const parents = new Map<number, number>();
+  nodes.forEach((n, i) => n.children?.forEach((c) => parents.set(c, i)));
+  // A human bone's rotation is in its human parent's space; nodes the Avatar
+  // left out of the human skeleton between the two keep their own rotation.
+  const between = skeleton.m_Node.map((node, i): Quat | undefined => {
+    const parent = target[node.m_ParentId] ?? -1;
+    if (target[i]! < 0 || parent < 0) return undefined;
+    let q: Quat | undefined;
+    for (let at = parents.get(target[i]!); at !== undefined && at !== parent; at = parents.get(at)) {
+      const r = nodes[at]!.rotation as Quat;
+      q = q ? qmul(r, q) : r;
+    }
+    return q;
+  });
+  return { avatar, nodes: target, between };
+}
+
+/**
+ * A humanoid clip's rotation channels, one per human bone with a node:
+ * `LINEAR` samples of {@link sampleHumanoid}, mirrored as every rotation is.
+ */
+function humanoidChannels(
+  human: HumanTarget,
+  curves: Curves,
+  sampleRate: number,
+): { node: number; sampled: Sampled }[] {
+  const sampled = sampleHumanoid(human.avatar, curves.float, sampleRate);
+  if (!sampled) return [];
+  return sampled.bones.flatMap(({ node, rotations }) => {
+    const target = human.nodes[node] ?? -1;
+    if (target < 0) return [];
+    const between = human.between[node];
+    const samples = rotations.map((r, i) => {
+      const mirrored: Quat = [r[0], -r[1], -r[2], r[3]];
+      const value = between ? qmul(qconj(between), mirrored) : mirrored;
+      return { time: sampled.times[i]!, value, inTangent: [], outTangent: [], keyed: true };
+    });
+    return [{ node: target, sampled: { interpolation: "LINEAR" as const, samples } }];
+  });
 }
 
 /** A vector curve's keys split into one curve per component, each converted by `parts`. */
