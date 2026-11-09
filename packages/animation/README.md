@@ -166,7 +166,8 @@ closest (the bones' joints, each half its length along the bone, weighted by `m_
 was off by 4.7e-3 × the human scale (about 5 mm on the fixture).
 
 The fixture rig leaves these untested: a bind pose with rotated bones, bones between human bones
-(rotations through them are corrected but unchecked), an Avatar with an UpperChest, twist shares
+(rotations through them are corrected but unchecked), a rotated node above the Hips (as Blender's
+`Armature`), an Avatar with an UpperChest, twist shares
 other than 0.5 (so which bone keeps which share), limits other than Unity's defaults, and fingers,
 eyes and jaw (the fingers are not converted).
 

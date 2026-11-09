@@ -206,7 +206,9 @@ export interface HumanPose {
  *   the upper legs to the middle of the upper arms and whose right runs from
  *   the left upper leg and arm to the right ones (Unity's T-pose body frame
  *   `m_RootX` is the identity by it). It is measured with the Hips at the
- *   identity, and the Hips turned by `bodyRotation` times its inverse.
+ *   identity, and the Hips turned by `bodyRotation` times its inverse, in
+ *   the root's space, then made local by the skeleton pose rotations of the
+ *   nodes between the root and the Hips.
  *
  * The Hips position (`bodyPosition`, the body's centre of mass) is not
  * converted: no centre of mass definition met the tolerance (#319).
@@ -261,7 +263,14 @@ export function humanRotations(avatar: Avatar, pose: HumanPose): Quat[] {
   if (hips >= 0) {
     rotations[hips] = [0, 0, 0, 1];
     const body = bodyFrame(avatar, hipsSpace(avatar, rotations));
-    rotations[hips] = qnorm(qmul(qnorm(pose.bodyRotation), qconj(body)));
+    // bodyRotation is in the root's space; the Hips' rotation is local to its
+    // parent, so divide by the skeleton pose rotations above it (root excluded).
+    let above: Quat = [0, 0, 0, 1];
+    for (let at = skeleton.m_Node[hips]!.m_ParentId; at >= 0; at = skeleton.m_Node[at]!.m_ParentId) {
+      if (skeleton.m_Node[at]!.m_ParentId < 0) break;
+      above = qmul(quat(poseX[at]!.q), above);
+    }
+    rotations[hips] = qnorm(qmul(qconj(above), qmul(qnorm(pose.bodyRotation), qconj(body))));
   }
   return rotations;
 }

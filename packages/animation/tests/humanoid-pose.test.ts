@@ -11,9 +11,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import * as gltfValidator from "gltf-validator";
-import type { Animator, Avatar, Env, ObjectReader } from "unity-asset-reader";
+import type { AnimationClip, Animator, Avatar, Env, ObjectReader } from "unity-asset-reader";
 import { clipCurves, sceneToGltf } from "../src/index.js";
 import { evaluate } from "../src/cubic.js";
+import { writeScene } from "../src/gltf.js";
 import { fixtureEnv } from "./helpers.js";
 
 interface Sample {
@@ -198,4 +199,37 @@ test("a humanoid .glb passes the Khronos validator", async () => {
     const errors = report.issues.messages.filter((m) => m.severity === 0);
     assert.deepEqual(errors, [], `${editor} ${name}`);
   }
+});
+
+test("a human bone's Transform curves give way to its humanoid rotation", async () => {
+  const { clip } = cases.find((c) => c.name === "pose")!;
+  const env = fixtureEnv(clip.bundle);
+  const { animator } = humanoid(env);
+  const reader = clipOf(env, "pose");
+  const curves = clipCurves(env, reader);
+  const v = (x: number, y: number, z: number) => ({ x, y, z });
+  const k = <T>(time: number, value: T, slope: T) => ({ time, value, inSlope: slope, outSlope: slope });
+  const zero = v(0, 0, 0);
+  const still = { x: 0, y: 0, z: 0, w: 0 };
+  curves.rotation.push({
+    path: "Hips/Spine",
+    keyframes: [k(0, { x: 0, y: 0, z: 0, w: 1 }, still), k(1, { x: 0, y: 0.6, z: 0, w: 0.8 }, still)],
+  });
+  curves.position.push({ path: "Hips/Spine", keyframes: [k(0, v(0, 0.1, 0), zero), k(1, v(0, 0.3, 0), zero)] });
+  const sampleRate = reader.read<AnimationClip>().m_SampleRate;
+  const glb = writeScene(env, animator, [{ name: "pose", curves, sampleRate }]);
+  const gltf = parse(glb);
+  const spine = gltf.json.nodes.findIndex((n) => n.name === "Spine");
+  assert.ok(spine >= 0);
+  const [animation] = gltf.json.animations;
+  const onSpine = animation!.channels.filter((c) => c.target.node === spine);
+  assert.deepEqual(onSpine.map((c) => c.target.path), ["rotation"]);
+  assert.equal(animation!.samplers[onSpine[0]!.sampler]!.interpolation, "LINEAR");
+  const report = await gltfValidator.validateBytes(glb);
+  assert.deepEqual(report.issues.messages.filter((m) => m.severity === 0), []);
+  // Without the muscles, the same curves do animate the Spine: the path resolves.
+  const generic = { ...curves, float: [] };
+  const plain = parse(writeScene(env, animator, [{ name: "pose", curves: generic, sampleRate }]));
+  const paths = plain.json.animations[0]!.channels.filter((c) => c.target.node === spine).map((c) => c.target.path);
+  assert.deepEqual(paths.sort(), ["rotation", "translation"]);
 });
