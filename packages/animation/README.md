@@ -128,7 +128,7 @@ Full JSDoc is in the bundled `index.d.ts`.
 
 - `UnsupportedError` for:
   - an optimized hierarchy: the Animator's `m_HasTransformHierarchy` false, or a skinned renderer
-    with bind poses but no `m_Bones` (upstream rebuilds those from the Avatar and
+    with bind poses but no `m_Bones` (AssetStudio rebuilds those from the Avatar and
     `m_BoneNameHashes`);
   - a skin glTF cannot hold (bones not one per bind pose, or outside the hierarchy);
   - a mesh without positions or triangles;
@@ -194,7 +194,7 @@ What the file holds:
 - **Nodes**: the root's ancestors and its hierarchy, each GameObject's local position, rotation
   and scale. Inactive GameObjects are written too.
 - **Meshes**: each SkinnedMeshRenderer's mesh, and each MeshRenderer's MeshFilter mesh, from the
-  root down (the ancestors' renderers are left out, as upstream does), with `POSITION`, `NORMAL`
+  root down (the ancestors' renderers are left out, as AssetStudio does), with `POSITION`, `NORMAL`
   and `TEXCOORD_0`. No materials, tangents, colours or other UV channels.
 - **Skins**: joints from the renderer's `m_Bones`, in order, inverse bind matrices from the mesh's
   bind poses, `JOINTS_0` and `WEIGHTS_0` from its bone weights. A renderer without bones writes
@@ -224,13 +224,6 @@ Skipped, since glTF has no channel for them:
   motion curves (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...), the finger muscles and
   the translation DoFs.
 
-## Not included
-
-- YAML (`.anim` text) output.
-- A humanoid clip's body position, finger muscles and root motion (see
-  [Humanoid clips](#humanoid-clips)).
-- `m_CompressedRotationCurves`, which AssetStudio leaves compressed too.
-
 ## Humanoid clips
 
 In short:
@@ -238,7 +231,7 @@ In short:
 - **What is converted**: the muscle curves of a humanoid clip, and its body rotation (`RootQ`),
   become rotations of the human bones in the glTF file.
 - **How accurate**: on the fixture rig, in Unity 2019.4, 2020.3, 6000.3 and 6000.6, every bone's
-  rotation is within 7e-7 rad of Unity's, the Hips' within 2.3e-5 rad (the owner's tolerance:
+  rotation is within 7e-7 rad of Unity's, the Hips' within 2.3e-5 rad (the accepted tolerance is
   1e-3 rad).
 - **What is not converted**: the body position (`RootT`), the finger muscles, the motion curves,
   the IK goals and the translation DoFs (see [glTF scene export](#gltf-scene-export)).
@@ -256,8 +249,8 @@ is derived from the Avatar's own data (`m_Avatar.m_Human`) and Unity's public do
 - [HumanLimit](https://docs.unity3d.com/ScriptReference/HumanLimit.html)
 - [HumanDescription](https://docs.unity3d.com/ScriptReference/HumanDescription.html)
 
-It is checked against the poses the Unity editor makes from the same muscles (the oracle of
-plan §5, `fixtures/humanoid-unity-goldens.json`).
+It is checked against the bone poses the Unity editor makes from the same muscles (recorded in
+the repository's `fixtures/humanoid-unity-goldens.json`).
 
 ### The steps
 
@@ -296,13 +289,19 @@ was off by 4.7e-3 × the human scale (about 5 mm on the fixture).
 - limits other than Unity's defaults;
 - fingers, eyes and jaw (the fingers are not converted).
 
+## Not included
+
+- YAML (`.anim` text) output.
+- A humanoid clip's body position, finger muscles and root motion (see
+  [Humanoid clips](#humanoid-clips)).
+- `m_CompressedRotationCurves`, which AssetStudio leaves compressed too.
+
 ## How it is tested
 
 - `clipCurves()` is tested against the curves of AssetStudio's own `.anim` export, from clips
   built by Unity 2019.4, 2020.3 and 6000.3.
-- Humanoid clips are checked against the bone poses the Unity editor makes from the same muscles,
-  in Unity 2019.4, 2020.3, 6000.3 and 6000.6 (see [Humanoid clips](#humanoid-clips) for the
-  tolerances).
+- Humanoid clips are checked against the bone poses the Unity editor makes from the same muscles:
+  see [Humanoid clips](#humanoid-clips) for the editor versions and tolerances.
 - Euler curves in glTF have no oracle: AssetStudio converts them with the native FBX SDK.
 
 ## Requirements

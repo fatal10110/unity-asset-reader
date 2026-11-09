@@ -70,7 +70,8 @@ const skeletons = spineSkeletons(env);
 ```
 
 If a pointer leads into a file that is not loaded, `spineSkeletons` throws
-`ResourceNotFoundError`, naming that file.
+`ResourceNotFoundError`, naming the SerializedFile it needs (usually `CAB-<hash>`, the file
+inside the other bundle).
 
 ## API reference
 
@@ -101,8 +102,6 @@ These objects are recognized by those field names in their type trees, not by th
 class name, so copies of the classes under other names are found too. (A type tree is the list
 of field names and types that Unity can store in a file for each object type.)
 
-- Pointers are followed across files: load a skeleton's dependency bundles together with it
-  when its atlases or textures are there.
 - A null entry in `atlasAssets` is skipped, as spine-unity does.
 - A skeleton's pages come in the order of its atlas asset's `materials`. spine-unity matches
   them to the pages the atlas text names by texture name.

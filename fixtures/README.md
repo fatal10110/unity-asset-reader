@@ -74,10 +74,10 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `{lz4,lz4-notypetree,stripped}/{audio,font,video}` | 2019.4.41f2, 2020.3.30f1, 6000.3.25f1 | AudioClip (PCM, Vorbis), Font, VideoClip | [Audio, font and video](#audio-font-and-video) | 11 |
 | `{lz4,lz4-notypetree,stripped}/adpcm` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1 | IMA ADPCM AudioClips | [Audio, font and video](#audio-font-and-video) | 11 |
 | `lz4/audiohdr` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1 | five AudioClips for the FSB5 sample header paths (#289) | — | 11 |
-| `shader/{lz4,lz4-notypetree}/<target>` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | two shaders: DX11, GLES3 and Vulkan, Metal | [Shaders](#shaders) | 18 |
+| `shader/{lz4,lz4-notypetree}/<target>` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | two shaders, for `windows` (DX11), `android` (GLES3, Vulkan) and, in 2020.3 and 6000.3.26f1, `ios` (Metal) | [Shaders](#shaders) | 18 |
 | `shader-variants/lz4/<target>` | 6000.3.26f1, 6000.6.4f1 | shader variants in `m_PlayerSubPrograms` (#283) | — | 18 |
 | `sprite/sprites` | 2019.4.41f2, 6000.3.25f1, 6000.6.4f1 | 22 Sprites and two Sprite Atlas V1 assets | [Sprites](#sprites) | 12, 13 |
-| `sprite-v2/sprites`, `sprite-v2-rect/sprites` | 6000.6.4f1 | the same sprites in native Sprite Atlas V2 | [Oracle notes](#oracle-notes) | 13 |
+| `sprite-v2/sprites`, `sprite-v2-rect/sprites` | 6000.6.4f1 | the same sprites in native Sprite Atlas V2 | [Format coverage](#format-coverage) | 13 |
 | `variant/sprites` | 2019.4.41f2, 6000.6.4f1 | a master atlas and its half-scale variant | [AssetStudio references](#plain-format-and-half-scale-variant-assetstudio-references) | 13, 14 |
 | `split-alpha/sprites` | 2019.4.41f2 | sprites on an Android ETC1 texture with split alpha | [2019.4 acceptance fixtures](#20194-acceptance-fixtures-and-rotation-probes) | 14 |
 | `rotation-probe/sprites`, `legacy-probe/sprites` | 2019.4.41f2 | native rotation probes (no Rotate90) | [2019.4 acceptance fixtures](#20194-acceptance-fixtures-and-rotation-probes) | 14 |
@@ -92,7 +92,9 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 
 ## Editor-built fixtures (`bundles/editor/`)
 
-Built with our own Unity project in three editors, per plan §5 and R11. The
+Built with our own Unity projects, per plan §5 and R11. The base variants below come from three
+editors (table); later fixtures add 6000.3.26f1 (6000.3.25f1 was no longer installed) and
+6000.6.4f1 (format 23, `BUILDING.md` section 13). The
 project itself is not committed (R2: no C#); [`BUILDING.md`](BUILDING.md) holds
 its sources and the batch-mode command.
 

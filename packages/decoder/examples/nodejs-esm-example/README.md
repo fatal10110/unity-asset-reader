@@ -67,6 +67,7 @@ const decoded = await decode_astc(astcData, width, height, blockWidth, blockHeig
 ### 5. Working with Files
 ```javascript
 import fs from 'fs';
+import { decode_bc1 } from 'texture2ddecoder-wasm';
 
 // Read texture file
 const textureData = fs.readFileSync('texture.bin');
@@ -84,7 +85,13 @@ The decoded output is in BGRA format (4 bytes per pixel). You can use it with po
 ```javascript
 import sharp from 'sharp';
 
-await sharp(decoded, {
+const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+for (let i = 0; i < rgba.length; i += 4) {
+  const b = rgba[i];
+  rgba[i] = rgba[i + 2];
+  rgba[i + 2] = b;
+}
+await sharp(rgba, {
   raw: { width, height, channels: 4 }
 })
 .toFile('output.png');
@@ -94,8 +101,14 @@ await sharp(decoded, {
 ```javascript
 import Jimp from 'jimp';
 
+const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+for (let i = 0; i < rgba.length; i += 4) {
+  const b = rgba[i];
+  rgba[i] = rgba[i + 2];
+  rgba[i + 2] = b;
+}
 const image = new Jimp(width, height);
-image.bitmap.data = Buffer.from(decoded);
+image.bitmap.data = Buffer.from(rgba);
 await image.writeAsync('output.png');
 ```
 

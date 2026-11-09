@@ -55,6 +55,7 @@ const { decode_bc3 } = require('texture2ddecoder-wasm');
 ### 3. Working with Files
 ```javascript
 const fs = require('fs');
+const { decode_bc1 } = require('texture2ddecoder-wasm');
 
 (async () => {
   // Read texture file
@@ -75,7 +76,13 @@ The decoded output is in BGRA format (4 bytes per pixel). You can use it with po
 const sharp = require('sharp');
 
 (async () => {
-  await sharp(decoded, {
+  const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+  for (let i = 0; i < rgba.length; i += 4) {
+    const b = rgba[i];
+    rgba[i] = rgba[i + 2];
+    rgba[i + 2] = b;
+  }
+  await sharp(rgba, {
     raw: { width, height, channels: 4 }
   })
   .toFile('output.png');
@@ -87,8 +94,14 @@ const sharp = require('sharp');
 const Jimp = require('jimp');
 
 (async () => {
+  const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+  for (let i = 0; i < rgba.length; i += 4) {
+    const b = rgba[i];
+    rgba[i] = rgba[i + 2];
+    rgba[i + 2] = b;
+  }
   const image = new Jimp(width, height);
-  image.bitmap.data = Buffer.from(decoded);
+  image.bitmap.data = Buffer.from(rgba);
   await image.writeAsync('output.png');
 })();
 ```

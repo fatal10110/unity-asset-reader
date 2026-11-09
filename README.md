@@ -185,7 +185,7 @@ A few terms used below:
   - Split files (`.split0`, `.split1`, ...), through `unity-asset-reader-node`.
 - **Bundle compression:** none, LZ4, LZ4HC, LZMA.
 - **SerializedFile formats:** 2 to 23, little- and big-endian.
-- **Classes:** any class, through its type tree. These classes also have a hand-written reader,
+- **Classes:** any class, through its type tree. These classes have a hand-written reader,
   which also reads bundles built without type trees: `AssetBundle`, `TextAsset`,
   `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`,
   `AudioClip`, `VideoClip`, `Font`, `MovieTexture`, `Mesh` (its vertices and triangles

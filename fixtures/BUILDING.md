@@ -19,8 +19,8 @@ How to use it:
 2. Jump to the section for the bundle you need (table of contents below).
 3. Run the numbered steps at the top of that section, then use the details further down when a
    step needs explanation.
-4. Sections 12-28 (below) follow the same pattern; sections 17 and 27 describe the AssetStudio
-   export-golden harness instead of a Unity bundle.
+4. Sections 12-28 (below) mostly follow the same pattern. Sections 15, 16, 17 and 27 are oracle
+   or experiment sections that build no committed Unity bundle.
 
 ## Contents
 
@@ -36,23 +36,23 @@ How to use it:
 - [9. The PVRTC bundle](#9-the-pvrtc-bundle-32) - PVRTC textures (needs the older editor)
 - [10. The `material` bundles](#10-the-material-bundles-40) - Material bundles
 - [11. The media bundles](#11-the-media-bundles-41) - audio, font, video, ADPCM and FSB5 header bundles
-- [12. The `sprite` bundles](#12-the-sprite-bundles-34)
-- [13. Unity 6000.6.4f1 candidate fixtures](#13-unity-600064f1-candidate-fixtures-108-153-155-160-229)
-- [14. Unity 2019.4.41f2 acceptance fixtures and rotation probes](#14-unity-2019441f2-acceptance-fixtures-and-rotation-probes)
-- [15. Complete plain-format and variant pixel references (no Unity rebuild)](#15-complete-plain-format-and-variant-pixel-references-no-unity-rebuild)
-- [16. Bounded native Rotate90 experiment](#16-bounded-native-rotate90-experiment-160)
-- [17. Export goldens: the AssetStudio harness](#17-export-goldens-the-assetstudio-harness-233)
-- [18. The `shader` bundles](#18-the-shader-bundles-237)
-- [19. The `spine` bundles](#19-the-spine-bundles-238)
-- [20. The `mesh` bundles](#20-the-mesh-bundles-253-257-285)
-- [21. The signed-EAC bundles](#21-the-signed-eac-bundles-288)
-- [22. The `animator` bundles](#22-the-animator-bundles-303)
-- [23. The `animation` bundles](#23-the-animation-bundles-302)
-- [24. The `scene` bundles](#24-the-scene-bundles-305)
-- [25. The `legacy-animation` bundles](#25-the-legacy-animation-bundles-314)
-- [26. The `ui-animation` bundles](#26-the-ui-animation-bundles-315)
-- [27. The scene export oracle: AssetStudio's ModelConverter](#27-the-scene-export-oracle-assetstudios-modelconverter-306)
-- [28. The `humanoid` bundles and the humanoid oracle](#28-the-humanoid-bundles-and-the-humanoid-oracle-318)
+- [12. The `sprite` bundles](#12-the-sprite-bundles-34) - sprites, sprite atlases and packer flips
+- [13. Unity 6000.6.4f1 candidate fixtures](#13-unity-600064f1-candidate-fixtures-108-153-155-160-229) - format 23 bundles and 6000.6 sprite atlases
+- [14. Unity 2019.4.41f2 acceptance fixtures and rotation probes](#14-unity-2019441f2-acceptance-fixtures-and-rotation-probes) - 2019.4 acceptance bundles and rotation probes
+- [15. Complete plain-format and variant pixel references (no Unity rebuild)](#15-complete-plain-format-and-variant-pixel-references-no-unity-rebuild) - pixel goldens for every plain format and variant atlas, no Unity build
+- [16. Bounded native Rotate90 experiment](#16-bounded-native-rotate90-experiment-160) - the Rotate90 packer experiment and its result
+- [17. Export goldens: the AssetStudio harness](#17-export-goldens-the-assetstudio-harness-233) - the external .NET harness that runs AssetStudio's exporters
+- [18. The `shader` bundles](#18-the-shader-bundles-237) - shaders for the shader text export
+- [19. The `spine` bundles](#19-the-spine-bundles-238) - spine-unity skeletons, atlases and pages
+- [20. The `mesh` bundles](#20-the-mesh-bundles-253-257-285) - meshes for the mesh reader and exports
+- [21. The signed-EAC bundles](#21-the-signed-eac-bundles-288) - signed EAC textures from etc2comp
+- [22. The `animator` bundles](#22-the-animator-bundles-303) - Avatar, AnimatorController and Animator
+- [23. The `animation` bundles](#23-the-animation-bundles-302) - AnimationClips: streamed, dense and constant curves
+- [24. The `scene` bundles](#24-the-scene-bundles-305) - a GameObject hierarchy with skinned mesh and clips
+- [25. The `legacy-animation` bundles](#25-the-legacy-animation-bundles-314) - legacy Animation components
+- [26. The `ui-animation` bundles](#26-the-ui-animation-bundles-315) - RectTransform hierarchies
+- [27. The scene export oracle: AssetStudio's ModelConverter](#27-the-scene-export-oracle-assetstudios-modelconverter-306) - goldens for the glTF scene export
+- [28. The `humanoid` bundles and the humanoid oracle](#28-the-humanoid-bundles-and-the-humanoid-oracle-318) - the humanoid clip and the Unity-sampled bone poses
 
 ## Editors
 
@@ -68,7 +68,8 @@ older (Unity 2019.2 and earlier) have no fixture.
 ## 1. Create the project (once per editor)
 
 Sets up one Unity project per editor with the test data and the two C# files that build
-the base bundles (`shared`, `main`, `texture`, in four compression variants). You do this
+the base bundles (`shared`, `main`, `texture`, in four variants: `lz4`, `lzma`, `uncompressed`,
+`lz4-notypetree`). You do this
 once per editor, then reuse the project for section 2.
 
 1. Create an empty project folder for the editor.
@@ -266,7 +267,8 @@ That is 16 files per editor, 48 in total, about 150 KB.
 ## 4. Goldens
 
 Regenerates the golden JSON files from the new bundles and explains what a rebuild
-changes. Run this after every copy step in the sections that follow.
+changes. Run this after the copy step of sections 5-12; later sections name their own golden
+scripts.
 
 1. Run the command below.
 2. Replace all of an editor's bundles together if you rebuild.
@@ -540,8 +542,7 @@ goldens record which (`oracleError`, `oracleNote`), see [`README.md`](README.md#
 
 ## 7. The `stripped` bundles (#104)
 
-Two bundles (`lz4` and `uncompressed`) built with the Unity version stripped, which tests
-readers that must cope with a `"0.0.0"` editor version. Built with 6000.3.25f1 and 2020.3.30f1.
+Two bundles (`lz4` and `uncompressed`) built with the Unity version stripped. Built with 6000.3.25f1 and 2020.3.30f1.
 
 1. Create any project with `Assets/Fixtures/strip/hello.txt` and `BuildStripped.cs`.
 2. Build with `-executeMethod BuildStripped.Build`.
@@ -603,7 +604,7 @@ public static class BuildStripped
 ## 8. The `block` bundles (#32)
 
 Two bundles (`block/windows`, `block/android`) holding one 32x16 texture per block-compressed
-format (DXT, BC, ETC, ASTC, Crunch), to test the decoder end to end. Built with 6000.3.25f1.
+format (DXT, BC, ETC, ASTC, Crunch). Built with 6000.3.25f1.
 
 1. Create any project and add `Assets/Editor/BuildBlockTextures.cs` (Android module needed).
 2. Build with `-executeMethod BuildBlockTextures.Build`.
@@ -848,7 +849,7 @@ regenerate the goldens and the AssetStudio cross-check hashes of `decode.test.ts
 ## 10. The `material` bundles (#40)
 
 Three Material bundles per editor (`lz4`, `lz4-notypetree`, `lz4-stripped`), one Material
-with non-default values in every property kind, to test the Material reader on all editors.
+with non-default values in every property kind.
 
 1. Create a project per editor and add the files listed below, with `INT_TYPE` set for that
    editor in `uar.shader`.
@@ -2320,7 +2321,8 @@ To reproduce:
 1. Create an external Unity project for each editor (2019.4.41f2 and 6000.6.4f1).
 2. Run the preparer, then the build method, as in the commands below.
 3. Run legacy and V1 in 2019; V1 and V2 in 6000.6.
-4. Read all four outputs through the oracle and compare with `fixtures/rotate90-experiment.json`.
+4. Read all four outputs through the oracle with `scripts/inspect-rotate90-experiment.py`; it
+   writes `fixtures/rotate90-experiment.json`.
 
 ### The 24 probe configurations
 
@@ -4360,7 +4362,7 @@ than 31 (31sts), the fourth weight is derived.
 ## 21. The signed-EAC bundles (#288)
 
 These bundles test decoding of the signed EAC texture formats in `unity-asset-reader-texture`.
-Unity never compresses to those formats, so the texture blocks come from etc2comp and the
+The importer never compresses to signed EAC, so the texture blocks come from etc2comp and the
 editor only stores them.
 
 To rebuild:
@@ -4998,9 +5000,9 @@ Rerun the goldens, `make-modern-goldens.py` first:
 .venv-oracle/bin/python scripts/make-tpk-trees.py 43 74 90 91 95 221
 ```
 
-`make-tpk-trees.py` writes Unity's player trees of the classes from 2019.1 to
-`fixtures/tpk-trees.json`: AnimationClip (74) for the HumanPose struct the readers share, and
-the four classes.
+`make-tpk-trees.py` writes `fixtures/tpk-trees.json`: Unity's player trees of the classes from
+2019.1, namely AnimationClip (74) for the HumanPose struct the readers share, and the four
+classes.
 
 - Its keys keep the patch release (`2020.3.43f1`). The Animator's 2023.1 fields came to
   2020.3, 2021.3, 2022.1 and 2022.2 in patch releases, which UnityPy's version string, without
@@ -5849,7 +5851,7 @@ typed twin, as in section 22.
 
 Rerun the goldens, `make-modern-goldens.py` first:
 
-- Both `make-modern-goldens.py` and `make-export-goldens.py` now see the five classes
+- Both `make-goldens.py` and `make-modern-goldens.py` now dump the five classes
   (`DUMPED_CLASSES` 1, 4, 23, 33 and 137). The section 22 animator bundles' entries gain their
   GameObjects' and Transforms' dumps. No other entry changes.
 - `make-modern-goldens.py` checks the 6000.6 bundles' counts (its `evidence`).
@@ -6367,9 +6369,10 @@ bundle is built.
 **Steps:**
 
 1. Have the section 24 `scene` bundles committed.
-2. Run `scripts/make-export-goldens.py` (section 17) with the command at the end of this
-   section.
-3. The script fills each `scene` bundle's `models` entry in the golden.
+2. Run `scripts/make-export-goldens.py` (section 17, including its external setup) with the
+   command at the end of this section.
+3. The script fills each `scene` bundle's `models` entry in
+   `fixtures/assetstudio-export-goldens.json`.
 4. `packages/animation/tests/gltf.test.ts` compares `sceneToGltf()` with it.
 
 ### What the script runs
@@ -6470,7 +6473,8 @@ editor, made from code by an editor script.
 3. Build each project once with `-executeMethod BuildHumanoid.Build` and check the log.
 4. Copy the built bundle into `fixtures/bundles/`.
 5. Rerun the goldens, `make-modern-goldens.py` first.
-6. Run the humanoid oracle (`scripts/make-humanoid-goldens.py`, below).
+6. Then rerun the humanoid oracle (`scripts/make-humanoid-goldens.py`, below); it records each
+   bundle's sha256.
 
 ### What is in a bundle
 
@@ -6721,6 +6725,3 @@ byte. Through `heavy --lock unity` (it runs the four editors):
 ```bash
 python3 scripts/make-humanoid-goldens.py --work <scratch dir on the Windows host> --settings '<section 24 project>/uar-305-scene-{version}' --unity 2019.4.41f2=<Unity.exe> --unity 2020.3.30f1=<Unity.exe> --unity 6000.3.26f1=<Unity.exe> --unity 6000.6.4f1=<Unity.exe>
 ```
-
-
-

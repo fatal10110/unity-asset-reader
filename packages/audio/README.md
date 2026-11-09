@@ -72,7 +72,18 @@ if (bank.codec === Fsb5Codec.VORBIS) {
 }
 ```
 
-### Vorbis to Ogg
+### Convert Vorbis clips to Ogg
+
+Vorbis clips need a table of setup headers that you supply, since this package ships none. With
+that table as `headers`:
+
+```js
+const ogg = fsb5ToOgg(clip.data.audioData, headers);
+```
+
+See [Vorbis to Ogg](#vorbis-to-ogg) for where the table comes from and how to build it.
+
+## Vorbis to Ogg
 
 Vorbis is Unity's default compression format. A normal Vorbis stream starts with three header
 packets: an identification header (rate, channels, block sizes), a comment header (tags) and a
@@ -207,13 +218,14 @@ both `import` and `require`. Browsers and Web Workers: ES2020.
 ## Acknowledgements
 
 - [AssetStudio](https://github.com/Razviar/assetstudio) (MIT, © Perfare, RazTools, Razviar): the
-  WAV it writes (`AudioClipConverter.cs`), and the oracle of the test goldens.
+  WAV it writes (`AudioClipConverter.cs`), and the reference output the tests
+  compare against.
 - [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (MIT, © 2021 Sam Byass): the FSB5
   parser, the ADPCM decoders and the Vorbis to Ogg rebuild are hand-ported from it.
 - [python-fsb5](https://github.com/HearthSim/python-fsb5) (MIT, © 2016 Simon Pinfold): second
   reference for the FSB5 parser.
-- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): names the inputs of the test
-  goldens.
+- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): identifies the objects the
+  tests check.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements).
 

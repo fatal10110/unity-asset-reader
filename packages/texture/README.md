@@ -33,14 +33,15 @@ import { encodePng, images } from "unity-asset-reader-texture";
 
 const env = load({ name: "ui.bundle", data: readFileSync("ui.bundle") });
 for await (const image of images(env)) {
-  const { name, rgba, width, height } = image;
-  writeFileSync(`${name}.png`, encodePng({ data: rgba, width, height }));
+  const { kind, name, pathId, rgba, width, height } = image;
+  if (width === 0 || height === 0) continue; // a dynamic font's empty texture has no PNG
+  writeFileSync(`${kind}-${name}-${pathId}.png`, encodePng({ data: rgba, width, height }));
 }
 ```
 
-`images` decodes every `Texture2D` and `Sprite` of the files you loaded. In Node.js the WASM
-decoder loads by itself. In a browser, tell it where the WASM files are: see
-[Where the WASM files come from](#where-the-wasm-files-come-from).
+`images` decodes every `Texture2D`, `Sprite` and Unity 6000.6 packed sprite of the files you
+loaded. In Node.js the WASM decoder loads by itself. In a browser, tell it where the WASM files
+are: see [Where the WASM files come from](#where-the-wasm-files-come-from).
 
 ## Common tasks
 

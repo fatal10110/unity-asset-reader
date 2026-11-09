@@ -52,8 +52,8 @@ import { meshToGltf, meshToObj } from "unity-asset-reader-mesh";
 const env = load({ name: "models.bundle", data: readFileSync("models.bundle") });
 for (const asset of env.assets("Mesh")) {
   const mesh = asset.reader.read();
-  writeFileSync(`${asset.name}.obj`, meshToObj(mesh)); // written as UTF-8
-  writeFileSync(`${asset.name}.glb`, meshToGltf(mesh));
+  writeFileSync(`${asset.name}-${asset.pathId}.obj`, meshToObj(mesh)); // written as UTF-8
+  writeFileSync(`${asset.name}-${asset.pathId}.glb`, meshToGltf(mesh));
 }
 ```
 
@@ -64,7 +64,7 @@ for (const asset of env.assets("Mesh")) {
 | Output | Text (`string`) | Binary `.glb` (`Uint8Array`) |
 | Matches AssetStudio | Yes, byte for byte | No upstream: AssetStudio exports models as FBX |
 | Positions, UV channel 0, normals | Yes | Yes |
-| Tangents, vertex colors | No | Yes, when valid for glTF |
+| Tangents, vertex colours | No | Yes, when valid for glTF |
 | One part per submesh | `g <name>_<i>` group | One triangle primitive |
 
 See [What the OBJ holds](#what-the-obj-holds) and [What the glTF holds](#what-the-gltf-holds)

@@ -8,8 +8,8 @@ How to read it:
 
 - §0 holds the locked decisions D1-D9.
 - §1-§7 cover dependencies, layout, public API, milestones, testing, risks and what is out of scope.
-- §8 covers GitHub tracking and ends with the revision log. Each revision records one change to the
-  plan: its id, its issue or PR, and the reason.
+- §8 covers GitHub tracking and ends with the revision log. Each revision records a change to the
+  plan: its id, usually its issue or PR, and what changed and why.
 
 At a glance:
 

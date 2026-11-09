@@ -23,8 +23,8 @@ A built Unity shader holds two things, and the text shows both:
 npm install unity-asset-reader unity-asset-reader-shader
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.3.0`, the first core with `formatSingle`), so your
-app has exactly one copy of the parser.
+`unity-asset-reader` is a peer dependency (`^1.3.0` or later), so your app has exactly one copy
+of the parser.
 
 ## Usage
 
@@ -150,8 +150,8 @@ The parameters of `m_PlayerSubPrograms` variants are not written (see
 
 - The output is tested against AssetStudio's own `.shader` files.
 - Unity 6 shaders, several keyword variants per stage included, are tested against AssetStudio's
-  converter text in the composite oracle of the plan's section 5 (revision 2026-11-08a). That
-  oracle writes the variants of `m_PlayerSubPrograms` as [described above](#what-the-text-holds).
+  converter text, extended to read the variants of `m_PlayerSubPrograms` as
+  [described above](#what-the-text-holds).
 - The decoder of SMOL-V's newer encoding is tested against goldens from smol-v's
   `source/smolv.cpp`.
 
@@ -166,14 +166,14 @@ or any browser `unity-asset-reader` runs in.
   `shaderToText()` is hand-ported from its `AssetStudio.Utility/ShaderConverter.cs` and
   `SpirVShaderConverter.cs`, and the SMOL-V decoder from its `AssetStudio.Utility/Smolv/`; the
   output is tested against AssetStudio's own `.shader` files, and Unity 6 shaders, several
-  keyword variants per stage included, against its converter's text in the composite oracle.
+  keyword variants per stage included, against its converter's text, extended for Unity 6 variants.
 - [CSspv](https://github.com/Anteru/csspv) (BSD-2-Clause, © 2017 Matthäus G. Chajdas): the SPIR-V
   disassembler is hand-ported from it, as AssetStudio vendors it in `AssetStudio.Utility/CSspv/`.
 - [smol-v](https://github.com/aras-p/smol-v) (MIT or public domain, © 2016-2018 Aras Pranckevicius): the
   SMOL-V format AssetStudio's decoder reads; the decoder of its newer encoding (Unity 2020.3 and
   later) is hand-ported from smol-v's `source/smolv.cpp`, which is also the oracle of its goldens.
-- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): the oracle that names the
-  inputs of the test goldens.
+- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): identifies the objects the
+  tests check.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
 and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).

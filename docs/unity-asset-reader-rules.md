@@ -120,5 +120,5 @@ locally (`build:wasm`, needs Docker).
   - The one exception is `waves`: the user's invocation of it authorizes its merge agent to
     squash-merge a PR once its review agent found nothing left to fix on the reviewed head, and CI
     is green on the head it merges.
-  - The head it merges is the reviewed head, or that head plus only GitHub's own update-branch
+  - It may merge only the reviewed head, or that head plus only GitHub's own update-branch
     merges from `main`.

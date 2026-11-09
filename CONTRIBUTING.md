@@ -24,8 +24,10 @@ npm ci
 npm run verify
 ```
 
-Only a change to the decoder's C++ or its WASM bindings needs Docker and `npm run build:wasm`
-([Building the Project](#building-the-project)).
+Docker is needed only to build the WASM (`npm run build:wasm`,
+[Building the Project](#building-the-project)). The decoder tests and the texture decode tests
+need that WASM; without it they are skipped. Build it when you change the decoder's C++ or its
+WASM bindings.
 
 ## Table of Contents
 
@@ -233,7 +235,8 @@ npm run build:rollup
 npm test
 ```
 
-   For a change outside the decoder, `npm run verify` is enough (no Docker).
+   Without Docker, `npm run verify` builds and tests everything else; the decoder tests and the
+   texture decode tests are skipped. That is enough for a change outside the decoder.
 
 4. **Commit your changes** with clear messages.
 
@@ -253,9 +256,7 @@ git push origin feature/your-feature-name
 
 Before you submit, make sure:
 
-- [ ] The code builds (`npm run build:rollup`)
-- [ ] All tests pass (`npm test`)
-- [ ] There are no linter errors
+- [ ] The code builds and the tests pass (`npm run verify`, which runs `npm test`)
 - [ ] The documentation is updated (README, JSDoc comments)
 - [ ] The commit messages are clear and descriptive
 - [ ] The branch is up to date with `main`
@@ -314,7 +315,7 @@ success, so all of them can be required checks.
 | Status check | Runs when these change | What it does |
 |---|---|---|
 | `reader (node 20)`, `reader (node 22)` | `packages/{core,texture,node,mesh,audio,spine,shader,animation}/**`, `fixtures/**`, `scripts/**`, `.github/**`, root config | `npm ci && npm run verify` (build, test, `check:browser`, no-C# guard) |
-| `reader floor (node 20.19.0)`, `reader floor (node 22.12.0)` | same as `reader` | Tests the lowest versions of the reader packages' `engines` (#172): `npm ci && npm run verify`, then `node scripts/check-node-floor.mjs` (`import` and `require()` of the three packages) |
+| `reader floor (node 20.19.0)`, `reader floor (node 22.12.0)` | same as `reader` | Tests the lowest versions of the reader packages' `engines` (#172): `npm ci && npm run verify`, then `node scripts/check-node-floor.mjs` (`import` and `require()` of `unity-asset-reader`, `unity-asset-reader-texture` and `unity-asset-reader-node`) |
 | `decoder` | `packages/{decoder,core,texture}/**`, `fixtures/**`, `examples/**`, the `docs/` demo, `scripts/check-node-floor.mjs`, `.github/**`, root config | Checks out the submodules, then `build:wasm` (Docker), `build:rollup`, `npm test -w texture2ddecoder-wasm`, the texture package's tests with the WASM, and the Playwright tests (`npm run test:smoke`). Then `scripts/check-node-floor.mjs` with the WASM (`initTexture()` and decodes) on Node.js 20.19.0 and 22.12.0 |
 
 Run the reader job locally with `npm ci && npm run verify`.

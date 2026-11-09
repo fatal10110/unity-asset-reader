@@ -2,8 +2,8 @@
 
 How to set up the reader packages with Vite, Next.js, a plain CDN page, and Node.js (ESM and
 CommonJS). Most packages need no bundler setup. The texture package needs its two WASM files
-served, `unity-asset-reader-node` is for Node.js only, and every setup below runs the reader in a
-Web Worker.
+served, `unity-asset-reader-node` is for Node.js only, and every browser setup below runs the reader
+in a Web Worker.
 
 For `texture2ddecoder-wasm` on its own, see its
 [Bundler Guide](packages/decoder/BUNDLER_GUIDE.md).
@@ -227,8 +227,8 @@ const { loadPath } = require("unity-asset-reader-node");
 In Node.js, `initTexture()` takes no options: the WASM files are found in the installed
 `texture2ddecoder-wasm` package.
 
-**Node.js version.** All three reader packages need Node.js 20.19+ or 22.12+ (`engines`:
-`^20.19.0 || >=22.12.0`), for both `import` and `require`. CI tests on 20.19.0 and 22.12.0.
+**Node.js version.** Every reader package (all but `texture2ddecoder-wasm`) needs Node.js 20.19+
+or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and `require`. CI tests on 20.19.0 and 22.12.0.
 The floor comes from two needs:
 
 - `require()` needs a Node.js that can `require()` an ES module, because the LZMA decoder

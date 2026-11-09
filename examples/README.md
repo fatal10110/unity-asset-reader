@@ -18,6 +18,9 @@ npm ci                               # serve.mjs reads its package list from nod
 node examples/serve.mjs              # then open http://127.0.0.1:8080/examples/cdn.html
 ```
 
+Use that URL, not the `?local` link the server prints: `?local` needs the builds described
+below.
+
 To run the page on this repo's own builds instead of the published packages, see
 [Where the packages come from](#where-the-packages-come-from).
 
@@ -63,8 +66,8 @@ and RGBA pixels that go straight into `ImageData`. The page itself imports nothi
 switches** it to the builds of this repo instead, served by `serve.mjs` under
 `/npm/<name>/+esm`.
 
-Without `?local` the page needs nothing built; any static server will do, `node
-examples/serve.mjs` included. With `?local`, build everything first:
+Without `?local` the page needs nothing built (see [Try it](#try-it)). With `?local`, build
+everything first:
 
 ```bash
 npm ci
