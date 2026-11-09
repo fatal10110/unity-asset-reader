@@ -525,6 +525,13 @@ scene readers.
   clip key and midpoint in all four fixture editors, recorded by
   `scripts/make-humanoid-goldens.py` in `fixtures/humanoid-unity-goldens.json` (plan revision
   2026-11-08e).
+- `sceneToGltf()` converts humanoid clips (#319): with a humanoid Avatar on the root's Animator,
+  the muscle curves and `RootQ` become `LINEAR` rotation channels on the human bones, sampled at
+  the clip's sample rate and every key. The conversion is derived from the Avatar's limits,
+  swing-twist axes and twist shares and Unity's documentation; every bone's rotation is within
+  7e-7 rad of Unity's poses, the Hips' within 2.3e-5 rad, in all four fixture editors (tolerance
+  1e-3 rad). The body position (`RootT`), finger muscles, root motion and IK goals are not
+  converted; the Hips keep their skeleton position.
 
 ## texture2ddecoder-wasm
 

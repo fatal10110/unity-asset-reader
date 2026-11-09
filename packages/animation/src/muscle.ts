@@ -142,3 +142,26 @@ export function muscleName(attribute: number): string {
   }
   throw new Error(`humanoid muscle ${attribute} is past the last one (${LAST - 1})`);
 }
+
+/** The number of muscles `HumanTrait.MuscleName` lists: the body's, then each hand's fingers. */
+export const MUSCLE_COUNT = TDOF_START - MUSCLES_START;
+
+let byName: Map<string, number> | undefined;
+
+/**
+ * A humanoid curve attribute's muscle index, 0 to 94 in `HumanTrait.MuscleName`
+ * order (the order of `HumanPose.muscles`), the inverse of {@link muscleName}
+ * over the muscles: `Spine Front-Back` is 0, `LeftHand.Thumb.1 Stretched` 55.
+ * Upstream's muscle and finger ranges follow each other in that order.
+ *
+ * @param attribute a curve's attribute, as {@link muscleName} names it
+ * @returns the muscle index, or -1 for an attribute that is not a muscle
+ *   (`RootT.x`, `LeftFootT.y`, `ChestTDOF.x`, a generic property)
+ */
+export function muscleIndex(attribute: string): number {
+  if (!byName) {
+    byName = new Map();
+    for (let i = 0; i < MUSCLE_COUNT; i++) byName.set(muscleName(MUSCLES_START + i), i);
+  }
+  return byName.get(attribute) ?? -1;
+}

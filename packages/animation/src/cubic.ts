@@ -23,7 +23,7 @@ export interface Sample {
 
 /** A channel's samples and the interpolation that reproduces its curves between them. */
 export interface Sampled {
-  interpolation: "STEP" | "CUBICSPLINE";
+  interpolation: "STEP" | "LINEAR" | "CUBICSPLINE";
   samples: Sample[];
 }
 
@@ -90,6 +90,17 @@ function at(keys: ScalarKey[], t: number, step: boolean): [number, number, numbe
 }
 
 /**
+ * A curve's value at time `t`, as Unity evaluates it: the Hermite segment,
+ * a stepped segment's left value, and the end keys' values held outside them.
+ *
+ * @param keys the curve's keys, in time order, at least one
+ * @param t the time, seconds
+ */
+export function evaluate(keys: ScalarKey[], t: number): number {
+  return at(keys, t, false)[0];
+}
+
+/**
  * Sample a channel's curves, one per component, for a glTF sampler.
  *
  * The samples are at the union of the components' key times; between its own
@@ -145,13 +156,13 @@ export function sampleCurves(components: ScalarKey[][]): Sampled {
 
 /**
  * The sampler's input and output data: the times, and per sample the values
- * (`STEP`), or the in tangents, the values and the out tangents
+ * (`STEP`, `LINEAR`), or the in tangents, the values and the out tangents
  * (`CUBICSPLINE`), every component of each in turn.
  */
 export function packSampler(sampled: Sampled): { input: Float32Array; output: Float32Array } {
   const { samples, interpolation } = sampled;
   const input = Float32Array.from(samples, (s) => s.time);
-  const parts = interpolation === "STEP"
+  const parts = interpolation !== "CUBICSPLINE"
     ? samples.map((s) => s.value)
     : samples.flatMap((s) => [s.inTangent, s.value, s.outTangent]);
   return { input, output: Float32Array.from(parts.flat()) };

@@ -181,10 +181,21 @@ export interface SceneToGltfOptions {
  *   key (infinite slope) holds its value and jumps one float32 step before
  *   the next key, or makes the whole channel `STEP` when every key is
  *   stepped; weighted tangents fall back to plain Hermite (the curves carry
- *   no weights). Skipped, as glTF has no channel for them: humanoid muscle
- *   curves (until #318), `m_IsActive` and every other float or object
- *   reference curve, curves whose path names no node, and a clip left
- *   without channels.
+ *   no weights). Skipped, as glTF has no channel for them: `m_IsActive`
+ *   and every other float or object reference curve, curves whose path
+ *   names no node, and a clip left without channels.
+ * - Humanoid clips: when the root's Animator has a humanoid Avatar, a clip's
+ *   muscle curves and `RootQ` become a `LINEAR` rotation channel per human
+ *   bone, sampled at the clip's `m_SampleRate` and every key: each muscle an
+ *   angle on its bone's limits, the bone turned by the Avatar's swing-twist
+ *   axes, the twists split as the Avatar sets, the Hips turned to the body
+ *   rotation (derived from the Avatar and Unity's documentation, checked
+ *   against Unity's own poses; the package README describes each step).
+ *   These replace any Transform curve on the human bones. Not converted:
+ *   the body position (`RootT`; the Hips keep their skeleton position, as
+ *   no centre of mass definition met #319's tolerance), the finger muscles,
+ *   `MotionT`/`MotionQ`, the IK goals and the translation DoFs. Without a
+ *   humanoid Avatar, muscle curves are skipped.
  *
  * Isomorphic and sync.
  *
@@ -215,7 +226,8 @@ export function sceneToGltf(
 ): Uint8Array {
   const clips = (options.clips ?? []).map((clip) => {
     const curves = clipCurves(env, clip);
-    return { name: clip.read<AnimationClip>().m_Name, curves };
+    const { m_Name: name, m_SampleRate: sampleRate } = clip.read<AnimationClip>();
+    return { name, curves, sampleRate };
   });
   return writeScene(env, root, clips);
 }
