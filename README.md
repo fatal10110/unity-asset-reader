@@ -20,7 +20,7 @@ You do not need Unity, .NET, or a native application installed.
 | Convert audio clips to WAV (or Vorbis clips to Ogg) | Add `unity-asset-reader-audio` |
 | Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
 | Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
-| Decode animation clips into curves (paths, keyframes, events) | Add `unity-asset-reader-animation` |
+| Decode animation clips into curves, or export an animated scene to glTF (`.glb`) | Add `unity-asset-reader-animation` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
 
 Every package except `texture2ddecoder-wasm` builds on the core: the feature packages list
@@ -57,8 +57,10 @@ installs `texture2ddecoder-wasm` automatically.
   write Direct3D programs, and its text is not a shader Unity can compile.
 - **[Animation](packages/animation/README.md):** decode an `AnimationClip` into the curves
   AssetStudio's `.anim` export holds, with `clipCurves(env, clip)`: per curve its path,
-  attribute and keyframes, and the clip's events. It does not write `.anim` YAML, and does not
-  convert humanoid muscle curves to bone rotations.
+  attribute and keyframes, and the clip's events. `sceneToGltf(env, root, { clips })` exports a
+  scene (nodes, skinned meshes, blend shapes) with its clips as a glTF 2.0 `.glb`, humanoid clips
+  converted to bone rotations. It does not write `.anim` YAML, and a humanoid clip's root
+  (Hips) position is not written.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -133,7 +135,7 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
   - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
   - [`unity-asset-reader-shader`](packages/shader/README.md): `shaderToText()`.
-  - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`.
+  - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`, `sceneToGltf()`.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 

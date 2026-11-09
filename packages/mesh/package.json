@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-mesh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Mesh export for unity-asset-reader: Wavefront OBJ, as AssetStudio writes it, and glTF 2.0 (.glb).",
   "license": "MIT",
   "main": "dist/index.cjs",
@@ -36,7 +36,7 @@
     "browser"
   ],
   "peerDependencies": {
-    "unity-asset-reader": "^1.2.0"
+    "unity-asset-reader": "^1.3.0"
   },
   "devDependencies": {
     "gltf-validator": "2.0.0-dev.3.10",
