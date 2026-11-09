@@ -5,7 +5,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { crc32 } from "../src/crc.js";
 import { clipCurves, type ClipCurves } from "../src/index.js";
-import { asGolden, exportGoldens, fixtureEnv, objectOf, type GoldenAnim } from "./helpers.js";
+import {
+  asAssetStudioWithoutHierarchy,
+  asGolden,
+  exportGoldens,
+  fixtureEnv,
+  objectOf,
+  type GoldenAnim,
+} from "./helpers.js";
 
 const clips = Object.entries(exportGoldens).flatMap(([fixture, files]) =>
   Object.entries(files).flatMap(([file, entries]) =>
@@ -35,19 +42,26 @@ function asAssetStudioWithoutRenderer(curves: ClipCurves): ClipCurves {
   return { ...curves, float };
 }
 
+/** The curves as AssetStudio wrote them, by the golden's verdict. */
+function asAssetStudio(curves: ClipCurves, verdict: string | undefined): ClipCurves {
+  if (verdict === undefined) return curves;
+  if (verdict.startsWith("c37af7d's Animator reader")) return asAssetStudioWithoutHierarchy(curves);
+  return asAssetStudioWithoutRenderer(curves);
+}
+
 const has = (kind: keyof GoldenAnim["curves"], pick = (_: GoldenAnim) => true) =>
   clips.some((c) => c.anim.curves[kind].length > 0 && pick(c.anim));
 
 test("every AnimationClip AssetStudio exports converts to the curves and events of its .anim", () => {
   // Every clip of 2019.4, 2020.3 and 6000.3, typed and not; two of 6000.6 (BUILDING.md, 17).
   // And the three typed `pose` clips of the humanoid oracle's bundles (BUILDING.md, 28).
-  assert.equal(clips.length, 119);
+  assert.equal(clips.length, 125);
   for (const c of clips) {
     const env = fixtureEnv(c.fixture);
     const curves = clipCurves(env, objectOf(env, c.file, c.pathId));
-    const got = asGolden(c.verdict ? asAssetStudioWithoutRenderer(curves) : curves);
+    const got = asGolden(asAssetStudio(curves, c.verdict));
     const where = `${c.fixture} ${c.name}`;
-    if (c.verdict)
+    if (c.verdict?.startsWith("c37af7d's Renderer reader"))
       assert.ok(
         curves.float.some((x) => x.attribute.startsWith("blendShape.")),
         where,

@@ -36,6 +36,7 @@ import { readMonoScript, type MonoScript } from "./MonoScript.js";
 import { readSprite, type Sprite } from "./Sprite.js";
 import { readSpriteAtlas, type SpriteAtlas } from "./SpriteAtlas.js";
 import { readTextAsset, type TextAsset } from "./TextAsset.js";
+import { readRectTransform, type RectTransform } from "./RectTransform.js";
 import { readTransform, type Transform } from "./Transform.js";
 import { readAudioClipData, type AudioClipData } from "./AudioClip.js";
 import { readFont, type Font } from "./Font.js";
@@ -66,6 +67,7 @@ import {
   toTextAssetFields,
   toTexture2DFields,
   toTransformFields,
+  toRectTransformFields,
   toVideoClipFields,
   type AnimationClipFields,
   type AnimatorControllerFields,
@@ -79,6 +81,7 @@ import {
   type MeshRendererFields,
   type SkinnedMeshRendererFields,
   type TransformFields,
+  type RectTransformFields,
   type AudioClipFields,
   type FontFields,
   type MaterialFields,
@@ -161,6 +164,7 @@ export interface ObjectDataMap {
   AnimationClip: AnimationClip;
   GameObject: GameObject;
   Transform: Transform;
+  RectTransform: RectTransform;
   MeshFilter: MeshFilter;
   MeshRenderer: MeshRenderer;
   SkinnedMeshRenderer: SkinnedMeshRenderer;
@@ -195,6 +199,7 @@ export interface AssetDataMap {
   AnimationClip: AnimationClipFields;
   GameObject: GameObjectFields;
   Transform: TransformFields;
+  RectTransform: RectTransformFields;
   MeshFilter: MeshFilterFields;
   MeshRenderer: MeshRendererFields;
   SkinnedMeshRenderer: SkinnedMeshRendererFields;
@@ -250,6 +255,7 @@ const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDa
   AnimationClip: readAnimationClip,
   GameObject: readGameObject,
   Transform: readTransform,
+  RectTransform: readRectTransform,
   MeshFilter: readMeshFilter,
   MeshRenderer: readMeshRenderer,
   SkinnedMeshRenderer: readSkinnedMeshRenderer,
@@ -335,6 +341,7 @@ const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   AnimationClip: toAnimationClipFields,
   GameObject: toGameObjectFields,
   Transform: toTransformFields,
+  RectTransform: toRectTransformFields,
   MeshFilter: toMeshFilterFields,
   MeshRenderer: toMeshRendererFields,
   SkinnedMeshRenderer: toSkinnedMeshRendererFields,

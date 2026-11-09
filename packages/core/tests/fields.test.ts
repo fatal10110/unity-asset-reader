@@ -173,6 +173,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "MeshRenderer",
       "MonoBehaviour",
       "MonoScript",
+      "RectTransform",
       "Shader",
       "SkinnedMeshRenderer",
       "Sprite",

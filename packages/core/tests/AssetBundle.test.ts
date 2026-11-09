@@ -129,8 +129,9 @@ test("the AssetBundle checks cover formats 21 and 22, typed and not, every edito
   // skeletons (#238) and split atlas (#254), the mesh bundle of each of the
   // three editors (#253) and their adpcm bundles (#251), and their skinned
   // mesh bundles (#285), and the animator (#303), animation (#302), scene
-  // (#305) and legacy-animation (#314) bundles of 2019.4, 2020.3 and 6000.3.26f1.
-  assert.equal(NO_TYPE_TREE.length, 55);
+  // (#305), legacy-animation (#314) and ui-animation (#315) bundles of 2019.4,
+  // 2020.3 and 6000.3.26f1.
+  assert.equal(NO_TYPE_TREE.length, 58);
 });
 
 // --- m_Container entries, resolved ----------------------------------------------

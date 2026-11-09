@@ -202,6 +202,12 @@ BLENDSHAPE_VERDICT = ("c37af7d's Renderer reader fails on this file's SkinnedMes
                       "attribute as its CRC-32 (blendShape.<hash>); unity-asset-reader-animation "
                       "reads the renderer and names it from the mesh's channel (blendShape."
                       "<name>); the golden is compared with each name replaced by its CRC-32")
+ANIMATOR_VERDICT = ("c37af7d's Animator reader lacks m_AnimatePhysics, which Unity writes before "
+                    "m_HasTransformHierarchy from 2023.1, so it reads that byte (false) as "
+                    "m_HasTransformHierarchy and AddAnimatorTOS names nothing from the "
+                    "hierarchy of the Animator that plays the clip (UnityPy reads it true), "
+                    "leaving each path as path_<hash>; unity-asset-reader-animation names them; "
+                    "the golden is compared with each named path replaced by path_<CRC-32> (#315)")
 # The scene fixtures (#305) whose Animator ModelConverter converts (#306): the fixture
 # set (the third part of the key) -> the names of the GameObjects whose Animator it takes.
 MODEL_ROOTS = {"scene": ["scene"]}
@@ -1282,6 +1288,35 @@ def unitypy_object_hashes(key: str) -> dict[tuple[str, str], str] | None:
         config.FALLBACK_UNITY_VERSION = None
 
 
+def unitypy_hierarchy_clips(key: str) -> set[str]:
+    """The path ids of the clips an Animator plays whose m_AnimatePhysics (2023.1+) is false
+    and m_HasTransformHierarchy true, as UnityPy 1.25.3 reads them (empty if it cannot)."""
+    config.FALLBACK_UNITY_VERSION = editor_of(key)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            env = UnityPy.load(str(FIXTURES / key))
+            objects = {(obj.assets_file.name, obj.path_id): obj for obj in env.objects}
+            clips = set()
+            for obj in env.objects:
+                if obj.type.name != "Animator":
+                    continue
+                tree = obj.read_typetree()
+                if tree.get("m_AnimatePhysics", True) or not tree["m_HasTransformHierarchy"]:
+                    continue
+                ptr = tree["m_Controller"]
+                controller = objects.get((obj.assets_file.name, ptr["m_PathID"]))
+                if ptr["m_FileID"] != 0 or controller is None:
+                    continue
+                clips |= {str(clip["m_PathID"])
+                          for clip in controller.read_typetree().get("m_AnimationClips", [])}
+            return clips
+    except Exception:  # noqa: BLE001 - format 23 (modern-goldens.json) needs UnityPy 1.25.4
+        return set()
+    finally:
+        config.FALLBACK_UNITY_VERSION = None
+
+
 class Host:
     """Runs the .NET tools, translating paths for a Windows dotnet.exe called from WSL."""
 
@@ -1560,6 +1595,7 @@ def main() -> None:
             result["exportError"] = "nondeterministic: AssetStudio's output differs between two runs"
 
     hashes: dict[str, dict | None] = {}
+    hierarchy_clips: dict[str, set[str]] = {}
     fixtures: dict = {}
     for index, job in enumerate(flat):
         key, result = job["fixture"], results.get(index)
@@ -1623,6 +1659,16 @@ def main() -> None:
                         and not re.fullmatch(r"path_\d+", c["path"])
                         for c in entry["anim"]["curves"]["float"])):
             entry["verdict"] = BLENDSHAPE_VERDICT
+        # A clip an Animator plays whose every path AssetStudio left hashed
+        # (#315): its Animator reader misreads m_HasTransformHierarchy from
+        # 2023.1, so only an Avatar could have named some.
+        paths = {c["path"] for curves in entry.get("anim", {}).get("curves", {}).values()
+                 for c in curves} - {""}
+        if paths and all(re.fullmatch(r"path_\d+", path) for path in paths):
+            if key not in hierarchy_clips:
+                hierarchy_clips[key] = unitypy_hierarchy_clips(key)
+            if job["pathId"] in hierarchy_clips[key]:
+                entry["verdict"] = ANIMATOR_VERDICT
         if ("exportError" in entry) == any(k in entry for k in OUTPUTS):
             raise SystemExit(f"{where}: want an export or an exportError, got {sorted(result)}")
         fixtures.setdefault(key, {}).setdefault(job["file"], {})[job["pathId"]] = entry

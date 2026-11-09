@@ -26,6 +26,7 @@ export const CLASS = {
   Animator: 95,
   Animation: 111,
   SkinnedMeshRenderer: 137,
+  RectTransform: 224,
 } as const;
 
 /**
@@ -46,22 +47,24 @@ export class Scene {
 
   /**
    * The object a pointer reaches when it is of class `classId` (upstream
-   * `PPtr<T>.TryGet`), or `undefined`.
+   * `PPtr<T>.TryGet`), or `undefined`. A `RectTransform` (224) counts as a
+   * `Transform` (4), as upstream's class derives from it.
    */
   tryGet(pptr: PPtr, from: ObjectReader, classId: number): ObjectReader | undefined {
     const found = this.env.resolve(pptr, from);
-    return found.status === "found" && found.object.type === classId ? found.object : undefined;
+    if (found.status !== "found") return undefined;
+    const type = found.object.type;
+    const matches =
+      type === classId || (classId === CLASS.Transform && type === CLASS.RectTransform);
+    return matches ? found.object : undefined;
   }
 
   /**
    * A GameObject's last component of class `classId`: upstream's
    * `AssetsManager` sets `m_Transform`, `m_SkinnedMeshRenderer` and
    * `m_MeshRenderer` going through `m_Component` in order, each later one
-   * replacing the one before.
-   *
-   * ponytail: upstream's `Transform` includes `RectTransform` (224), which has
-   * no reader in core; only class 4 counts, so a UI hierarchy's paths stay
-   * unresolved. Upgrade: a RectTransform reader in core (#315).
+   * replacing the one before. A `RectTransform` counts as a `Transform`
+   * (see {@link Scene.tryGet}).
    */
   component(go: ObjectReader, classId: number): ObjectReader | undefined {
     let last: ObjectReader | undefined;
@@ -161,7 +164,8 @@ export function children(
 /**
  * The paths of a GameObject's hierarchy by their CRC-32 (upstream
  * `BuildTOS(GameObject)`): each child, by `m_Children`, as the names from the
- * GameObject down joined with `/`, the GameObject itself `""` at 0.
+ * GameObject down joined with `/`, the GameObject itself `""` at 0. A UI
+ * hierarchy's `RectTransform`s count as Transforms, as upstream.
  *
  * @throws {Error} when a GameObject on the way has no Transform, where
  *   upstream throws `NullReferenceException`

@@ -64,18 +64,21 @@ const FIXTURES = [
     "editor/6000.6.4f1/animator/lz4-notypetree/animator",
     "editor/6000.6.4f1/legacy-animation/lz4/legacy-animation",
     "editor/6000.6.4f1/legacy-animation/lz4-notypetree/legacy-animation",
+    "editor/6000.6.4f1/ui-animation/lz4/ui-animation",
+    "editor/6000.6.4f1/ui-animation/lz4-notypetree/ui-animation",
   ]),
 ].sort();
 
 const loadName = (name: string): Env => load([{ name, data: loadFixture(name) }]);
 
-test("the scene, animator, legacy-animation and humanoid bundles are the fixtures that hold the five classes", () => {
+test("the scene, animator, legacy-animation, ui-animation and humanoid bundles are the fixtures that hold the five classes", () => {
   // The animator bundles (#303) hold GameObjects and Transforms too, the
   // legacy-animation ones (#314) a SkinnedMeshRenderer as well, and so do the
-  // humanoid oracle's (#318), those of goldens.json (6000.6's is not listed above).
+  // humanoid oracle's (#318), those of goldens.json (6000.6's is not listed above);
+  // the ui-animation ones (#315) GameObjects only (their Transforms are RectTransforms).
   const others = FIXTURES.filter((name) => !SCENE.includes(name));
   const animator = EDITORS.flatMap((e) =>
-    ["animator", "legacy-animation"].flatMap((set) =>
+    ["animator", "legacy-animation", "ui-animation"].flatMap((set) =>
       ["lz4", "lz4-notypetree"].map((kind) => `editor/${e}/${set}/${kind}/${set}`),
     ),
   );

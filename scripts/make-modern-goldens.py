@@ -123,8 +123,8 @@ def evidence(name, path):
         if obj.type.name in ("AnimationClip", "Animator", "AnimatorController",
                              "AnimatorOverrideController", "Avatar"):
             animation[obj.type.name] = animation.get(obj.type.name, 0) + 1
-        if obj.type.name in ("GameObject", "Transform", "MeshFilter", "MeshRenderer",
-                             "SkinnedMeshRenderer", "Mesh"):
+        if obj.type.name in ("GameObject", "Transform", "RectTransform", "MeshFilter",
+                             "MeshRenderer", "SkinnedMeshRenderer", "Mesh"):
             scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
         if obj.type.name == "Animation":
             components.append(obj.read_typetree())
@@ -239,6 +239,15 @@ def evidence(name, path):
                           "m_UpdateMode": 1, "m_CullingType": 1}, fields
         return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
                 "listed": listed}
+    if "/ui-animation/" in name:
+        # The ui-animation fixtures (#315): the "ui" prefab (a Canvas and
+        # three children, all RectTransforms), whose Animator has no Avatar
+        # and plays "ui"; no Avatar anywhere.
+        assert scene == {"GameObject": 4, "RectTransform": 4}, scene
+        assert animation == {"AnimationClip": 1, "Animator": 1, "AnimatorController": 1}, animation
+        animator = next(obj.read_typetree() for obj in env.objects if obj.type.name == "Animator")
+        assert animator["m_Avatar"]["m_PathID"] == 0, animator["m_Avatar"]
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items()))}
     if "/animation/" in name:
         # The animation fixtures (#302): one legacy clip, whose curves stay in
         # the curve arrays, and five Mecanim clips, whose curves land in the
@@ -299,6 +308,8 @@ def main():
         # The legacy Animation component (#314) and the clip it lists.
         ("legacy-animation/lz4", "legacy-animation"),
         ("legacy-animation/lz4-notypetree", "legacy-animation"),
+        # RectTransform (#315): a UI hierarchy an Avatar-less Animator plays.
+        ("ui-animation/lz4", "ui-animation"), ("ui-animation/lz4-notypetree", "ui-animation"),
     ]]
     result = {
         "_oracle": "UnityPy " + UnityPy.__version__,

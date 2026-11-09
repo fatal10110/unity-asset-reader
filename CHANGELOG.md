@@ -36,6 +36,15 @@ version first. How to release is in [RELEASING.md](RELEASING.md).
   reads `m_Animation` and `m_Animations` only; the rest comes from Unity's own type trees:
   `m_WrapMode`, `m_PlayAutomatically`, `m_AnimatePhysics`, `m_CullingType` and, from 2023.1,
   `m_UpdateMode`.
+- A hand-written reader for `RectTransform` (`readRectTransform`), Unity 2019.1 to 6000.6 (#315),
+  with its `asset.data` shape (`toRectTransformFields`, `RectTransformFields`). AssetStudio reads
+  only the `Transform` fields; `m_AnchorMin`, `m_AnchorMax`, `m_AnchoredPosition`, `m_SizeDelta`
+  and `m_Pivot` come from Unity's own type trees.
+  **Behavior change:** `RectTransform` was `"Other"` in `env.assets()`, with `asset.data` and
+  `obj.read()` the type tree's result. Now `asset.type` is `"RectTransform"` and `asset.data`
+  its friendly shape; `obj.read()` gives the same object as before for a file with type trees,
+  and now also reads one without (it threw `UnsupportedError`). It throws `UnsupportedError` for
+  a Unity version before 2019.1 (use `readTypeTree()`) and for an editor file.
 - `GltfWriter`: a sync, dependency-free writer of binary glTF 2.0 files (`.glb`), moved from
   `unity-asset-reader-mesh` and extended (#317). It writes accessors, meshes, nodes with
   translation, rotation and scale, skins (joints, inverse bind matrices, `JOINTS_0` /
@@ -495,7 +504,7 @@ scene readers.
   its path (and attribute and class id) and keyframes (time, value, in and out slope), and the
   clip's events. A Mecanim clip's streamed, dense and constant data is decoded as AssetStudio's
   `AnimationClipConverter` does, its path hashes named from the loaded Avatars, Animators and
-  legacy Animation components (#314),
+  legacy Animation components (#314), through `RectTransform` hierarchies too (#315),
   humanoid curves as muscle attributes; legacy curves are merged as `Convert()` merges them.
   Pure TypeScript, sync, browser-safe, no dependencies. Every fixture clip of Unity 2019.4,
   2020.3 and 6000.3 matches AssetStudio's curves float32 bit for bit. The dense and constant

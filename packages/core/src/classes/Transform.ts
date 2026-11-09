@@ -34,7 +34,7 @@ export interface Transform extends EditorExtension {
  * keep this one layout from 2019.1 to 6000.6, as upstream reads it. The
  * object must end exactly there.
  *
- * A `RectTransform` (class 224) is not read here.
+ * A `RectTransform` (class 224) is read by `readRectTransform`.
  *
  * @param reader the object's reader, rewound first and left at its end
  * @throws {UnsupportedError} of kind `"Unity version"`, with the file's own
@@ -50,14 +50,30 @@ export function readTransform(reader: ObjectReader): Transform {
   // Filled in field order, so the keys come out in the order Unity wrote them.
   const out: Partial<Transform> = readEditorExtension(reader);
   assumingLayout(reader, "Transform", () => {
-    out.m_GameObject = readPPtr(reader);
-    out.m_LocalRotation = readFloat4(reader);
-    out.m_LocalPosition = readFloat3(reader);
-    out.m_LocalScale = readFloat3(reader);
-    out.m_Children = readArray(reader, "Transform", "m_Children", readPPtr);
-    out.m_Father = readPPtr(reader);
+    readTransformFields(reader, "Transform", out);
     endOfObject(reader, "Transform");
   });
   // Every field was set above.
   return out as Transform;
+}
+
+/**
+ * Read the `Transform` fields after the `EditorExtension` ones into `out`, in
+ * Unity's order: `m_GameObject` to `m_Father` (a `RectTransform` reads them
+ * too, then its own).
+ *
+ * @param owner the class named in errors
+ * @throws {CorruptError} when the object ends early
+ */
+export function readTransformFields(
+  reader: ObjectReader,
+  owner: string,
+  out: Partial<Transform>,
+): void {
+  out.m_GameObject = readPPtr(reader);
+  out.m_LocalRotation = readFloat4(reader);
+  out.m_LocalPosition = readFloat3(reader);
+  out.m_LocalScale = readFloat3(reader);
+  out.m_Children = readArray(reader, owner, "m_Children", readPPtr);
+  out.m_Father = readPPtr(reader);
 }

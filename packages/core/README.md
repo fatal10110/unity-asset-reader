@@ -263,7 +263,7 @@ trees (`BuildAssetBundleOptions.DisableWriteTypeTree`). The table lists the main
 version; `Texture2D` has no floor: it reads any older version with its oldest layout. Unity 2019.1
 is the supported floor: a reader added since that decision (`Mesh`, `Avatar`, `AnimatorController`,
 `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`,
-`MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer`) starts there, and the older readers keep the older
+`RectTransform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer`) starts there, and the older readers keep the older
 layouts they already had.
 
 | Class | Main fields of `asset.data` | From | Fixture |
@@ -290,13 +290,14 @@ layouts they already had.
 | `Animation` (`AnimationFields`) | A legacy `Animation` component: `clip` (the default one) and `clips` (pointers), `gameObject`, `enabled`, `wrapMode`, `playAutomatically`, `animatePhysics`, `cullingType`, `updateMode` (2023.1+) | 2019.1 | Yes, and 6000.6 |
 | `GameObject` (`GameObjectFields`) | `component` (each `{ component }` pointer, the `Transform` first), `layer`, `name`, `tag`, `isActive` | 2019.1 | Yes, and 6000.6 |
 | `Transform` (`TransformFields`) | `gameObject`, `localRotation`, `localPosition`, `localScale`, `children`, `father` (pointers to the parent and child `Transform`s) | 2019.1 | Yes, and 6000.6 |
+| `RectTransform` (`RectTransformFields`) | A UI element's `Transform`: the `Transform` fields, then `anchorMin`, `anchorMax`, `anchoredPosition`, `sizeDelta`, `pivot` | 2019.1 | Yes, and 6000.6 |
 | `MeshFilter` (`MeshFilterFields`) | `gameObject`, `mesh` | 2019.1 | Yes, and 6000.6 |
 | `MeshRenderer` (`MeshRendererFields`) | `materials`, `gameObject`, `enabled`, the shadow, probe, lightmap and sorting settings, `additionalVertexStreams` | 2019.1 | Yes, and 6000.6 |
 | `SkinnedMeshRenderer` (`SkinnedMeshRendererFields`) | `mesh`, `bones`, `rootBone`, `blendShapeWeights`, `aabb`, `quality`, and the renderer fields as `MeshRenderer` | 2019.1 | Yes, and 6000.6 |
 
 "Yes" is all three fixture editors. The animation classes' nested runtime structs keep their raw
 arrays: curves and muscle values are not decoded. Every other class (`Camera`, `Light`,
-`RectTransform`, ...) comes from its type tree. In a bundle without type trees, `obj.read()`
+`Canvas`, ...) comes from its type tree. In a bundle without type trees, `obj.read()`
 throws `UnsupportedError` for them. The class readers are for player builds; see
 [Not supported](#not-supported) for the editor files they refuse.
 
@@ -312,6 +313,7 @@ throws `UnsupportedError` for them. The class readers are for player builds; see
 | **Tested** `AnimationClip` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy clip with every curve kind and Mecanim clips whose curves land in the streamed, dense and constant parts, with bindings, a sprite swap and events, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 (the split curve count's patch-release gates included) against Unity's own type trees |
 | **Tested** `GameObject`, `Transform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: two prefabs (a skinned hierarchy with a mesh renderer and a humanoid one), typed and without type trees, and the animator fixtures' GameObjects and Transforms, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
 | **Tested** `Animation` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a legacy `Animation` component listing a Mecanim clip, every field away from its default, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
+| **Tested** `RectTransform` | **2019.4.41f2, 2020.3.30f1, 6000.3.26f1 and 6000.6.4f1**: a Canvas with three children, their anchors set, typed and without type trees, against `readTypeTree()`; every layout from 2019.1 to 6000.6 against Unity's own type trees |
 | Tested on unit tests only | The class readers' version gates from 3.4 to 6000.6 and their refusals below; SerializedFile formats 6, 8 and 15 |
 | Handled in code, no test | The rest of SerializedFile formats 2 to 22; `Texture2D`'s layouts before 3.4 (gates at 2.6 and 3.0) |
 
@@ -365,6 +367,7 @@ and throws `UnsupportedError` (kind `"Unity version"`) otherwise:
 | `Animation` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `GameObject` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `Transform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
+| `RectTransform` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `MeshFilter` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `MeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `SkinnedMeshRenderer` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
@@ -389,7 +392,7 @@ Each of these throws `UnsupportedError` naming what it found:
 - An editor file (`BuildTarget.NoTarget`) read by the reader of `Texture2D`, `MovieTexture`,
   `MonoScript`, `MonoBehaviour`, `Shader`, `Sprite`, `SpriteAtlas`, `AudioClip`, `Mesh`, `Avatar`,
   `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`,
-  `Transform`, `MeshFilter`, `MeshRenderer` or `SkinnedMeshRenderer`, or by `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
+  `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` or `SkinnedMeshRenderer`, or by `Material`'s from Unity 2022.1 on: those read player data only. `readTypeTree()` reads editor files.
 - A `Mesh` whose vertices or triangles cannot be decoded: a submesh of lines or points, a vertex
   format Unity does not define, bone weights in an integer format or more than four per vertex
   (AssetStudio throws for each). `readMesh()` still reads its fields. A submesh whose
@@ -478,6 +481,7 @@ Call one yourself only to read an object as a specific class.
 | `readAnimationClip` | `AnimationClip`, `AnimationCurve`, `Keyframe`, `QuaternionCurve`, `Vector3Curve`, `CompressedAnimationCurve`, `PackedQuatVector`, `FloatCurve`, `PPtrCurve`, `PPtrKeyframe`, `ClipMuscleConstant`, `Clip`, `StreamedClip`, `DenseClip`, `ConstantClip`, `ValueDelta`, `AnimationClipBindingConstant`, `GenericBinding`, `AnimationEvent` |
 | `readGameObject` | `GameObject`, `ComponentPair` |
 | `readTransform` | `Transform` |
+| `readRectTransform` | `RectTransform` |
 | `readMeshFilter` | `MeshFilter` |
 | `readMeshRenderer`, `readSkinnedMeshRenderer` | `MeshRenderer`, `SkinnedMeshRenderer`, `Renderer` (the fields both start with), `StaticBatchInfo` |
 
@@ -490,6 +494,7 @@ it; `env.assets()` calls them for you.
 |---|---|
 | `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toShaderFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `ShaderFields` (`SerializedShaderFields`, `SerializedPropertyFields`, `SerializedSubShaderFields`, `SerializedPassFields`, `SerializedShaderStateFields`, `SerializedProgramFields`, `SerializedSubProgramFields`, `SerializedPlayerSubProgramFields`, `ProgramParametersFields`, `VectorParameterFields`, `MatrixParameterFields`, `StructParameterFields`, `TextureParameterFields`, `BufferBindingFields`, `ConstantBufferFields`, `UAVParameterFields`, `SamplerParameterFields`, `BindingFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
 | `toAnimationFields` | `AnimationFields` |
+| `toRectTransformFields` | `RectTransformFields` |
 | `toAvatarFields`, `toAnimatorControllerFields`, `toAnimatorFields`, `toAnimatorOverrideControllerFields` | `AvatarFields`, `AnimatorControllerFields`, `AnimatorFields`, `AnimatorOverrideControllerFields` (`AnimationClipOverrideFields`, `ValueConstantFields`, `ValueArrayConstantFields`, `SkeletonMaskElementFields`, `SkeletonMaskFields`, `LayerConstantFields`, `ConditionConstantFields`, `TransitionConstantFields`, `MotionNeighborListFields`, `Blend2dDataConstantFields`, `Blend1dDataConstantFields`, `BlendDirectDataConstantFields`, `BlendTreeNodeConstantFields`, `BlendTreeConstantFields`, `StateConstantFields`, `SelectorTransitionConstantFields`, `SelectorStateConstantFields`, `StateMachineConstantFields`, `ValueArrayFields`, `ControllerConstantFields`, `StateKeyFields`, `StateRangeFields`, `StateMachineBehaviourVectorDescriptionFields`, `SkeletonNodeFields`, `LimitFields`, `AxesFields`, `SkeletonFields`, `SkeletonPoseFields`, `HandFields`, `HumanFields`, `AvatarConstantFields`, `SkeletonBoneLimitFields`, `HumanBoneFields`, `SkeletonBoneFields`, `HumanDescriptionFields`) |
 | `toAnimationClipFields` | `AnimationClipFields` (`AnimationCurveFields`, `QuaternionCurveFields`, `Vector3CurveFields`, `PackedQuatVectorFields`, `CompressedAnimationCurveFields`, `FloatCurveFields`, `DenseClipFields`, `ClipFields`, `HumanGoalFields`, `HandPoseFields`, `HumanPoseFields`, `ValueDeltaFields`, `ClipMuscleConstantFields`) |
 | `toGameObjectFields`, `toTransformFields`, `toMeshFilterFields`, `toMeshRendererFields`, `toSkinnedMeshRendererFields` | `GameObjectFields`, `TransformFields`, `MeshFilterFields`, `MeshRendererFields`, `SkinnedMeshRendererFields` (`RendererFields`: the fields both renderers start with) |

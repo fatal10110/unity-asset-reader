@@ -107,6 +107,7 @@ import type { MonoScript, Hash128 } from "./MonoScript.js";
 import type { MovieTexture } from "./MovieTexture.js";
 import type { NamedObject } from "./NamedObject.js";
 import type { PPtr } from "./PPtr.js";
+import type { RectTransform } from "./RectTransform.js";
 import type {
   MeshRenderer,
   Renderer,
@@ -3211,6 +3212,48 @@ export function toTransformFields(data: Transform): TransformFields {
     localScale: data.m_LocalScale,
     children: data.m_Children,
     father: data.m_Father,
+  });
+}
+
+/** The friendly form of {@link RectTransform}: the {@link TransformFields} and the anchors. */
+export interface RectTransformFields extends TransformFields {
+  /**
+   * Unity: `m_AnchorMin`. The anchor of the lower left corner, as a fraction of the
+   * parent's rectangle.
+   */
+  anchorMin: Vector2;
+  /**
+   * Unity: `m_AnchorMax`. The anchor of the upper right corner, as a fraction of the
+   * parent's rectangle.
+   */
+  anchorMax: Vector2;
+  /**
+   * Unity: `m_AnchoredPosition`. The pivot's position relative to the anchors' reference point.
+   */
+  anchoredPosition: Vector2;
+  /**
+   * Unity: `m_SizeDelta`. The size relative to the distances between the anchors.
+   */
+  sizeDelta: Vector2;
+  /**
+   * Unity: `m_Pivot`. The point it rotates and scales around, as a fraction of its own rectangle.
+   */
+  pivot: Vector2;
+}
+
+/**
+ * A `RectTransform` as {@link RectTransformFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toRectTransformFields(data: RectTransform): RectTransformFields {
+  return defined({
+    ...toTransformFields(data),
+    anchorMin: data.m_AnchorMin,
+    anchorMax: data.m_AnchorMax,
+    anchoredPosition: data.m_AnchoredPosition,
+    sizeDelta: data.m_SizeDelta,
+    pivot: data.m_Pivot,
   });
 }
 
