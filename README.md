@@ -59,9 +59,9 @@ installs `texture2ddecoder-wasm` automatically.
   AssetStudio's `.anim` export holds, with `clipCurves(env, clip)`: per curve its path,
   attribute and keyframes, and the clip's events. `sceneToGltf(env, root, { clips })` exports a
   scene (nodes, skinned meshes, blend shapes) with its clips as a glTF 2.0 `.glb`, a humanoid
-  clip's muscles (fingers aside) and `RootQ` converted to bone rotations. It does not write `.anim` YAML, and
-  of a humanoid clip it does not convert the body position (the Hips keep their own position),
-  the finger muscles or the root motion.
+  clip's muscles (fingers aside) and `RootQ` converted to bone rotations. It does not write
+  `.anim` YAML, and of a humanoid clip it does not convert the body position (the Hips keep their
+  own position), the finger muscles, the root motion or the IK goals.
 - **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
   to **BGRA**. It does not read Unity files.
 
@@ -155,7 +155,7 @@ The short answer. The full tables, with what each claim is tested on, are in the
 | Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture`, `Mesh` (its vertices and triangles decoded), `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` and `SkinnedMeshRenderer` |
 | Texture formats | 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
 | Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
-| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, and to Ogg for Vorbis sound given a caller-supplied setup header table, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
+| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, and to Ogg for Vorbis sound given a caller-supplied setup header table, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips and the mono and stereo IMA ADPCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
 | Shaders | `Shader` to AssetStudio's inspection text, through `unity-asset-reader-shader`: OpenGL, OpenGL ES and Metal programs as their source, Vulkan programs as SPIR-V disassembly; tested to match AssetStudio's `.shader` file on the OpenGL ES, Vulkan and Metal shaders of the 2019.4 and 2020.3 bundles, and its converter's text (on UnityPy's type tree) on those of the 6000.3 and 6000.6 bundles without an `Int` property, several keyword variants per stage included |
 | Platforms | Xbox 360 textures are byte-swapped back and Switch textures deswizzled. Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)) |
 | Runtimes | Browsers and Web Workers (ES2020, WebAssembly for textures); Node.js `^20.19.0 \|\| >=22.12.0`, `import` and `require` |
@@ -255,7 +255,7 @@ copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` 
 | [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (© 2021 Sam Byass) | MIT | The FSB5 parser, the ADPCM decoders and the Vorbis to Ogg rebuild of `unity-asset-reader-audio` are hand-ported from it. |
 | [python-fsb5](https://github.com/HearthSim/python-fsb5) (© 2016 Simon Pinfold) | MIT | Second reference for the FSB5 parser of `unity-asset-reader-audio`. |
 | [CSspv](https://github.com/Anteru/csspv) (© 2017 Matthäus G. Chajdas) | BSD-2-Clause | The SPIR-V disassembler of `unity-asset-reader-shader` is hand-ported from it, as AssetStudio vendors it. |
-| [smol-v](https://github.com/aras-p/smol-v) (© 2016-2018 Aras Pranckevicius) | MIT or public domain | The SMOL-V format Unity stores Vulkan programs in; the decoder of `unity-asset-reader-shader` is ported from AssetStudio's C# port of its decoder. |
+| [smol-v](https://github.com/aras-p/smol-v) (© 2016-2018 Aras Pranckevicius) | MIT or public domain | The SMOL-V format Unity stores Vulkan programs in; the decoder of `unity-asset-reader-shader` is ported from AssetStudio's C# port of its decoder, and the decoder of its newer encoding (Unity 2020.3 and later) from smol-v's `source/smolv.cpp`. |
 | [texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (© K0lb3) | MIT | The C++ block and Crunch decoders that `texture2ddecoder-wasm` compiles to WASM (a git submodule). |
 | Codecs inside texture2ddecoder: [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative) (ATC, BCn), [mikunyan](https://github.com/Ishotihadus/mikunyan) (ASTC, ETC, PVRTC), [FP16](https://github.com/Maratyszcza/FP16), [BinomialLLC/crunch](https://github.com/BinomialLLC/crunch), [Unity-Technologies/crunch](https://github.com/Unity-Technologies/crunch) | MIT; MIT; MIT; public domain; zlib | The block decoders, half floats, and Crunch and Unity Crunch unpacking. |
 | [fflate](https://github.com/101arrowz/fflate) | MIT | Runtime dependency of `unity-asset-reader`: gzip and zlib, synchronously. |

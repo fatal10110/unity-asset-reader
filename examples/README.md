@@ -26,11 +26,12 @@ imports nothing.
   from any static host without COOP/COEP. It has to be served over HTTP, not
   opened as `file://`.
 - **One exact version per package.** jsDelivr's `/+esm` build of
-  `unity-asset-reader-texture@1.0.0` imports `unity-asset-reader@1.0.0/+esm`
-  and `texture2ddecoder-wasm@1.2.3/+esm`, exact versions, not ranges. The
+  `unity-asset-reader-texture@1.3.0` imports `unity-asset-reader@1.3.0/+esm`
+  and `texture2ddecoder-wasm@1.2.6/+esm`, exact versions, not ranges. The
   Worker imports core at that same version, so core is loaded once, and takes
-  the WASM from that same decoder release.
-- **The WASM** comes from `texture2ddecoder-wasm@1.2.3/wasm` on the same CDN.
+  the WASM from that same decoder release. The versions are the constants at
+  the top of `cdn-worker.js`, updated after each release (RELEASING.md).
+- **The WASM** comes from `texture2ddecoder-wasm@1.2.6/wasm` on the same CDN.
   The decoder has its own version line, separate from the reader packages.
   `initTexture({ wasmPath })` loads it, even when the textures are plain
   formats decoded in TS.

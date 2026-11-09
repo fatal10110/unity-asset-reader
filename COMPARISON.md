@@ -97,15 +97,17 @@ paths and events as data; it writes no `.anim` YAML. Humanoid clips become bone 
 against the Unity editor; their body position (`RootT`), finger muscles and root motion are not
 converted. Studio JS and Studio CLI export animated models as FBX (Studio JS's `fbxAnimation`,
 the CLI's `--fbx-animation`); Studio JS lists humanoid muscle retargeting as unsupported, and
-AssetStudioMod does not document it. unityfs-js exports a `SkinnedMeshRenderer` as a `.glb`
-skeleton model and names no animation clip.
+AssetStudioMod does not document it. unityfs-js exports a `SkinnedMeshRenderer` as a `.glb`, which
+its README calls a skeletal-animation model (骨骼动画模型), and names no animation clip.
+Studio CLI's skinned-model ✓ rests on AssetStudioMod's Animator FBX export and its bone options
+(`--fbx-bone-size`); its documentation does not say "skin weights".
 Exporting Spine means grouping each spine-unity skeleton's data, atlas text and page textures
 (`unity-asset-reader-spine`), from files built with type trees.
 Our library writes a Shader as AssetStudio's inspection text through `unity-asset-reader-shader`'s
 `shaderToText()`: OpenGL and Metal source and SPIR-V disassembly, byte for byte AssetStudio's
 `.shader` file for the fixture shaders. It also writes the variant lists of Unity 2021.3.10+ /
-2022.2+ / 6000 builds (`m_PlayerSubPrograms`), which AssetStudio's converter does not read, and
-disassembles Unity 2020.3's newer SMOL-V encoding. It refuses Direct3D programs, which need
+2022.1.13+ / 2022.2+ / 6000 builds (`m_PlayerSubPrograms`), which AssetStudio's converter does not
+read, and disassembles the newer SMOL-V encoding of Unity 2020.3 and later. It refuses Direct3D programs, which need
 Windows' D3DCompiler.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
@@ -140,7 +142,8 @@ For our library's exact formats, platform restrictions and tested Unity versions
 ## Licenses
 
 Our packages and the other listed libraries declare MIT, except `@arkntools/unity-js`
-(AGPL-3.0) and our texture package (MIT AND Apache-2.0).
+(AGPL-3.0), our texture package (MIT AND Apache-2.0) and our shader package
+(MIT AND BSD-2-Clause).
 See each package's license and notices for its included components.
 This repository does not copy, import or test against `@arkntools/unity-js`;
 its comparison entries use only package metadata and documentation.
