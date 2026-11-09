@@ -1,7 +1,32 @@
 # Fixtures and goldens
 
-Shared test data for every reader package. Tests import [`helpers.ts`](helpers.ts)
-by relative path; nothing here is published.
+Shared test data for every reader package. Nothing here is published. It holds two kinds of file:
+
+- **Fixtures:** small Unity bundles. Most are built with our own Unity project; the oldest are
+  written by a script. No third-party game data, ever (R11).
+- **Goldens:** what an independent tool, the *oracle*, says each fixture contains. UnityPy is the
+  oracle for parsing, AssetStudio `c37af7d` for export output, and the Unity editor for the humanoid
+  muscle-to-bone conversion (plan §5). Goldens never come from this library's own output (R12).
+
+This page says what each fixture is and how each golden was made. [`BUILDING.md`](BUILDING.md) says
+how to build the fixtures with Unity.
+
+## Common tasks
+
+- **Find the fixture for a feature:** start with [Fixtures at a glance](#fixtures-at-a-glance), then
+  read its section below.
+- **Use a fixture in a test:** import [`helpers.ts`](helpers.ts) by relative path (`loadFixture`,
+  `golden`, `assertMatchesGolden`). A fixture is named by its path under `bundles/`.
+- **Add or change a fixture:**
+  1. Build it. An M1 container fixture: add an entry to `FIXTURES` in `scripts/make-fixtures.py`. An
+     editor fixture: follow [`BUILDING.md`](BUILDING.md).
+  2. Rerun the oracle scripts, as [Regenerating](#regenerating) shows.
+  3. Run `npm test`.
+  4. Commit the goldens. Never hand-edit `goldens.json`.
+- **Understand an `oracleNote`, an `oracleError` or a cross-check hash:** see [Oracle
+  notes](#oracle-notes).
+
+## Files
 
 ```
 bundles/          M1 container fixtures (generated, see below)
@@ -17,9 +42,59 @@ helpers.ts        loadFixture / golden / assertMatchesGolden, typed golden shape
 Fixtures are named by their path under `bundles/` (`lz4.bundle`,
 `editor/6000.3.25f1/lz4/main`).
 
+Other files here, each described further down or in `BUILDING.md`:
+
+- `modern-goldens.json`: UnityPy 1.25.4 goldens of the Unity 6000.6.4f1 (format 23) fixtures, kept
+  apart from `goldens.json` (`BUILDING.md` section 13).
+- `humanoid-unity-goldens.json`: the Unity editor's poses for the humanoid fixture clips (plan §5,
+  `BUILDING.md` section 28).
+- `assetstudio-fixture-cross-checks.json`, `assetstudio-modern-cross-checks.json`: AssetStudio
+  reference pixels for plain formats and variant sprites
+  ([below](#plain-format-and-half-scale-variant-assetstudio-references)).
+- `assetstudio-rgb48.json`: AssetStudio's executed `DecodeRGB48` output (`BUILDING.md` section 13).
+- `rotate90-experiment.json`: the Rotate90 experiment's report, not a pixel golden
+  ([below](#rotate90-experiment)).
+
+## Fixtures at a glance
+
+Paths are under `bundles/`; editor fixtures are under `bundles/editor/<editor version>/`. The last
+column is the [`BUILDING.md`](BUILDING.md) section that builds them.
+
+| Fixture | Editors | What it covers | Here | BUILDING.md |
+|---|---|---|---|---|
+| `*.bundle`, `webdata.data`, `gzip-lz4.bundle.gz` | none: written by `scripts/make-fixtures.py` | container shapes and compression only (layers 1–2) | [M1 container fixtures](#m1-container-fixtures-bundlesbundle) | — |
+| `{lz4,lzma,uncompressed,lz4-notypetree}/{shared,main,texture,<variant>}` | 2019.4.41f2, 2020.3.30f1, 6000.3.25f1 | a TextAsset, a ScriptableObject with every kind of field, a one-triangle Mesh, a 4x4 Texture2D, the manifest | [Base variants](#base-variants) | 1-4 |
+| `registry/refs` | 2019.4.41f2, 2020.3.30f1, 6000.3.25f1 | `[SerializeReference]` registry | [Registry](#registry) | 5 |
+| `plain/textures` | 6000.3.25f1 | the 17 plain texture formats | [Plain textures](#plain-textures) | 6 |
+| `more-plain/textures` | 2019.4.41f2, 6000.6.4f1 | R8, RG16, RG32, RGB48, RGBA64; 6000.6 also eight signed formats | [2019.4 acceptance fixtures](#20194-acceptance-fixtures-and-rotation-probes) | 13, 14 |
+| `block/windows`, `block/android`; `block/ios` | 6000.3.25f1; `ios`: 2019.4.41f2 | BCn, ETC, EAC, ASTC and Crunch; PVRTC | [Block and Crunch textures](#block-and-crunch-textures) | 8, 9 |
+| `signed-eac/android` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | `EAC_R_SIGNED`, `EAC_RG_SIGNED` | [Signed EAC](#signed-eac) | 21 |
+| `stripped/lz4`, `stripped/uncompressed` | 2020.3.30f1, 6000.3.25f1 | a version-stripped bundle (`"0.0.0"`) | [Version-stripped bundles](#version-stripped-bundles) | 7 |
+| `material/{lz4,lz4-notypetree,lz4-stripped}/material` | 2019.4.41f2, 2020.3.30f1, 6000.3.25f1 | three Material layouts | [Materials](#materials) | 10 |
+| `{lz4,lz4-notypetree,stripped}/{audio,font,video}` | 2019.4.41f2, 2020.3.30f1, 6000.3.25f1 | AudioClip (PCM, Vorbis), Font, VideoClip | [Audio, font and video](#audio-font-and-video) | 11 |
+| `{lz4,lz4-notypetree,stripped}/adpcm` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1 | IMA ADPCM AudioClips | [Audio, font and video](#audio-font-and-video) | 11 |
+| `lz4/audiohdr` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1 | five AudioClips for the FSB5 sample header paths (#289) | — | 11 |
+| `shader/{lz4,lz4-notypetree}/<target>` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | two shaders, for `windows` (DX11), `android` (GLES3, Vulkan) and, in 2020.3 and 6000.3.26f1, `ios` (Metal) | [Shaders](#shaders) | 18 |
+| `shader-variants/lz4/<target>` | 6000.3.26f1, 6000.6.4f1 | shader variants in `m_PlayerSubPrograms` (#283) | — | 18 |
+| `sprite/sprites` | 2019.4.41f2, 6000.3.25f1, 6000.6.4f1 | 22 Sprites and two Sprite Atlas V1 assets | [Sprites](#sprites) | 12, 13 |
+| `sprite-v2/sprites`, `sprite-v2-rect/sprites` | 6000.6.4f1 | the same sprites in native Sprite Atlas V2 | [Format coverage](#format-coverage) | 13 |
+| `variant/sprites` | 2019.4.41f2, 6000.6.4f1 | a master atlas and its half-scale variant | [AssetStudio references](#plain-format-and-half-scale-variant-assetstudio-references) | 13, 14 |
+| `split-alpha/sprites` | 2019.4.41f2 | sprites on an Android ETC1 texture with split alpha | [2019.4 acceptance fixtures](#20194-acceptance-fixtures-and-rotation-probes) | 14 |
+| `rotation-probe/sprites`, `legacy-probe/sprites` | 2019.4.41f2 | native rotation probes (no Rotate90) | [2019.4 acceptance fixtures](#20194-acceptance-fixtures-and-rotation-probes) | 14 |
+| `spine/...` | 2019.4.41f2 | Spine skeletons as spine-unity stores them | [Spine](#spine) | 19 |
+| `mesh/{lz4,lz4-notypetree}/...` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1; skinned meshes also 6000.6.4f1 | meshes made from code, compressed and skinned ones included | — | 20 |
+| `animator/{lz4,lz4-notypetree}/animator` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController` | — | 22 |
+| `animation/{lz4,lz4-notypetree}/animation` | the same four | six AnimationClips | — | 23 |
+| `scene/{lz4,lz4-notypetree}/scene` | the same four | `GameObject`, `Transform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer` | — | 24 |
+| `legacy-animation/{lz4,lz4-notypetree}/legacy-animation` | the same four | a legacy `Animation` component | — | 25 |
+| `ui-animation/{lz4,lz4-notypetree}/ui-animation` | the same four | a `RectTransform` UI hierarchy and its clip | — | 26 |
+| `humanoid/lz4/humanoid` | the same four | the input of the humanoid oracle | — | 28 |
+
 ## Editor-built fixtures (`bundles/editor/`)
 
-Built with our own Unity project in three editors, per plan §5 and R11. The
+Built with our own Unity projects, per plan §5 and R11. The base variants below come from three
+editors (table); later fixtures add 6000.3.26f1 (6000.3.25f1 was no longer installed) and
+6000.6.4f1 (format 23, `BUILDING.md` section 13). The
 project itself is not committed (R2: no C#); [`BUILDING.md`](BUILDING.md) holds
 its sources and the batch-mode command.
 
@@ -28,6 +103,8 @@ its sources and the batch-mode command.
 | 2019.4.41f2 | v7 | **21** | `[SerializeReference]` v1 |
 | 2020.3.30f1 | v7 | **22** | `[SerializeReference]` v1 |
 | 6000.3.25f1 | v8 | **22** | `[SerializeReference]` v2 |
+
+### Base variants
 
 Each editor has four variants - `lz4`, `lzma`, `uncompressed`, and
 `lz4-notypetree` (built with `DisableWriteTypeTree`) - and each variant four
@@ -43,15 +120,21 @@ bundles:
   `TypelessData`; the 64 pixel bytes live in a `.resS` node of the bundle
 - `<variant>` - the AssetBundleManifest bundle Unity writes with every build
 
+### Registry
+
 Each editor also has `registry/refs` (uncompressed, #96): a ScriptableObject
 with 13 `[SerializeReference]` entries, so version 1 entry keys go past
 `00000009`, and a ref type with a `[SerializeReference]` field of its own,
 whose type tree carries a nested `ManagedReferencesRegistry` node
 ([`BUILDING.md`](BUILDING.md) section 5).
 
+### Plain textures
+
 6000.3.25f1 also has `plain/textures` (uncompressed, #31): one 8x5 Texture2D in
 each of the 17 plain formats the texture package converts in TS, pixels written
 by script and kept inline ([`BUILDING.md`](BUILDING.md) section 6).
+
+### Block and Crunch textures
 
 The block and Crunch formats (#32) are in three uncompressed bundles, one
 32x16 (PVRTC: 32x32) Texture2D per format with a full mip chain, compressed by
@@ -68,11 +151,15 @@ writes ATC (its `TextureFormat` no longer has it), and every one of them writes
 Unity's own Crunch (2017.3+), not the original: those are covered without a
 fixture (see Oracle notes).
 
+### Signed EAC
+
 The importer never compresses to signed EAC, but the `Texture2D` constructor
 accepts it: `signed-eac/android` (lz4, Android) of 2019.4.41f2, 2020.3.30f1,
 6000.3.26f1 and 6000.6.4f1 each hold one 32x16 `EAC_R_SIGNED` and one
 `EAC_RG_SIGNED` Texture2D an editor script made from etc2comp's blocks, image
 data inline ([`BUILDING.md`](BUILDING.md) section 21, #288).
+
+### Version-stripped bundles
 
 6000.3.25f1 and 2020.3.30f1 also have `stripped/lz4` and `stripped/uncompressed`
 (#104): the `hello.txt` TextAsset built with `AssetBundleStripUnityVersion`, so
@@ -80,6 +167,8 @@ the bundle header and the SerializedFile both record `"0.0.0"` as the editor.
 The 6000.3.25f1 pair sets archive flag 0x200 (block padding, flags `0x243`); the
 2020.3.30f1 pair predates that and does not (`0x43`)
 ([`BUILDING.md`](BUILDING.md) section 7).
+
+### Materials
 
 Each editor also has `material/lz4/material`, `material/lz4-notypetree/material`
 and `material/lz4-stripped/material` (#40): one Material with its serialized
@@ -92,6 +181,8 @@ texture are in a dependency bundle that is not committed, so `m_Shader` and the
 Unity's Material layouts: 2019.4's, 2020.3's (adds `m_BuildTextureStacks`) and
 6000.3's (`m_ValidKeywords` / `m_InvalidKeywords` and `m_Ints`)
 ([`BUILDING.md`](BUILDING.md) section 10).
+
+### Audio, font and video
 
 Every editor also has `audio`, `font` and `video` in `lz4`, `lz4-notypetree`
 and `stripped` (#41), built from generated source files
@@ -112,6 +203,8 @@ installed.
 2019.4.41f2's `stripped` bundles are format 21, the others' format 22. No
 fixture holds a MovieTexture (no fixture editor makes one with a movie).
 
+### Shaders
+
 2019.4.41f2 (format 21), 2020.3.30f1 and 6000.3.26f1 (format 22) and
 6000.6.4f1 (format 23) have `shader/lz4/<target>` and
 `shader/lz4-notypetree/<target>` (#237): two shaders of our own, built for
@@ -125,6 +218,8 @@ editor here has the macOS module. The format 21 and 22 bundles are in
 object, their Shaders included. The Shader reader is checked against
 `readTypeTree()` on all of them, and against `shader-layouts.json` for every
 Shader layout of Unity's type trees from 2019.1 (UnityPy's TPK data).
+
+### Sprites
 
 2019.4.41f2 (format 21) and 6000.3.25f1 (format 22) also have `sprite/sprites`
 (LZ4, #34): 22 Sprites and two Sprite Atlas V1 assets, with every source pixel
@@ -143,6 +238,8 @@ Every texture is RGBA32. Neither editor's packer writes Rotate90, and no
 sprite has an alpha texture, secondary textures, bones or a variant atlas's
 downscale.
 
+### Spine
+
 2019.4.41f2 also has `spine/lz4/skeletons`, `spine/lz4/ondemand` and
 `spine/lz4-notypetree/skeletons` (LZ4, #238): Spine skeletons as spine-unity
 stores them, made with our own stub scripts that serialize the same fields, and
@@ -157,10 +254,38 @@ atlas type; `spine/lz4-notypetree/splitatlas` is `splitatlas` without type
 trees. The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 19
 lists what each skeleton is grouped as.
 
+### 2019.4 acceptance fixtures and rotation probes
+
+The additional Unity 2019.4.41f2 bundles in BUILDING section 14 are included in
+canonical `goldens.json`: five unsigned plain formats, a half-scale variant,
+Android ETC1 split alpha, and two native rotation probes. Both probes lack
+Rotate90, which remains a coverage gap. RGB48 records AssetStudio's executed
+verdict; variant pixel hashes are retained with a warning that UnityPy ignores
+the downscale multiplier. Only 2019 and later are in this fixture addition's
+support scope.
+
+### Rotate90 experiment
+
+The bounded Rotate90 experiment in BUILDING section 16 records 24 probe cases
+and 288 genuinely packed entries across 2019 legacy/V1 and 6000.6 V1/V2.
+Legacy size/padding remain controlled by its built-in policy; its size labels
+are not applied limits, and some legacy mesh/order settings repeat.
+`rotate90-experiment.json` is an independent negative experiment report, not a
+pixel golden or native Rotate90 acceptance fixture. None of these probes wrote
+rotation value 4. Its `scriptablePackerProbes` add the custom Sprite Atlas V2
+`ScriptablePacker` route in 6000.3.26f1 and 6000.6.4f1 (2026-11-08): the
+packer asked for `PackTransform` 4 (and the listed values as a control), but
+Unity wrote rotation 0 for all 24 entries and left every pixel unturned, so
+no native Rotate90 fixture exists and `decodeSprite` keeps AssetStudio's direction.
+
+### NaN bit patterns
+
 NaN does not have one bit pattern everywhere, and that comes from Unity: every
 editor wrote `0xFFC00000` into the first variant it built (`lz4`) and
 `0x7FC00000` into the rest (see `BUILDING.md` section 4). The goldens record the
 bytes as written, so the reader has to keep a NaN's sign bit.
+
+### Format coverage
 
 The main golden set tests **formats 21 and 22** (Unity 2019.4 to
 6000.3); `scripts/tests/fixtures.test.ts` fails if either format goes missing,
@@ -473,30 +598,9 @@ layouts are checked against Unity's own trees rather than a hand-written list.
 Adding an M1 fixture: add an entry to `FIXTURES` in `make-fixtures.py`, then
 rerun both scripts. Adding an editor fixture: follow [`BUILDING.md`](BUILDING.md),
 then rerun `make-goldens.py`, and `make-export-goldens.py` if it holds a
-Texture2D, Mesh, AudioClip, TextAsset or Shader (`scripts/tests/export-goldens.test.ts` fails until
-it is rerun). Goldens are committed; never hand-edit `goldens.json`, and never
-regenerate it from this library's own output (R12).
-
-The additional Unity 2019.4.41f2 bundles in BUILDING section 14 are included in
-canonical `goldens.json`: five unsigned plain formats, a half-scale variant,
-Android ETC1 split alpha, and two native rotation probes. Both probes lack
-Rotate90, which remains a coverage gap. RGB48 records AssetStudio's executed
-verdict; variant pixel hashes are retained with a warning that UnityPy ignores
-the downscale multiplier. Only 2019 and later are in this fixture addition's
-support scope.
-
-The bounded Rotate90 experiment in BUILDING section 16 records 24 probe cases
-and 288 genuinely packed entries across 2019 legacy/V1 and 6000.6 V1/V2.
-Legacy size/padding remain controlled by its built-in policy; its size labels
-are not applied limits, and some legacy mesh/order settings repeat.
-`rotate90-experiment.json` is an independent negative experiment report, not a
-pixel golden or native Rotate90 acceptance fixture. None of these probes wrote
-rotation value 4. Its `scriptablePackerProbes` add the custom Sprite Atlas V2
-`ScriptablePacker` route in 6000.3.26f1 and 6000.6.4f1 (2026-11-08): the
-packer asked for `PackTransform` 4 (and the listed values as a control), but
-Unity wrote rotation 0 for all 24 entries and left every pixel unturned, so
-no native Rotate90 fixture exists and `decodeSprite` keeps AssetStudio's direction.
-
+Texture2D, Mesh, AudioClip, TextAsset or Shader (`scripts/tests/export-goldens.test.ts`
+fails until it is rerun). Goldens are committed; never hand-edit `goldens.json`, and
+never regenerate it from this library's own output (R12).
 
 ### Export goldens (AssetStudio, #233)
 

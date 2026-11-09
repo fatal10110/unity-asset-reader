@@ -1,13 +1,17 @@
 # Agent tooling
 
-Use the smallest tool that answers the question and bound its output. Every tool call of an agent
-re-sends its whole context, so cost tracks the number of calls more than their size: batch the
-lookups a step needs into one call.
+The exact commands agents use to search this repo and the upstream references, and the tools a
+`waves` run is built on. [CLAUDE.md](../../CLAUDE.md) §5 has the one-table summary.
+
+- Use the smallest tool that answers the question, and bound its output.
+- Batch the lookups a step needs into one call. Every tool call of an agent re-sends its whole
+  context, so cost tracks the number of calls more than their size.
 
 ## Search and read
 
-- Filenames: `rg --files <dir> -g '<glob>'`. Exact text: `rg -n -m 5 '<pattern>' <path> | head -60`.
-  After one exact miss, change tools instead of retrying variants.
+- Filenames: `rg --files <dir> -g '<glob>'`.
+- Exact text: `rg -n -m 5 '<pattern>' <path> | head -60`. After one exact miss, change tools
+  instead of retrying variants.
 - Known range: the Read tool with offset and limit, at most about 80 lines at a time.
 - Golden and fixture JSON: `jq` on the keys you need (`jq 'keys' fixtures/goldens.json`,
   `jq '.["<bundle>"].objects | length' ...`), never the whole file.
@@ -67,8 +71,7 @@ Built for the [`waves`](../../.claude/skills/waves/SKILL.md) skill; usable on th
   - `worktree --run R --lane S --branch B [--review] [--remove]`: creates or reuses
     `.claude/worktrees/wf-<slug>` on its branch from `origin/main` (or the detached
     `review-<slug>` at `origin/<branch>`, reset to a clean tree each round), seeds the decoder
-    WASM, and prints head, dirty files
-    and how far it is behind `main`.
+    WASM, and prints head, dirty files and how far it is behind `main`.
   - `pr-state --pr N`: `{state, merged, merge_sha, draft, head, mergeable_state, behind_by}`.
   - `ci-wait --run R --head SHA --wait 570`: waits until every check run on the head finished;
     success needs the `changes`, `reader` and `decoder` checks (a job its path filter skipped

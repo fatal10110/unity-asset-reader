@@ -1,14 +1,19 @@
 # Quick Start
 
-Read a Unity AssetBundle in five minutes, in Node.js or in a browser.
+Read a Unity AssetBundle in five minutes, in Node.js or in a browser. You will unpack a bundle,
+dump every asset as JSON, and get its textures and sprites as pixels.
 
 ## 1. Pick the packages
+
+Most projects need one to three packages:
 
 | You want to | Install |
 |---|---|
 | Unpack bundles and read objects (text, script data, raw audio / video / font bytes) | `unity-asset-reader` |
 | Also get textures and sprites as RGBA pixels | `unity-asset-reader-texture` |
 | Load files and folders from disk in Node.js | `unity-asset-reader-node` |
+
+For this guide, install all three:
 
 ```bash
 npm install unity-asset-reader unity-asset-reader-texture unity-asset-reader-node
@@ -50,7 +55,7 @@ for (const asset of env.assets()) {
   try {
     save(join("objects", `${name}.json`), JSON.stringify(asset.data, replacer, 2));
   } catch (error) {
-    console.warn(`${name}: ${error.message}`); // e.g. a GameObject in a bundle without type trees
+    console.warn(`${name}: ${error.message}`); // e.g. a Camera in a bundle without type trees
   }
 
   // 3. Textures and sprites as raw RGBA, top row first. The first call loads the WASM
@@ -67,25 +72,29 @@ console.log(`${env.files.length} files, ${env.objects.length} objects -> out/`);
 
 What happens here:
 
-- `loadPath()` reads the file together with its `.resS` / `.resource` sidecars (or the whole
-  folder), and calls `load()` from `unity-asset-reader`.
-- `env.files` holds every unpacked file. `env.assets()` yields every object of every
-  SerializedFile among them, with its `type`, `name` and container `path` (the path the asset had
-  in the Unity project).
-- `asset.data` is read when you first use it. For the common classes it comes from a hand-written
-  reader, which also works without type trees; `asset.type` is then the class name, checking it
-  types `data`, and its fields have TypeScript-style names (`width`, `format`, `text`; each one's
-  JSDoc names its Unity field, `m_Width`, ...). The low-level `asset.reader.read()` keeps Unity's
-  names. Any other class (`asset.type === "Other"`, `asset.typeName === "GameObject"`) is read
-  through its type tree, which includes your own scripts' fields when the bundle was built with
-  type trees (the Unity default).
-- `isImage(asset)` is true for a Texture2D or a Sprite. `decodeImage(asset)` gives its pixels
-  (a Sprite cut out of its texture or atlas) together with `imageInfo(asset)`: size, format,
-  mip count, color space and the rest, which `imageInfo` also gives on its own, without decoding.
-- 64-bit integers, such as path ids, are always `bigint`, so JSON needs the replacer.
+- **Loading.** `loadPath()` reads the file together with its `.resS` / `.resource` sidecars (or
+  the whole folder), and calls `load()` from `unity-asset-reader`.
+- **Files.** `env.files` holds every unpacked file.
+- **Assets.** `env.assets()` yields every object of every SerializedFile among them. A
+  SerializedFile is the file inside a bundle that holds the objects. Each asset has its `type`,
+  its `name` and its container `path`: the path the asset had in the Unity project.
+- **Asset data.** `asset.data` is read when you first use it.
+  - For the common classes it comes from a hand-written reader, which also works without type
+    trees (the field layout Unity can store next to the objects).
+  - `asset.type` is then the class name, and checking it gives `data` its TypeScript type.
+  - Its fields have TypeScript-style names (`width`, `format`, `text`). Each one's JSDoc names
+    its Unity field (`m_Width`, ...). The low-level `asset.reader.read()` keeps Unity's names.
+  - Any other class (`asset.type === "Other"`, `asset.typeName === "Camera"`) is read through
+    its type tree. That includes your own scripts' fields when the bundle was built with type
+    trees (the Unity default).
+- **Images.** `isImage(asset)` is true for a Texture2D or a Sprite. `decodeImage(asset)` gives
+  its pixels (a Sprite is cut out of its texture or atlas), together with `imageInfo(asset)`:
+  size, format, mip count, color space and the rest. `imageInfo` also gives these on its own,
+  without decoding.
+- **64-bit integers**, such as path ids, are always `bigint`, so JSON needs the replacer.
 
-Without Node.js file access (a server that received an upload, say), use `load()` directly, or
-`open()` to fetch the file first:
+Without Node.js file access (a server that received an upload, say), call `load()` directly,
+or `open()` to fetch the file first:
 
 ```js
 import { load, open } from "unity-asset-reader";
@@ -96,7 +105,8 @@ const env2 = await open("https://cdn.example.com/a.bundle");
 
 ## 3. Browser
 
-The parser is synchronous, so run it in a Web Worker. A big bundle then does not freeze the page.
+The parser is synchronous, so run it in a Web Worker. A big bundle then does not freeze the
+page.
 
 - **No bundler:** [`examples/cdn.html`](examples/cdn.html) is a complete page: pick a bundle, list
   its objects, draw a texture. It loads everything from jsDelivr.
@@ -121,8 +131,8 @@ self.onmessage = async ({ data: { file, bytes } }) => {
 };
 ```
 
-On the page, `new ImageData(new Uint8ClampedArray(rgba), width, height)` goes straight onto a
-canvas.
+On the page, wrap the pixels in `new ImageData(new Uint8ClampedArray(rgba), width, height)` and
+draw it onto a canvas with `putImageData()`.
 
 ## Next steps
 

@@ -1,6 +1,7 @@
 # Node.js ESM Example
 
-This example demonstrates how to use `texture2ddecoder-wasm` in a modern Node.js environment using ES6 modules (`import/export`).
+This example shows how to use `texture2ddecoder-wasm` from Node.js with ES modules
+(`import`/`export`). It decodes BC1, BC3, ETC2 and ASTC data and shows how to read and write files.
 
 ## Features
 
@@ -8,7 +9,7 @@ This example demonstrates how to use `texture2ddecoder-wasm` in a modern Node.js
 - No build tools required
 - Automatic WASM initialization
 - Examples of BC1, BC3, ETC2, and ASTC decoding
-- Instructions for file I/O with async/await
+- File I/O with async/await
 
 ## Setup
 
@@ -66,6 +67,7 @@ const decoded = await decode_astc(astcData, width, height, blockWidth, blockHeig
 ### 5. Working with Files
 ```javascript
 import fs from 'fs';
+import { decode_bc1 } from 'texture2ddecoder-wasm';
 
 // Read texture file
 const textureData = fs.readFileSync('texture.bin');
@@ -83,7 +85,13 @@ The decoded output is in BGRA format (4 bytes per pixel). You can use it with po
 ```javascript
 import sharp from 'sharp';
 
-await sharp(decoded, {
+const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+for (let i = 0; i < rgba.length; i += 4) {
+  const b = rgba[i];
+  rgba[i] = rgba[i + 2];
+  rgba[i + 2] = b;
+}
+await sharp(rgba, {
   raw: { width, height, channels: 4 }
 })
 .toFile('output.png');
@@ -93,14 +101,20 @@ await sharp(decoded, {
 ```javascript
 import Jimp from 'jimp';
 
+const rgba = Uint8Array.from(decoded); // copy; the decoder returns BGRA
+for (let i = 0; i < rgba.length; i += 4) {
+  const b = rgba[i];
+  rgba[i] = rgba[i + 2];
+  rgba[i + 2] = b;
+}
 const image = new Jimp(width, height);
-image.bitmap.data = Buffer.from(decoded);
+image.bitmap.data = Buffer.from(rgba);
 await image.writeAsync('output.png');
 ```
 
 ## Supported Formats
 
-This library supports all major texture compression formats:
+The library decodes these texture compression formats:
 
 - **BC1-7** (DXT1, DXT5, etc.) - DirectX texture compression
 - **ETC1/2** - Ericsson Texture Compression

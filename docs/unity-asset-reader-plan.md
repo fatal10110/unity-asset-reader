@@ -1,8 +1,31 @@
 # Plan: browser-first Unity AssetBundle reader (TS + WASM leaf codecs)
 
-Working name: `unity-asset-reader`. Monorepo (npm workspaces): a shared parser core plus feature packages; the texture decoder, `texture2ddecoder-wasm`, is one of the packages (D7, D8). Every package versions on its own and is released when its version changes (2026-09-28c). License: MIT, except `unity-asset-reader-texture`, which is `MIT AND Apache-2.0` (see the 2026-09-27b and 2026-10-06 revisions). Source of truth for behavior: Razviar/assetstudio (MIT), also the golden oracle for export output, executed outside the repo (§5). Secondary reference + golden oracle for parsing: UnityPy (MIT).
+This is the project plan: what the packages are, how the repo is laid out, and how the code is
+tested. It wins over every other document, issue and rule in the repo. Code, issues and reviews cite
+it by section (§0-§8), decision id (D1-D9) and revision id (for example 2026-11-08a).
 
-Checkable rules derived from this plan: [unity-asset-reader-rules.md](unity-asset-reader-rules.md). Workflows: `.claude/skills/{implement-issue,review-implementation,fix-pr-comments}`.
+How to read it:
+
+- §0 holds the locked decisions D1-D9.
+- §1-§7 cover dependencies, layout, public API, milestones, testing, risks and what is out of scope.
+- §8 covers GitHub tracking and ends with the revision log. Each revision records a change to the
+  plan: its id, usually its issue or PR, and what changed and why.
+
+At a glance:
+
+- Working name: `unity-asset-reader`.
+- Monorepo (npm workspaces): a shared parser core plus feature packages. The texture decoder,
+  `texture2ddecoder-wasm`, is one of the packages (D7, D8).
+- Every package versions on its own and is released when its version changes (2026-09-28c).
+- License: MIT, except `unity-asset-reader-texture`, which is `MIT AND Apache-2.0` (see the
+  2026-09-27b and 2026-10-06 revisions), and `unity-asset-reader-shader`, which is
+  `MIT AND BSD-2-Clause` (see the 2026-10-16g revision).
+- Source of truth for behavior: Razviar/assetstudio (MIT). It is also the golden oracle for export
+  output, executed outside the repo (§5).
+- Secondary reference and golden oracle for parsing: UnityPy (MIT).
+- Checkable rules derived from this plan:
+  [unity-asset-reader-rules.md](unity-asset-reader-rules.md).
+- Workflows: `.claude/skills/{implement-issue,review-implementation,fix-pr-comments}`.
 
 ## 0. Locked decisions
 
@@ -20,7 +43,11 @@ Checkable rules derived from this plan: [unity-asset-reader-rules.md](unity-asse
 
 ## 1. Dependencies (all MIT, all browser-safe, all sync)
 
-Runtime deps of `packages/core` unless the note names another package. Between workspace packages: feature packages list `unity-asset-reader` as a `peerDependency` (one core instance per app, so `instanceof` and `ClassID` stay shared) plus a `devDependency` for the workspace link.
+These are runtime deps of `packages/core` unless the note names another package.
+
+Between workspace packages, feature packages list `unity-asset-reader` as a `peerDependency` (one
+core instance per app, so `instanceof` and `ClassID` stay shared) plus a `devDependency` for the
+workspace link.
 
 | Need | Dep | Note |
 |---|---|---|
@@ -85,17 +112,48 @@ packages/
 examples/               cdn.html, vite/   (reader examples; use core + texture together)
 ```
 
-What belongs in core: anything two packages need, and anything that reads Unity bytes into fields (so `classes/Texture2D.ts` and `classes/Sprite.ts` live in core; turning their bytes into pixels lives in `texture`). What does not: WASM, pixel conversion, `fs`, anything with a heavy or optional dependency. The decoder shares no code with core today; if a second WASM package appears (LZMA fallback, M6 — #69), its emscripten loader is extracted then, not before.
+What belongs in core, and what does not:
 
-Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core`, `texture`, `mesh`, `audio`, `shader` and `animation` use `resolve({ browser: true })` with **no** node builtins in `external`; only `node` may externalize them.
+- In core: anything two packages need, and anything that reads Unity bytes into fields. So
+  `classes/Texture2D.ts` and `classes/Sprite.ts` live in core; turning their bytes into pixels lives
+  in `texture`.
+- Not in core: WASM, pixel conversion, `fs`, anything with a heavy or optional dependency.
+- The decoder shares no code with core today. If a second WASM package appears (LZMA fallback, M6 —
+  #69), its emscripten loader is extracted then, not before.
 
-**Externalization rule (#71, decided):** *everything a package declares in `dependencies`, `peerDependencies` or `optionalDependencies` is `external`; everything else is bundled, except the node builtins `packages/node` passes through `external` itself.* One rule for workspace siblings and npm deps alike — `rollup.reader.mjs` reads the package's own manifest, so adding a dep to `package.json` is the only step. `dist/` keeps the bare `import`, npm resolves it at install time. Consequences, accepted:
+Every reader package builds ESM + CJS + types through `rollup.reader.mjs`. `core`, `texture`,
+`mesh`, `audio`, `shader` and `animation` use `resolve({ browser: true })` with **no** node builtins
+in `external`; only `node` may externalize them.
 
-- A dep is never both inlined in `dist/` and installed beside it. No second copy, and a security fix in a decompressor that eats untrusted bytes (`fflate`, `lzma1` — #14, #15) reaches consumers through `npm update`, not through a republish of this package.
-- No per-dep NOTICE obligation: we distribute no copy of their code. The `fflate` stanza added by #68 is dropped.
+**Externalization rule (#71, decided):** *everything a package declares in `dependencies`,
+`peerDependencies` or `optionalDependencies` is `external`; everything else is bundled, except the
+node builtins `packages/node` passes through `external` itself.*
+
+It is one rule for workspace siblings and npm deps alike. `rollup.reader.mjs` reads the package's
+own manifest, so adding a dep to `package.json` is the only step. `dist/` keeps the bare `import`;
+npm resolves it at install time.
+
+Consequences, accepted:
+
+- A dep is never both inlined in `dist/` and installed beside it. No second copy, and a security fix
+  in a decompressor that eats untrusted bytes (`fflate`, `lzma1` — #14, #15) reaches consumers
+  through `npm update`, not through a republish of this package.
+- No per-dep NOTICE obligation: we distribute no copy of their code. The `fflate` stanza added by
+  #68 is dropped.
 - Consumers dedupe and tree-shake the dep themselves.
-- A bare specifier in `dist/` means CDN use needs an import map or a CDN ESM endpoint (`/+esm`, esm.sh) — still zero bundler, so M3's `examples/cdn.html` criterion stands. `unity-asset-reader-texture` needs one regardless, since `texture2ddecoder-wasm` is external either way; this makes it one pattern to document instead of two. A separate bundled `dist/*.bundle.mjs` CDN build was rejected: it doubles the published output and keeps the NOTICE chore it was meant to avoid. Revisit only if a real CDN consumer cannot use an import map.
-- An undeclared import is **not** caught by the build: npm hoists root devDependencies and symlinks workspace siblings into the root `node_modules`, so rollup resolves them and inlines them silently. Only a package absent from `node_modules` fails (`UNRESOLVED_IMPORT`). The guard is a test — `scripts/tests/rollup-reader.test.mjs` fails `npm run verify` when a reader package's `src/` imports something its `package.json` does not declare — with `check:browser` covering the R14 half at source level.
+- A bare specifier in `dist/` means CDN use needs an import map or a CDN ESM endpoint (`/+esm`,
+  esm.sh). That is still zero bundler, so M3's `examples/cdn.html` criterion stands.
+  - `unity-asset-reader-texture` needs one regardless, since `texture2ddecoder-wasm` is external
+    either way; this makes it one pattern to document instead of two.
+  - A separate bundled `dist/*.bundle.mjs` CDN build was rejected: it doubles the published output
+    and keeps the NOTICE chore it was meant to avoid. Revisit only if a real CDN consumer cannot use
+    an import map.
+- An undeclared import is **not** caught by the build. npm hoists root devDependencies and symlinks
+  workspace siblings into the root `node_modules`, so rollup resolves them and inlines them
+  silently. Only a package absent from `node_modules` fails (`UNRESOLVED_IMPORT`).
+  - The guard is a test: `scripts/tests/rollup-reader.test.mjs` fails `npm run verify` when a reader
+    package's `src/` imports something its `package.json` does not declare.
+  - `check:browser` covers the R14 half at source level.
 
 ## 3. Public API (target)
 
@@ -115,11 +173,13 @@ env.files        // unpacked CAB / resS entries: { path, data }  ← pure "unpac
 obj.readTypeTree()  // generic JS object for any class with an embedded typetree; int64 → bigint (D9)
 ```
 
-That is the low-level API, and it stays as it is: `env.objects`, `ObjectReader.read()`, `readTypeTree()`, `env.resolve()`, `env.readResource()` and the `read*` class readers.
+That is the low-level API, and it stays as it is: `env.objects`, `ObjectReader.read()`,
+`readTypeTree()`, `env.resolve()`, `env.readResource()` and the `read*` class readers.
 
 ### High-level API (2026-09-28b)
 
-A TypeScript-style layer over the same `Env`, for callers who want assets rather than objects. It does not mirror UnityPy's interface.
+A TypeScript-style layer over the same `Env`, for callers who want assets rather than objects. It
+does not mirror UnityPy's interface.
 
 ```ts
 import { load, open } from 'unity-asset-reader'
@@ -140,10 +200,19 @@ env.assets('Texture2D', 'Sprite')              // filtered and narrowed
 env.get('Assets/UI/Icon.png')                  // by container path, case-insensitive, or undefined
 ```
 
-- **Data plus free functions, no per-class methods.** An `Asset` is plain data with a discriminant (`type`); its `data` is what `obj.read()` returns, as plain data with camelCase field names without `m_` (#184; `obj.read()` keeps Unity's). Whatever an asset can be turned into is a free function taking it (#185: texture `isImage` / `decodeImage`), never a method on an asset class.
-- `type` is the class name for the classes with a hand reader and `'Other'` for the rest (a `string` fallback would stop `switch` from narrowing `data`); `typeName` names every class.
-- `load()` takes one input or an array; an input is bytes or `{ name?, data }`, a missing name becomes `input <index>`. Loose files still need their real names (resource and externals lookup).
-- `open()` is the async way in: it only gets the bytes (global `fetch` or `options.fetch`, `Blob.arrayBuffer()`), names each file after its URL's last path segment or `File.name`, throws on a non-OK response, then calls `load()`. Parsing stays sync (D4).
+- **Data plus free functions, no per-class methods.** An `Asset` is plain data with a discriminant
+  (`type`).
+  - Its `data` is what `obj.read()` returns, as plain data with camelCase field names without `m_`
+    (#184; `obj.read()` keeps Unity's).
+  - Whatever an asset can be turned into is a free function taking it (#185: texture `isImage` /
+    `decodeImage`), never a method on an asset class.
+- `type` is the class name for the classes with a hand reader and `'Other'` for the rest (a `string`
+  fallback would stop `switch` from narrowing `data`); `typeName` names every class.
+- `load()` takes one input or an array; an input is bytes or `{ name?, data }`, a missing name
+  becomes `input <index>`. Loose files still need their real names (resource and externals lookup).
+- `open()` is the async way in. It only gets the bytes (global `fetch` or `options.fetch`,
+  `Blob.arrayBuffer()`), names each file after its URL's last path segment or `File.name`, throws on
+  a non-OK response, then calls `load()`. Parsing stays sync (D4).
 - #184 gives `data` TypeScript-style field names; #185 adds the texture functions on top of `Asset`.
 
 ## 4. Milestones
@@ -151,56 +220,130 @@ env.get('Assets/UI/Icon.png')                  // by container path, case-insens
 Each milestone = shippable npm prerelease. "Port" lists the AssetStudio files that define behavior.
 
 ### M0 — Monorepo skeleton + browser guard (1 d)
-- **First: convert the repo to npm workspaces and move the existing package** to `packages/` (D8; `packages/decoder` since #174): `git mv` incl. the submodule, fix `build-wasm.sh` / `copy-wasm.js` paths, private root `package.json`. No source or API change. Check: `npm pack --dry-run` file list identical before/after; its `build:rollup` and tests still pass.
-- Scaffold `packages/core`, `packages/texture`, `packages/node` (§2) on `tsconfig.base.json` + `rollup.reader.mjs`; empty modules, one smoke test each.
-- Root scripts: `build` (all TS builds, no Docker), `test` (reader packages; the decoder's tests join only when its `wasm/` output exists, since that needs Docker), `check:browser`, and `verify` = all of them + the no-C# guard. One command for humans, agents and CI.
+
+- **First: convert the repo to npm workspaces and move the existing package** to `packages/` (D8;
+  `packages/decoder` since #174).
+  - `git mv` incl. the submodule, fix `build-wasm.sh` / `copy-wasm.js` paths, private root
+    `package.json`. No source or API change.
+  - Check: `npm pack --dry-run` file list identical before/after; its `build:rollup` and tests still
+    pass.
+- Scaffold `packages/core`, `packages/texture`, `packages/node` (§2) on `tsconfig.base.json` +
+  `rollup.reader.mjs`; empty modules, one smoke test each.
+- Root scripts:
+  - `build` (all TS builds, no Docker);
+  - `test` (reader packages; the decoder's tests join only when its `wasm/` output exists, since
+    that needs Docker);
+  - `check:browser`;
+  - `verify` = all of them + the no-C# guard. One command for humans, agents and CI.
 - CI: one workflow running `npm ci && npm run verify` at the root.
-- CI guard (D2): `git ls-files '*.cs' '*.csproj' '*.sln'` must be empty — no C# in the repo, so none can reach a WASM build.
-- CI guard: `esbuild --bundle --platform=browser` on the `core` and `texture` entries must succeed with **no** node-builtin resolution (the decoder marked external). This is the whole browser-safety test; cheap and catches every regression.
-- Done when: `npm ci && npm run verify` is green at the root; every reader package emits `dist/index.{mjs,cjs,d.ts}`; decoder tarball unchanged by the move.
+- CI guard (D2): `git ls-files '*.cs' '*.csproj' '*.sln'` must be empty — no C# in the repo, so none
+  can reach a WASM build.
+- CI guard: `esbuild --bundle --platform=browser` on the `core` and `texture` entries must succeed
+  with **no** node-builtin resolution (the decoder marked external). This is the whole
+  browser-safety test; cheap and catches every regression.
+- Done when: `npm ci && npm run verify` is green at the root; every reader package emits
+  `dist/index.{mjs,cjs,d.ts}`; decoder tarball unchanged by the move.
 
 ### M1 — Unpack (layers 1–2) (3–4 d)
+
 - **First task: golden harness (#20).** Every later "Done when" depends on it. See §5.
 - All of M1 and M2 lands in `packages/core`.
-- Port: `EndianBinaryReader.cs`, `FileReader.cs` (detection only), `BundleFile.cs` (UnityFS, UnityWeb, UnityRaw; flags, blocksInfo at end, v7 alignment, 2019.4+ padding), `WebFile.cs`, `LZ4.cs`.
-- `UnityArchive` signature: detect, throw `UnsupportedError`. Upstream has no implementation to port (confirm in `BundleFile.cs` while porting).
+- Port: `EndianBinaryReader.cs`, `FileReader.cs` (detection only), `BundleFile.cs` (UnityFS,
+  UnityWeb, UnityRaw; flags, blocksInfo at end, v7 alignment, 2019.4+ padding), `WebFile.cs`,
+  `LZ4.cs`.
+- `UnityArchive` signature: detect, throw `UnsupportedError`. Upstream has no implementation to port
+  (confirm in `BundleFile.cs` while porting).
 - Compression types: none, LZMA, LZ4, LZ4HC. LZHAM and anything else → `UnsupportedError(type)`.
 - LZMA (spike #13, **done**) covers **both** stream shapes:
-  - UnityFS block: 5 prop bytes + raw data, uncompressed size from block info → synthesize the 13-byte `.lzma` header.
+  - UnityFS block: 5 prop bytes + raw data, uncompressed size from block info → synthesize the
+    13-byte `.lzma` header.
   - Legacy UnityWeb/UnityRaw: 5 prop bytes + u64 size already in the stream.
-  - **Outcome: `lzma1`.** Correct on both shapes (sha256-exact against the #20 goldens), sync, `Uint8Array` in/out, no node builtins. Measured ~10 MB/s on a 50 MB block in both Node 22 and Chromium, against a native-liblzma reference of 44.5 MB/s.
-  - The original bar was ≥ 20 MB/s on a single ~50 MB block, with `LzmaDec.c` as the fallback. **The bar is retired, not met.** Taking the WASM path would put WASM in core, which §2 and AGENTS.md forbid, and D4's consequence already routes big bundles through a Worker — so ~5 s on a 50 MB block instead of ~2.5 s does not justify it yet. Revisit via #69 if real bundle sizes make it hurt.
-  - `lzma1` does **not** throw on truncated input — it returned 52 MB of garbage for a 100 KB slice of a 26 MB stream. #14's wrapper must assert the output length itself (R9).
+  - **Outcome: `lzma1`.** Correct on both shapes (sha256-exact against the #20 goldens), sync,
+    `Uint8Array` in/out, no node builtins. Measured ~10 MB/s on a 50 MB block in both Node 22 and
+    Chromium, against a native-liblzma reference of 44.5 MB/s.
+  - The original bar was ≥ 20 MB/s on a single ~50 MB block, with `LzmaDec.c` as the fallback. **The
+    bar is retired, not met.** Taking the WASM path would put WASM in core, which §2 and AGENTS.md
+    forbid, and D4's consequence already routes big bundles through a Worker — so ~5 s on a 50 MB
+    block instead of ~2.5 s does not justify it yet. Revisit via #69 if real bundle sizes make it
+    hurt.
+  - `lzma1` does **not** throw on truncated input — it returned 52 MB of garbage for a 100 KB slice
+    of a 26 MB stream. #14's wrapper must assert the output length itself (R9).
 - gzip-wrapped files via `fflate`.
-- `BinaryReader` directly over `Uint8Array`. No `ByteSource` interface yet — one impl, one backlog consumer (#51). Guard: total uncompressed block size above typed-array limit → throw.
-- Done when: `load()` returns `env.files` byte-identical to golden raw-file hashes for fixtures covering: LZ4, LZMA (UnityFS), LZMA (legacy UnityWeb), uncompressed, gzip-wrapped.
+- `BinaryReader` directly over `Uint8Array`. No `ByteSource` interface yet — one impl, one backlog
+  consumer (#51). Guard: total uncompressed block size above typed-array limit → throw.
+- Done when: `load()` returns `env.files` byte-identical to golden raw-file hashes for fixtures
+  covering: LZ4, LZMA (UnityFS), LZMA (legacy UnityWeb), uncompressed, gzip-wrapped.
 
 ### M2 — SerializedFile + TypeTree (5–6 d)
-- Port: `SerializedFile.cs`, `SerializedFileHeader/FormatVersion`, `SerializedType.cs`, `TypeTree*.cs`, `TypeTreeHelper.cs`, `CommonString.cs`, `ClassIDType.cs`, `ObjectInfo.cs`, `ObjectReader.cs`, `PPtr.cs`; include the fork's Unity 6000 typetree fixes (`UNITY_6000_FIXES.md`).
-- Generic `readTypeTree()` → plain JS object. This alone decodes *every* class in bundles with embedded typetrees — biggest capability per LOC in the project.
-- Format-version claim: **Unity 2019.1 is the supported floor** (revision 2026-10-16). Container, SerializedFile and type tree parse code, and the class readers shipped before that revision, are ported for all versions upstream handles and keep those older paths; a class reader added from then on ports only the 2019.1+ layouts and refuses an older version with `UnsupportedError` (`readTypeTree()` still reads it). Tested only on what fixtures cover (Editors 2019.4 / 2020.3 / 6000 = formats 21 and 22, both required by the fixture tests; #82). README states the tested range. Older versions get a fixture when someone installs a 5.x/2017/2018 editor — not before.
-- Done when: object table (pathID, classID, size) matches goldens for every fixture incl. one Unity 6 bundle; typetree dump equals golden for TextAsset/MonoBehaviour under the §5 normalization.
+
+- Port: `SerializedFile.cs`, `SerializedFileHeader/FormatVersion`, `SerializedType.cs`,
+  `TypeTree*.cs`, `TypeTreeHelper.cs`, `CommonString.cs`, `ClassIDType.cs`, `ObjectInfo.cs`,
+  `ObjectReader.cs`, `PPtr.cs`; include the fork's Unity 6000 typetree fixes
+  (`UNITY_6000_FIXES.md`).
+- Generic `readTypeTree()` → plain JS object. This alone decodes *every* class in bundles with
+  embedded typetrees — biggest capability per LOC in the project.
+- Format-version claim: **Unity 2019.1 is the supported floor** (revision 2026-10-16).
+  - Container, SerializedFile and type tree parse code, and the class readers shipped before that
+    revision, are ported for all versions upstream handles and keep those older paths.
+  - A class reader added from then on ports only the 2019.1+ layouts and refuses an older version
+    with `UnsupportedError` (`readTypeTree()` still reads it).
+  - Tested only on what fixtures cover (Editors 2019.4 / 2020.3 / 6000 = formats 21 and 22, both
+    required by the fixture tests; #82). README states the tested range.
+  - Older versions get a fixture when someone installs a 5.x/2017/2018 editor — not before.
+- Done when: object table (pathID, classID, size) matches goldens for every fixture incl. one Unity
+  6 bundle; typetree dump equals golden for TextAsset/MonoBehaviour under the §5 normalization.
 
 ### M3 — Textures + sprites (4–5 d)
-- Split: class readers (`Texture2D`, `Texture`, `StreamingInfo`, `Sprite`, `SpriteAtlas`) and the resource resolver go to `packages/core`; everything that produces pixels goes to `packages/texture`.
-- Port: `Classes/Texture2D.cs`, `Texture.cs`, `StreamingInfo` + `ResourceReader.cs` (→ `env.ts`), `Texture2DConverter.cs` (plain formats in TS: Alpha8, RGB24, RGBA32, ARGB32, BGRA32, RGB565, ARGB/RGBA4444, R16, R/RG/RGBA Half+Float, RGB9e5, YUY2; block + Crunch → `texture2ddecoder-wasm`), platform swaps (Switch/XBOX360 byte-swap), vertical flip.
-- **Channel order:** the decoder and AssetStudio's converter both produce BGRA. Public output is RGBA (D5) → one in-place R/B swap after block decode (#32); plain-format converters write RGBA directly. Goldens are hashed post-swap.
-- **TextureFormat ids** follow Unity's own numbering (UnityCsReference `GraphicsEnums.cs`), not the Razviar fork's shifted `R16_Alt = 66`; decided on PR #113, recorded on #28.
-- Then: `Sprite.cs`, `SpriteAtlas.cs`, `SpriteHelper.cs` (crop, rotate/flip packing; tight-mesh mask = optional flag, polygon fill in TS).
-- Done when: RGBA output hash-equal to golden pixels for one fixture per format family; `examples/cdn.html` renders a texture from a bundle with zero bundler, reader running in a Worker, proven against this repo's builds behind a local `/+esm` stand-in. The live jsDelivr path needs the 1.0 publish and is checked in M5 (#150).
+
+- Split: class readers (`Texture2D`, `Texture`, `StreamingInfo`, `Sprite`, `SpriteAtlas`) and the
+  resource resolver go to `packages/core`; everything that produces pixels goes to
+  `packages/texture`.
+- Port: `Classes/Texture2D.cs`, `Texture.cs`, `StreamingInfo` + `ResourceReader.cs` (→ `env.ts`),
+  `Texture2DConverter.cs` (plain formats in TS: Alpha8, RGB24, RGBA32, ARGB32, BGRA32, RGB565,
+  ARGB/RGBA4444, R16, R/RG/RGBA Half+Float, RGB9e5, YUY2; block + Crunch → `texture2ddecoder-wasm`),
+  platform swaps (Switch/XBOX360 byte-swap), vertical flip.
+- **Channel order:** the decoder and AssetStudio's converter both produce BGRA. Public output is
+  RGBA (D5) → one in-place R/B swap after block decode (#32); plain-format converters write RGBA
+  directly. Goldens are hashed post-swap.
+- **TextureFormat ids** follow Unity's own numbering (UnityCsReference `GraphicsEnums.cs`), not the
+  Razviar fork's shifted `R16_Alt = 66`; decided on PR #113, recorded on #28.
+- Then: `Sprite.cs`, `SpriteAtlas.cs`, `SpriteHelper.cs` (crop, rotate/flip packing;
+  tight-mesh mask = optional flag, polygon fill in TS).
+- Done when:
+  - RGBA output hash-equal to golden pixels for one fixture per format family;
+  - `examples/cdn.html` renders a texture from a bundle with zero bundler, reader running in a
+    Worker, proven against this repo's builds behind a local `/+esm` stand-in. The live jsDelivr
+    path needs the 1.0 publish and is checked in M5 (#150).
 
 ### M4 — Hardcoded classes for typetree-stripped bundles (2–3 d)
+
 - All in `packages/core`.
-- Port minimal readers: `Object`, `EditorExtension`, `NamedObject`, `AssetBundle` (container map), `TextAsset`, `MonoScript`, `MonoBehaviour` (header only), `Material`, `AudioClip` (metadata + raw FSB bytes out), `Font` (raw ttf/otf out), `VideoClip`/`MovieTexture` (raw out).
+- Port minimal readers: `Object`, `EditorExtension`, `NamedObject`, `AssetBundle` (container map),
+  `TextAsset`, `MonoScript`, `MonoBehaviour` (header only), `Material`, `AudioClip` (metadata + raw
+  FSB bytes out), `Font` (raw ttf/otf out), `VideoClip`/`MovieTexture` (raw out).
 - Raw-bytes-out covers audio/font/video "extract" without any decoder.
 - Done when: container paths + names match golden asset list for a stripped-typetree fixture.
 
 ### M5 — node adapter package + 1.0 (1–2 d)
-- `packages/node`: `loadPath(fileOrDir)`: fs read, dir scan, split-file (`.split0..n`) merge, sidecar `.resS/.resource` lookup. Port only that slice of `AssetsManager.cs` / `ImportHelper.cs`.
-- README (incl. tested format-version range, Worker guidance, bigint JSON replacer), QUICK_START, bundler guide (reuse existing lib's docs structure). Root README becomes the package index. First publish: `texture2ddecoder-wasm` 1.2.3 (it carries #137 and #149, which the texture package and its goldens rely on), then 1.0.0 of `unity-asset-reader`, `-texture` and `-node`, through the release workflow's manual dispatch, which publishes every version not on npm yet in dependency order (#192). From then on each package is released on its own, by merging a change of its `version` (2026-09-28c).
+
+- `packages/node`: `loadPath(fileOrDir)`: fs read, dir scan, split-file (`.split0..n`) merge,
+  sidecar `.resS/.resource` lookup. Port only that slice of `AssetsManager.cs` / `ImportHelper.cs`.
+- Docs: README (incl. tested format-version range, Worker guidance, bigint JSON replacer),
+  QUICK_START, bundler guide (reuse existing lib's docs structure). Root README becomes the package
+  index.
+- First publish, through the release workflow's manual dispatch, which publishes every version not
+  on npm yet in dependency order (#192):
+  - `texture2ddecoder-wasm` 1.2.3 (it carries #137 and #149, which the texture package and its
+    goldens rely on);
+  - then 1.0.0 of `unity-asset-reader`, `-texture` and `-node`.
+- From then on each package is released on its own, by merging a change of its `version`
+  (2026-09-28c).
 
 ### M6+ — On demand, each independent
-Each item that brings a decoder or writer ships as its own package on top of core (D7); only the class field readers it needs are added to core.
+
+Each item that brings a decoder or writer ships as its own package on top of core (D7); only the
+class field readers it needs are added to core.
+
 | Item | Work | Trigger |
 |---|---|---|
 | Mesh → glTF | `Mesh.cs` (1.5k LOC, vertex decompression) + glTF writer in TS (core's `GltfWriter`, 2026-11-08d) | need 3D |
@@ -213,14 +356,47 @@ Each item that brings a decoder or writer ships as its own package on top of cor
 
 ## 5. Testing
 
-- Runner: `tsx --test` (same as existing lib), tests in `packages/<pkg>/tests/`; fixtures and goldens shared from root `fixtures/`.
-- **Golden oracle for parsing: UnityPy** (`pip install UnityPy`; MIT, cross-platform, scriptable). One script `scripts/make-goldens.py` emits per fixture: raw file hashes (`env.files`), object table, typetree JSON (`read_typetree()`), RGBA hashes. UnityPy also names the inputs of the export oracle.
-- **Golden oracle for export output: AssetStudio** at `c37af7d` (Razviar/assetstudio), the behavior source of truth itself, for images, models, audio, TextAsset files, shader text, fonts, videos and animation curves (2026-10-16b, 2026-10-16f, 2026-11-07a, 2026-11-07b, 2026-11-08c). `scripts/make-export-goldens.py` builds that revision unmodified from a clone **outside the repo** (R2) in an external .NET 8 harness and runs its own exporters (`ExportTexture2D` and `ExportSprite` to PNG, `ExportMesh` to OBJ, `AudioClipConverter.ConvertToWav`, `ExportTextAsset`, `ExportShader`, `ExportFont`, `ExportVideoClip`, `ExportAnimationClip`) on every fixture object the UnityPy goldens list, recording output hashes and sizes in `fixtures/assetstudio-export-goldens.json` only where AssetStudio reads the same input metadata as UnityPy. No C#, NuGet package or FMOD library is committed (`fixtures/BUILDING.md` section 17). Vulkan stages in SMOL-V encoding version 1 (Unity 2020.3+), which `c37af7d`'s decoder predates, have a hybrid oracle: aras-p/smol-v `6303e979` words and `c37af7d`'s CSspv text (2026-11-07c). Shaders with variants in `m_PlayerSubPrograms` (Unity 2021.3.10+ / 2022.2+, all of Unity 6) have a composite oracle: UnityPy 1.25.4's type tree in `c37af7d`'s own converter (2026-11-08a).
-- **Golden oracle for the humanoid muscle-to-bone conversion: the Unity editor** (2026-11-08e), for that conversion only; AssetStudio `c37af7d` has none. `scripts/make-humanoid-goldens.py`, run outside the package on the Windows host, opens a scratch project per fixture editor (its C# held in the script, R2), loads the committed typed bundles with `AssetBundle.LoadFromFile` and feeds each humanoid fixture clip's authored muscle and root values, at its keys and the midpoints between them, to `HumanPoseHandler.SetHumanPose` on the bundle's own prefab and Avatar, in batchmode without play mode. `fixtures/humanoid-unity-goldens.json` records the inputs and every transform's local rotation and position (`fixtures/BUILDING.md` section 28). Compared within the tolerance the owner sets on #319, not by float32 bits, a quaternion matching its negation; the golden carries no bound of its own.
+- Runner: `tsx --test` (same as existing lib), tests in `packages/<pkg>/tests/`; fixtures and
+  goldens shared from root `fixtures/`.
+- **Golden oracle for parsing: UnityPy** (`pip install UnityPy`; MIT, cross-platform, scriptable).
+  - One script `scripts/make-goldens.py` emits per fixture: raw file hashes (`env.files`), object
+    table, typetree JSON (`read_typetree()`), RGBA hashes.
+  - UnityPy also names the inputs of the export oracle.
+- **Golden oracle for export output: AssetStudio** at `c37af7d` (Razviar/assetstudio), the behavior
+  source of truth itself, for images, models, audio, TextAsset files, shader text, fonts, videos and
+  animation curves (2026-10-16b, 2026-10-16f, 2026-11-07a, 2026-11-07b, 2026-11-08c).
+  - `scripts/make-export-goldens.py` builds that revision unmodified from a clone **outside the
+    repo** (R2) in an external .NET 8 harness.
+  - The harness runs AssetStudio's own exporters (`ExportTexture2D` and `ExportSprite` to PNG,
+    `ExportMesh` to OBJ, `AudioClipConverter.ConvertToWav`, `ExportTextAsset`, `ExportShader`,
+    `ExportFont`, `ExportVideoClip`, `ExportAnimationClip`) on every fixture object the UnityPy
+    goldens list.
+  - It records output hashes and sizes in `fixtures/assetstudio-export-goldens.json` only where
+    AssetStudio reads the same input metadata as UnityPy.
+  - No C#, NuGet package or FMOD library is committed (`fixtures/BUILDING.md` section 17).
+  - Vulkan stages in SMOL-V encoding version 1 (Unity 2020.3+), which `c37af7d`'s decoder predates,
+    have a hybrid oracle: aras-p/smol-v `6303e979` words and `c37af7d`'s CSspv text (2026-11-07c).
+  - Shaders with variants in `m_PlayerSubPrograms` (Unity 2021.3.10+ / 2022.2+, all of Unity 6) have
+    a composite oracle: UnityPy 1.25.4's type tree in `c37af7d`'s own converter (2026-11-08a).
+- **Golden oracle for the humanoid muscle-to-bone conversion: the Unity editor** (2026-11-08e), for
+  that conversion only; AssetStudio `c37af7d` has none.
+  - `scripts/make-humanoid-goldens.py` runs outside the package on the Windows host. It opens a
+    scratch project per fixture editor (its C# held in the script, R2).
+  - It loads the committed typed bundles with `AssetBundle.LoadFromFile`. It feeds each humanoid
+    fixture clip's authored muscle and root values, at its keys and the midpoints between them, to
+    `HumanPoseHandler.SetHumanPose` on the bundle's own prefab and Avatar, in batchmode without play
+    mode.
+  - `fixtures/humanoid-unity-goldens.json` records the inputs and every transform's local rotation
+    and position (`fixtures/BUILDING.md` section 28).
+  - Compared within the tolerance the owner sets on #319, not by float32 bits, a quaternion matching
+    its negation; the golden carries no bound of its own.
 - Goldens generated **once**, committed. The oracle is not a dependency of the package or CI.
-- Typetree comparison normalization (both sides): int64 → decimal string; floats compared by float32 bit pattern (NaN/-0 safe), not by printed text; byte arrays → hex or hash.
-- Fixtures: small bundles per (compression × editor version × texture family), zipped like `samples.zip`, built with own Unity Editor projects.
-- Browser: M0 esbuild guard + one Playwright smoke loading `examples/cdn.html` (M3), and one Playwright test of the GitHub Pages demo `docs/index.html` (#209). No per-feature browser suite.
+- Typetree comparison normalization (both sides): int64 → decimal string; floats compared by float32
+  bit pattern (NaN/-0 safe), not by printed text; byte arrays → hex or hash.
+- Fixtures: small bundles per (compression × editor version × texture family), zipped like
+  `samples.zip`, built with own Unity Editor projects.
+- Browser: M0 esbuild guard + one Playwright smoke loading `examples/cdn.html` (M3), and one
+  Playwright test of the GitHub Pages demo `docs/index.html` (#209). No per-feature browser suite.
 
 ## 6. Risks
 
@@ -238,21 +414,39 @@ Each item that brings a decoder or writer ships as its own package on top of cor
 
 ## 7. Explicitly not doing
 
-C#→WASM, FBX, Mono.Cecil DLL reflection, YAML export, LZMA/LZ4 *compression*, repacking/writing bundles, brotli, LZHAM, UnityArchive, GUI, multi-threading, JPEG encoding. (PNG encoding left this list with #234, see the 2026-10-16c revision.)
+- C#→WASM, FBX, Mono.Cecil DLL reflection, YAML export, LZMA/LZ4 *compression*, repacking/writing
+  bundles, brotli, LZHAM, UnityArchive, GUI, multi-threading, JPEG encoding.
+- PNG encoding left this list with #234, see the 2026-10-16c revision.
 
 **Core to 1.0: ~16–21 working days.**
 
 ## 8. Tracking (GitHub)
 
-Issues live in this repo (`fatal10110/unity-asset-reader` — D8). No transfer needed.
-Milestone epics (each has its tasks as sub-issues): M0 #6 · M1 #10 · M2 #21 · M3 #28 · M4 #36 · M5 #42 · M6+ #46
-Labels: `epic`, `area:{bundle,serialized,texture,codec,node,infra}`, `backlog`.
+- Issues live in this repo (`fatal10110/unity-asset-reader` — D8). No transfer needed.
+- Milestone epics (each has its tasks as sub-issues): M0 #6 · M1 #10 · M2 #21 · M3 #28 · M4 #36 · M5
+  #42 · M6+ #46
+- Labels: `epic`, `area:{bundle,serialized,texture,codec,node,infra}`, `backlog`.
 
-Revision 2026-09-21c (#71): §2 states the externalization rule for `rollup.reader.mjs` — declared `dependencies`/`peerDependencies` are external, everything else is bundled.
+### Revision log
 
-Revision 2026-09-21b (monorepo, D7/D8 rewritten): new M0 issue #55 for the workspaces conversion + package move (#7 → scaffold reader packages, depends on #55; #8 → guards for core/texture + R14; #9 → root `verify` CI); #6–#9 re-scoped to `packages/*` and root `verify`; every implementation issue names its package; #28/#29–#35 split core/texture; #32 decoder is a regular dependency; #43 → `packages/node`; #44/#45 multi-package docs and lockstep publish; M6+ items (#47–#52) each name their own package. Milestones M0/M5 retitled. PR #54 (single-package scaffold) is superseded by the re-scoped #7.
+Each entry starts with its revision id: the date, plus a letter when a day has several. Entries are
+mostly in date order. Two entries share the id 2026-09-21c: the externalization rule (#71) and the
+LZMA spike outcome (#13).
+
+**Revision 2026-09-21c** (#71): §2 states the externalization rule for `rollup.reader.mjs` —
+declared `dependencies`/`peerDependencies` are external, everything else is bundled.
+
+**Revision 2026-09-21b** (monorepo, D7/D8 rewritten):
+
+- New M0 issue #55 for the workspaces conversion + package move (#7 → scaffold reader packages,
+  depends on #55; #8 → guards for core/texture + R14; #9 → root `verify` CI).
+- #6–#9 re-scoped to `packages/*` and root `verify`; every implementation issue names its package.
+- #28/#29–#35 split core/texture; #32 decoder is a regular dependency; #43 → `packages/node`;
+  #44/#45 multi-package docs and lockstep publish; M6+ items (#47–#52) each name their own package.
+- Milestones M0/M5 retitled. PR #54 (single-package scaffold) is superseded by the re-scoped #7.
 
 Issue edits applied for the previous revision (2026-09-21, via `gh`):
+
 - #6, #7, #9 → scaffold + CI scoped to `unity-asset-reader/` subdir (D8).
 - #8 → adds no-C# guard (D2).
 - #10, #21, #28 → epic goals/done-criteria aligned.
@@ -265,50 +459,309 @@ Issue edits applied for the previous revision (2026-09-21, via `gh`):
 - #35 → example runs reader in a Worker.
 - #6–#52 → footer: "clean-room" → MIT-derivative wording + UnityPy oracle + no-C#→WASM rule.
 
-Revision 2026-09-21c (M1 spike #13 resolved): LZMA is **`lzma1`**, not the `LzmaDec.c` WASM fallback. The spike measured it correct on both stream shapes but at ~10 MB/s against a 20 MB/s bar; the bar is retired rather than met, because the WASM route would put WASM in `packages/core` (forbidden by §2 and the AGENTS.md core row) and D4 already routes big bundles through a Worker. The WASM fallback becomes on-demand M6 work (#69), to be built only on a real complaint or a measured regression on genuine bundles. §1's LZMA row and the M1 LZMA bullet record the outcome; §2's "LZMA fallback, M6" line was already consistent and now names the issue. Also recorded: `lzma1` does not throw on truncated input, so #14's wrapper must assert output length itself (R9).
+**Revision 2026-09-21c** (M1 spike #13 resolved): LZMA is **`lzma1`**, not the `LzmaDec.c` WASM
+fallback.
 
-Revision 2026-09-26 (#81, #82): M2 fixtures are editor-built with 2019.4.41f2 (SerializedFile format 21), 2020.3.30f1 and 6000.3.25f1 (format 22); only the bundles are committed, the Unity project stays local and `fixtures/BUILDING.md` carries its sources (R2). The M2 format-version claim and the §6 licensing row name these editors. Also recorded: UnityPy cannot fully read a v1 `[SerializeReference]` registry (≤ 2020.3), so `make-goldens.py` records an `oracleNote` for that case (#25); `files` goldens hash raw node bytes, not UnityPy's re-serialization (#81).
+- The spike measured it correct on both stream shapes but at ~10 MB/s against a 20 MB/s bar. The bar
+  is retired rather than met, because the WASM route would put WASM in `packages/core` (forbidden by
+  §2 and the AGENTS.md core row) and D4 already routes big bundles through a Worker.
+- The WASM fallback becomes on-demand M6 work (#69), to be built only on a real complaint or a
+  measured regression on genuine bundles.
+- §1's LZMA row and the M1 LZMA bullet record the outcome; §2's "LZMA fallback, M6" line was already
+  consistent and now names the issue.
+- Also recorded: `lzma1` does not throw on truncated input, so #14's wrapper must assert output
+  length itself (R9).
 
-Revision 2026-09-27 (#35, PR #151): M3's `examples/cdn.html` criterion no longer requires jsDelivr. The reader packages are first published in M5 (#45), so M3 proves the page against this repo's builds behind `examples/serve.mjs`, a local stand-in for jsDelivr's `/+esm`; the live jsDelivr check is #150, in M5.
+**Revision 2026-09-26** (#81, #82): M2 fixtures are editor-built with 2019.4.41f2 (SerializedFile
+format 21), 2020.3.30f1 and 6000.3.25f1 (format 22).
 
-Revision 2026-09-27b (#34, PR #156): the texture package's optional sprite tight-mesh fill is derived from ImageSharp.Drawing v1.0.0-beta15 (Apache-2.0, Six Labors), kept by maintainer decision because it makes the mask match AssetStudio pixel-for-pixel. `unity-asset-reader-texture` therefore declares `"license": "MIT AND Apache-2.0"` and ships `LICENSE-APACHE` plus a `NOTICE` stanza; the derived code carries a per-file Apache-2.0 header. Core, node and `texture2ddecoder-wasm` stay MIT. D1 notes the exception.
+- Only the bundles are committed; the Unity project stays local and `fixtures/BUILDING.md` carries
+  its sources (R2).
+- The M2 format-version claim and the §6 licensing row name these editors.
+- Also recorded: UnityPy cannot fully read a v1 `[SerializeReference]` registry (≤ 2020.3), so
+  `make-goldens.py` records an `oracleNote` for that case (#25); `files` goldens hash raw node
+  bytes, not UnityPy's re-serialization (#81).
 
-Revision 2026-09-27c (#174, maintainer decision): every package ships under **one version**, and the decoder is renamed so the family starts together at **1.0.0**. `texture2ddecoder-wasm` becomes `unity-asset-reader-decoder` (folder `packages/decoder`) at 1.0.0 with its public API unchanged; only the npm name and version change. The reader packages are 1.0.0 too, and all four are released together from now on. `texture2ddecoder-wasm` stays at 1.2.2 on npm; after the first publish the maintainer deprecates it with a pointer to the new name (not done from the repo). Reverses D7's "keeps its npm name, API and 1.x version line" and "versions independently", D8's `packages/texture2ddecoder-wasm/` path, and R13's "keeps its npm name". D7, D8, §1, §2, M0, M3 and M5 now name the new package.
+**Revision 2026-09-27** (#35, PR #151): M3's `examples/cdn.html` criterion no longer requires
+jsDelivr. The reader packages are first published in M5 (#45), so M3 proves the page against this
+repo's builds behind `examples/serve.mjs`, a local stand-in for jsDelivr's `/+esm`; the live
+jsDelivr check is #150, in M5.
 
-Revision 2026-09-28b (#183, maintainer decision): the reader gets a TypeScript-style high-level API before 1.0 (§3 "High-level API"): `load()` takes bare bytes and single inputs, `open()` fetches or reads input asynchronously and then calls `load()`, `env.assets()` yields every object as an `Asset` (plain data with a `type` discriminant and a lazy `data`), `env.get(path)` looks assets up by container path. The design is data plus free functions, with no per-class methods; the low-level API stays alongside. D4 and R5 now read "parsing is sync; `open()` (loading input) and texture decoding are async", and D3 / R4 name the WHATWG globals `open()` uses. §2 lists `asset.ts` and `open.ts`.
+**Revision 2026-09-27b** (#34, PR #156): the texture package's optional sprite tight-mesh fill is
+derived from ImageSharp.Drawing v1.0.0-beta15 (Apache-2.0, Six Labors), kept by maintainer decision
+because it makes the mask match AssetStudio pixel-for-pixel.
 
-Revision 2026-09-28a (#182, maintainer decision): reverses the naming and versioning half of 2026-09-27c. The decoder goes back to its published name **`texture2ddecoder-wasm`** and keeps **its own version line**; its next release is 1.2.3 (#137, #149). `unity-asset-reader-decoder` was never published and is dropped; there is no migration and no `npm deprecate`. The three reader packages stay in lockstep and start at 1.0.0; `unity-asset-reader-texture` depends on `texture2ddecoder-wasm@^1.2.3`, so decoder 1.2.3 is published before the readers' 1.0.0. The folder stays `packages/decoder`. Releases use two tag families, `unity-asset-reader@<v>` and `texture2ddecoder-wasm@<v>`, because the decoder's old `v1.x` tags exist. D7, D8, §1, §2, §3, M3, M5 and R13 name `texture2ddecoder-wasm` again.
+- `unity-asset-reader-texture` therefore declares `"license": "MIT AND Apache-2.0"` and ships
+  `LICENSE-APACHE` plus a `NOTICE` stanza; the derived code carries a per-file Apache-2.0 header.
+- Core, node and `texture2ddecoder-wasm` stay MIT. D1 notes the exception.
 
-Revision 2026-09-28c (#192, maintainer decision): **no shared version**. `unity-asset-reader`, `unity-asset-reader-texture`, `unity-asset-reader-node` and `texture2ddecoder-wasm` each version independently; the readers are no longer in lockstep. A release is **a change of `version` in a package's `package.json`**, merged to `main`: the release workflow publishes each package whose version changed and is not on npm yet, in dependency order (decoder, core, texture, node), after checking that each one's ranges on other packages of this repo (`dependencies`, `peerDependencies`) are satisfied on npm or by a package published earlier in the same run. A pull request that changes a `package.json` runs the same plan as a dry run, without environment, secrets or OIDC token; `workflow_dispatch` publishes every version not on npm yet (the first release, recovery). After each publish the workflow pushes a `<name>@<version>` tag as a record; nothing triggers on tags. Replaces the lockstep versioning and the tag-triggered, family-based releases of #175 and 2026-09-28a. Versions are unchanged: readers 1.0.0, decoder 1.2.3. D7, D8, M5 and the rules (R13, Git and PRs) updated.
+**Revision 2026-09-27c** (#174, maintainer decision): every package ships under **one version**, and
+the decoder is renamed so the family starts together at **1.0.0**.
 
-Revision 2026-10-06 (#153, PR #227, maintainer decision): a second Apache-2.0 exception, handled like #34's. The texture package's variant-atlas resize (`packages/texture/src/resize.ts`) is derived from SixLabors ImageSharp 2.1.3 (Apache-2.0, Six Labors), the version AssetStudio resizes a variant atlas with, kept because it makes the resized sprite match AssetStudio's to the byte. It carries a per-file Apache-2.0 header and a `NOTICE` stanza; `unity-asset-reader-texture` stays `"MIT AND Apache-2.0"` with the same `LICENSE-APACHE`. D1 names both exceptions.
+- `texture2ddecoder-wasm` becomes `unity-asset-reader-decoder` (folder `packages/decoder`) at 1.0.0
+  with its public API unchanged; only the npm name and version change.
+- The reader packages are 1.0.0 too, and all four are released together from now on.
+- `texture2ddecoder-wasm` stays at 1.2.2 on npm; after the first publish the maintainer deprecates
+  it with a pointer to the new name (not done from the repo).
+- Reverses D7's "keeps its npm name, API and 1.x version line" and "versions independently", D8's
+  `packages/texture2ddecoder-wasm/` path, and R13's "keeps its npm name". D7, D8, §1, §2, M0, M3 and
+  M5 now name the new package.
 
-Revision 2026-10-16 (#235, PR #243, maintainer decision): **Unity 2019.1 is the supported floor.** The M2 format-version claim said parse code is ported for all versions upstream handles; it now holds for the container, SerializedFile and type tree code and for the class readers already shipped, which keep their older paths (nothing is removed). A class reader added from now on (`Mesh`, #235; `Shader`, #237) ports only the 2019.1+ layouts of its class and refuses an older version with `UnsupportedError` (kind `"Unity version"`); `readTypeTree()` still reads such an object from its type tree.
+**Revision 2026-09-28b** (#183, maintainer decision): the reader gets a TypeScript-style high-level
+API before 1.0 (§3 "High-level API"):
 
-Revision 2026-10-16b (#233, maintainer decision): AssetStudio at `c37af7d`, executed outside the repo (R2), is the golden oracle for **export output** (images, models, audio, shader text), since it is already the behavior source of truth and section 15 of `fixtures/BUILDING.md` already runs its pinned methods in an external .NET 8 harness (#221, #230). UnityPy stays the oracle for parsing goldens and names and checks the harness inputs. `scripts/make-export-goldens.py` is the one entry point; it writes `fixtures/assetstudio-export-goldens.json` (PNG pixels, OBJ and WAV hashes and sizes), each entry matched on the UnityPy input metadata as `make-goldens.py` matches its cross-checks. Shader text has no fixture yet and is left to #52. The header, §5, the §6 oracle risk row and R12 name the harness. Replaces §5's "use [AssetStudio] only to cross-check disagreements, not in the harness".
+- `load()` takes bare bytes and single inputs;
+- `open()` fetches or reads input asynchronously and then calls `load()`;
+- `env.assets()` yields every object as an `Asset` (plain data with a `type` discriminant and a lazy
+  `data`);
+- `env.get(path)` looks assets up by container path.
 
-Revision 2026-10-16c (#234, maintainer decision): **PNG encoding is in scope**; §7 keeps only JPEG encoding. `unity-asset-reader-texture` exports `encodePng(image)`, an RGBA8 `RgbaImage` (top row first) to a PNG file. It stays sync (D4) and browser-safe (D3, R4), so `CompressionStream` is out, and it adds no dependency (§1, R8): the zlib stream holds stored deflate blocks, so the file is about the size of the raw pixels, and callers who want smaller files keep using an image library. D5 is unchanged: core encodes no images (it writes glTF since 2026-11-08d). Tested against AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json` (2026-10-16b), pixels compared, not file bytes.
+The design is data plus free functions, with no per-class methods; the low-level API stays
+alongside. D4 and R5 now read "parsing is sync; `open()` (loading input) and texture decoding are
+async", and D3 / R4 name the WHATWG globals `open()` uses. §2 lists `asset.ts` and `open.ts`.
 
-Revision 2026-10-16d (#239, PR #249, maintainer decision): a feature package's peer range on core may name the oldest core it works with, `^<major>.<minor>.<patch>`, instead of `^<major>`, as the texture package's range on the decoder does; it never admits another major. `unity-asset-reader-mesh` peers on `^1.2.0`, the first core that decodes `MeshData`. The release plan already refuses a package whose range is neither on npm nor met by a package released earlier in the same run, so a feature package never ships ahead of its core. Also from PR #249: a new package enters the release order at version `0.0.0`, which the release workflow never publishes; its first release is a bump to 1.0.0 (RELEASING.md). D7 updated.
+**Revision 2026-09-28a** (#182, maintainer decision): reverses the naming and versioning half of
+2026-09-27c.
 
-Revision 2026-10-16e (#236, PR #248): §2 lists `packages/audio` (`unity-asset-reader-audio`, the M6 audio item's own package per D7), isomorphic and sync, and the `resolve({ browser: true })` line names it and `mesh`; R4 names both, as `check:browser` already holds them to it. Audio enters the release order at `0.0.0` (2026-10-16d) and peers on `^1`.
+- The decoder goes back to its published name **`texture2ddecoder-wasm`** and keeps **its own
+  version line**; its next release is 1.2.3 (#137, #149).
+- `unity-asset-reader-decoder` was never published and is dropped; there is no migration and no
+  `npm deprecate`.
+- The three reader packages stay in lockstep and start at 1.0.0; `unity-asset-reader-texture`
+  depends on `texture2ddecoder-wasm@^1.2.3`, so decoder 1.2.3 is published before the readers'
+  1.0.0.
+- The folder stays `packages/decoder`.
+- Releases use two tag families, `unity-asset-reader@<v>` and `texture2ddecoder-wasm@<v>`, because
+  the decoder's old `v1.x` tags exist.
+- D7, D8, §1, §2, §3, M3, M5 and R13 name `texture2ddecoder-wasm` again.
 
-Revision 2026-10-16f (#238): M6 gets a **Spine export** row and its package, `unity-asset-reader-spine` (`packages/spine`, §2), a feature package on core as a peer dependency (D7, R14), isomorphic like core. It groups what spine-unity stores per skeleton - the `SkeletonDataAsset`'s skeleton data TextAsset, and per `SpineAtlasAsset` the atlas text TextAsset and the page Texture2Ds of its materials - by MonoBehaviour field names read through type trees, so bundles built without type trees are not readable (§7, Mono.Cecil). AssetStudio has no Spine export: the grouping is checked against the table `fixtures/BUILDING.md` writes before the build, and its parts against #233's export goldens, which now also cover every fixture TextAsset (`ExportTextAsset`).
+**Revision 2026-09-28c** (#192, maintainer decision): **no shared version**. `unity-asset-reader`,
+`unity-asset-reader-texture`, `unity-asset-reader-node` and `texture2ddecoder-wasm` each version
+independently; the readers are no longer in lockstep.
 
-Revision 2026-10-16g (#242): the M6 **Shader** row is `unity-asset-reader-shader` (`packages/shader`, §2), a feature package on core as a peer dependency (D7, R14), `^1.2.0` (2026-10-16d), isomorphic and sync like core (D3, D4, R4). `shaderToText()` writes AssetStudio's `ShaderConverter.Convert()` text in pure TypeScript, without the spirv-cross WASM the row planned: Vulkan programs are SMOL-V decoded and disassembled by a hand-port of the CSspv disassembler AssetStudio vendors, whose BSD-2-Clause license makes the package `MIT AND BSD-2-Clause` (no runtime dependency, §1). Direct3D programs throw `UnsupportedError` (AssetStudio needs Windows' D3DCompiler or HLSLDecompiler for them, R9), and so do shaders whose variants are in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.1.13, 2022.2 and later, so every 6000 fixture), which AssetStudio's converter does not read: there is no oracle text for them, as `c37af7d` skips every 6000+ Shader. #233's harness exports every fixture Shader with `ExportShader`, except those with Direct3D programs, whose text depends on the host.
+- A release is **a change of `version` in a package's `package.json`**, merged to `main`.
+- The release workflow publishes each package whose version changed and is not on npm yet, in
+  dependency order (decoder, core, texture, node), after checking that each one's ranges on other
+  packages of this repo (`dependencies`, `peerDependencies`) are satisfied on npm or by a package
+  published earlier in the same run.
+- A pull request that changes a `package.json` runs the same plan as a dry run, without environment,
+  secrets or OIDC token.
+- `workflow_dispatch` publishes every version not on npm yet (the first release, recovery).
+- After each publish the workflow pushes a `<name>@<version>` tag as a record; nothing triggers on
+  tags.
+- Replaces the lockstep versioning and the tag-triggered, family-based releases of #175 and
+  2026-09-28a. Versions are unchanged: readers 1.0.0, decoder 1.2.3.
+- D7, D8, M5 and the rules (R13, Git and PRs) updated.
 
-Revision 2026-11-07a (#275, maintainer-approved in the 2026-11-07 parity wave): the export oracle of §5 also runs `ExportSprite` (`Sprite.GetImage()`) on every fixture Sprite, so `decodeSprite` is checked against AssetStudio's executed sprite PNGs, not only UnityPy's crop and hand-kept hashes. Where the package differs from `GetImage()` by design (it merges an ETC1 split alpha texture, #152; it cuts a sprite's own variant atlas, where AssetStudio's loader moves the sprite to its master atlas, #153), the script records the verdict next to the golden (§6) and the tests compare the golden with what `GetImage()` cuts.
+**Revision 2026-10-06** (#153, PR #227, maintainer decision): a second Apache-2.0 exception, handled
+like #34's.
 
-Revision 2026-11-07b (#277, maintainer-approved in the 2026-11-07 parity wave): the export oracle of §5 also runs `ExportFont` on every fixture Font and `ExportVideoClip` on every fixture VideoClip, so core's `m_FontData` and video bytes (inline or from the bundle's `.resource` node, as core resolves them) are checked against the files AssetStudio writes, not only against UnityPy's raw data.
+- The texture package's variant-atlas resize (`packages/texture/src/resize.ts`) is derived from
+  SixLabors ImageSharp 2.1.3 (Apache-2.0, Six Labors), the version AssetStudio resizes a variant
+  atlas with, kept because it makes the resized sprite match AssetStudio's to the byte.
+- It carries a per-file Apache-2.0 header and a `NOTICE` stanza; `unity-asset-reader-texture` stays
+  `"MIT AND Apache-2.0"` with the same `LICENSE-APACHE`.
+- D1 names both exceptions.
 
-Revision 2026-11-07c (#260): SPIR-V words of SMOL-V streams with encoding version 1 or later (header `0x01xxxxxx`, Unity 2020.3+) come from aras-p/smol-v `6303e979` (MIT/Unlicense) `smolv::Decode`, built outside the repo (R2). Their text is `c37af7d`'s CSspv `Disassembler` run by the #233 harness on those words, framed as `SpirVShaderConverter.Convert`. Goldens record word hashes per stage and the text. Version-0 streams stay on `c37af7d`; the harness checks that smol-v with `kDecodeFlagUse20160831AsZeroVersion` reproduces them word for word. Where CSspv cannot disassemble a program, the golden keeps `// disassembly error`. `packages/shader` ports `smolv::Decode`'s version-1 path (MIT) and keeps AssetStudio's for version 0, so 2026-10-16g's "Vulkan programs are SMOL-V decoded and disassembled" now holds for 2020.3 too.
+**Revision 2026-10-16** (#235, PR #243, maintainer decision): **Unity 2019.1 is the supported
+floor.**
 
-Revision 2026-11-08a (#259): shaders that list their variants in `m_PlayerSubPrograms` (Unity 2021.3.10+, 2022.1.13+, 2022.2+, so every Unity 6 build) get text, replacing 2026-10-16g's `UnsupportedError`. No MIT fork pins `c37af7d`-format text for them, and `c37af7d`'s `Shader` reader skips every 6000+ Shader, so their oracle is a composite, run by the #233 harness: (1) UnityPy 1.25.4 (it also reads SerializedFile format 23) reads the Shader's type tree; (2) the harness fills `c37af7d`'s own `SerializedShader` with it, by field name; (3) each distinct (`m_BlobIndex`, `m_GpuProgramType`) of a stage's `m_PlayerSubPrograms`, its groups in order, where it first appears, becomes one `SerializedSubProgram` of hardware tier 0 after the stage's `m_SubPrograms`; (4) `c37af7d`'s `ShaderSubProgram(reader, false)` reads each blob entry those name (it reads the entries of 6000.3.26f1, version 202012090, and 6000.6.4f1, version 202605290); the blob's other entries are the variants' parameters (`m_ParameterBlobIndices`), which do not read as programs and are not written, as `c37af7d` writes no `m_Parameters`; (5) `c37af7d`'s `ShaderConverter.ConvertSerializedShader` writes the text, after its header; Vulkan programs go through 2026-11-07c's hybrid. So the layout is `ConvertSerializedSubPrograms`' without `hw_tierNN`: each blob index and type has one variant. The layout rule (3) is ours; everything else is `c37af7d`'s code on UnityPy's input. Goldens carry `"oracle"`. Shaders with variants in `m_SubPrograms` stay on `c37af7d` unchanged. A shader `c37af7d`'s converter fails on (a property of type `Int`) still gets no golden and is still refused.
+- The M2 format-version claim said parse code is ported for all versions upstream handles. It now
+  holds for the container, SerializedFile and type tree code and for the class readers already
+  shipped, which keep their older paths (nothing is removed).
+- A class reader added from now on (`Mesh`, #235; `Shader`, #237) ports only the 2019.1+ layouts of
+  its class and refuses an older version with `UnsupportedError` (kind `"Unity version"`);
+  `readTypeTree()` still reads such an object from its type tree.
 
-Revision 2026-11-08c (#304, maintainer decision 2026-11-08 on #49, option A): the M6 animation row gets its package, `unity-asset-reader-animation` (`packages/animation`, §2), a feature package on core as a peer dependency (D7, R14), `^1.3.0` (2026-10-16d: the first core with #302's and #303's readers), entering the release order at `0.0.0`, isomorphic and sync like core (D3, D4, R4), no runtime dependency (§1); the `resolve({ browser: true })` line and R4 name it, as `check:browser` holds it to them. Its `clipCurves(env, clip)` returns plain curve data (per curve the path, attribute, class id and keyframes; the events), ported from AssetStudio's `AnimationClipConverter`, `AnimationClipExtensions.Convert`/`FindTOS`, `CustomCurveResolver` and `MuscleHelper`: humanoid curves stay named muscle attributes, with no muscle-to-bone conversion (#306) and no YAML (§7). §5's export oracle also runs `ExportAnimationClip` on every fixture AnimationClip; the harness records the `.anim`'s sha256 as a check and dumps the curve lists and events from the clip after `Convert()` as float32 bits, since .NET 8 under en-US prints infinite slopes as the infinity sign. One deviation from `c37af7d`: its single `UInt32` `StreamedClip.curveCount` is the split `curveCount` + `discreteCurveCount` since 2022.3.19, so the dense and constant curves follow both counts here; no fixture has discrete and dense or constant curves together. 6000.6 (format 23) has no oracle; a cross-editor test holds its clips to the other editors'.
+**Revision 2026-10-16b** (#233, maintainer decision): AssetStudio at `c37af7d`, executed outside the
+repo (R2), is the golden oracle for **export output** (images, models, audio, shader text).
 
-Revision 2026-11-08b (#302, maintainer decision 2026-11-08): the M6 animation row covers stock Unity clips only: `AnimationClip`, `Animator`, `Avatar` and the controllers as Unity writes them (streamed, dense and constant curves), pure TS, fixtures from our own Unity projects and checked by the §5 oracles. ACL decompression (`acl-wasm`) moves to the game variants row (#50): Unity never writes ACL clips; AssetStudio reads them only as game-specific classes (`MHYACLClip`, `GIACLClip`, `LnDACLClip`) behind an explicit game profile, so they share #50's trigger, its third-party fixtures and its own WASM build.
+- Reason: it is already the behavior source of truth, and section 15 of `fixtures/BUILDING.md`
+  already runs its pinned methods in an external .NET 8 harness (#221, #230).
+- UnityPy stays the oracle for parsing goldens and names and checks the harness inputs.
+- `scripts/make-export-goldens.py` is the one entry point. It writes
+  `fixtures/assetstudio-export-goldens.json` (PNG pixels, OBJ and WAV hashes and sizes), each entry
+  matched on the UnityPy input metadata as `make-goldens.py` matches its cross-checks.
+- Shader text has no fixture yet and is left to #52.
+- The header, §5, the §6 oracle risk row and R12 name the harness. Replaces §5's "use [AssetStudio]
+  only to cross-check disagreements, not in the harness".
 
-Revision 2026-11-08d (#317, maintainer decision 2026-11-08): core holds a sync, isomorphic, dependency-free glTF 2.0 `.glb` writer, `GltfWriter` (`packages/core/src/gltf/`, §2): buffers, accessors, meshes, nodes with translation, rotation and scale, skins, morph targets and animations (`LINEAR`, `STEP`, `CUBICSPLINE`), as building blocks only. Unity-specific choices (the left-handed to right-handed conversion, which attributes a `Mesh` keeps, how a scene or a clip maps to nodes and channels) stay in the feature packages. It is in core because more than one package exports glTF (`unity-asset-reader-mesh`'s `meshToGltf`, the glTF scene and animation export of #306), and a writer of plain data needs no WASM, no platform API and no dependency (D3, D4, §1). It was `unity-asset-reader-mesh`'s own `gltf.ts`; `meshToGltf` keeps its API and is built on it, its output byte for byte the same. Not a port: AssetStudio exports FBX, so the Khronos glTF 2.0 specification is the reference and the Khronos glTF validator (a dev dependency) checks the files the tests build, as for `meshToGltf` (§5's oracles have no glTF). D7 and §2 updated; 2026-10-16c's "core encodes nothing" now reads "core encodes no images": D5 is about images and still holds.
+**Revision 2026-10-16c** (#234, maintainer decision): **PNG encoding is in scope**; §7 keeps only
+JPEG encoding.
 
-Revision 2026-11-08e (#318, maintainer-approved 2026-11-08): for the humanoid muscle-to-bone conversion only (#319), the oracle is the Unity editor itself: AssetStudio `c37af7d` has no such conversion (`MuscleHelper` only names muscles) and UnityPy none either. Its goldens are recorded by an oracle script outside the package, `scripts/make-humanoid-goldens.py`, never by this library (R12): in each fixture editor, in batchmode without play mode, `HumanPoseHandler(avatar, root).SetHumanPose` on the committed bundle's own `humanoid` prefab and Avatar, with each humanoid fixture clip's authored values at its keys and midpoints. Feeding the authored values keeps curve evaluation, clip compression and root motion baking out of the golden. The C# lives in the script, not in a `.cs` file (R2). Unlike §5's other goldens they are compared with a tolerance (a quaternion matches its negation), not float32 bits: the conversion is Unity's float math, which a port reproduces only approximately. The bound and its metric are the owner's decision on #319 (proposed there: rotation angle ≤ 1e-3 rad, position ≤ 1e-4 × humanScale); this revision fixes no number. §5 and R12 name it.
+- `unity-asset-reader-texture` exports `encodePng(image)`, an RGBA8 `RgbaImage` (top row first) to a
+  PNG file.
+- It stays sync (D4) and browser-safe (D3, R4), so `CompressionStream` is out, and it adds no
+  dependency (§1, R8).
+- The zlib stream holds stored deflate blocks, so the file is about the size of the raw pixels, and
+  callers who want smaller files keep using an image library.
+- D5 is unchanged: core encodes no images (it writes glTF since 2026-11-08d).
+- Tested against AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json`
+  (2026-10-16b), pixels compared, not file bytes.
+
+**Revision 2026-10-16d** (#239, PR #249, maintainer decision): a feature package's peer range on
+core may name the oldest core it works with, `^<major>.<minor>.<patch>`, instead of `^<major>`, as
+the texture package's range on the decoder does; it never admits another major.
+
+- `unity-asset-reader-mesh` peers on `^1.2.0`, the first core that decodes `MeshData`.
+- The release plan already refuses a package whose range is neither on npm nor met by a package
+  released earlier in the same run, so a feature package never ships ahead of its core.
+- Also from PR #249: a new package enters the release order at version `0.0.0`, which the release
+  workflow never publishes; its first release is a bump to 1.0.0 (RELEASING.md).
+- D7 updated.
+
+**Revision 2026-10-16e** (#236, PR #248): §2 lists `packages/audio` (`unity-asset-reader-audio`, the
+M6 audio item's own package per D7), isomorphic and sync, and the `resolve({ browser: true })` line
+names it and `mesh`. R4 names both, as `check:browser` already holds them to it. Audio enters the
+release order at `0.0.0` (2026-10-16d) and peers on `^1`.
+
+**Revision 2026-10-16f** (#238): M6 gets a **Spine export** row and its package,
+`unity-asset-reader-spine` (`packages/spine`, §2), a feature package on core as a peer dependency
+(D7, R14), isomorphic like core.
+
+- It groups what spine-unity stores per skeleton: the `SkeletonDataAsset`'s skeleton data TextAsset,
+  and per `SpineAtlasAsset` the atlas text TextAsset and the page Texture2Ds of its materials.
+- It finds them by MonoBehaviour field names read through type trees, so bundles built without type
+  trees are not readable (§7, Mono.Cecil).
+- AssetStudio has no Spine export: the grouping is checked against the table `fixtures/BUILDING.md`
+  writes before the build, and its parts against #233's export goldens, which now also cover every
+  fixture TextAsset (`ExportTextAsset`).
+
+**Revision 2026-10-16g** (#242): the M6 **Shader** row is `unity-asset-reader-shader`
+(`packages/shader`, §2), a feature package on core as a peer dependency (D7, R14), `^1.2.0`
+(2026-10-16d), isomorphic and sync like core (D3, D4, R4).
+
+- `shaderToText()` writes AssetStudio's `ShaderConverter.Convert()` text in pure TypeScript, without
+  the spirv-cross WASM the row planned.
+- Vulkan programs are SMOL-V decoded and disassembled by a hand-port of the CSspv disassembler
+  AssetStudio vendors, whose BSD-2-Clause license makes the package `MIT AND BSD-2-Clause` (no
+  runtime dependency, §1).
+- Direct3D programs throw `UnsupportedError` (AssetStudio needs Windows' D3DCompiler or
+  HLSLDecompiler for them, R9).
+- So do shaders whose variants are in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.1.13, 2022.2 and
+  later, so every 6000 fixture), which AssetStudio's converter does not read: there is no oracle
+  text for them, as `c37af7d` skips every 6000+ Shader.
+- #233's harness exports every fixture Shader with `ExportShader`, except those with Direct3D
+  programs, whose text depends on the host.
+
+**Revision 2026-11-07a** (#275, maintainer-approved in the 2026-11-07 parity wave): the export
+oracle of §5 also runs `ExportSprite` (`Sprite.GetImage()`) on every fixture Sprite, so
+`decodeSprite` is checked against AssetStudio's executed sprite PNGs, not only UnityPy's crop and
+hand-kept hashes.
+
+- Where the package differs from `GetImage()` by design, the script records the verdict next to the
+  golden (§6) and the tests compare the golden with what `GetImage()` cuts.
+- The by-design differences: it merges an ETC1 split alpha texture (#152); it cuts a sprite's own
+  variant atlas, where AssetStudio's loader moves the sprite to its master atlas (#153).
+
+**Revision 2026-11-07b** (#277, maintainer-approved in the 2026-11-07 parity wave): the export
+oracle of §5 also runs `ExportFont` on every fixture Font and `ExportVideoClip` on every fixture
+VideoClip. So core's `m_FontData` and video bytes (inline or from the bundle's `.resource` node, as
+core resolves them) are checked against the files AssetStudio writes, not only against UnityPy's raw
+data.
+
+**Revision 2026-11-07c** (#260): SPIR-V words of SMOL-V streams with encoding version 1 or later
+(header `0x01xxxxxx`, Unity 2020.3+) come from aras-p/smol-v `6303e979` (MIT/Unlicense)
+`smolv::Decode`, built outside the repo (R2).
+
+- Their text is `c37af7d`'s CSspv `Disassembler` run by the #233 harness on those words, framed as
+  `SpirVShaderConverter.Convert`.
+- Goldens record word hashes per stage and the text.
+- Version-0 streams stay on `c37af7d`; the harness checks that smol-v with
+  `kDecodeFlagUse20160831AsZeroVersion` reproduces them word for word.
+- Where CSspv cannot disassemble a program, the golden keeps `// disassembly error`.
+- `packages/shader` ports `smolv::Decode`'s version-1 path (MIT) and keeps AssetStudio's for version
+  0, so 2026-10-16g's "Vulkan programs are SMOL-V decoded and disassembled" now holds for 2020.3
+  too.
+
+**Revision 2026-11-08a** (#259): shaders that list their variants in `m_PlayerSubPrograms` (Unity
+2021.3.10+, 2022.1.13+, 2022.2+, so every Unity 6 build) get text, replacing 2026-10-16g's
+`UnsupportedError`.
+
+No MIT fork pins `c37af7d`-format text for them, and `c37af7d`'s `Shader` reader skips every 6000+
+Shader, so their oracle is a composite, run by the #233 harness:
+
+1. UnityPy 1.25.4 (it also reads SerializedFile format 23) reads the Shader's type tree.
+2. The harness fills `c37af7d`'s own `SerializedShader` with it, by field name.
+3. Each distinct (`m_BlobIndex`, `m_GpuProgramType`) of a stage's `m_PlayerSubPrograms`, its groups
+   in order, where it first appears, becomes one `SerializedSubProgram` of hardware tier 0 after the
+   stage's `m_SubPrograms`.
+4. `c37af7d`'s `ShaderSubProgram(reader, false)` reads each blob entry those name (it reads the
+   entries of 6000.3.26f1, version 202012090, and 6000.6.4f1, version 202605290). The blob's other
+   entries are the variants' parameters (`m_ParameterBlobIndices`), which do not read as programs
+   and are not written, as `c37af7d` writes no `m_Parameters`.
+5. `c37af7d`'s `ShaderConverter.ConvertSerializedShader` writes the text, after its header; Vulkan
+   programs go through 2026-11-07c's hybrid.
+
+So the layout is `ConvertSerializedSubPrograms`' without `hw_tierNN`: each blob index and type has
+one variant. The layout rule (3) is ours; everything else is `c37af7d`'s code on UnityPy's input.
+Goldens carry `"oracle"`. Shaders with variants in `m_SubPrograms` stay on `c37af7d` unchanged. A
+shader `c37af7d`'s converter fails on (a property of type `Int`) still gets no golden and is still
+refused.
+
+**Revision 2026-11-08c** (#304, maintainer decision 2026-11-08 on #49, option A): the M6 animation
+row gets its package, `unity-asset-reader-animation` (`packages/animation`, §2).
+
+- It is a feature package on core as a peer dependency (D7, R14), `^1.3.0` (2026-10-16d: the first
+  core with #302's and #303's readers), entering the release order at `0.0.0`, isomorphic and sync
+  like core (D3, D4, R4), no runtime dependency (§1).
+- The `resolve({ browser: true })` line and R4 name it, as `check:browser` holds it to them.
+- Its `clipCurves(env, clip)` returns plain curve data (per curve the path, attribute, class id and
+  keyframes; the events), ported from AssetStudio's `AnimationClipConverter`,
+  `AnimationClipExtensions.Convert`/`FindTOS`, `CustomCurveResolver` and `MuscleHelper`.
+- Humanoid curves stay named muscle attributes, with no muscle-to-bone conversion (#306) and no YAML
+  (§7).
+- §5's export oracle also runs `ExportAnimationClip` on every fixture AnimationClip. The harness
+  records the `.anim`'s sha256 as a check and dumps the curve lists and events from the clip after
+  `Convert()` as float32 bits, since .NET 8 under en-US prints infinite slopes as the infinity sign.
+- One deviation from `c37af7d`: its single `UInt32` `StreamedClip.curveCount` is the split
+  `curveCount` + `discreteCurveCount` since 2022.3.19, so the dense and constant curves follow both
+  counts here; no fixture has discrete and dense or constant curves together.
+- 6000.6 (format 23) has no oracle; a cross-editor test holds its clips to the other editors'.
+
+**Revision 2026-11-08b** (#302, maintainer decision 2026-11-08): the M6 animation row covers stock
+Unity clips only: `AnimationClip`, `Animator`, `Avatar` and the controllers as Unity writes them
+(streamed, dense and constant curves), pure TS, fixtures from our own Unity projects and checked by
+the §5 oracles.
+
+- ACL decompression (`acl-wasm`) moves to the game variants row (#50).
+- Unity never writes ACL clips; AssetStudio reads them only as game-specific classes (`MHYACLClip`,
+  `GIACLClip`, `LnDACLClip`) behind an explicit game profile, so they share #50's trigger, its
+  third-party fixtures and its own WASM build.
+
+**Revision 2026-11-08d** (#317, maintainer decision 2026-11-08): core holds a sync, isomorphic,
+dependency-free glTF 2.0 `.glb` writer, `GltfWriter` (`packages/core/src/gltf/`, §2).
+
+- It provides buffers, accessors, meshes, nodes with translation, rotation and scale, skins, morph
+  targets and animations (`LINEAR`, `STEP`, `CUBICSPLINE`), as building blocks only.
+- Unity-specific choices (the left-handed to right-handed conversion, which attributes a `Mesh`
+  keeps, how a scene or a clip maps to nodes and channels) stay in the feature packages.
+- It is in core because more than one package exports glTF (`unity-asset-reader-mesh`'s
+  `meshToGltf`, the glTF scene and animation export of #306), and a writer of plain data needs no
+  WASM, no platform API and no dependency (D3, D4, §1).
+- It was `unity-asset-reader-mesh`'s own `gltf.ts`; `meshToGltf` keeps its API and is built on it,
+  its output byte for byte the same.
+- Not a port: AssetStudio exports FBX, so the Khronos glTF 2.0 specification is the reference and
+  the Khronos glTF validator (a dev dependency) checks the files the tests build, as for
+  `meshToGltf` (§5's oracles have no glTF).
+- D7 and §2 updated; 2026-10-16c's "core encodes nothing" now reads "core encodes no images": D5 is
+  about images and still holds.
+
+**Revision 2026-11-08e** (#318, maintainer-approved 2026-11-08): for the humanoid muscle-to-bone
+conversion only (#319), the oracle is the Unity editor itself. AssetStudio `c37af7d` has no such
+conversion (`MuscleHelper` only names muscles) and UnityPy none either.
+
+- Its goldens are recorded by an oracle script outside the package,
+  `scripts/make-humanoid-goldens.py`, never by this library (R12).
+- In each fixture editor, in batchmode without play mode, the script runs
+  `HumanPoseHandler(avatar, root).SetHumanPose` on the committed bundle's own `humanoid` prefab and
+  Avatar, with each humanoid fixture clip's authored values at its keys and midpoints.
+- Feeding the authored values keeps curve evaluation, clip compression and root motion baking out of
+  the golden.
+- The C# lives in the script, not in a `.cs` file (R2).
+- Unlike §5's other goldens they are compared with a tolerance (a quaternion matches its negation),
+  not float32 bits: the conversion is Unity's float math, which a port reproduces only
+  approximately.
+- The bound and its metric are the owner's decision on #319 (proposed there: rotation angle ≤ 1e-3
+  rad, position ≤ 1e-4 × humanScale); this revision fixes no number.
+- §5 and R12 name it.

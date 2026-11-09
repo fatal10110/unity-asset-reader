@@ -1,14 +1,15 @@
 # Vite CDN Example
 
-This example demonstrates how to use `texture2ddecoder-wasm` with Vite, loading the library from jsDelivr CDN.
+This example shows how to use `texture2ddecoder-wasm` with Vite, loading the library from the
+jsDelivr CDN. It decodes a real ETC2 RGBA texture and draws it on a canvas.
 
 ## Features
 
-- ⚡ **Vite**: Lightning-fast development with HMR
-- 📦 **CDN Loading**: WASM files loaded from jsDelivr CDN
-- 🎨 **Interactive Demo**: Decode and display real ETC2 RGBA texture
-- 🚀 **Zero Config**: Minimal setup required
-- 📱 **Modern Build**: Optimized production builds
+- **Vite:** dev server with hot reload (HMR).
+- **CDN loading:** the WASM files load from the jsDelivr CDN.
+- **Interactive demo:** decode and show a real ETC2 RGBA texture.
+- **Minimal setup:** almost no configuration.
+- **Production build:** `npm run build`.
 
 ## Quick Start
 
@@ -33,7 +34,7 @@ This example uses Vite as the development server and build tool, while loading t
 ### Main Features
 
 1. **CDN Import**: Library loaded from jsDelivr in `src/main.js`
-2. **Real Texture Decoding**: Includes `output.bin` - a 512x512 ETC2 RGBA compressed PNG
+2. **Real Texture Decoding**: Includes `compressed_etc2_rgba_400x400.bin`, a 400x400 PNG compressed as ETC2 RGBA
 3. **Canvas Display**: Decoded images displayed in HTML canvas
 4. **Multiple Formats**: Test BC1, BC3, ETC1, ASTC decoders
 
@@ -58,11 +59,11 @@ vite-cdn-example/
 import {
   initialize,
   decode_etc2a8,
-} from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/dist/index.mjs";
+} from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/dist/index.mjs";
 
 // Initialize with CDN path
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Load and decode texture
@@ -85,28 +86,28 @@ ctx.putImageData(imageData, 0, 0);
 ## Benefits of This Approach
 
 ### Development
-- ⚡ Instant hot module replacement (HMR)
-- 🔍 Better error messages and debugging
-- 🎯 Modern ES modules support
-- 📦 No WASM file copying needed
+- Hot module replacement (HMR)
+- Better error messages and debugging
+- ES module support
+- No WASM file copying
 
 ### Production
-- 🚀 Optimized builds with code splitting
-- 📉 Smaller bundle sizes (WASM loaded from CDN)
-- 🌐 Global CDN caching
-- 🔒 Version pinning for stability
+- Optimized builds with code splitting
+- Smaller bundles (the WASM loads from the CDN)
+- Global CDN caching
+- Version pinning for stability
 
 ## CDN vs Local WASM Files
 
 This example uses CDN for both development and production:
 
-**CDN Benefits:**
-- ✅ No manual file copying
-- ✅ Globally cached by jsDelivr
-- ✅ Faster setup
-- ✅ Automatic updates (or pin to specific version)
+**CDN benefits:**
+- No manual file copying
+- Cached globally by jsDelivr
+- Faster setup
+- Automatic updates (or pin a specific version)
 
-**When to Use Local Files:**
+**When to use local files:**
 - Offline development
 - Corporate firewalls
 - Guaranteed availability

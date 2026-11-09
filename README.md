@@ -1,79 +1,26 @@
 # unity-asset-reader
 
-Read Unity AssetBundles in your browser or Node.js. Browse assets, read text and script data,
-and turn textures and sprites into RGBA pixels.
+Read Unity AssetBundles in JavaScript, in your browser or in Node.js. Browse the assets in a
+bundle, read text and script data, and turn textures and sprites into RGBA pixels.
 
 **[Try the live demo](https://fatal10110.github.io/unity-asset-reader/)** — open a bundle,
 browse its contents, and preview its textures and sprites.
 
-The parser is written in TypeScript. Compressed texture decoding uses WebAssembly.
-You do not need Unity, .NET, or a native application installed.
+- The parser is written in TypeScript. Compressed texture decoding uses WebAssembly.
+- You do not need Unity, .NET, or a native application installed.
+- Packages for meshes, audio, Spine, shaders and animation build on the same core.
 
-## Choose your packages
-
-| What you need | Packages |
-|---|---|
-| Read bundles and their assets | `unity-asset-reader` |
-| Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
-| Load files or folders from disk | Add `unity-asset-reader-node` |
-| Export meshes as OBJ or glTF | Add `unity-asset-reader-mesh` |
-| Convert audio clips to WAV (or Vorbis clips to Ogg) | Add `unity-asset-reader-audio` |
-| Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
-| Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
-| Decode animation clips into curves, or export an animated scene to glTF (`.glb`) | Add `unity-asset-reader-animation` |
-| Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
-
-Every package except `texture2ddecoder-wasm` builds on the core: the feature packages list
-`unity-asset-reader` as a peer dependency, so install it next to them. The texture package
-installs `texture2ddecoder-wasm` automatically.
-
-- **[Core](packages/core/README.md):** unpack bundles, list assets, and read their data.
-  Use `load(bytes)` for bytes you already have or `await open(url)` to fetch a file.
-  Its `GltfWriter` writes binary glTF 2.0 files from data you give it (meshes, nodes, skins,
-  morph targets, animations). It does not decode textures to pixels or audio to WAV, does
-  not convert Unity meshes, and does not read the disk; it throws `UnsupportedError` on a compression, container or Unity
-  version it does not read.
-- **[Textures](packages/texture/README.md):** convert `Texture2D` and `Sprite` assets to
-  RGBA pixels with `await decodeImage(asset)`. It does not decode mip levels past the first,
-  `Cubemap`, `Texture2DArray` or `Texture3D` assets, or a few formats such as `DXT3` and
-  `ARGBFloat` (see [Texture formats](packages/texture/README.md#texture-formats)).
-- **[Node.js](packages/node/README.md):** load a file or folder with `loadPath()`, including
-  split bundles and resource sidecars. It does not run in browsers, does not stream (each file
-  is read whole), and does not look up dependency bundles itself: pass them, or their folder.
-- **[Meshes](packages/mesh/README.md):** write a `Mesh` as Wavefront OBJ text with
-  `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file with `meshToGltf()`
-  (built on core's `GltfWriter`).
-  It does not export materials, bones, blend shapes or UV channels past the first.
-- **[Audio](packages/audio/README.md):** convert an `AudioClip` to a WAV file with
-  `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound; Vorbis sound to Ogg with
-  `fsb5ToOgg()`, given its setup header (none ships with the package). It does not convert
-  MPEG, ATRAC9, XMA, Opus or other console codecs, or clips from before Unity 5.0, which hold
-  their file as it is.
-- **[Spine](packages/spine/README.md):** find each spine-unity skeleton's data, atlas text and
-  page textures with `spineSkeletons(env)`. It does not parse the skeleton data or atlas text
-  (both come back as stored), or read bundles built without type trees.
-- **[Shaders](packages/shader/README.md):** write a `Shader` as the inspection text AssetStudio
-  exports, with `shaderToText()`: OpenGL and Metal source, SPIR-V disassembly. It does not
-  write Direct3D programs, and its text is not a shader Unity can compile.
-- **[Animation](packages/animation/README.md):** decode an `AnimationClip` into the curves
-  AssetStudio's `.anim` export holds, with `clipCurves(env, clip)`: per curve its path,
-  attribute and keyframes, and the clip's events. `sceneToGltf(env, root, { clips })` exports a
-  scene (nodes, skinned meshes, blend shapes) with its clips as a glTF 2.0 `.glb`, humanoid clips
-  converted to bone rotations. It does not write `.anim` YAML, and a humanoid clip's root
-  (Hips) position is not written.
-- **[Standalone decoder](packages/decoder/README.md):** decode compressed texture blocks
-  to **BGRA**. It does not read Unity files.
-
-Install only what you need: reading text or script data does not load the texture decoder.
-Each package has its own version.
-
-## Usage
+## Quick start
 
 ### Node.js
+
+Install the core, the texture package and the Node.js file loader:
 
 ```bash
 npm install unity-asset-reader unity-asset-reader-texture unity-asset-reader-node
 ```
+
+Load a bundle (or a whole folder) and get every texture and sprite as pixels:
 
 ```js
 import { images } from "unity-asset-reader-texture";
@@ -87,12 +34,12 @@ for await (const { rgba, width, height, path, name, formatName } of images(env))
 }
 ```
 
-The bytes don't have to come from disk: when they come from an upload or a download, skip
-`unity-asset-reader-node` and call `load(bytes)` (`bytes` is a `Uint8Array` or an `ArrayBuffer`;
-a `Buffer` is a `Uint8Array` too), or `await open(url)` to fetch them. To save a PNG,
-`encodePng({ data: rgba, width, height })` from `unity-asset-reader-texture` returns the file's
-bytes, uncompressed; for smaller files hand the RGBA to an image library, for example
-`sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
+- **Bytes that are not on disk** (an upload, a download): skip `unity-asset-reader-node` and
+  call `load(bytes)`. `bytes` is a `Uint8Array` or an `ArrayBuffer` (a `Buffer` is a
+  `Uint8Array` too). Or call `await open(url)` to fetch the file.
+- **Saving a PNG:** `encodePng({ data: rgba, width, height })` from `unity-asset-reader-texture`
+  returns the file's bytes, uncompressed. For smaller files, hand the RGBA to an image library,
+  for example `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
 ### Browser
 
@@ -116,9 +63,78 @@ if (icon && isImage(icon)) { // a Texture2D or a Sprite
 }
 ```
 
-Parsing is synchronous, so a big bundle blocks the page while it loads; run it in a Web Worker.
+Parsing is synchronous, so a big bundle blocks the page while it loads. Run it in a Web Worker:
 [`examples/cdn.html`](examples/cdn.html) does that, and the [Bundler Guide](BUNDLER_GUIDE.md) has
 the Vite and Next.js setups.
+
+## Choose your packages
+
+| What you need | Packages |
+|---|---|
+| Read bundles and their assets | `unity-asset-reader` |
+| Decode textures and sprites too | `unity-asset-reader` + `unity-asset-reader-texture` |
+| Load files or folders from disk | Add `unity-asset-reader-node` |
+| Export meshes as OBJ or glTF | Add `unity-asset-reader-mesh` |
+| Convert audio clips to WAV (or Vorbis clips to Ogg) | Add `unity-asset-reader-audio` |
+| Export Spine skeletons (data, atlas, page textures) | Add `unity-asset-reader-spine` |
+| Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
+| Decode animation clips into curves, or export an animated scene to glTF (`.glb`) | Add `unity-asset-reader-animation` |
+| Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
+
+How they fit together:
+
+- Every package except `texture2ddecoder-wasm` builds on the core. The feature packages list
+  `unity-asset-reader` as a peer dependency, so install it next to them.
+- The texture package installs `texture2ddecoder-wasm` automatically.
+- Install only what you need: reading text or script data does not load the texture decoder.
+- Each package has its own version.
+
+What each package does, and what it leaves out:
+
+- **[Core](packages/core/README.md)** (`unity-asset-reader`): unpacks bundles, lists assets and
+  reads their data. Use `load(bytes)` for bytes you already have, or `await open(url)` to fetch
+  a file. Its `GltfWriter` writes binary glTF 2.0 files from data you give it (meshes, nodes,
+  skins, morph targets, animations).
+  It does not decode textures to pixels or audio to WAV, does not convert Unity meshes, and does
+  not read the disk. It throws `UnsupportedError` on a compression, container or Unity version
+  it does not read.
+- **[Textures](packages/texture/README.md)** (`unity-asset-reader-texture`): converts
+  `Texture2D` and `Sprite` assets to RGBA pixels with `await decodeImage(asset)`.
+  It does not decode mip levels past the first, `Cubemap`, `Texture2DArray` or `Texture3D`
+  assets, or a few formats such as `DXT3` and `ARGBFloat` (see
+  [Texture formats](packages/texture/README.md#texture-formats)).
+- **[Node.js](packages/node/README.md)** (`unity-asset-reader-node`): loads a file or folder
+  with `loadPath()`, including split bundles and resource sidecars.
+  It does not run in browsers, does not stream (each file is read whole), and does not look up
+  dependency bundles itself: pass them, or their folder.
+- **[Meshes](packages/mesh/README.md)** (`unity-asset-reader-mesh`): writes a `Mesh` as
+  Wavefront OBJ text with `meshToObj()`, as AssetStudio exports it, or as a binary glTF 2.0 file
+  with `meshToGltf()` (built on core's `GltfWriter`).
+  It does not export materials, bones, blend shapes or UV channels past the first.
+- **[Audio](packages/audio/README.md)** (`unity-asset-reader-audio`): converts an `AudioClip`
+  to a WAV file with `fsb5ToWav(clip.data.audioData)`, for PCM and ADPCM sound. Converts Vorbis
+  sound to Ogg with `fsb5ToOgg()`, given its setup header (none ships with the package).
+  It does not convert MPEG, ATRAC9, XMA, Opus or other console codecs, or clips from before
+  Unity 5.0, which hold their file as it is.
+- **[Spine](packages/spine/README.md)** (`unity-asset-reader-spine`): finds each spine-unity
+  skeleton's data, atlas text and page textures with `spineSkeletons(env)`.
+  It does not parse the skeleton data or atlas text (both come back as stored), and does not
+  read bundles built without type trees.
+- **[Shaders](packages/shader/README.md)** (`unity-asset-reader-shader`): writes a `Shader` as
+  the inspection text AssetStudio exports, with `shaderToText()`: OpenGL and Metal source, and
+  SPIR-V disassembly.
+  It does not write Direct3D programs, and its text is not a shader Unity can compile.
+- **[Animation](packages/animation/README.md)** (`unity-asset-reader-animation`):
+  - `clipCurves(env, clip)` decodes an `AnimationClip` into the curves AssetStudio's `.anim`
+    export holds: each curve's path, attribute and keyframes, and the clip's events.
+  - `sceneToGltf(env, root, { clips })` exports a scene (nodes, skinned meshes, blend shapes)
+    with its clips as a glTF 2.0 `.glb`. A humanoid clip's muscles (fingers aside) and `RootQ`
+    are converted to bone rotations.
+
+  It does not write `.anim` YAML. Of a humanoid clip, it does not convert the body position
+  (the Hips keep their own position), the finger muscles, the root motion or the IK goals.
+- **[Standalone decoder](packages/decoder/README.md)** (`texture2ddecoder-wasm`): decodes
+  compressed texture blocks to **BGRA**. It does not read Unity files.
 
 ## Documentation
 
@@ -135,89 +151,169 @@ the Vite and Next.js setups.
   - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
   - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
   - [`unity-asset-reader-shader`](packages/shader/README.md): `shaderToText()`.
-  - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`, `sceneToGltf()`.
+  - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`,
+    `sceneToGltf()`.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 
 ## Supported formats and Unity versions
 
-The short answer. The full tables, with what each claim is tested on, are in the package READMEs:
+This is the short answer. The full tables, with what each claim is tested on, are in the
+package READMEs:
 [containers, compression, classes and Unity versions](packages/core/README.md#supported),
 [texture formats, platforms and sprites](packages/texture/README.md#texture-formats), and
 [`texture2ddecoder-wasm`'s block formats](packages/decoder/README.md#supported-formats).
 
-| | Supported |
-|---|---|
-| Containers | UnityFS; UnityWeb and UnityRaw (legacy web player bundles); `UnityWebData1.0` (a WebGL `.data` file); a gzip-wrapped file; loose SerializedFiles (`.assets`, `level0`, `globalgamemanagers`); `.resS` and `.resource` resource files. Split files (`.split0`, `.split1`, ...) through `unity-asset-reader-node` |
-| Bundle compression | None, LZ4, LZ4HC, LZMA |
-| SerializedFile formats | 2 to 23, little- and big-endian |
-| Classes | Any class, through its type tree. A hand-written reader, which also reads bundles built without type trees, for `AssetBundle`, `TextAsset`, `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`, `AudioClip`, `VideoClip`, `Font`, `MovieTexture`, `Mesh` (its vertices and triangles decoded), `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` and `SkinnedMeshRenderer` |
-| Texture formats | 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...) in TypeScript. Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants; EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12; Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`). Output is RGBA8, top row first, first mip level |
-| Sprites | Cut out of their texture, or of their `SpriteAtlas` when it is loaded; packer flips and rotations undone; optional transparency outside a tight mesh. The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects, through `packedSprites()` and `images()` |
-| Audio | `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM sound, and to Ogg for Vorbis sound given a caller-supplied setup header table, through `unity-asset-reader-audio`; tested to match AssetStudio's WAV on the PCM clips of the 2019.4, 2020.3 and 6000.3 bundles |
-| Shaders | `Shader` to AssetStudio's inspection text, through `unity-asset-reader-shader`: OpenGL, OpenGL ES and Metal programs as their source, Vulkan programs as SPIR-V disassembly; tested to match AssetStudio's `.shader` file on the OpenGL ES, Vulkan and Metal shaders of the 2019.4 and 2020.3 bundles, and its converter's text (on UnityPy's type tree) on those of the 6000.3 and 6000.6 bundles without an `Int` property, several keyword variants per stage included |
-| Platforms | Xbox 360 textures are byte-swapped back and Switch textures deswizzled. Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)) |
-| Runtimes | Browsers and Web Workers (ES2020, WebAssembly for textures); Node.js `^20.19.0 \|\| >=22.12.0`, `import` and `require` |
+A few terms used below:
+
+- A **SerializedFile** is the file inside a bundle that holds the objects (assets). A game
+  build also ships loose ones, outside any bundle (`.assets`, `level0`, ...).
+- A **type tree** is the field layout Unity can store next to the objects. With it, any class
+  can be read; without it, only classes that have a hand-written reader.
+- A **version-stripped** file is built with `AssetBundleStripUnityVersion`, so it does not say
+  which Unity version wrote it.
+
+### What it reads
+
+- **Containers:**
+  - UnityFS.
+  - UnityWeb and UnityRaw (legacy web player bundles).
+  - `UnityWebData1.0` (a WebGL `.data` file).
+  - A gzip-wrapped file.
+  - Loose SerializedFiles (`.assets`, `level0`, `globalgamemanagers`).
+  - `.resS` and `.resource` resource files.
+  - Split files (`.split0`, `.split1`, ...), through `unity-asset-reader-node`.
+- **Bundle compression:** none, LZ4, LZ4HC, LZMA.
+- **SerializedFile formats:** 2 to 23, little- and big-endian.
+- **Classes:** any class, through its type tree. These classes have a hand-written reader,
+  which also reads bundles built without type trees: `AssetBundle`, `TextAsset`,
+  `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`,
+  `AudioClip`, `VideoClip`, `Font`, `MovieTexture`, `Mesh` (its vertices and triangles
+  decoded), `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`,
+  `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`,
+  `MeshRenderer` and `SkinnedMeshRenderer`.
+- **Texture formats:** output is RGBA8, top row first, first mip level.
+  - 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...), in
+    TypeScript.
+  - Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants;
+    EAC R and RG, signed too; PVRTC 2 and 4 bpp; ATC; ASTC LDR and HDR at 4x4 to 12x12.
+  - Crunch (`DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched`), through
+    WASM.
+- **Sprites:**
+  - Cut out of their texture, or of their `SpriteAtlas` when it is loaded.
+  - Packer flips and rotations undone.
+  - Optional transparency outside a tight mesh.
+  - The sprites a Unity 6000.6 `SpriteAtlas` holds itself, which have no `Sprite` objects,
+    through `packedSprites()` and `images()`.
+- **Audio** (through `unity-asset-reader-audio`):
+  - `AudioClip` to WAV for FSB5 banks of PCM (8, 16, 32 bit), IMA ADPCM, FADPCM and GCADPCM
+    sound. FSB5 is the FMOD sound bank format Unity stores clips in.
+  - To Ogg for Vorbis sound, given a caller-supplied setup header table.
+  - Tested to match AssetStudio's WAV on the PCM clips and the mono and stereo IMA ADPCM clips
+    of the 2019.4, 2020.3 and 6000.3 bundles.
+- **Shaders** (through `unity-asset-reader-shader`): `Shader` to AssetStudio's inspection text.
+  - OpenGL, OpenGL ES and Metal programs as their source; Vulkan programs as SPIR-V
+    disassembly.
+  - Tested to match AssetStudio's `.shader` file on the OpenGL ES, Vulkan and Metal shaders of
+    the 2019.4 and 2020.3 bundles.
+  - Tested to match its converter's text (on UnityPy's type tree) on those of the 6000.3 and
+    6000.6 bundles without an `Int` property, several keyword variants per stage included.
+- **Platforms:** Xbox 360 textures are byte-swapped back, and Switch textures deswizzled.
+  Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which
+  are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)).
+- **Runtimes:** browsers and Web Workers (ES2020, WebAssembly for textures); Node.js
+  `^20.19.0 || >=22.12.0`, with `import` and `require`.
 
 ### Unity versions
 
-- **Tested on editor-built bundles:** Unity **2019.4.41f2**, **2020.3.30f1** and **6000.3.25f1**.
-  That is SerializedFile formats 21 and 22 and UnityFS formats 7 and 8, with LZ4, LZMA and
-  uncompressed blocks, with and without type trees, and version-stripped. PVRTC comes from
-  2019.4 only (Unity 6 no longer writes it), sprites and atlases from 2019.4 and 6000.3.
-  Also **6000.6.4f1**: SerializedFile format 23 metadata, type-tree dumps, `Sprite` and
-  `SpriteAtlas`. `Shader` comes from 2019.4, 2020.3, 6000.3.26f1 and 6000.6 (DX11, GLES3 and
-  Vulkan; Metal from 2020.3 and 6000.3). `Avatar`, `AnimatorController`, `Animator`,
-  `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`,
-  `MeshFilter`, `MeshRenderer` and `SkinnedMeshRenderer` come from 2019.4, 2020.3, 6000.3.26f1 and 6000.6.
-- **Tested on generated or hand-written bytes only:** the class readers' version gates from
-  Unity 3.4 to 6000.6; SerializedFile formats 6, 8 and 15; UnityFS format 6; UnityWeb and
-  UnityRaw formats 2, 3, 4 and 6; `UnityWebData` and gzip. No real Unity build of those versions
-  or containers is in the tests.
-- **Handled in code:** SerializedFile formats 2 to 23 (Unity 2020.1 to 6000.3 write 22, 6000.6
-  writes 23). Type tree reads work on every one of them, whatever the Unity version. The class
-  readers know the layouts from Unity 3.4 (`Sprite` from 4.3, `VideoClip` from 5.6,
-  `SpriteAtlas` from 2017.1, `Mesh`, `Shader`, the animation classes and the scene classes from 2019.1) up to 6000.6, and read a newer version with the
-  newest layout they know. Unity 2019.1 is the supported floor: readers added since that
-  decision (`Mesh`, `Shader`, `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer`, `SkinnedMeshRenderer`) start there, and the older readers keep their older layouts. `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the
-  texture package's cuts of the sprites such an atlas holds ([#229](https://github.com/fatal10110/unity-asset-reader/issues/229)).
-  A class reader refuses a version older than its first layout;
-  `readTypeTree()` still reads such an object. `Texture2D` is the exception: it has no floor,
-  with gates at 2.6 and 3.0 that no test covers, and reads any older version with its oldest
-  layout.
-- **Version-stripped files** (`AssetBundleStripUnityVersion`): type tree reads work. A class
-  reader reads the object when its bytes or the SerializedFile format decide the layout, and
-  refuses it otherwise: `Texture2D`, `MovieTexture` and `MonoScript` always; `Material`,
-  `Sprite`, `SpriteAtlas`, `Mesh` and the animation classes outside formats 18 to 21, and
-  `Shader` outside format 21,
-  so in every file from Unity 2020.1 on.
-  If you know the editor that built the file, `load()` and `open()` take it as a `unityVersion`
-  fallback, and the class readers then read such objects too. The table per class is in
-  [the core README](packages/core/README.md#version-stripped-files).
+**Tested on bundles built by the Unity editor:**
+
+- Unity **2019.4.41f2**, **2020.3.30f1** and **6000.3.25f1**. That covers SerializedFile
+  formats 21 and 22 and UnityFS formats 7 and 8; LZ4, LZMA and uncompressed blocks; with and
+  without type trees; and version-stripped files.
+  - PVRTC comes from 2019.4 only (Unity 6 no longer writes it).
+  - Sprites and atlases come from 2019.4 and 6000.3.
+- Unity **6000.6.4f1**: SerializedFile format 23 metadata, type-tree dumps, `Sprite` and
+  `SpriteAtlas`.
+- `Shader` comes from 2019.4, 2020.3, 6000.3.26f1 and 6000.6 (DX11, GLES3 and Vulkan; Metal
+  from 2020.3 and 6000.3).
+- `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`,
+  `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` and
+  `SkinnedMeshRenderer` come from 2019.4, 2020.3, 6000.3.26f1 and 6000.6.
+
+**Tested on generated or hand-written bytes only.** No real Unity build of these versions or
+containers is in the tests:
+
+- the class readers' version gates from Unity 3.4 to 6000.6;
+- SerializedFile formats 6, 8 and 15;
+- UnityFS format 6;
+- UnityWeb and UnityRaw formats 2, 3, 4 and 6;
+- `UnityWebData` and gzip.
+
+**Handled in code:**
+
+- SerializedFile formats 2 to 23 (Unity 2020.1 to 6000.3 write 22, 6000.6 writes 23). Type
+  tree reads work on every one of them, whatever the Unity version.
+- The class readers know the layouts from Unity 3.4 up to 6000.6, and read a newer version with
+  the newest layout they know. Some start later: `Sprite` from 4.3, `VideoClip` from 5.6,
+  `SpriteAtlas` from 2017.1, and `Mesh`, `Shader`, the animation classes and the scene classes
+  from 2019.1.
+- Unity 2019.1 is the supported floor. Readers added since that decision (`Mesh`, `Shader`,
+  `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`,
+  `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer`,
+  `SkinnedMeshRenderer`) start there. The older readers keep their older layouts.
+- `SpriteAtlas`'s 6000.6 layout is tested on Unity 6000.6.4f1 bundles, and so are the texture
+  package's cuts of the sprites such an atlas holds.
+- A class reader refuses a version older than its first layout. `readTypeTree()` still reads
+  such an object.
+- `Texture2D` is the exception: it has no floor. It has gates at 2.6 and 3.0 that no test
+  covers, and reads any older version with its oldest layout.
+
+**Version-stripped files** (`AssetBundleStripUnityVersion`):
+
+- Type tree reads work.
+- A class reader reads the object when its bytes or the SerializedFile format decide the
+  layout, and refuses it otherwise:
+  - `Texture2D`, `MovieTexture` and `MonoScript`: always refused.
+  - `Material`, `Sprite`, `SpriteAtlas`, `Mesh` and the animation classes: refused outside
+    formats 18 to 21.
+  - `Shader`: refused outside format 21.
+
+  So these classes are refused in every version-stripped file from Unity 2020.1 on.
+- If you know the editor that built the file, pass it to `load()` or `open()` as the
+  `unityVersion` fallback. The class readers then read such objects too.
+- The table per class is in [the core README](packages/core/README.md#version-stripped-files).
 
 ### Not supported
 
 Each of these throws `UnsupportedError`, naming what it found:
 
-- Compression: LZHAM, brotli (a WebGL build's `.br` files), zstd.
-- Containers: `UnityArchive`, zip archives, encrypted bundles (UnityCN and other game-specific
-  encryption).
-- Texture formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, and the signed plain formats.
-  Textures built for PS4 or PS5. Sprites whose alpha texture (ETC1 split
-  alpha) is not the size of their texture. A `Sprite` object that points at a Unity 6000.6
-  `SpriteAtlas` (the atlas' own packed sprites are supported).
-- Meshes: a submesh of lines or points, a vertex format Unity does not define.
-- Audio: Vorbis without a setup header table from the caller (none ships), and the other FSB5
-  codecs that are not PCM, ADPCM or Vorbis (MPEG, ATRAC9, XMA, ...);
-  IMA ADPCM of more than two channels and GCADPCM of more than one; sound that is not an FSB5
-  bank (`AudioClip`s from before Unity 5.0).
-- Shader text: Direct3D programs (they need Windows' D3DCompiler), shaders that list their
-  variants in `m_PlayerSubPrograms` (Unity 2021.3.10, 2022.2 and later, Unity 6), and `Int`
-  properties, on which AssetStudio fails too.
+- **Compression:** LZHAM, brotli (a WebGL build's `.br` files), zstd.
+- **Containers:** `UnityArchive`, zip archives, encrypted bundles (UnityCN and other
+  game-specific encryption).
+- **Texture formats:**
+  - `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, and the signed plain formats.
+  - Textures built for PS4 or PS5.
+  - Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
+  - A `Sprite` object that points at a Unity 6000.6 `SpriteAtlas` (the atlas' own packed
+    sprites are supported).
+- **Meshes:** a submesh of lines or points, a vertex format Unity does not define.
+- **Audio:**
+  - Vorbis without a setup header table from the caller (none ships).
+  - The other FSB5 codecs that are not PCM, ADPCM or Vorbis (MPEG, ATRAC9, XMA, ...).
+  - GCADPCM of more than one channel.
+  - Sound that is not an FSB5 bank (`AudioClip`s from before Unity 5.0).
+- **Shader text:** Direct3D programs (they need Windows' D3DCompiler), and `Int` properties, on
+  which AssetStudio fails too.
 
-Not provided at all: decoding video; exporting models as FBX; mip levels other than the first; the
-`Cubemap`, `Texture2DArray` and `Texture3D` classes; JPEG encoding; writing or
-repacking bundles.
+Not provided at all:
+
+- decoding video;
+- exporting models as FBX;
+- mip levels other than the first;
+- the `Cubemap`, `Texture2DArray` and `Texture3D` classes;
+- JPEG encoding;
+- writing or repacking bundles.
 
 ## Development
 
@@ -228,10 +324,10 @@ npm ci
 npm run verify   # build, test, check:browser, no-C# guard
 ```
 
-Building the WASM decoder (`npm run build:wasm`) needs Docker. See
-[CONTRIBUTING.md](CONTRIBUTING.md). The design and its decisions are in
-[docs/unity-asset-reader-plan.md](docs/unity-asset-reader-plan.md), and the rules for changes are
-in [docs/unity-asset-reader-rules.md](docs/unity-asset-reader-rules.md).
+- Building the WASM decoder (`npm run build:wasm`) needs Docker.
+- Setup and conventions: [CONTRIBUTING.md](CONTRIBUTING.md).
+- The design and its decisions: [docs/unity-asset-reader-plan.md](docs/unity-asset-reader-plan.md).
+- The rules for changes: [docs/unity-asset-reader-rules.md](docs/unity-asset-reader-rules.md).
 
 ## Compare libraries
 
@@ -241,8 +337,11 @@ and texture decoders.
 ## Acknowledgements
 
 This project stands on the work below. The reader packages are a derivative port, not a
-clean-room rewrite: every ported file starts with a line naming the file it came from, and the
-copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` or `LICENSE`.
+clean-room rewrite:
+
+- Every ported file starts with a line naming the file it came from.
+- The copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` or
+  `LICENSE`.
 
 | Project | License | What it is used for |
 |---|---|---|
@@ -255,24 +354,31 @@ copyright notices are kept in [`NOTICE`](NOTICE) and in each package's `NOTICE` 
 | [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (© 2021 Sam Byass) | MIT | The FSB5 parser, the ADPCM decoders and the Vorbis to Ogg rebuild of `unity-asset-reader-audio` are hand-ported from it. |
 | [python-fsb5](https://github.com/HearthSim/python-fsb5) (© 2016 Simon Pinfold) | MIT | Second reference for the FSB5 parser of `unity-asset-reader-audio`. |
 | [CSspv](https://github.com/Anteru/csspv) (© 2017 Matthäus G. Chajdas) | BSD-2-Clause | The SPIR-V disassembler of `unity-asset-reader-shader` is hand-ported from it, as AssetStudio vendors it. |
-| [smol-v](https://github.com/aras-p/smol-v) (© 2016-2018 Aras Pranckevicius) | MIT or public domain | The SMOL-V format Unity stores Vulkan programs in; the decoder of `unity-asset-reader-shader` is ported from AssetStudio's C# port of its decoder. |
+| [smol-v](https://github.com/aras-p/smol-v) (© 2016-2018 Aras Pranckevicius) | MIT or public domain | The SMOL-V format Unity stores Vulkan programs in; the decoder of `unity-asset-reader-shader` is ported from AssetStudio's C# port of its decoder, and the decoder of its newer encoding (Unity 2020.3 and later) from smol-v's `source/smolv.cpp`. |
 | [texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (© K0lb3) | MIT | The C++ block and Crunch decoders that `texture2ddecoder-wasm` compiles to WASM (a git submodule). |
 | Codecs inside texture2ddecoder: [Perfare's AssetStudio](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative) (ATC, BCn), [mikunyan](https://github.com/Ishotihadus/mikunyan) (ASTC, ETC, PVRTC), [FP16](https://github.com/Maratyszcza/FP16), [BinomialLLC/crunch](https://github.com/BinomialLLC/crunch), [Unity-Technologies/crunch](https://github.com/Unity-Technologies/crunch) | MIT; MIT; MIT; public domain; zlib | The block decoders, half floats, and Crunch and Unity Crunch unpacking. |
 | [fflate](https://github.com/101arrowz/fflate) | MIT | Runtime dependency of `unity-asset-reader`: gzip and zlib, synchronously. |
 | [lzma1](https://github.com/xseman/lzma1) | MIT | Runtime dependency of `unity-asset-reader`: LZMA, synchronously and without WASM. |
 | [Emscripten](https://github.com/emscripten-core/emscripten) | MIT or University of Illinois/NCSA | Compiles texture2ddecoder to the WASM module and generates its JavaScript loader (the pinned `emscripten/emsdk:4.0.7` Docker image). |
 
-Development only, not shipped: TypeScript (Apache-2.0), Rollup, esbuild and tsx (MIT) build and
-test the packages, and Playwright (Apache-2.0) runs the browser smoke test. The test bundles are
-built with the Unity Editor from our own projects ([`fixtures/BUILDING.md`](fixtures/BUILDING.md)).
+Development only, not shipped:
+
+- TypeScript (Apache-2.0), Rollup, esbuild and tsx (MIT) build and test the packages.
+- Playwright (Apache-2.0) runs the browser smoke test.
+- The test bundles are built with the Unity Editor from our own projects
+  ([`fixtures/BUILDING.md`](fixtures/BUILDING.md)).
 
 ## License
 
-MIT, except the tight-mesh fill and the variant-atlas resize of `unity-asset-reader-texture`
-(`packages/texture`). That code is derived from ImageSharp.Drawing and ImageSharp and is under
-Apache-2.0, so that package is `MIT AND Apache-2.0`
-(see its `NOTICE` and `LICENSE-APACHE`). The SPIR-V disassembler of `unity-asset-reader-shader`
-(`packages/shader`) is ported from CSspv and is under BSD-2-Clause, so that package is
-`MIT AND BSD-2-Clause` (see its `NOTICE` and `LICENSE-BSD`). The upstreams the repo derives from (AssetStudio, UnityPy
-and others) are listed in [`NOTICE`](NOTICE). Each published package ships its own `NOTICE`, which
-is the authoritative one for its tarball.
+MIT, with two packages that also include code under another license:
+
+- **`unity-asset-reader-texture`** (`packages/texture`) is `MIT AND Apache-2.0`. Its tight-mesh
+  fill and variant-atlas resize are derived from ImageSharp.Drawing and ImageSharp, and are under
+  Apache-2.0 (see its `NOTICE` and `LICENSE-APACHE`).
+- **`unity-asset-reader-shader`** (`packages/shader`) is `MIT AND BSD-2-Clause`. Its SPIR-V
+  disassembler is ported from CSspv, and is under BSD-2-Clause (see its `NOTICE` and
+  `LICENSE-BSD`).
+
+The upstreams the repo derives from (AssetStudio, UnityPy and others) are listed in
+[`NOTICE`](NOTICE). Each published package ships its own `NOTICE`, which is the authoritative one
+for its tarball.

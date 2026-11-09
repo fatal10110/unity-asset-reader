@@ -1,6 +1,30 @@
 # Examples
 
-Examples of the reader packages used together. Not published.
+Browser pages that use the reader packages together, and their tests. Nothing here is published
+to npm.
+
+- **[`cdn.html`](cdn.html)** is the smallest complete example: pick a bundle, list its objects,
+  draw a Texture2D to a `<canvas>`. It needs no bundler and no install.
+- **The GitHub Pages demo**, [`docs/index.html`](../docs/index.html), is a fuller page. Its test
+  lives here too.
+
+## Try it
+
+`cdn.html` loads the packages from jsDelivr, so it needs nothing built. Serve it over HTTP with
+any static server (opening the file as `file://` does not work), for example this repo's own:
+
+```bash
+npm ci                               # serve.mjs reads its package list from node_modules
+node examples/serve.mjs              # then open http://127.0.0.1:8080/examples/cdn.html
+```
+
+Use that URL, not the `?local` link the server prints: `?local` needs the builds described
+below.
+
+To run the page on this repo's own builds instead of the published packages, see
+[Where the packages come from](#where-the-packages-come-from).
+
+## Files
 
 | File | What |
 |---|---|
@@ -8,43 +32,42 @@ Examples of the reader packages used together. Not published.
 | [`cdn-worker.js`](cdn-worker.js) | The Worker `cdn.html` runs the reader in. |
 | [`serve.mjs`](serve.mjs) | Static server with a local stand-in for jsDelivr, for trying the page on this repo's builds. |
 | [`tests/cdn.spec.mts`](tests/cdn.spec.mts) | The Playwright smoke test of `cdn.html` (plan §5). |
-| [`tests/demo.spec.mts`](tests/demo.spec.mts) | The Playwright test of the GitHub Pages demo, [`docs/index.html`](../docs/index.html) (#209). |
+| [`tests/demo.spec.mts`](tests/demo.spec.mts) | The Playwright test of the GitHub Pages demo, [`docs/index.html`](../docs/index.html). |
 
-## `cdn.html`
+## How `cdn.html` works
 
-The page runs the reader in a module Worker. The parse path is synchronous (plan
-D4), so on the main thread a big bundle would freeze the page. The Worker
-imports the packages from jsDelivr and sends the page plain data: the object
-list, and RGBA pixels that go straight into `ImageData`. The page itself
-imports nothing.
+The page runs the reader in a module Worker. The parse path is synchronous (plan D4), so on the
+main thread a big bundle would freeze the page.
 
-- **No import map.** Import maps do not apply inside Workers. So the Worker
-  imports jsDelivr's `/+esm` builds, which also rewrite the packages' own bare
-  imports (`fflate`, `lzma1`, `unity-asset-reader`, `texture2ddecoder-wasm`) to
-  CDN URLs.
-- **No special headers.** Everything is single-threaded (D6), so the page works
-  from any static host without COOP/COEP. It has to be served over HTTP, not
-  opened as `file://`.
+The Worker imports the packages from jsDelivr, and sends the page plain data: the object list,
+and RGBA pixels that go straight into `ImageData`. The page itself imports nothing.
+
+- **No import map.** Import maps do not apply inside Workers. So the Worker imports jsDelivr's
+  `/+esm` builds. These also rewrite the packages' own bare imports (`fflate`, `lzma1`,
+  `unity-asset-reader`, `texture2ddecoder-wasm`) to CDN URLs.
+- **No special headers.** Everything is single-threaded (D6), so the page works from any static
+  host without COOP/COEP. It has to be served over HTTP, not opened as `file://`.
 - **One exact version per package.** jsDelivr's `/+esm` build of
-  `unity-asset-reader-texture@1.0.0` imports `unity-asset-reader@1.0.0/+esm`
-  and `texture2ddecoder-wasm@1.2.3/+esm`, exact versions, not ranges. The
-  Worker imports core at that same version, so core is loaded once, and takes
-  the WASM from that same decoder release.
-- **The WASM** comes from `texture2ddecoder-wasm@1.2.3/wasm` on the same CDN.
-  The decoder has its own version line, separate from the reader packages.
-  `initTexture({ wasmPath })` loads it, even when the textures are plain
-  formats decoded in TS.
-- **`texture2ddecoder-wasm` 1.2.3 or later.** Earlier versions refuse to
-  `initialize()` in a Worker (#149).
+  `unity-asset-reader-texture@1.3.0` imports `unity-asset-reader@1.3.0/+esm` and
+  `texture2ddecoder-wasm@1.2.6/+esm`: exact versions, not ranges.
+  - The Worker imports core at that same version, so core is loaded once.
+  - It takes the WASM from that same decoder release.
+  - The versions are the constants at the top of `cdn-worker.js`, updated after each release
+    (RELEASING.md).
+- **The WASM** comes from `texture2ddecoder-wasm@1.2.6/wasm` on the same CDN. The decoder has
+  its own version line, separate from the reader packages. `initTexture({ wasmPath })` loads
+  it, even when the textures are plain formats decoded in TS.
+- **`texture2ddecoder-wasm` 1.2.3 or later.** Earlier versions refuse to `initialize()` in a
+  Worker ([#149](https://github.com/fatal10110/unity-asset-reader/issues/149)).
 
 ### Where the packages come from
 
-`cdn-worker.js` holds the jsDelivr base URL and the versions. **Opening the page
-with `?local` switches** it to the builds of this repo instead, served by
-`serve.mjs` under `/npm/<name>/+esm`.
+`cdn-worker.js` holds the jsDelivr base URL and the versions. **Opening the page with `?local`
+switches** it to the builds of this repo instead, served by `serve.mjs` under
+`/npm/<name>/+esm`.
 
-Without `?local` the page needs nothing built; any static server will do,
-`node examples/serve.mjs` included. With `?local`:
+Without `?local` the page needs nothing built (see [Try it](#try-it)). With `?local`, build
+everything first:
 
 ```bash
 npm ci
@@ -53,14 +76,22 @@ npm run build:wasm                   # needs Docker, see CONTRIBUTING.md
 node examples/serve.mjs              # then open http://127.0.0.1:8080/
 ```
 
-`serve.mjs` sends no special headers. It maps `/npm/<name>/+esm` to the
-package's browser ESM entry in `node_modules`, and rewrites the bare imports of
-import statements the way jsDelivr does. The version in a URL is ignored, and
-the local build is served. It listens on `127.0.0.1` only, and serves only the
-packages the pages' Workers load and their dependencies, this folder, `docs/`
-(the demo, at `/docs/?local`) and `fixtures/bundles/` (the demo's samples);
-anything else under `node_modules` or the repo is a 404. `scripts/tests/serve-examples.test.mjs`
-covers this.
+`http://127.0.0.1:8080/` opens `cdn.html?local`. What `serve.mjs` does:
+
+- It sends no special headers.
+- It maps `/npm/<name>/+esm` to the package's browser ESM entry in `node_modules`, and rewrites
+  the bare imports of import statements the way jsDelivr does.
+- The version in a URL is ignored, and the local build is served.
+- It listens on `127.0.0.1` only.
+- It serves only:
+  - the packages the pages' Workers load, and their dependencies;
+  - this folder;
+  - `docs/` (the demo, at `/docs/?local`);
+  - `fixtures/bundles/` (the demo's samples).
+
+  Anything else under `node_modules` or the repo is a 404.
+
+`scripts/tests/serve-examples.test.mjs` covers this.
 
 ## Smoke test
 
@@ -68,49 +99,61 @@ covers this.
 npm run test:smoke
 ```
 
-This runs [`tests/cdn.spec.mts`](tests/cdn.spec.mts) in Chromium, against
-`cdn.html?local`. It needs the builds and the WASM above, and a Playwright
-Chromium (`npx playwright install chromium`). It checks:
+This runs [`tests/cdn.spec.mts`](tests/cdn.spec.mts) in Chromium, against `cdn.html?local`. It
+needs:
+
+- the builds and the WASM above;
+- a Playwright Chromium (`npx playwright install chromium`).
+
+It checks that:
 
 - The page is served without COOP/COEP, and is not cross-origin isolated.
-- An LZ4 bundle with an RGBA32 texture in its `.resS` node is listed and
-  drawn. Then an uncompressed bundle of block textures is loaded, and its DXT1
-  Crunch and DXT1 textures are drawn through the WASM.
-- The pixels handed to the canvas match the UnityPy goldens in
-  `fixtures/goldens.json`. `decodeTexture2D` returns the top row first, and the
-  goldens hash Unity's bottom-up rows, so the test reverses the rows before it
-  hashes. The DXT1 texture is also read back from the canvas.
-- The reader modules load in the Worker only, never on the page: a Worker
-  starts, and the page's own resource timeline has no `/npm/` module. That is
-  the responsiveness proof (D4); the fixtures are too small for a timing check
-  to tell a Worker from the main thread.
-- The Worker loads exactly one `unity-asset-reader` module: its own import and
-  the texture package's peer import are the same URL.
+- An LZ4 bundle with an RGBA32 texture in its `.resS` node is listed and drawn. Then an
+  uncompressed bundle of block textures is loaded, and its DXT1 Crunch and DXT1 textures are
+  drawn through the WASM.
+- The pixels handed to the canvas match the UnityPy goldens in `fixtures/goldens.json`.
+  `decodeTexture2D` returns the top row first, and the goldens hash Unity's bottom-up rows, so
+  the test reverses the rows before it hashes. The DXT1 texture is also read back from the
+  canvas.
+- The reader modules load in the Worker only, never on the page: a Worker starts, and the
+  page's own resource timeline has no `/npm/` module. That is the responsiveness proof (D4). The
+  fixtures are too small for a timing check to tell a Worker from the main thread.
+- The Worker loads exactly one `unity-asset-reader` module: its own import and the texture
+  package's peer import are the same URL.
 
 CI runs it in the `decoder` job, the only job that builds the WASM.
 
-After a release, check the published packages on jsDelivr with the same test
-(needs the network, not the builds):
+### After a release
+
+Check the published packages on jsDelivr with the same test. It needs the network, not the
+builds:
 
 ```bash
 CDN_LIVE=1 npm run test:smoke        # cdn.html without ?local
 ```
 
-If core is loaded twice, `CORE_VERSION` in `cdn-worker.js` is not the version
-the texture package's `/+esm` build imports.
+If core is loaded twice, `CORE_VERSION` in `cdn-worker.js` is not the version the texture
+package's `/+esm` build imports.
 
 ## The demo page test
 
-`npm run test:smoke` also runs [`tests/demo.spec.mts`](tests/demo.spec.mts),
-against `docs/index.html?local` (the GitHub Pages demo): its Worker takes the
-packages from `serve.mjs` and its samples from `/fixtures/bundles/`. It opens
-the samples and checks the asset table, its filters and `env.get`, image
-previews and their `imageInfo`, a TextAsset's text, a MonoBehaviour's fields
-(64-bit values exact), raw audio, video and font bytes, "decode all images",
-an error message, and that the Worker loads one copy of core. Every expected
-value comes from `fixtures/goldens.json`.
+`npm run test:smoke` also runs [`tests/demo.spec.mts`](tests/demo.spec.mts), against
+`docs/index.html?local` (the GitHub Pages demo). Its Worker takes the packages from `serve.mjs`,
+and its samples from `/fixtures/bundles/`.
 
-`CDN_LIVE=1 npm run test:smoke` opens the demo without `?local`: packages from
-jsDelivr, samples from jsDelivr's GitHub endpoint on `main`. The demo imports
-the `@1` lines and reads the exact versions from the headers of jsDelivr's
-texture build, so it needs no edit after a release.
+It opens the samples and checks:
+
+- the asset table, its filters and `env.get`;
+- image previews and their `imageInfo`;
+- a TextAsset's text;
+- a MonoBehaviour's fields (64-bit values exact);
+- raw audio, video and font bytes;
+- "decode all images";
+- an error message;
+- that the Worker loads one copy of core.
+
+Every expected value comes from `fixtures/goldens.json`.
+
+`CDN_LIVE=1 npm run test:smoke` opens the demo without `?local`: packages from jsDelivr, samples
+from jsDelivr's GitHub endpoint on `main`. The demo imports the `@1` lines and reads the exact
+versions from the headers of jsDelivr's texture build, so it needs no edit after a release.

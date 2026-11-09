@@ -1,16 +1,17 @@
 # unity-asset-reader-texture
 
-Decodes Unity `Texture2D` and `Sprite` objects read by
-[`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md)
-to RGBA8 pixels. It runs in browsers, Web Workers and Node.js.
+Turns Unity `Texture2D` and `Sprite` objects into RGBA8 pixels that you can draw on a canvas or
+save as a PNG. It works on files read by
+[`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md),
+in browsers, Web Workers and Node.js.
 
 - **Plain formats** (RGBA32, RGB565, RHalf, ...) are converted in TypeScript.
 - **Block-compressed and Crunch formats** (BC1–BC7, ETC, EAC, PVRTC, ASTC, ATC) are decoded by
   [`texture2ddecoder-wasm`](https://www.npmjs.com/package/texture2ddecoder-wasm), a
   small single-threaded WASM module (about 150 KB). It needs no special headers (COOP/COEP).
 - **Output is always RGBA, top row first:** `{ data, width, height }`, ready for `ImageData` or
-  `encodePng`. Unity stores rows bottom first and the WASM decoders produce BGRA; both are
-  undone for you.
+  `encodePng`. Unity stores rows bottom first, and the WASM decoders produce BGRA. The package
+  undoes both for you.
 
 ## Install
 
@@ -21,7 +22,30 @@ npm install unity-asset-reader unity-asset-reader-texture
 `unity-asset-reader` is a peer dependency, so your app has exactly one copy of the parser.
 `texture2ddecoder-wasm` is installed with this package.
 
-## Usage
+## Quick start
+
+Save every image of a bundle as a PNG file, in Node.js:
+
+```js
+import { readFileSync, writeFileSync } from "node:fs";
+import { load } from "unity-asset-reader";
+import { encodePng, images } from "unity-asset-reader-texture";
+
+const env = load({ name: "ui.bundle", data: readFileSync("ui.bundle") });
+for await (const image of images(env)) {
+  const { kind, name, pathId, rgba, width, height } = image;
+  if (width === 0 || height === 0) continue; // a dynamic font's empty texture has no PNG
+  writeFileSync(`${kind}-${name}-${pathId}.png`, encodePng({ data: rgba, width, height }));
+}
+```
+
+`images` decodes every `Texture2D`, `Sprite` and Unity 6000.6 packed sprite of the files you
+loaded. In Node.js the WASM decoder loads by itself. In a browser, tell it where the WASM files
+are: see [Where the WASM files come from](#where-the-wasm-files-come-from).
+
+## Common tasks
+
+### Go through the images of a file
 
 Images are free functions over the assets of `env.assets()`:
 
@@ -43,31 +67,52 @@ for await (const image of images(env)) {    // every Texture2D and Sprite, decod
 ```
 
 - **`isImage(asset)`** is a type guard: `true` for a `Texture2D` or `Sprite` asset.
-- **`imageInfo(asset)`** describes the image without decoding it: `kind`, `name`, `path`,
-  `pathId`, `file`, `width`, `height`, `format` (the `TextureFormat` value), `formatName`
-  (`"DXT5"`), `compression` (`"none"`, `"bc"`, `"etc"`, `"etc2"`, `"eac"`, `"pvrtc"`, `"atc"`,
-  `"astc"`, `"crunch"`, or `"unknown"` for a format number `TextureFormat` does not name),
-  `mipCount`, `readable`, `colorSpace` (`"srgb"` or `"linear"`), `filterMode`, `wrapMode`
-  (`{ u, v, w }`), `platform` (the `BuildTarget`), `encodedSize` and `streamed` (the data is in
-  a `.resS`). It is synchronous, needs no WASM, and reads no image data, so a `.resS` that is not
-  loaded does not stop it. Each field's JSDoc names the Unity field it comes from.
-- For a **Sprite**, `width` and `height` are the size of the cut-out image, the encoding fields
-  are those of the texture it is cut from, and `info.sprite` adds `rect`, `textureRect`, `pivot`,
-  `border`, `pixelsPerUnit`, `packed`, `packingMode` (`"tight"` or `"rectangle"`), `rotation`
-  (a `SpritePackingRotation`), `atlas` (the SpriteAtlas' name, when it is packed into one that is
-  loaded) and `texture` (the texture's own `imageInfo`). `info.kind === "Sprite"` narrows to it.
 - **`decodeImage(asset, options?)`** returns `imageInfo(asset)` plus `rgba`: RGBA8 pixels, top
   row first, `width * height * 4` bytes. A Sprite is cut out of its texture or atlas, as
   `decodeSprite` does.
-- **`images(env, { onError })`** decodes every Texture2D and Sprite, in `env.assets()` order,
-  and, at each Unity 6000.6 `SpriteAtlas`, the sprites it holds itself (see "Sprites"). An
-  image that fails to decode throws (`onError: "throw"`, the default) or is left out
-  (`onError: "skip"`). It gives the event loop a turn between images, so a loop on a page's main
-  thread keeps the page responsive.
+- **`images(env, { onError })`** decodes every Texture2D and Sprite, in `env.assets()` order.
+  At each Unity 6000.6 `SpriteAtlas` it also decodes the sprites that atlas holds itself (see
+  [Unity 6000.6 packed sprites](#unity-60006-packed-sprites)).
+  - An image that fails to decode throws (`onError: "throw"`, the default) or is left out
+    (`onError: "skip"`).
+  - It gives the event loop a turn between images, so a loop on a page's main thread keeps the
+    page responsive.
+
+### Read image metadata without decoding
+
+**`imageInfo(asset)`** describes an image without decoding it. It is synchronous, needs no
+WASM, and reads no image data, so a `.resS` that is not loaded does not stop it. It returns:
+
+- `kind`, `name`, `path`, `pathId`, `file`
+- `width`, `height`, `mipCount`
+- `format`: the `TextureFormat` value
+- `formatName`: for example `"DXT5"`
+- `compression`: `"none"`, `"bc"`, `"etc"`, `"etc2"`, `"eac"`, `"pvrtc"`, `"atc"`, `"astc"`,
+  `"crunch"`, or `"unknown"` for a format number `TextureFormat` does not name
+- `readable`, `filterMode`
+- `colorSpace`: `"srgb"` or `"linear"`
+- `wrapMode`: `{ u, v, w }`
+- `platform`: the `BuildTarget`
+- `encodedSize`
+- `streamed`: whether the data is in a `.resS`
+
+Each field's JSDoc names the Unity field it comes from.
+
+For a **Sprite** (`info.kind === "Sprite"` narrows to it):
+
+- `width` and `height` are the size of the cut-out image.
+- The encoding fields are those of the texture it is cut from.
+- `info.sprite` adds `rect`, `textureRect`, `pivot`, `border`, `pixelsPerUnit`, `packed`,
+  `packingMode` (`"tight"` or `"rectangle"`), `rotation` (a `SpritePackingRotation`), `atlas`
+  (the SpriteAtlas' name, when it is packed into one that is loaded) and `texture` (the
+  texture's own `imageInfo`).
+
+### Draw an image on a canvas
 
 `decodeImage` and `images` load the WASM decoder on first use. In Node.js that needs nothing. A
 browser has to say where the WASM files are: pass `{ wasmPath }` to the first call, or call
-`initTexture({ wasmPath })` once before (see "Where the WASM files come from").
+`initTexture({ wasmPath })` once before (see
+[Where the WASM files come from](#where-the-wasm-files-come-from)).
 
 In a browser, put the pixels on a canvas:
 
@@ -77,7 +122,9 @@ const imageData = new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffs
 canvas.getContext("2d").putImageData(imageData, 0, 0);
 ```
 
-To save a PNG, `encodePng` turns the pixels into a PNG file, in browsers and Node.js alike:
+### Save a PNG
+
+`encodePng` turns the pixels into a PNG file, in browsers and Node.js alike:
 
 ```js
 import { writeFileSync } from "node:fs";
@@ -86,19 +133,23 @@ const { rgba, width, height } = await decodeImage(asset);
 writeFileSync("out.png", encodePng({ data: rgba, width, height }));
 ```
 
-It is synchronous and has no dependency, so it does not compress: the deflate stream holds
-stored blocks, and the file is about as large as the pixels (`width * height * 4` bytes). For
-smaller files, or other formats, hand the RGBA to an image library instead, for example
+`encodePng` is synchronous and has no dependency, so it does not compress. The deflate stream
+holds stored blocks, and the file is about as large as the pixels (`width * height * 4` bytes).
+
+For smaller files, or other formats, hand the RGBA to an image library instead, for example
 [`sharp`](https://www.npmjs.com/package/sharp):
 `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
 ### Reuse an atlas across sprites
 
-Pass a caller-owned `decodedTextures` map to `decodeImage`, `images` or `decodeSprite` to
-decode each shared texture once across sequential calls. Keys are the Texture2D
-`ObjectReader`s from `env.objects`; values are `RgbaImage`s from `decodeTexture2D`, RGBA with
-the top row first. A missing entry is decoded and added only on success. You can also put
-already-decoded textures in the map before calling.
+The package keeps no decoded textures on its own. To decode each shared texture once across
+sequential calls, pass a `decodedTextures` map that you own to `decodeImage`, `images` or
+`decodeSprite`:
+
+- Keys are the Texture2D `ObjectReader`s from `env.objects`.
+- Values are `RgbaImage`s from `decodeTexture2D`: RGBA, top row first.
+- A missing entry is decoded and added, only on success.
+- You can also put textures you decoded earlier into the map before the call.
 
 ```ts
 import type { ObjectReader } from "unity-asset-reader";
@@ -114,17 +165,19 @@ try {
 }
 ```
 
-The package keeps no decoded textures without this option. You choose when to clear the map
-or delete entries: a 2048×2048 atlas holds 16 MiB of pixels. Treat stored pixels as read-only,
-and clear an entry after editing its source bytes. A Texture2D's `decodeImage().rgba` shares
-the map's array; do not modify it or transfer its buffer while retaining the entry. Sprite
-images have separate arrays. Await each decode before starting the next; concurrent misses
-can decode the same texture more than once.
+Things to keep in mind:
 
-### The low-level API
+- You choose when to clear the map or delete entries. A 2048×2048 atlas holds 16 MiB of pixels.
+- Treat stored pixels as read-only, and clear an entry after you edit its source bytes.
+- A Texture2D's `decodeImage().rgba` shares the map's array. Do not modify it, or transfer its
+  buffer, while you keep the entry. Sprite images have separate arrays.
+- Await each decode before you start the next. Concurrent misses can decode the same texture
+  more than once.
 
-`decodeTexture2D`, `decodeSprite` and `initTexture` work on the objects of `env.objects`
-directly. They are what `decodeImage` uses, and they do not load the WASM themselves: call
+### Use the low-level API
+
+`decodeTexture2D`, `decodeSprite` and `initTexture` work directly on the objects of
+`env.objects`. `decodeImage` is built on them. They do not load the WASM themselves: call
 `initTexture()` once, and wait for it, before the first decode.
 
 ```ts
@@ -146,10 +199,14 @@ for (const obj of env.objects) {
 
 ### Where the WASM files come from
 
-`initTexture()` loads `texture2ddecoder.js` and `texture2ddecoder.wasm`. `decodeImage` and
-`images` call it on first use with the `wasmPath` they were given; `decodeTexture2D` and
-`decodeSprite` need it called, and waited for, before the first decode. Every format needs it,
-the plain ones too.
+`initTexture()` loads `texture2ddecoder.js` and `texture2ddecoder.wasm`. Every format needs
+them, the plain ones too.
+
+- `decodeImage` and `images` call `initTexture()` on first use, with the `wasmPath` they were
+  given.
+- `decodeTexture2D` and `decodeSprite` need it called, and waited for, before the first decode.
+
+Where the files are found:
 
 - **Node.js:** nothing to do, or `await initTexture()`. The files are found inside the installed
   package.
@@ -167,41 +224,58 @@ the plain ones too.
 - **Browser, CDN:**
   `await initTexture({ wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1/wasm" })`.
 
-**In a Web Worker**, `texture2ddecoder-wasm` 1.2.3 or later is needed. 1.2.2 refuses to
+**In a Web Worker**, you need `texture2ddecoder-wasm` 1.2.3 or later. Version 1.2.2 refuses to
 initialize in a Worker ([#149](https://github.com/fatal10110/unity-asset-reader/issues/149)).
-This package depends on `^1.2.3`; a CDN `wasmPath` should point at 1.2.3 or later too.
+This package depends on `^1.2.3`. A CDN `wasmPath` should point at 1.2.3 or later too.
 
 The [Bundler Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/BUNDLER_GUIDE.md)
 has the setup for Vite, Next.js and CDN pages. Next.js, and a root-relative `wasmPath` in the
 Vite dev server, need `texture2ddecoder-wasm` 1.2.4 or later
 ([#171](https://github.com/fatal10110/unity-asset-reader/issues/171)).
 
-### Sprites
+## Sprites
 
-A sprite's pixels are in another object. `decodeImage` finds it through the Sprite asset's
-`env`; `decodeSprite(obj, env, options?)` takes the Sprite's `ObjectReader` and the `env` that
-loaded it. Both find the texture through the Sprite's pointers, through its `SpriteAtlas` when
-that atlas is loaded. It cuts the sprite's rectangle out, and it
-undoes the packer's flip or rotation. So pass the bundles holding the texture and the atlas to
-the same `load()`.
+### How a sprite is found and cut
+
+A sprite's pixels are in another object: a texture, or a `SpriteAtlas`'s texture.
+
+- `decodeImage` finds it through the Sprite asset's `env`.
+- `decodeSprite(obj, env, options?)` takes the Sprite's `ObjectReader` and the `env` that loaded
+  it.
+
+Both follow the Sprite's pointers to the texture, through its `SpriteAtlas` when that atlas is
+loaded. They cut the sprite's rectangle out, and undo the packer's flip or rotation. So pass the
+bundles that hold the texture and the atlas to the same `load()`.
 
 With `decodeSprite`'s `{ tightMesh: true }`, pixels outside a tight-packed sprite's mesh become
 transparent, as AssetStudio does. The default, and `decodeImage`, return the whole rectangle.
 
-A sprite packed into a variant `SpriteAtlas` (`m_IsVariant`, a scaled copy of a master atlas) is
-cut from that variant by default, as its pointer says and UnityPy does. AssetStudio's loader
-moves it to its master atlas when that is loaded; `decodeSprite`'s `{ preferMasterAtlas: true }`
-does the same: walking the loaded atlases in load order, the first one that has render data
-(`m_RenderDataMap`), lists the sprite in `m_PackedSprites` and is not a variant cuts it. A variant loaded without its master keeps the
-variant. `decodeImage` and `imageInfo` always use the sprite's own atlas.
+### Variant atlases
 
-From Unity 6000.6 a `SpriteAtlas` holds its packed sprites itself (each `renderDataMap` entry's
-`spriteInstanceData`), and the bundle has no `Sprite` objects for them. `packedSprites(atlas)`
-lists them as `PackedSprite`s (`{ type: "PackedSprite", name, atlas, index }`), which
-`imageInfo`, `decodeImage` and `decodeSprite` take where they take a Sprite, and `images` lists
-them at their atlas' place. One is described and cut as a Sprite, from its atlas entry and the
-name, rectangle, pivot, border and mesh it holds; its `pathId` and `file` are its atlas', and its
-`path` is `undefined`. Before 6000.6 `packedSprites` returns `[]`:
+A variant `SpriteAtlas` (`m_IsVariant`) is a scaled copy of a master atlas.
+
+- By default, a sprite packed into a variant is cut from that variant, as its pointer says and
+  as UnityPy does.
+- AssetStudio's loader moves it to its master atlas when that is loaded. `decodeSprite`'s
+  `{ preferMasterAtlas: true }` does the same. It walks the loaded atlases in load order, and
+  cuts the sprite from the first one that has render data (`m_RenderDataMap`), lists the sprite
+  in `m_PackedSprites`, and is not a variant.
+- A variant loaded without its master keeps the variant.
+- `decodeImage` and `imageInfo` always use the sprite's own atlas.
+
+### Unity 6000.6 packed sprites
+
+From Unity 6000.6, a `SpriteAtlas` holds its packed sprites itself (each `renderDataMap` entry's
+`spriteInstanceData`), and the bundle has no `Sprite` objects for them.
+
+- `packedSprites(atlas)` lists them as `PackedSprite`s (`{ type: "PackedSprite", name, atlas,
+  index }`).
+- `imageInfo`, `decodeImage` and `decodeSprite` take a `PackedSprite` where they take a Sprite.
+- `images` lists them at their atlas' place.
+- One is described and cut as a Sprite, from its atlas entry and the name, rectangle, pivot,
+  border and mesh it holds.
+- Its `pathId` and `file` are its atlas', and its `path` is `undefined`.
+- Before 6000.6, `packedSprites` returns `[]`.
 
 ```ts
 for (const atlas of env.assets("SpriteAtlas")) {
@@ -211,6 +285,8 @@ for (const atlas of env.assets("SpriteAtlas")) {
   }
 }
 ```
+
+### Sprite support
 
 What is supported, and what it is tested on (sprites built by 2019.4.41f2, 6000.3.25f1 and
 6000.6.4f1):
@@ -226,89 +302,6 @@ What is supported, and what it is tested on (sprites built by 2019.4.41f2, 6000.
 | Pixels outside a tight mesh | Transparent with `decodeSprite`'s `{ tightMesh: true }` |
 | Alpha texture (Android ETC1 split alpha, 2019.4.41f2 atlases) | Its red channel is the sprite's alpha, as UnityPy merges it; one of another size than its texture is refused |
 | Variant atlas (`downscaleMultiplier` other than 1) | Texture resized as AssetStudio resizes it (ImageSharp 2.1.3 bicubic), then cut; matches AssetStudio's image to the byte (2019.4 half-scale fixture). The 6000.6 half-scale fixture is checked for size and closeness only ([#230](https://github.com/fatal10110/unity-asset-reader/issues/230)) |
-
-## Texture formats
-
-`decodeTexture2D` decodes the first mip level. Every format below is checked against pixels from
-UnityPy (the test oracle) or, where UnityPy cannot decode it, against AssetStudio's decoder.
-"Editor-built" means the test texture was made by the Unity editor. "Synthetic" means it was
-generated block data; no current editor writes those formats.
-
-| Group | Formats | Decoded by | Tested on |
-|---|---|---|---|
-| Plain | `Alpha8`, `ARGB4444`, `RGB24`, `RGBA32`, `ARGB32`, `RGB565`, `R16`, `RGBA4444`, `BGRA32`, `RHalf`, `RGHalf`, `RGBAHalf`, `RFloat`, `RGFloat`, `RGBAFloat`, `RGB9e5Float`, `YUY2` | TypeScript | editor-built (6000.3), all 17 |
-| | `R8`, `RG16`, `RG32`, `RGB48`, `RGBA64` | TypeScript | editor-built (2019.4, 6000.6), all five |
-| BC | `DXT1` (BC1), `DXT5` (BC3), `BC4`, `BC5`, `BC6H`, `BC7` | WASM `decode_bc1`, `decode_bc3` to `decode_bc7` | editor-built (6000.3) |
-| ETC | `ETC_RGB4` (ETC1), `ETC2_RGB`, `ETC2_RGBA1`, `ETC2_RGBA8` | WASM `decode_etc1`, `decode_etc2`, `decode_etc2a1`, `decode_etc2a8` | editor-built (6000.3) |
-| | `ETC_RGB4_3DS`, `ETC_RGBA8_3DS` | WASM, the decoder of `ETC_RGB4` / `ETC2_RGBA8` | `ETC_RGB4` / `ETC2_RGBA8` fixture data |
-| EAC | `EAC_R`, `EAC_RG` | WASM `decode_eacr`, `decode_eacrg` | editor-built (6000.3) |
-| | `EAC_R_SIGNED`, `EAC_RG_SIGNED` | WASM `decode_eacr_signed`, `decode_eacrg_signed` | editor-script-built (2019.4, 2020.3, 6000.3, 6000.6) |
-| PVRTC | `PVRTC_RGB2`, `PVRTC_RGBA2`, `PVRTC_RGB4`, `PVRTC_RGBA4` | WASM `decode_pvrtc` | editor-built (2019.4) |
-| ATC | `ATC_RGB4`, `ATC_RGBA8` | WASM `decode_atc_rgb4`, `decode_atc_rgba8` | synthetic |
-| ASTC | `ASTC_RGB_4x4`, `ASTC_RGB_5x5`, `ASTC_RGB_6x6`, `ASTC_RGB_8x8`, `ASTC_RGB_10x10`, `ASTC_RGB_12x12` (Unity's `ASTC_4x4` ... `ASTC_12x12`), `ASTC_HDR_4x4`, `ASTC_HDR_12x12` | WASM `decode_astc` | editor-built (6000.3) |
-| | `ASTC_RGBA_4x4`, `ASTC_RGBA_5x5`, `ASTC_RGBA_6x6`, `ASTC_RGBA_8x8`, `ASTC_RGBA_10x10`, `ASTC_RGBA_12x12`, `ASTC_HDR_5x5`, `ASTC_HDR_6x6`, `ASTC_HDR_8x8`, `ASTC_HDR_10x10` | WASM `decode_astc` | fixture data of the `ASTC_RGB_*` format of the same block size |
-| Crunch | `DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched` | WASM `unpack_unity_crunch` (or `unpack_crunch`, see below), then the block decoder | editor-built (6000.3; Unity's crunch, 2017.3+) |
-
-Every other `TextureFormat` is refused (see [Not supported](#not-supported)).
-
-Details worth knowing:
-
-- Output is 8 bits per channel. Half and float channels are scaled by 255 and clamped, so HDR
-  values saturate.
-- Unsigned 16-bit channels (`R16`, `RG32`, `RGB48`, `RGBA64`) use AssetStudio's rounded
-  `(component * 255 + 32895) >> 16` conversion. `R8` uses UnityPy's golden; the other four new
-  plain formats use the executed AssetStudio cross-checks where UnityPy fails or disagrees.
-- Channels a format lacks are 0 (color) or 255 (alpha); `Alpha8` is white with that alpha.
-- `DXT1Crunched` / `DXT5Crunched` from before Unity 2017.3 use the original crunch format. It is
-  unpacked too, and checked against AssetStudio's decoder only.
-- `DXT5` color is decoded in 4-color mode, as the S3TC spec says. On blocks with `c0 <= c1` that differs from AssetStudio
-  ([#137](https://github.com/fatal10110/unity-asset-reader/issues/137)).
-
-### Platforms
-
-- **Switch:** swizzled textures are deswizzled first (as UnityPy does; AssetStudio has no Switch
-  support). Formats with no known Switch layout, such as Crunch, ETC, PVRTC and ASTC HDR, are
-  refused.
-- **Xbox 360:** the byte order of `ARGB4444`, `RGB565`, `DXT1` and `DXT5` is swapped back.
-- **PS4, PS5:** refused. Their textures can be tiled, and no reference implementation detiles them
-  yet ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)).
-- **Every other build target** (Windows, macOS, Linux, Android, iOS, WebGL, ...): the image data
-  is decoded as stored.
-
-No fixture editor here has the Switch or Xbox 360 module, so those two are tested on generated
-data checked against UnityPy, not on real console builds.
-
-## Not supported
-
-Each of these throws `UnsupportedError`, whose `kind` and `found` say what was refused:
-
-- Formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, and signed plain formats (values 75–82).
-  `YUY2` of odd width. (A swizzled Switch texture stores `BGR24` as `BGRA32`; that one decodes.)
-- `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
-  Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
-- Textures built for PS4 or PS5.
-- Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
-- With `tightMesh`, a sprite mesh whose positions are not 32-bit floats, or a 6000.6 packed
-  sprite's whose indices are not 16-bit.
-- A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
-  6000.6 bundle are not `Sprite` objects at all; `packedSprites` lists them.)
-
-Not provided at all: mip levels other than the first; the `Cubemap`, `Texture2DArray` and
-`Texture3D` classes; JPEG encoding, and compressed PNG (`encodePng` stores the pixels
-uncompressed).
-
-`Rotate90`-packed sprites are turned the way AssetStudio turns them, which no test bundle has
-confirmed against Unity's packer yet
-([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)).
-
-## Requirements
-
-- **Browsers:** WebAssembly and ES2020. No COOP/COEP headers, no `SharedArrayBuffer`.
-- **Node.js:** 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and
-  `require`; CI tests on 20.19.0 and 22.12.0. `initTexture()` loads
-  `texture2ddecoder-wasm`'s ES-module glue code, which older Node.js versions refuse
-  ([#172](https://github.com/fatal10110/unity-asset-reader/issues/172)). Node.js 22 prints a
-  `MODULE_TYPELESS_PACKAGE_JSON` warning while loading it. The warning is harmless.
 
 ## API reference
 
@@ -336,6 +329,109 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
 | `encodePng(image)` | An `RgbaImage`, top row first, to a PNG file (8-bit RGBA, uncompressed deflate), sync |
+
+## Texture formats
+
+`decodeTexture2D` decodes the first mip level. The **Tested on** column says what test data each
+format is checked on (see [How it is tested](#how-it-is-tested)):
+
+- **Editor-built:** the test texture was made by the Unity editor.
+- **Synthetic:** generated block data. No current editor writes those formats.
+
+| Group | Formats | Decoded by | Tested on |
+|---|---|---|---|
+| Plain | `Alpha8`, `ARGB4444`, `RGB24`, `RGBA32`, `ARGB32`, `RGB565`, `R16`, `RGBA4444`, `BGRA32`, `RHalf`, `RGHalf`, `RGBAHalf`, `RFloat`, `RGFloat`, `RGBAFloat`, `RGB9e5Float`, `YUY2` | TypeScript | editor-built (6000.3), all 17 |
+| | `R8`, `RG16`, `RG32`, `RGB48`, `RGBA64` | TypeScript | editor-built (2019.4, 6000.6), all five |
+| BC | `DXT1` (BC1), `DXT5` (BC3), `BC4`, `BC5`, `BC6H`, `BC7` | WASM `decode_bc1`, `decode_bc3` to `decode_bc7` | editor-built (6000.3) |
+| ETC | `ETC_RGB4` (ETC1), `ETC2_RGB`, `ETC2_RGBA1`, `ETC2_RGBA8` | WASM `decode_etc1`, `decode_etc2`, `decode_etc2a1`, `decode_etc2a8` | editor-built (6000.3) |
+| | `ETC_RGB4_3DS`, `ETC_RGBA8_3DS` | WASM, the decoder of `ETC_RGB4` / `ETC2_RGBA8` | `ETC_RGB4` / `ETC2_RGBA8` fixture data |
+| EAC | `EAC_R`, `EAC_RG` | WASM `decode_eacr`, `decode_eacrg` | editor-built (6000.3) |
+| | `EAC_R_SIGNED`, `EAC_RG_SIGNED` | WASM `decode_eacr_signed`, `decode_eacrg_signed` | editor-script-built (2019.4, 2020.3, 6000.3, 6000.6) |
+| PVRTC | `PVRTC_RGB2`, `PVRTC_RGBA2`, `PVRTC_RGB4`, `PVRTC_RGBA4` | WASM `decode_pvrtc` | editor-built (2019.4) |
+| ATC | `ATC_RGB4`, `ATC_RGBA8` | WASM `decode_atc_rgb4`, `decode_atc_rgba8` | synthetic |
+| ASTC | `ASTC_RGB_4x4`, `ASTC_RGB_5x5`, `ASTC_RGB_6x6`, `ASTC_RGB_8x8`, `ASTC_RGB_10x10`, `ASTC_RGB_12x12` (Unity's `ASTC_4x4` ... `ASTC_12x12`), `ASTC_HDR_4x4`, `ASTC_HDR_12x12` | WASM `decode_astc` | editor-built (6000.3) |
+| | `ASTC_RGBA_4x4`, `ASTC_RGBA_5x5`, `ASTC_RGBA_6x6`, `ASTC_RGBA_8x8`, `ASTC_RGBA_10x10`, `ASTC_RGBA_12x12`, `ASTC_HDR_5x5`, `ASTC_HDR_6x6`, `ASTC_HDR_8x8`, `ASTC_HDR_10x10` | WASM `decode_astc` | fixture data of the `ASTC_RGB_*` format of the same block size |
+| Crunch | `DXT1Crunched`, `DXT5Crunched`, `ETC_RGB4Crunched`, `ETC2_RGBA8Crunched` | WASM `unpack_unity_crunch` (or `unpack_crunch`, see below), then the block decoder | editor-built (6000.3; Unity's crunch, 2017.3+) |
+
+Every other `TextureFormat` is refused (see [Not supported](#not-supported)).
+
+Details worth knowing:
+
+- Output is 8 bits per channel. Half and float channels are scaled by 255 and clamped, so HDR
+  values saturate.
+- Unsigned 16-bit channels (`R16`, `RG32`, `RGB48`, `RGBA64`) use AssetStudio's rounded
+  `(component * 255 + 32895) >> 16` conversion.
+- Channels a format lacks are 0 (color) or 255 (alpha). `Alpha8` is white with that alpha.
+- `DXT1Crunched` / `DXT5Crunched` from before Unity 2017.3 use the original crunch format. It is
+  unpacked too (with `unpack_crunch`).
+- `DXT5` color is decoded in 4-color mode, as the S3TC spec says. On blocks with `c0 <= c1`
+  that differs from AssetStudio (see [Not supported](#not-supported)).
+
+### Platforms
+
+- **Switch:** swizzled textures are deswizzled first (as UnityPy does; AssetStudio has no Switch
+  support). Formats with no known Switch layout, such as Crunch, ETC, PVRTC and ASTC HDR, are
+  refused.
+- **Xbox 360:** the byte order of `ARGB4444`, `RGB565`, `DXT1` and `DXT5` is swapped back.
+- **PS4, PS5:** refused. Their textures can be tiled, and no reference implementation detiles them
+  yet ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)).
+- **Every other build target** (Windows, macOS, Linux, Android, iOS, WebGL, ...): the image data
+  is decoded as stored.
+
+## Not supported
+
+Each of these throws `UnsupportedError`, whose `kind` and `found` say what was refused:
+
+- Formats: `DXT3`, `ARGBFloat`, `RGBFloat`, `BGR24`, and signed plain formats (values 75–82).
+  `YUY2` of odd width. (A swizzled Switch texture stores `BGR24` as `BGRA32`; that one decodes.)
+- `R16_Alt`: this fork-only enum member conflicts with Unity's `ASTC_HDR_4x4` value 66.
+  Unity's format numbers are preserved; use `R16` (9) for unsigned single-channel 16-bit data.
+- Textures built for PS4 or PS5.
+- Sprites whose alpha texture (ETC1 split alpha) is not the size of their texture.
+- With `tightMesh`, a sprite mesh whose positions are not 32-bit floats, or a 6000.6 packed
+  sprite's whose indices are not 16-bit.
+- A `Sprite` object that points at a loaded Unity 6000.6 `SpriteAtlas`. (Packed sprites of a
+  6000.6 bundle are not `Sprite` objects at all; `packedSprites` lists them.)
+
+Not provided at all:
+
+- Mip levels other than the first.
+- The `Cubemap`, `Texture2DArray` and `Texture3D` classes.
+- JPEG encoding, and compressed PNG (`encodePng` stores the pixels uncompressed).
+
+Known differences and open questions:
+
+- `DXT5` blocks with `c0 <= c1` decode differently from AssetStudio, because this package
+  decodes `DXT5` color in 4-color mode, as the S3TC spec says
+  ([#137](https://github.com/fatal10110/unity-asset-reader/issues/137)).
+- `Rotate90`-packed sprites are turned the way AssetStudio turns them, which no test bundle has
+  confirmed against Unity's packer yet
+  ([#160](https://github.com/fatal10110/unity-asset-reader/issues/160)).
+
+## How it is tested
+
+- **Formats:** every format in the [Texture formats](#texture-formats) table is checked against
+  pixels from UnityPy (the test oracle) or, where UnityPy cannot decode it, against
+  AssetStudio's decoder. `R8` uses UnityPy's golden. The other four newer plain formats (`RG16`,
+  `RG32`, `RGB48`, `RGBA64`) use the executed AssetStudio cross-checks where UnityPy fails or
+  disagrees.
+- **Old Crunch:** `DXT1Crunched` / `DXT5Crunched` from before Unity 2017.3 are checked against
+  AssetStudio's decoder only.
+- **Sprites:** built by Unity 2019.4.41f2, 6000.3.25f1 and 6000.6.4f1. The
+  [Sprite support](#sprite-support) table says which fixture covers which case.
+- **Consoles:** no fixture editor here has the Switch or Xbox 360 module, so those two are
+  tested on generated data checked against UnityPy, not on real console builds.
+- **Node.js:** CI tests on 20.19.0 and 22.12.0 (see [Requirements](#requirements)).
+
+## Requirements
+
+- **Browsers:** WebAssembly and ES2020. No COOP/COEP headers, no `SharedArrayBuffer`.
+- **Node.js:** 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and
+  `require`; CI tests on 20.19.0 and 22.12.0. `initTexture()` loads
+  `texture2ddecoder-wasm`'s ES-module glue code, which older Node.js versions refuse
+  ([#172](https://github.com/fatal10110/unity-asset-reader/issues/172)).
+- Node.js 22 prints a `MODULE_TYPELESS_PACKAGE_JSON` warning while loading that glue code. The
+  warning is harmless.
 
 ## Acknowledgements
 

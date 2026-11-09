@@ -1,11 +1,21 @@
 # unity-asset-reader-shader
 
-Shader inspection text for [`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md):
-`shaderToText()` turns a Unity `Shader` into the text
-[AssetStudio](https://github.com/Razviar/assetstudio) exports for it, byte for byte: the ShaderLab
-as Unity parsed it, with each pass's compiled programs in it. OpenGL and Metal programs are their
-stored source; Vulkan programs are SPIR-V disassembly. Pure TypeScript and synchronous: it runs
-anywhere `unity-asset-reader` does, browsers, Workers, Node.js.
+See what is inside a Unity `Shader`. `shaderToText()` turns a shader into readable text: the text
+[AssetStudio](https://github.com/Razviar/assetstudio) exports for it, byte for byte. It is an
+add-on for
+[`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md),
+in pure TypeScript and synchronous. It runs anywhere `unity-asset-reader` does: browsers,
+Workers, Node.js.
+
+A built Unity shader holds two things, and the text shows both:
+
+- **ShaderLab**, Unity's shader description language, as Unity parsed it: properties, sub-shaders,
+  passes and their render state.
+- **Compiled programs**, one per graphics API and variant, inside each pass:
+  - OpenGL and Metal programs are their stored source.
+  - Vulkan programs are stored as SPIR-V, the binary shader format Vulkan runs, compressed with
+    SMOL-V, a smaller encoding of SPIR-V. This package decodes the SMOL-V and prints the SPIR-V
+    as readable assembly ("disassembly").
 
 ## Install
 
@@ -13,8 +23,8 @@ anywhere `unity-asset-reader` does, browsers, Workers, Node.js.
 npm install unity-asset-reader unity-asset-reader-shader
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.3.0`, the first core with `formatSingle`), so your
-app has exactly one copy of the parser.
+`unity-asset-reader` is a peer dependency (`^1.3.0` or later), so your app has exactly one copy
+of the parser.
 
 ## Usage
 
@@ -33,48 +43,81 @@ for (const asset of env.assets("Shader")) {
 `shaderToText` takes what `obj.read()` gives for a `Shader` (Unity's field names), not
 `asset.data`.
 
+## Common tasks
+
+### Save a .shader file in Node.js
+
+`writeFileSync` writes a string as UTF-8, which gives the file AssetStudio writes. Shader names
+can contain `/`, so replace it for the file name.
+
+```js
+import { writeFileSync } from "node:fs";
+
+const text = shaderToText(asset.reader.read());
+writeFileSync(`${asset.name.replaceAll("/", "_")}.shader`, text);
+```
+
+### Skip shaders that cannot be converted
+
+Direct3D programs, among others, throw `UnsupportedError` (see [Limitations](#limitations)).
+Catch it to keep going through a bundle.
+
+```js
+import { UnsupportedError } from "unity-asset-reader";
+
+for (const asset of env.assets("Shader")) {
+  try {
+    console.log(shaderToText(asset.reader.read()));
+  } catch (error) {
+    if (!(error instanceof UnsupportedError)) throw error;
+    console.warn(`${asset.name}: ${error.message}`);
+  }
+}
+```
+
 ## What the text holds
 
-As AssetStudio's `ShaderConverter.Convert()` writes it:
+It is what AssetStudio's `ShaderConverter.Convert()` writes.
 
-- A banner saying the text is not a valid shader file, then `Shader "<name>" {`, the `Properties`
-  block, each `SubShader` with its tags, LOD and passes, `Fallback` and `CustomEditor`.
-- Per pass: its name, tags and the render state that differs from ShaderLab's defaults (blend,
-  color mask, depth, culling, offset, stencil, fog), then a `Program` block per stage (`vp`, `fp`,
-  `gp`, `hp`, `dp`, `rtp`) with a `SubProgram "<platform> [hw_tierNN] "` per variant, its
-  keywords, and the program in quotes after a `// hash:` line. A shader built by Unity 2021.3.10,
-  2022.1.13, 2022.2 or later (every Unity 6 build) lists its variants in `m_PlayerSubPrograms`,
-  which AssetStudio's converter does not read: each distinct blob index and program type there
-  gets one `SubProgram "<platform> "`, without `hw_tierNN`, as the composite oracle of the
-  plan's section 5 (revision 2026-11-08a) writes it; their parameters are not written:
-  - OpenGL, OpenGL ES and OpenGL Core (`openGL`, `gles`, `gles3`, `glcore`): the GLSL source.
-  - Metal (`metal`): the Metal source.
-  - Vulkan (`vulkan`): each stage decoded from SMOL-V and disassembled to SPIR-V assembly, as
-    AssetStudio's CSspv disassembler prints it. Where AssetStudio cannot decode or disassemble a
-    program, the text has the `// disassembly error <message>` line AssetStudio writes. Unity
-    2020.3 stores SMOL-V in a newer encoding (header version `0x01010000`) than AssetStudio's
-    decoder reads; it is decoded as aras-p/smol-v decodes it, and disassembled as AssetStudio
-    disassembles the SPIR-V, so Unity 2019.4 and 2020.3 Vulkan programs are both disassembled.
-  - Console programs: their bytes as UTF-8.
+**Outline:**
+
+- A banner saying the text is not a valid shader file.
+- `Shader "<name>" {`, the `Properties` block, each `SubShader` with its tags, LOD and passes,
+  `Fallback` and `CustomEditor`.
 - `UsePass "<name>"` and `GrabPass { "<texture>" }` passes.
-- Lines end with `\n`; there is no final newline. Floats are written as .NET writes a `float`
-  under the en-US culture (`0.5`, `1E-05`).
 
-## Errors
+**Each pass:**
 
-- `UnsupportedError`:
-  - a Direct3D program (DX9, DX10 level 9, DX11): AssetStudio turns them into text with
-    Windows' D3DCompiler or HLSLDecompiler, which do not run here;
-  - a property of type `Int` (5, Unity 2021.1's `Integer`), on which AssetStudio fails;
-  - a platform AssetStudio does not know (NaCl, Flash, PSM, or a number it has no name for).
-- `CorruptError` when a platform's part of the blob does not decompress to its size, or a
-  program's entry or bytes run past it.
-- Anything `obj.read()` throws for the shader, before `shaderToText` is called.
+- Its name and tags.
+- The render state that differs from ShaderLab's defaults: blend, color mask, depth, culling,
+  offset, stencil, fog.
+- A `Program` block per stage (`vp`, `fp`, `gp`, `hp`, `dp`, `rtp`), with a
+  `SubProgram "<platform> [hw_tierNN] "` per variant, its keywords, and the program in quotes
+  after a `// hash:` line.
 
-## Requirements
+**Newer shaders.** A shader built by Unity 2021.3.10, 2022.1.13, 2022.2 or later (every Unity 6
+build) lists its variants in `m_PlayerSubPrograms`, which AssetStudio's converter does not read.
+Here, each distinct blob index and program type there gets one `SubProgram "<platform> "`,
+without `hw_tierNN`. Their parameters are not written.
 
-Node.js 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), the same as `unity-asset-reader`,
-or any browser `unity-asset-reader` runs in.
+**The program, by platform:**
+
+- OpenGL, OpenGL ES and OpenGL Core (`openGL`, `gles`, `gles3`, `glcore`): the GLSL source.
+- Metal (`metal`): the Metal source.
+- Vulkan (`vulkan`): each stage decoded from SMOL-V and disassembled to SPIR-V assembly, as
+  AssetStudio's CSspv disassembler prints it.
+  - Where AssetStudio cannot decode or disassemble a program, the text has the
+    `// disassembly error <message>` line AssetStudio writes.
+  - Unity 2020.3 stores SMOL-V in a newer encoding (header version `0x01010000`) than
+    AssetStudio's decoder reads. It is decoded as aras-p/smol-v decodes it, and disassembled as
+    AssetStudio disassembles the SPIR-V. So Unity 2019.4 and 2020.3 Vulkan programs are both
+    disassembled.
+- Console programs: their bytes as UTF-8.
+
+**Formatting:**
+
+- Lines end with `\n`; there is no final newline.
+- Floats are written as .NET writes a `float` under the en-US culture (`0.5`, `1E-05`).
 
 ## API reference
 
@@ -84,20 +127,53 @@ or any browser `unity-asset-reader` runs in.
 
 Full JSDoc is in the bundled `index.d.ts`.
 
+## Limitations
+
+`shaderToText` throws `UnsupportedError` for:
+
+- A Direct3D program (DX9, DX10 level 9, DX11). AssetStudio turns them into text with Windows'
+  D3DCompiler or HLSLDecompiler, which do not run here.
+- A property of type `Int` (5, Unity 2021.1's `Integer`), on which AssetStudio fails.
+- A platform AssetStudio does not know (NaCl, Flash, PSM, or a number it has no name for).
+
+The parameters of `m_PlayerSubPrograms` variants are not written (see
+[What the text holds](#what-the-text-holds)).
+
+## Errors
+
+- `UnsupportedError`: the cases in [Limitations](#limitations).
+- `CorruptError` when a platform's part of the blob does not decompress to its size, or a
+  program's entry or bytes run past it.
+- Anything `obj.read()` throws for the shader, before `shaderToText` is called.
+
+## How it is tested
+
+- The output is tested against AssetStudio's own `.shader` files.
+- Unity 6 shaders, several keyword variants per stage included, are tested against AssetStudio's
+  converter text, extended to read the variants of `m_PlayerSubPrograms` as
+  [described above](#what-the-text-holds).
+- The decoder of SMOL-V's newer encoding is tested against goldens from smol-v's
+  `source/smolv.cpp`.
+
+## Requirements
+
+Node.js 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), the same as `unity-asset-reader`,
+or any browser `unity-asset-reader` runs in.
+
 ## Acknowledgements
 
 - [AssetStudio](https://github.com/Razviar/assetstudio) (MIT, © Perfare, RazTools, Razviar):
   `shaderToText()` is hand-ported from its `AssetStudio.Utility/ShaderConverter.cs` and
   `SpirVShaderConverter.cs`, and the SMOL-V decoder from its `AssetStudio.Utility/Smolv/`; the
   output is tested against AssetStudio's own `.shader` files, and Unity 6 shaders, several
-  keyword variants per stage included, against its converter's text in the composite oracle.
+  keyword variants per stage included, against its converter's text, extended for Unity 6 variants.
 - [CSspv](https://github.com/Anteru/csspv) (BSD-2-Clause, © 2017 Matthäus G. Chajdas): the SPIR-V
   disassembler is hand-ported from it, as AssetStudio vendors it in `AssetStudio.Utility/CSspv/`.
 - [smol-v](https://github.com/aras-p/smol-v) (MIT or public domain, © 2016-2018 Aras Pranckevicius): the
   SMOL-V format AssetStudio's decoder reads; the decoder of its newer encoding (Unity 2020.3 and
   later) is hand-ported from smol-v's `source/smolv.cpp`, which is also the oracle of its goldens.
-- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): the oracle that names the
-  inputs of the test goldens.
+- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): identifies the objects the
+  tests check.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
 and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).

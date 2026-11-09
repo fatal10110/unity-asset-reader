@@ -4,13 +4,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**Zero-native-deps WebAssembly decoder for BC / ETC / ASTC / PVRTC / Crunch** (Unity assets included). Runs in the browser and Node.js — no native toolchain.
+Decode compressed GPU textures (BC, ETC, EAC, ASTC, PVRTC, ATC and Crunch) to plain pixels in
+JavaScript. It is a WebAssembly build, so it runs in the browser and in Node.js with no native
+toolchain. Use it for Unity textures, game assets, or any raw block-compressed data.
 
 ```bash
 npm install texture2ddecoder-wasm
 ```
 
-Try a complete Node.js example: save this as `decode.mjs` and run `node decode.mjs`.
+Try it now. Save this as `decode.mjs` and run `node decode.mjs`.
 
 ```javascript
 import { decode_bc1 } from "texture2ddecoder-wasm";
@@ -25,18 +27,24 @@ console.log([...decoded.slice(0, 4)]); // [0, 0, 255, 255] — BGRA, not RGBA
 
 **Live demo:** [fatal10110.github.io/unity-asset-reader/decoder.html](https://fatal10110.github.io/unity-asset-reader/decoder.html)
 
-For real assets, supply compressed texture payloads and the matching dimensions/format. Browser initialization and WASM asset paths are covered in the [Quick Start Guide](QUICK_START.md).
+For real assets, pass the compressed texture payload with its width, height and format. Browser
+setup (where the WASM files live) is in the [Quick Start Guide](QUICK_START.md).
 
-Same codecs as [Perfare's Texture2DDecoder](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative) (AssetStudio) and the formats covered by [K0lb3/texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (Python + native) — this package ships them as WASM so you can decode in **browser + Node** without native deps.
+The codecs are the same as in
+[Perfare's Texture2DDecoder](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoderNative)
+(AssetStudio) and cover the formats of
+[K0lb3/texture2ddecoder](https://github.com/K0lb3/texture2ddecoder) (Python + native). This
+package ships them as WASM, so you can decode in the browser and in Node.js without native
+dependencies.
 
 ## Features
 
-- **Zero native dependencies** - Pure WebAssembly, works on any platform
-- **Browser and Node.js compatible** - Works in both browser and Node.js environments
-- **Comprehensive format support** - Decode BC1-7, ETC1/2, PVRTC, ASTC, ATC, EAC, and Crunch formats
-- **TypeScript support** - Full type definitions included
-- **Unity Asset support** - Decode textures from Unity game assets
-- **WebAssembly codecs** - Runs the compiled Texture2DDecoder codecs in JavaScript environments
+- **No native dependencies.** Pure WebAssembly, works on any platform.
+- **Browser and Node.js.** The same API in both.
+- **Many formats.** BC1-7, ETC1/2, PVRTC, ASTC, ATC, EAC and Crunch.
+- **TypeScript types** are included.
+- **Unity textures.** Decodes the payloads of Unity `Texture2D` assets.
+- **Compiled codecs.** Runs the compiled Texture2DDecoder codecs in JavaScript.
 
 ## Supported Formats
 
@@ -79,14 +87,16 @@ or
 yarn add texture2ddecoder-wasm
 ```
 
-> 🚀 **New to this library?** Check out the [Quick Start Guide](QUICK_START.md) for the fastest way to get running!  
-> 📖 **Need bundler setup?** See the [Complete Bundler Guide](BUNDLER_GUIDE.md) for detailed configurations.
+- New to this library? The [Quick Start Guide](QUICK_START.md) is the fastest way to get running.
+- Need bundler setup? See the [Complete Bundler Guide](BUNDLER_GUIDE.md).
 
 ## Usage
 
-> 💡 **See the [examples/](examples/) directory for complete working configurations for popular frameworks!**
+Complete working setups for popular frameworks are in the [examples/](examples/) directory.
 
 ### Node.js Usage
+
+In Node.js the WASM module loads on first use, so you can call a decode function directly.
 
 ```typescript
 import { decode_astc } from "texture2ddecoder-wasm";
@@ -112,16 +122,19 @@ if (decoded) {
 
 ### Browser Usage with Modern Bundlers (Webpack, Vite, etc.)
 
-For modern frameworks (React, Vue, Svelte, Next.js, etc.), you can use CDN for quick setup or local files for production:
+In a browser the library needs to know where the WASM files are. Call `initialize` once with
+`wasmPath`. Use the CDN for a quick start or local files for production.
 
 #### Quick Start - Using CDN (Recommended for Development)
+
+Point `wasmPath` at jsDelivr. There is nothing to copy.
 
 ```typescript
 import { initialize, decode_bc1 } from "texture2ddecoder-wasm";
 
 // Initialize with CDN
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Load and decode texture
@@ -130,16 +143,16 @@ const data = new Uint8Array(await response.arrayBuffer());
 const decoded = await decode_bc1(data, 512, 512);
 ```
 
-**Benefits:**
+Why use it:
 
-- ✅ No manual file copying needed
-- ✅ Fastest setup time
-- ✅ Cached by CDN globally
-- ✅ Perfect for prototyping and development
+- No manual file copying.
+- Fastest setup.
+- The CDN caches the files globally.
+- Good for prototyping and development.
 
 #### Production Setup - Using Local Files
 
-For production, copy WASM files to your public directory:
+For production, copy the WASM files into your public directory, then point `wasmPath` at them:
 
 ```bash
 npx texture2ddecoder-copy-wasm public/wasm
@@ -154,13 +167,13 @@ await initialize({ wasmPath: "/wasm" });
 const decoded = await decode_bc1(data, 512, 512);
 ```
 
-**Benefits:**
+Why use it:
 
-- ✅ Faster loading (same domain)
-- ✅ Works offline
-- ✅ No external dependencies
+- Faster loading (same domain).
+- Works offline.
+- No external dependencies.
 
-**Framework-Specific Examples:**
+**Framework-specific examples** (the same two calls in each; choose by environment):
 
 **Vite + React:**
 
@@ -169,7 +182,7 @@ import { initialize, decode_bc1 } from "texture2ddecoder-wasm";
 
 // Development: Use CDN
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Production: Use local files (copy with: npx texture2ddecoder-copy-wasm public/wasm)
@@ -184,7 +197,7 @@ import { initialize, decode_bc1 } from "texture2ddecoder-wasm";
 
 // Development: Use CDN
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Production: Use local files (copy with: npx texture2ddecoder-copy-wasm public/wasm)
@@ -198,7 +211,7 @@ import { initialize, decode_bc1 } from "texture2ddecoder-wasm";
 
 // Development: Use CDN
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Production: Use local files (copy with: npx texture2ddecoder-copy-wasm public/wasm)
@@ -207,7 +220,7 @@ await initialize({ wasmPath: "/wasm" });
 
 ### CDN Usage (jsDelivr)
 
-You can use the library directly from jsDelivr CDN without any installation:
+You can use the library from the jsDelivr CDN with no installation and no build step:
 
 ```html
 <!DOCTYPE html>
@@ -224,12 +237,12 @@ You can use the library directly from jsDelivr CDN without any installation:
       import {
         initialize,
         decode_bc1,
-      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/dist/index.mjs";
+      } from "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/dist/index.mjs";
 
       // Initialize with CDN path for WASM files
       await initialize({
         wasmPath:
-          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+          "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
       });
 
       document.getElementById("status").textContent = "✓ Ready to decode!";
@@ -241,18 +254,21 @@ You can use the library directly from jsDelivr CDN without any installation:
 </html>
 ```
 
-**Benefits:**
+Why use it:
 
-- ✅ Zero build setup
-- ✅ No npm install needed
-- ✅ Cached by jsDelivr globally
-- ✅ Perfect for quick prototypes
+- No build setup.
+- No `npm install`.
+- jsDelivr caches the files globally.
+- Good for quick prototypes.
 
-**Production tip:** Pin to a specific version (e.g., `@1.2.1`) instead of `@latest` for stability.
+**Production tip:** Pin a specific version (for example `@1.2.6`) instead of `@latest`, so an
+update cannot change your behavior.
 
-**Complete working example:** See [examples/cdn-example.html](examples/cdn-example.html) for a full interactive demo.
+For a full interactive demo, open [examples/cdn-example.html](examples/cdn-example.html).
 
 ### Manual Initialization
+
+All the ways to call `initialize`, from Node.js to a custom `locateFile`:
 
 ```typescript
 import { initialize, decode_bc3 } from "texture2ddecoder-wasm";
@@ -265,7 +281,7 @@ await initialize({ wasmPath: "/wasm" });
 
 // Browser with CDN - provide full CDN URL
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // Browser with custom locateFile for advanced use cases
@@ -280,9 +296,11 @@ const result = await decode_bc3(data, width, height);
 
 ## API Reference
 
-All decode functions accept `Uint8Array | ArrayBuffer` as input and return a `Promise<Uint8Array | null>`. The returned Uint8Array contains BGRA pixel data (4 bytes per pixel).
+Every decode function takes `Uint8Array | ArrayBuffer` and returns
+`Promise<Uint8Array | null>`. The result holds BGRA pixel data, 4 bytes per pixel.
 
-**Note:** In Node.js, you can still pass `Buffer` objects (which extend `Uint8Array`) and receive `Uint8Array` results that are compatible with Buffer operations.
+In Node.js you can pass `Buffer` objects (they extend `Uint8Array`). The `Uint8Array` you get back
+works with Buffer operations.
 
 ### BC Decoders
 
@@ -383,7 +401,8 @@ Unpacks Unity Crunch compressed data.
 
 #### `initialize(options?: { wasmPath?: string; locateFile?: (path: string, prefix: string) => string }): Promise<void>`
 
-Manually initialize the WebAssembly module. This is called automatically on first use of any decode function in Node.js, but must be called explicitly in browser environments, including Web Workers.
+Loads the WebAssembly module. In Node.js the first decode call does this for you. In a browser,
+including a Web Worker, you must call it yourself.
 
 **Parameters:**
 
@@ -404,7 +423,7 @@ await initialize({ wasmPath: "/wasm" });
 
 // With CDN
 await initialize({
-  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.1/wasm",
+  wasmPath: "https://cdn.jsdelivr.net/npm/texture2ddecoder-wasm@1.2.6/wasm",
 });
 
 // With custom locateFile for advanced scenarios
@@ -414,16 +433,16 @@ await initialize({
 });
 ```
 
-**Web Workers:** the same `initialize({ wasmPath })` call works inside a Web Worker (classic or module), which has no `window`. Decode large textures there to keep the page responsive.
+**Web Workers:** the same `initialize({ wasmPath })` call works inside a Web Worker (classic or
+module), which has no `window`. Decode large textures there to keep the page responsive.
 
-**Framework Integration:**
-This approach works seamlessly with:
+**Framework integration.** This approach works with:
 
-- ✅ React / Next.js
-- ✅ Vue / Nuxt
-- ✅ Svelte / SvelteKit
-- ✅ Webpack 5 / Vite / Rollup
-- ✅ Server-Side Rendering (SSR) - Call `initialize()` in client-side code only
+- React / Next.js
+- Vue / Nuxt
+- Svelte / SvelteKit
+- Webpack 5 / Vite / Rollup
+- Server-side rendering (SSR): call `initialize()` in client-side code only
 
 ## Building from Source
 
@@ -432,7 +451,7 @@ This approach works seamlessly with:
 - **Node.js** ≥14.0.0
 - **Docker** - Required for building the WebAssembly module (no local Emscripten installation needed)
 
-Install Docker from: https://www.docker.com/get-started
+Install Docker from https://www.docker.com/get-started.
 
 ### Build Steps
 
@@ -466,14 +485,14 @@ npm test
 
 ### About the Docker Build
 
-The WebAssembly build uses Docker with the official Emscripten SDK image, which means:
+The WebAssembly build runs in the official Emscripten SDK Docker image. That gives you:
 
-- No need to install Emscripten locally
-- Consistent build environment across all platforms
-- Automatic compiler toolchain setup
-- Works on Windows, macOS, and Linux
+- No local Emscripten install.
+- The same build environment on every platform.
+- Automatic compiler toolchain setup.
+- Support for Windows, macOS and Linux.
 
-The build script ([scripts/build-wasm.sh](scripts/build-wasm.sh)) automatically:
+The build script ([scripts/build-wasm.sh](scripts/build-wasm.sh)):
 
 1. Checks if Docker is installed
 2. Pulls the pinned Emscripten SDK image (`emscripten/emsdk:4.0.7`)
@@ -511,7 +530,8 @@ The texture compression codecs were derived from the following sources:
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes.
+Contributions are welcome. Read the [Contributing Guide](https://github.com/fatal10110/unity-asset-reader/blob/main/CONTRIBUTING.md) for the development process, how to propose fixes and improvements, and how to build and test
+your changes.
 
 ### Quick Start for Contributors
 
@@ -523,7 +543,7 @@ Contributions are welcome! Please read our [Contributing Guide](https://github.c
 6. Run tests: `npm test`
 7. Create a branch, make your changes, and submit a Pull Request
 
-See [CONTRIBUTING.md](https://github.com/fatal10110/unity-asset-reader/blob/main/CONTRIBUTING.md) for detailed guidelines.
+Details are in [CONTRIBUTING.md](https://github.com/fatal10110/unity-asset-reader/blob/main/CONTRIBUTING.md).
 
 ## Platform Support
 
@@ -533,7 +553,7 @@ See [CONTRIBUTING.md](https://github.com/fatal10110/unity-asset-reader/blob/main
 
 ### Browser Compatibility
 
-The package works in all modern browsers that support:
+The package works in modern browsers that support:
 
 - WebAssembly
 - ES6 Modules (or use a bundler like Webpack/Vite)
@@ -548,4 +568,5 @@ Tested and working in:
 
 ## Examples
 
-See [browser-example.html](browser-example.html) for a complete browser usage example.
+For a complete browser example, see [examples/cdn-example.html](examples/cdn-example.html). More
+setups (Node.js CommonJS and ESM, Vite, React, Next.js) are in [examples/](examples/).

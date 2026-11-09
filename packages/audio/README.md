@@ -1,10 +1,17 @@
 # unity-asset-reader-audio
 
-AudioClip to WAV and Ogg for [`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md).
-From Unity 5.0 on, an `AudioClip`'s sound is an FMOD sound bank (FSB5). This package reads the
-bank and writes a WAV file for the PCM and ADPCM codecs, and an Ogg Vorbis file for Vorbis when
-you supply its setup header ([Vorbis to Ogg](#vorbis-to-ogg)), in TypeScript, synchronously, in
-browsers and Node.js. No WASM, no FMOD.
+Get the sound out of a Unity `AudioClip` as a WAV file you can play or save, or as an Ogg Vorbis
+file for clips compressed with Vorbis. It is an add-on for
+[`unity-asset-reader`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md),
+written in TypeScript. It runs synchronously, in browsers and Node.js, with no WASM and no FMOD.
+
+From Unity 5.0 on, an `AudioClip` stores its sound as an FMOD sound bank in the FSB5 format.
+FMOD is the audio engine Unity uses, and FSB5 is its container: a header followed by one or more
+encoded sounds ("samples"). This package reads the bank and writes:
+
+- a WAV file for the PCM and ADPCM codecs;
+- an Ogg Vorbis file for Vorbis, when you supply its setup header (see
+  [Vorbis to Ogg](#vorbis-to-ogg)).
 
 ## Install
 
@@ -26,43 +33,75 @@ for (const clip of env.assets("AudioClip")) {
 }
 ```
 
-In a browser, `new Blob([wav], { type: "audio/wav" })` plays in an `<audio>` element; in Node.js,
+In a browser, `new Blob([wav], { type: "audio/wav" })` plays in an `<audio>` element. In Node.js,
 write it to a file. `readFsb5()` gives the bank's codec and samples (rate, channels, frame count,
 bytes) without converting anything.
 
-## What it converts
+## Common tasks
 
-The WAV is the one AssetStudio's `AudioClipConverter.ConvertToWav()` writes: the bank's first
-sample, a 44-byte header, then the sample frames, interleaved, little-endian.
+### Play a clip in a browser
 
-| FSB5 codec | WAV |
-|---|---|
-| `PCM16` | 16-bit, the bytes as stored (Unity's PCM compression format) |
-| `PCM8`, `PCM32` | 8-bit and 32-bit, the bytes as stored, unconverted, as Fmod5Sharp and python-fsb5 copy them |
-| `IMAADPCM` | 16-bit, decoded |
-| `FADPCM` | 16-bit, decoded |
-| `GCADPCM` (mono) | 16-bit, decoded |
+Wrap the WAV bytes in a `Blob` and give its URL to an audio element.
 
-Tested on editor-built bundles (with and without type trees, and version-stripped), which convert
-to AssetStudio's WAV byte for byte: the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and
-**6000.3.25f1** bundles, and a mono and a stereo IMAADPCM clip of **2019.4.41f2**, **2020.3.30f1**
-and **6000.3.26f1** bundles. Also on lz4 bundles of the same three editors, the FSB5 header paths
-Unity writes for other clips: a 37800 Hz clip (frequency chunk), 4-channel clips (channels chunk)
-and 5.1 clips (six channels in the header), PCM16 and IMAADPCM. Unity writes whole IMAADPCM frames
-only, so a partial last frame is tested on hand-built banks, as are FADPCM, GCADPCM, `PCM8` and
-`PCM32`: Unity writes `PCM16` for 8-bit, 24-bit, 32-bit integer and 32-bit float source WAVs alike
-(checked on the same three editors).
+```js
+const wav = fsb5ToWav(clip.data.audioData);
+const url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
+new Audio(url).play();
+```
+
+### Save a clip as a .wav file in Node.js
+
+```js
+import { writeFileSync } from "node:fs";
+
+writeFileSync(`${clip.name}.wav`, fsb5ToWav(clip.data.audioData));
+```
+
+### Check the codec before converting
+
+`readFsb5()` parses the bank without decoding it. Use it to see which function to call.
+
+```js
+import { Fsb5Codec, readFsb5 } from "unity-asset-reader-audio";
+
+const bank = readFsb5(clip.data.audioData);
+const [sample] = bank.samples;
+console.log(bank.codec, sample.frequency, sample.channels, sample.sampleCount);
+if (bank.codec === Fsb5Codec.VORBIS) {
+  // fsb5ToOgg() converts it, given its setup header: see "Vorbis to Ogg"
+}
+```
+
+### Convert Vorbis clips to Ogg
+
+Vorbis clips need a table of setup headers that you supply, since this package ships none. With
+that table as `headers`:
+
+```js
+const ogg = fsb5ToOgg(clip.data.audioData, headers);
+```
+
+See [Vorbis to Ogg](#vorbis-to-ogg) for where the table comes from and how to build it.
 
 ## Vorbis to Ogg
 
-Unity's default compression format, Vorbis, is stored by FMOD without the three Vorbis headers.
-`fsb5ToOgg(bytes, headers)` rebuilds them, as Fmod5Sharp's `FmodVorbisRebuilder` does, and
-returns an Ogg Vorbis file (a `Uint8Array`) of the bank's first sample. Two of the headers are
-rebuilt from the sample. The third, the setup header, is one of a fixed set FMOD's encoder uses,
-named by a CRC-32 in the sample (`readFsb5(bytes).samples[0].vorbisCrc`). **No table of them
-ships with this package**: they are bytes of FMOD's library, which no licence lets us
-redistribute. You supply the table, as a `Map` from the CRC to `{ headerBytes, seekBit }`:
-`headerBytes` the whole setup header packet, `seekBit` the bit offset of its mode list.
+Vorbis is Unity's default compression format. A normal Vorbis stream starts with three header
+packets: an identification header (rate, channels, block sizes), a comment header (tags) and a
+setup header (the codebooks a decoder needs). FMOD stores Vorbis without these three headers.
+
+`fsb5ToOgg(bytes, headers)` rebuilds them, as Fmod5Sharp's `FmodVorbisRebuilder` does. It returns
+an Ogg Vorbis file (a `Uint8Array`) of the bank's first sample.
+
+- Two of the headers are rebuilt from the sample.
+- The third, the setup header, is one of a fixed set FMOD's encoder uses. The sample names it by a
+  CRC-32 (`readFsb5(bytes).samples[0].vorbisCrc`).
+
+**No table of setup headers ships with this package.** They are bytes of FMOD's library, which no
+licence lets us redistribute. You supply the table, as a `Map` from the CRC to
+`{ headerBytes, seekBit }`:
+
+- `headerBytes`: the whole setup header packet;
+- `seekBit`: the bit offset of its mode list.
 
 That is the shape of Fmod5Sharp's `Fmod5Sharp/Util/vorbis_headers_converted.json` (CRCs in
 decimal, `headerBytes` in base64), which you obtain yourself. In Node.js:
@@ -81,43 +120,33 @@ const headers = new Map(
 const ogg = fsb5ToOgg(clip.data.audioData, headers); // a Uint8Array holding a .ogg file
 ```
 
-The package itself parses no JSON and decodes no base64; in a browser, build the same `Map` with
-`Uint8Array.from(atob(headerBytes), (c) => c.charCodeAt(0))`. Without `headers`, or when they
-lack the sample's CRC, `fsb5ToOgg()` throws `UnsupportedError` naming the CRC (`0x8D00698D` for
-Unity's mono 22050 Hz clips, for example).
+The package itself parses no JSON and decodes no base64. In a browser, build the same `Map` with
+`Uint8Array.from(atob(headerBytes), (c) => c.charCodeAt(0))`.
 
-The Ogg has an identification header with FMOD's block sizes (256 and 2048), a comment header
-with only the vendor string `unity-asset-reader-audio`, the setup header, and the sample's
-packets, ending at its frame count. Tested locally only, since the table cannot be in the
-repository or CI: the Vorbis clip of the 2019.4.41f2, 2020.3.30f1 and 6000.3.25f1 bundles
-decodes (ffmpeg, with CRC checks) to its exact frame count, within 2 LSB of AssetStudio's WAV.
+Without `headers`, or when they lack the sample's CRC, `fsb5ToOgg()` throws `UnsupportedError`
+naming the CRC (`0x8D00698D` for Unity's mono 22050 Hz clips, for example).
 
-## Not supported
+The Ogg file holds:
 
-Each of these throws `UnsupportedError`, naming what it found:
+- an identification header with FMOD's block sizes (256 and 2048);
+- a comment header with only the vendor string `unity-asset-reader-audio`;
+- the setup header;
+- the sample's packets, ending at its frame count.
 
-- In `fsb5ToWav()`, Vorbis (`fsb5ToOgg()` converts it), and in both, every other codec (MPEG,
-  ATRAC9, XMA, VAG, HEVAG, Opus, CELT, XWMA, `PCM24`, `PCMFLOAT`).
-- In `fsb5ToOgg()`, a Vorbis sample whose setup header the caller did not supply, or with no
-  `VORBISDATA` chunk.
-- GCADPCM of more than one channel.
-- An FSB5 header version above 1; a frequency id above 10 with no frequency chunk.
-- Sound that is not an FSB5 bank: an `AudioClip` from before Unity 5.0 holds its file (Ogg,
-  MP3, WAV, ...) as it is, in `audioData`.
+## What it converts
 
-## Errors
+The WAV is the one AssetStudio's `AudioClipConverter.ConvertToWav()` writes: the bank's first
+sample, a 44-byte header, then the sample frames, interleaved, little-endian.
 
-- `UnsupportedError`: the cases above.
-- `CorruptError`: the bank is truncated, a sample header or chunk does not fit, a sample's data
-  is shorter than its frame count needs, the bank has no sample, a GCADPCM sample has no
-  coefficients or a predictor above 7, a Vorbis packet runs past the sample or names a mode its
-  setup header lacks, or a supplied setup header is not one (no type 5 and `"vorbis"`, or no
-  mode list at `seekBit`). The message names the offset, the sizes or the CRC.
+| FSB5 codec | WAV |
+|---|---|
+| `PCM16` | 16-bit, the bytes as stored (Unity's PCM compression format) |
+| `PCM8`, `PCM32` | 8-bit and 32-bit, the bytes as stored, unconverted, as Fmod5Sharp and python-fsb5 copy them |
+| `IMAADPCM` | 16-bit, decoded |
+| `FADPCM` | 16-bit, decoded |
+| `GCADPCM` (mono) | 16-bit, decoded |
 
-## Requirements
-
-Node.js 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), like `unity-asset-reader`, for
-both `import` and `require`. Browsers and Web Workers: ES2020.
+Vorbis converts to Ogg with `fsb5ToOgg()` (see [Vorbis to Ogg](#vorbis-to-ogg)).
 
 ## API reference
 
@@ -133,16 +162,70 @@ both `import` and `require`. Browsers and Web Workers: ES2020.
 
 Full JSDoc is in the bundled `index.d.ts`.
 
+## Not supported
+
+Each of these throws `UnsupportedError`, naming what it found:
+
+- In `fsb5ToWav()`: Vorbis (`fsb5ToOgg()` converts it).
+- In both functions, every other codec: MPEG, ATRAC9, XMA, VAG, HEVAG, Opus, CELT, XWMA, `PCM24`,
+  `PCMFLOAT`.
+- In `fsb5ToOgg()`: a Vorbis sample whose setup header the caller did not supply, or with no
+  `VORBISDATA` chunk.
+- GCADPCM of more than one channel.
+- An FSB5 header version above 1.
+- A frequency id above 10 with no frequency chunk.
+- Sound that is not an FSB5 bank. An `AudioClip` from before Unity 5.0 holds its file (Ogg,
+  MP3, WAV, ...) as it is, in `audioData`.
+
+## Errors
+
+- `UnsupportedError`: the cases above.
+- `CorruptError`, with a message naming the offset, the sizes or the CRC, when:
+  - the bank is truncated, or a sample header or chunk does not fit;
+  - a sample's data is shorter than its frame count needs;
+  - the bank has no sample;
+  - a GCADPCM sample has no coefficients, or a predictor above 7;
+  - a Vorbis packet runs past the sample, or names a mode its setup header lacks;
+  - a supplied setup header is not one (no type 5 and `"vorbis"`, or no mode list at `seekBit`).
+
+## How it is tested
+
+WAV output is compared with AssetStudio's WAV, byte for byte:
+
+- Editor-built bundles, with and without type trees, and version-stripped:
+  - the PCM clip of Unity **2019.4.41f2**, **2020.3.30f1** and **6000.3.25f1** bundles;
+  - a mono and a stereo IMAADPCM clip of **2019.4.41f2**, **2020.3.30f1** and **6000.3.26f1**
+    bundles.
+- lz4 bundles of the same three editors, covering the FSB5 header paths Unity writes for other
+  clips, in PCM16 and IMAADPCM:
+  - a 37800 Hz clip (frequency chunk);
+  - 4-channel clips (channels chunk);
+  - 5.1 clips (six channels in the header).
+- Hand-built banks, for what Unity does not write:
+  - a partial last IMAADPCM frame (Unity writes whole IMAADPCM frames only);
+  - FADPCM, GCADPCM, `PCM8` and `PCM32`. Unity writes `PCM16` for 8-bit, 24-bit, 32-bit integer
+    and 32-bit float source WAVs alike (checked on the same three editors).
+
+Vorbis to Ogg is tested locally only, since the setup header table cannot be in the repository or
+CI. The Vorbis clip of the 2019.4.41f2, 2020.3.30f1 and 6000.3.25f1 bundles decodes (ffmpeg, with
+CRC checks) to its exact frame count, within 2 LSB of AssetStudio's WAV.
+
+## Requirements
+
+Node.js 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), like `unity-asset-reader`, for
+both `import` and `require`. Browsers and Web Workers: ES2020.
+
 ## Acknowledgements
 
 - [AssetStudio](https://github.com/Razviar/assetstudio) (MIT, © Perfare, RazTools, Razviar): the
-  WAV it writes (`AudioClipConverter.cs`), and the oracle of the test goldens.
+  WAV it writes (`AudioClipConverter.cs`), and the reference output the tests
+  compare against.
 - [Fmod5Sharp](https://github.com/SamboyCoding/Fmod5Sharp) (MIT, © 2021 Sam Byass): the FSB5
   parser, the ADPCM decoders and the Vorbis to Ogg rebuild are hand-ported from it.
 - [python-fsb5](https://github.com/HearthSim/python-fsb5) (MIT, © 2016 Simon Pinfold): second
   reference for the FSB5 parser.
-- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): names the inputs of the test
-  goldens.
+- [UnityPy](https://github.com/K0lb3/UnityPy) (MIT, © K0lb3): identifies the objects the
+  tests check.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements).
 

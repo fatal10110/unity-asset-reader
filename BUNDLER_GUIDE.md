@@ -1,7 +1,11 @@
 # Bundler Guide
 
 How to set up the reader packages with Vite, Next.js, a plain CDN page, and Node.js (ESM and
-CommonJS). For `texture2ddecoder-wasm` on its own, see its
+CommonJS). Most packages need no bundler setup. The texture package needs its two WASM files
+served, `unity-asset-reader-node` is for Node.js only, and every browser setup below runs the reader
+in a Web Worker.
+
+For `texture2ddecoder-wasm` on its own, see its
 [Bundler Guide](packages/decoder/BUNDLER_GUIDE.md).
 
 - [What each package needs](#what-each-package-needs)
@@ -21,20 +25,25 @@ CommonJS). For `texture2ddecoder-wasm` on its own, see its
 | `unity-asset-reader-node` | Node.js only (`node:fs`). Never import it in browser code. |
 | `unity-asset-reader-mesh` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-audio` | Nothing, like `unity-asset-reader`. |
+| `unity-asset-reader-spine` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-shader` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-animation` | Nothing, like `unity-asset-reader`. |
 
-None of them needs COOP/COEP headers or `SharedArrayBuffer`: everything is single-threaded. The
-pages work from any static host. They have to be served over HTTP; `file://` does not work.
+- None of them needs COOP/COEP headers or `SharedArrayBuffer`: everything is single-threaded.
+- The pages work from any static host.
+- They have to be served over HTTP. `file://` does not work.
 
 ## Run the reader in a Worker
 
 `load()` and every class reader are synchronous (plan decision D4). On the main thread, a big
-bundle freezes the page until it is parsed. So parse in a module Worker, and post plain data
-back: object lists, strings, RGBA pixels. Transfer the `ArrayBuffer`s instead of copying them.
+bundle freezes the page until it is parsed. So:
 
-Do not post an `Env` or an `ObjectReader`: they hold functions and views into the whole unpacked
-buffer. `bigint`s can be posted, but convert them to strings if the data also goes into JSON.
+- Parse in a module Worker.
+- Post plain data back: object lists, strings, RGBA pixels.
+- Transfer the `ArrayBuffer`s instead of copying them.
+- Do not post an `Env` or an `ObjectReader`: they hold functions and views into the whole
+  unpacked buffer.
+- `bigint`s can be posted, but convert them to strings if the data also goes into JSON.
 
 Every setup below uses a Worker. On the main thread, the same imports work unchanged, which is
 fine for small files.
@@ -108,8 +117,10 @@ Tested with Vite 7 and 8, in `vite` (dev) and `vite build`.
 Tested with Next.js 16 (Turbopack, and `next build --webpack`), with `next build && next start`.
 
 Import the packages in a module Worker started from a client component. No `next.config.js`
-change is needed. `unity-asset-reader-texture` needs `texture2ddecoder-wasm` 1.2.4 or later
-here: with 1.2.3 and earlier, the build fails with `Can't resolve 'module'`
+change is needed.
+
+`unity-asset-reader-texture` needs `texture2ddecoder-wasm` 1.2.4 or later here. With 1.2.3 and
+earlier, the build fails with `Can't resolve 'module'`
 ([#171](https://github.com/fatal10110/unity-asset-reader/issues/171)).
 
 1. Install, and copy the WASM files into `public/`:
@@ -164,9 +175,9 @@ here: with 1.2.3 and earlier, the build fails with `Can't resolve 'module'`
    }
    ```
 
-On the server, in a route handler, `initTexture()` takes no options, as in
+**On the server**, in a route handler, `initTexture()` takes no options, as in
 [Node.js](#nodejs-esm-and-commonjs). No `next.config.js` change is needed either.
-`next build --webpack` needs `texture2ddecoder-wasm` 1.2.5 or later: with 1.2.4 and earlier,
+`next build --webpack` needs `texture2ddecoder-wasm` 1.2.5 or later. With 1.2.4 and earlier,
 `initTexture()` fails with `TypeError: a is not a function`
 ([#202](https://github.com/fatal10110/unity-asset-reader/issues/202)).
 
@@ -187,9 +198,11 @@ a texture. Its Worker is [`examples/cdn-worker.js`](examples/cdn-worker.js).
   await initTexture({ wasmPath: `${CDN}/texture2ddecoder-wasm@1/wasm` });
   ```
 
-  Pin exact versions in production. Each package has its own version: pick a
-  `unity-asset-reader` that `unity-asset-reader-texture`'s peer range allows (the same major),
-  and a `texture2ddecoder-wasm` that its dependency range allows (`@1.2.3` or later).
+  Pin exact versions in production. Each package has its own version, so pick ones that fit
+  together:
+  - a `unity-asset-reader` that `unity-asset-reader-texture`'s peer range allows (the same
+    major);
+  - a `texture2ddecoder-wasm` that its dependency range allows (`@1.2.3` or later).
 - **In a Worker, `texture2ddecoder-wasm` must be 1.2.3 or later.** 1.2.2 refuses to initialize in
   a Worker ([#149](https://github.com/fatal10110/unity-asset-reader/issues/149)).
 - **Try it on this repo's builds** with `node examples/serve.mjs`, a local stand-in for jsDelivr,
@@ -214,14 +227,16 @@ const { loadPath } = require("unity-asset-reader-node");
 In Node.js, `initTexture()` takes no options: the WASM files are found in the installed
 `texture2ddecoder-wasm` package.
 
-All three reader packages need Node.js 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`),
-for both `import` and `require`, and CI tests on 20.19.0 and 22.12.0
-([#172](https://github.com/fatal10110/unity-asset-reader/issues/172)). `require()` needs a
-Node.js that can `require()` an ES module, because the LZMA decoder `lzma1` is published as ES
-modules only. `initTexture()` needs a Node.js that detects ES-module syntax in
-`texture2ddecoder-wasm`'s glue code.
+**Node.js version.** Every reader package (all but `texture2ddecoder-wasm`) needs Node.js 20.19+
+or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and `require`. CI tests on 20.19.0 and 22.12.0.
+The floor comes from two needs:
 
-When you bundle a Node.js app (esbuild, Rollup, webpack with `target: "node"`), keep
+- `require()` needs a Node.js that can `require()` an ES module, because the LZMA decoder
+  `lzma1` is published as ES modules only.
+- `initTexture()` needs a Node.js that detects ES-module syntax in `texture2ddecoder-wasm`'s
+  glue code.
+
+**Bundling a Node.js app** (esbuild, Rollup, webpack with `target: "node"`): keep
 `texture2ddecoder-wasm` external. `initTexture()` finds the WASM files relative to its own
 installed location.
 
