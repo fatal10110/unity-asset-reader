@@ -107,8 +107,8 @@ Our library writes a Shader as AssetStudio's inspection text through `unity-asse
 `shaderToText()`: OpenGL and Metal source and SPIR-V disassembly, byte for byte AssetStudio's
 `.shader` file for the fixture shaders. It also writes the variant lists of Unity 2021.3.10+ /
 2022.1.13+ / 2022.2+ / 6000 builds (`m_PlayerSubPrograms`), which AssetStudio's converter does not
-read, and disassembles the newer SMOL-V encoding of Unity 2020.3 and later. It refuses Direct3D programs, which need
-Windows' D3DCompiler.
+read, and disassembles the newer SMOL-V encoding of Unity 2020.3 and later. It refuses Direct3D
+programs, which need Windows' D3DCompiler.
 AssetStudioMod documents Unity 1.7 to 6000.2; none of the others names Unity 6000.6. Loading
 external dependencies means a loose SerializedFile's `m_Externals`, through
 `unity-asset-reader-node`'s `loadPath()`; `.resS` / `.resource` sidecars are a separate row
