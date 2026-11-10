@@ -221,8 +221,8 @@ Skipped, since glTF has no channel for them:
 - `m_IsActive` and every other float or object reference curve;
 - curves whose path names no node;
 - of a humanoid clip: the body position (`RootT`, see [Humanoid clips](#humanoid-clips)), the
-  motion curves (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...), the finger muscles and
-  the translation DoFs.
+  motion curves (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...) and the translation
+  DoFs.
 
 ## Humanoid clips
 
@@ -230,13 +230,13 @@ In short:
 
 - **What is converted**: the muscle curves of a humanoid clip, and its body rotation (`RootQ`),
   become rotations of the human bones in the glTF file.
-- **How accurate**: on the fixture rig, in Unity 2019.4, 2020.3, 6000.3 and 6000.6, every bone's
-  rotation is within 7e-7 rad of Unity's, the Hips' within 2.3e-5 rad (the accepted tolerance is
-  1e-3 rad).
-- **What is not converted**: the body position (`RootT`), the finger muscles, the motion curves,
-  the IK goals and the translation DoFs (see [glTF scene export](#gltf-scene-export)).
+- **How accurate**: on the three fixture rigs, in Unity 2019.4, 2020.3, 6000.3 and 6000.6, every
+  bone's rotation is within 8e-7 rad of Unity's, fingers included, the Hips' within 7.1e-5 rad
+  (the accepted tolerance is 1e-3 rad).
+- **What is not converted**: the body position (`RootT`), the motion curves, the IK goals and the
+  translation DoFs (see [glTF scene export](#gltf-scene-export)).
 
-The rest of this section explains how the conversion works and what it leaves untested.
+The rest of this section explains how the conversion works and which fixture rigs check it.
 
 ### Where the conversion comes from
 
@@ -250,7 +250,7 @@ is derived from the Avatar's own data (`m_Avatar.m_Human`) and Unity's public do
 - [HumanDescription](https://docs.unity3d.com/ScriptReference/HumanDescription.html)
 
 It is checked against the bone poses the Unity editor makes from the same muscles (recorded in
-the repository's `fixtures/humanoid-unity-goldens.json`).
+the repository's `fixtures/humanoid-unity-goldens.json` and `fixtures/humanoid2-unity-goldens.json`).
 
 ### The steps
 
@@ -262,13 +262,15 @@ the repository's `fixtures/humanoid-unity-goldens.json`).
 3. Twist split: an upper arm, forearm, upper leg and lower leg keep the Avatar's share
    (`m_ArmTwist`, `m_ForeArmTwist`, `m_UpperLegTwist`, `m_LegTwist`) of their twist and pass the
    rest to the child bone.
-4. An avatar without an UpperChest turns the Chest by the UpperChest muscles too, over Unity's
-   default UpperChest range of ±20° (`HumanTrait.GetMuscleDefaultMax`), the one constant not from
-   the Avatar: such an Avatar holds no limits for the bone.
-5. The Hips turn so that the body has the clip's `RootQ`: the body frame's up runs from the middle
+4. The fingers turn the same way, without twist: a proximal bone by its `Spread` (Y) and
+   `1 Stretched` (Z) muscles, the intermediate and distal ones by `2 Stretched` and `3 Stretched`
+   (Z). The hands' `m_HandBoneIndex` names the bones.
+5. An avatar without an UpperChest turns the Chest by the UpperChest muscles too, each over half
+   the Chest's own limit on that side: such an Avatar holds no limits for the UpperChest.
+6. The Hips turn so that the body has the clip's `RootQ`: the body frame's up runs from the middle
    of the upper legs to the middle of the upper arms, its right from the left upper leg and arm to
    the right ones (by it the T-pose body frame `m_RootX` is the identity).
-6. The clip is sampled at its `m_SampleRate` and at every key, and written as `LINEAR` rotation
+7. The clip is sampled at its `m_SampleRate` and at every key, and written as `LINEAR` rotation
    channels (the conversion is not linear, so the curves' tangents do not carry over), each
    sample in the hemisphere of the one before, then mirrored as every rotation is.
 
@@ -277,22 +279,24 @@ the repository's `fixtures/humanoid-unity-goldens.json`).
 The body position (`RootT`, the body's centre of mass) is not converted: the Hips keep their
 skeleton position. No centre of mass definition met the tolerance of 1e-4 × the human scale. The
 closest (the bones' joints, each half its length along the bone, weighted by `m_HumanBoneMass`)
-was off by 4.7e-3 × the human scale (about 5 mm on the fixture).
+was off by 4.7e-3 × the human scale (about 5 mm on the first fixture rig).
 
-### What the fixture rig leaves untested
+### The fixture rigs
 
-- a bind pose with rotated bones;
-- bones between human bones (rotations through them are corrected but unchecked);
-- a rotated node above the Hips (as Blender's `Armature`);
-- an Avatar with an UpperChest;
-- twist shares other than 0.5 (so which bone keeps which share);
-- limits other than Unity's defaults;
-- fingers, eyes and jaw (the fingers are not converted).
+Three rigs, each built from code in our own Unity projects (`fixtures/BUILDING.md` sections 28
+and 31), cover the conversion's branches:
+
+- the first: a T-pose with unrotated bones, twist shares of 0.5 and Unity's default limits;
+- the second: a bind pose with rotated bones under a rotated, Blender-style `Armature`, a
+  non-human bone between the Spine and the Chest, an UpperChest, eyes, jaw and fingers, a
+  different twist share per pair (0.3, 0.7, 0.2, 0.6) and custom limits with off-centre centres;
+- the third: the first without an UpperChest, but with asymmetric Chest limits, posed by the
+  UpperChest muscles alone.
 
 ## Not included
 
 - YAML (`.anim` text) output.
-- A humanoid clip's body position, finger muscles and root motion (see
+- A humanoid clip's body position and root motion (see
   [Humanoid clips](#humanoid-clips)).
 - `m_CompressedRotationCurves`, which AssetStudio leaves compressed too.
 
