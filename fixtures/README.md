@@ -6,7 +6,8 @@ Shared test data for every reader package. Nothing here is published. It holds t
   written by a script. No third-party game data, ever (R11).
 - **Goldens:** what an independent tool, the *oracle*, says each fixture contains. UnityPy is the
   oracle for parsing, AssetStudio `c37af7d` for export output, and the Unity editor for the humanoid
-  muscle-to-bone conversion (plan §5). Goldens never come from this library's own output (R12).
+  muscle-to-bone conversion and the pixels of texture mip levels (plan §5). Goldens never come
+  from this library's own output (R12).
 
 This page says what each fixture is and how each golden was made. [`BUILDING.md`](BUILDING.md) says
 how to build the fixtures with Unity.
@@ -48,6 +49,8 @@ Other files here, each described further down or in `BUILDING.md`:
   apart from `goldens.json` (`BUILDING.md` section 13).
 - `humanoid-unity-goldens.json`: the Unity editor's poses for the humanoid fixture clips (plan §5,
   `BUILDING.md` section 28).
+- `texture-pixel-unity-goldens.json`: the Unity editor's pixels of every mip level of the `mips`
+  textures (plan §5, `BUILDING.md` section 29).
 - `assetstudio-fixture-cross-checks.json`, `assetstudio-modern-cross-checks.json`: AssetStudio
   reference pixels for plain formats and variant sprites
   ([below](#plain-format-and-half-scale-variant-assetstudio-references)).
@@ -89,6 +92,7 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `legacy-animation/{lz4,lz4-notypetree}/legacy-animation` | the same four | a legacy `Animation` component | — | 25 |
 | `ui-animation/{lz4,lz4-notypetree}/ui-animation` | the same four | a `RectTransform` UI hierarchy and its clip | — | 26 |
 | `humanoid/lz4/humanoid` | the same four | the input of the humanoid oracle | — | 28 |
+| `mips/windows`, `mips/android` | the same four | mipmapped Texture2Ds, every level its own pixels: RGBA32, DXT1, DXT5, BC7; ETC2, ASTC | — | 29 |
 
 ## Editor-built fixtures (`bundles/editor/`)
 

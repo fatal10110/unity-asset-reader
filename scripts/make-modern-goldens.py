@@ -108,6 +108,12 @@ def packed_sprite_goldens(path):
     return out
 
 
+# The textures of the mips bundles (fixtures/BUILDING.md section 29), by bundle.
+MIPS = {
+    "windows": ["10_DXT1", "12_DXT5", "25_BC7", "4_RGBA32", "4_RGBA32_20x12"],
+    "android": ["45_ETC2_RGB", "47_ETC2_RGBA8", "48_ASTC_4x4", "50_ASTC_6x6"],
+}
+
 # An AnimationClip's legacy curve arrays.
 CURVE_ARRAYS = ("m_RotationCurves", "m_CompressedRotationCurves", "m_EulerCurves",
                 "m_PositionCurves", "m_ScaleCurves", "m_FloatCurves", "m_PPtrCurves")
@@ -157,6 +163,10 @@ def evidence(name, path):
         if obj.type.name == "Texture2D" and "/signed-eac/" in name:
             texture = obj.read()
             assert (texture.m_Width, texture.m_Height) == (32, 16)
+            textures.append(texture.m_Name)
+        if obj.type.name == "Texture2D" and "/mips/" in name:
+            texture = obj.read()
+            assert texture.m_MipCount > 1
             textures.append(texture.m_Name)
         if obj.type.name == "SpriteAtlas":
             tree = obj.read_typetree()
@@ -272,6 +282,11 @@ def evidence(name, path):
         # etc2comp payloads by packages/texture/tests/signed-eac.test.ts.
         assert sorted(textures) == ["42_EAC_R_SIGNED", "44_EAC_RG_SIGNED"]
         return {"textures": sorted(textures)}
+    if "/mips/" in name:
+        # The mipmapped textures (#331); the pixels of their levels are the
+        # editor's, in texture-pixel-unity-goldens.json.
+        assert sorted(textures) == MIPS[name.rsplit("/", 1)[1]], textures
+        return {"textures": sorted(textures)}
     if "/more-plain/" in name:
         assert set(textures) == {"R8", "RG16", "RG32", "RGB48", "RGBA64", "R8_SIGNED",
                                  "RG16_SIGNED", "RGB24_SIGNED", "RGBA32_SIGNED", "R16_SIGNED",
@@ -297,6 +312,8 @@ def main():
         ("shader-variants/lz4", "android"),
         # Signed EAC textures made by an editor script from etc2comp blocks (#288).
         ("signed-eac", "android"),
+        # Mipmapped textures, every level its own pixels (#331).
+        ("mips", "windows"), ("mips", "android"),
         # Animator, AnimatorController, AnimatorOverrideController and Avatar (#303).
         ("animator/lz4", "animator"), ("animator/lz4-notypetree", "animator"),
         # AnimationClip (#302): legacy, streamed, dense and constant clips.

@@ -19,7 +19,7 @@ How to use it:
 2. Jump to the section for the bundle you need (table of contents below).
 3. Run the numbered steps at the top of that section, then use the details further down when a
    step needs explanation.
-4. Sections 12-28 (below) mostly follow the same pattern. Sections 15, 16, 17 and 27 are oracle
+4. Sections 12-29 (below) mostly follow the same pattern. Sections 15, 16, 17 and 27 are oracle
    or experiment sections that build no committed Unity bundle.
 
 ## Contents
@@ -53,6 +53,7 @@ How to use it:
 - [26. The `ui-animation` bundles](#26-the-ui-animation-bundles-315) - RectTransform hierarchies
 - [27. The scene export oracle: AssetStudio's ModelConverter](#27-the-scene-export-oracle-assetstudios-modelconverter-306) - goldens for the glTF scene export
 - [28. The `humanoid` bundles and the humanoid oracle](#28-the-humanoid-bundles-and-the-humanoid-oracle-318) - the humanoid clip and the Unity-sampled bone poses
+- [29. The `mips` bundles and the texture pixel oracle](#29-the-mips-bundles-and-the-texture-pixel-oracle-331) - mipmapped textures and the Unity-decoded pixels of every level
 
 ## Editors
 
@@ -6724,4 +6725,214 @@ byte. Through `heavy --lock unity` (it runs the four editors):
 
 ```bash
 python3 scripts/make-humanoid-goldens.py --work <scratch dir on the Windows host> --settings '<section 24 project>/uar-305-scene-{version}' --unity 2019.4.41f2=<Unity.exe> --unity 2020.3.30f1=<Unity.exe> --unity 6000.3.26f1=<Unity.exe> --unity 6000.6.4f1=<Unity.exe>
+```
+
+## 29. The `mips` bundles and the texture pixel oracle (#331)
+
+**What it is for:** decoding mip levels past the first (`decodeTexture2D(texture, { mip })`)
+and the oracle of their pixels (plan section 5, revision 2026-11-10a). The bundles are
+`mips/windows` and `mips/android` for **2019.4.41f2**, **2020.3.30f1**, **6000.3.26f1** and
+**6000.6.4f1**: two typed lz4 bundles per editor, made from code by an editor script.
+
+**Steps:**
+
+1. Make a fresh project per editor, named `uar-331-mips-<editor version>`.
+2. Add `Assets/Editor/BuildMipTextures.cs`.
+3. Build each project once with `-executeMethod BuildMipTextures.Build` (same command as
+   section 2) and check the log.
+4. Copy `Build/mips-windows/windows` and `Build/mips-android/android` into
+   `fixtures/bundles/editor/<editor version>/mips/`.
+5. Rerun the goldens, `make-modern-goldens.py` first, then `make-goldens.py` and the section 17
+   export goldens.
+6. Then rerun the texture pixel oracle (`scripts/make-texture-pixel-goldens.py`, below); it
+   records each bundle's sha256.
+
+### What is in a bundle
+
+Every texture is 32x16 with 6 levels (32x16 down to 1x1), readable, its image data inline:
+
+- `windows` (StandaloneWindows64): `4_RGBA32`, `10_DXT1`, `12_DXT5`, `25_BC7`, and
+  `4_RGBA32_20x12`, which is 20x12 with 5 levels (20x12, 10x6, 5x3, 2x1, 1x1).
+- `android` (Android): `45_ETC2_RGB`, `47_ETC2_RGBA8`, `48_ASTC_4x4` and `50_ASTC_6x6`
+  (`50_ASTC_RGB_6x6` in 2019.4 and 2020.3, whose enum names it so). ASTC 6x6 has partial blocks
+  at every level.
+
+Each level has its own pixels: R is an x ramp and G a y ramp over the level, B the level times
+50 plus a 4x4 dither, A 255 less 30 per level. So a level read from the wrong offset, at the
+wrong size or with its rows the wrong way round does not match.
+
+Why these sizes and formats:
+
+- The editor compresses a mipmapped texture only at power-of-two sides (section 8), so only
+  `RGBA32` has a non-power-of-two size.
+- No Crunch: the WASM decoder unpacks only the first level of Crunch data, so a Crunch level
+  past the first is an `UnsupportedError` (the section 8 Crunch textures test that).
+
+### The project
+
+Each project is a fresh copy named `uar-331-mips-<editor version>`, holding `ProjectSettings/`
+and `Packages/` of the section 21 project of the same editor and only this file under
+`Assets/`.
+
+`Assets/Editor/BuildMipTextures.cs`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// Mipmapped Texture2D assets made by script (#331): every level gets its own
+// pixels, so a level read from the wrong offset or at the wrong size shows.
+public static class BuildMipTextures
+{
+    const string Dir = "Assets/Fixtures/mips";
+    // By value: RGBA32, DXT1, DXT5, BC7 (Windows); ETC2_RGB, ETC2_RGBA8,
+    // ASTC_4x4, ASTC_6x6 (Android). All 32x16: the editor compresses a
+    // mipmapped texture only at power-of-two sides; ASTC 6x6 has partial blocks.
+    static readonly int[] Windows = { 4, 10, 12, 25 };
+    static readonly int[] Android = { 45, 47, 48, 50 };
+
+    // Level m of a w x h texture: R = x ramp, G = y ramp, B = the level and a
+    // 4x4 dither, A = the level.
+    static Color32[] Level(int w, int h, int m)
+    {
+        var c = new Color32[w * h];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                c[y * w + x] = new Color32((byte)(x * 255 / Math.Max(1, w - 1)), (byte)(y * 255 / Math.Max(1, h - 1)),
+                    (byte)((m * 50 + ((x ^ y) & 3) * 16) & 255), (byte)(255 - m * 30));
+        return c;
+    }
+
+    static string Make(int format, int w, int h, string suffix)
+    {
+        var name = format + "_" + (TextureFormat)format + suffix;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, true) { name = name };
+        for (int m = 0; m < tex.mipmapCount; m++)
+            tex.SetPixels32(Level(Math.Max(1, w >> m), Math.Max(1, h >> m), m), m);
+        tex.Apply(false, false);
+        if (format != 4) EditorUtility.CompressTexture(tex, (TextureFormat)format, TextureCompressionQuality.Normal);
+        if ((int)tex.format != format) throw new Exception(name + " is " + tex.format);
+        var path = Dir + "/" + name + ".asset";
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.CreateAsset(tex, path);
+        Debug.Log("FIXTURE-TEX " + name + " " + tex.format + " " + w + "x" + h + " mips " + tex.mipmapCount
+            + ", " + tex.GetRawTextureData().Length + " bytes, readable " + tex.isReadable);
+        return path;
+    }
+
+    public static void Build()
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/Fixtures")) AssetDatabase.CreateFolder("Assets", "Fixtures");
+        if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/Fixtures", "mips");
+        var windows = new List<string>();
+        var android = new List<string>();
+        foreach (var f in Windows) windows.Add(Make(f, 32, 16, ""));
+        // Non-power-of-two sides: only uncompressed (levels 20x12, 10x6, 5x3, 2x1, 1x1).
+        windows.Add(Make(4, 20, 12, "_20x12"));
+        foreach (var f in Android) android.Add(Make(f, 32, 16, ""));
+        AssetDatabase.SaveAssets();
+        Bundle("windows", windows, BuildTarget.StandaloneWindows64);
+        Bundle("android", android, BuildTarget.Android);
+    }
+
+    static void Bundle(string name, List<string> paths, BuildTarget target)
+    {
+        var dir = Path.Combine("Build", "mips-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = name, assetNames = paths.ToArray() } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, BuildAssetBundleOptions.ChunkBasedCompression, target);
+        if (m == null) throw new Exception("build failed: mips " + name);
+        Debug.Log("FIXTURE-OK mips " + name + " -> " + dir);
+    }
+}
+```
+
+The log holds nine `FIXTURE-TEX` lines (each with its format, size, `mips 6` or `mips 5` and
+`readable True`) and `FIXTURE-OK mips windows` and `FIXTURE-OK mips android`. The image data
+sizes are 2732 bytes (`RGBA32`), 1272 (`RGBA32` 20x12), 360 (`DXT1`, `ETC2_RGB`), 720 (`DXT5`,
+`BC7`, `ETC2_RGBA8`, `ASTC_4x4`) and 464 (`ASTC_6x6`): the sum of the levels, each in whole
+blocks.
+
+### Goldens
+
+In this order (`make-goldens.py` skips what `modern-goldens.json` holds):
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+.venv-oracle/bin/python scripts/make-export-goldens.py ...   # the section 17 command
+```
+
+- `make-modern-goldens.py` lists the two 6000.6 bundles and checks their texture names.
+- UnityPy and AssetStudio record level 0 only, as they decode it; AssetStudio c37af7d cannot read
+  the 6000.6 bundles (format 23).
+
+### Probes (2026-11-10)
+
+Before the fixtures, a scratch probe in 2019.4.41f2 and 6000.3.26f1 made textures by script as
+above, logged their in-memory `GetPixels32` per level, built them into an Android and a
+StandaloneWindows64 bundle, and read the bundles back in a second batchmode run under
+`-buildTarget Android` / `Win64`:
+
+- **Compressed Android formats on Windows:** under `-nographics` (no graphics device),
+  `GetPixels32(mip)` of the bundle's `ETC2_RGB`, `ETC2_RGBA8`, `ASTC_4x4`, `ASTC_6x6` and
+  `RGBA32` textures returns every level, the same pixels as before the build. Likewise `DXT1`,
+  `DXT5` and `BC7` under `Win64`. `-nographics` can stay.
+- **Cubemap** (for the next #331 PR): a 16x16 cubemap compressed with
+  `EditorUtility.CompressCubemapTexture` (`ETC2_RGBA8`, `ASTC_4x4`, `DXT1`, `BC7`) has 5
+  levels, and `GetPixels(face, mip)` returns all 30 face levels after the bundle round trip, in
+  both editors.
+- **Texture2DArray:** `new Texture2DArray(32, 16, 3, format, true)` filled level by level with
+  `SetPixelData(bytes, mip, slice)` (the bytes cut from compressed Texture2Ds) keeps
+  `ETC2_RGBA8`, `ASTC_4x4`, `DXT1`, `BC7` and `RGBA32` through `AssetDatabase.CreateAsset` and
+  the bundle, in 2019.4 too; `GetPixels32(slice, mip)` returns every slice and level.
+- **Texture3D:** 2019.4.41f2 refuses a compressed `Texture3D` (`ETC2_RGBA8`, `ASTC_4x4`,
+  `DXT1`, `BC7`: "Failed to create texture because of invalid parameters"); an `RGBA32` one
+  works. 6000.3.26f1 makes all four compressed ones, and `GetPixels32(mip)` returns every level.
+- In every probe texture the image data length is the sum of the levels in whole blocks
+  (`GetRawTextureData`).
+
+### The texture pixel oracle
+
+`scripts/make-texture-pixel-goldens.py` writes `fixtures/texture-pixel-unity-goldens.json`. Per
+editor it copies `ProjectSettings/` and `Packages/` of `--settings` into a scratch project
+`uar-331-oracle-<editor version>` under `--work`, writes its C# (held in the script, R2) into
+`Assets/Editor/`, and runs each bundle in its own editor run:
+
+```
+Unity.exe -batchmode -nographics -quit -buildTarget <Win64|Android> -projectPath <project> -executeMethod TexturePixelOracle.Run -logFile <project>\oracle-<bundle>.log -uarBundle <bundle> -uarOut <project>\oracle-<bundle>.json
+```
+
+`TexturePixelOracle.Run` loads the bundle with `AssetBundle.LoadFromFile` and records, for every
+Texture2D (refusing an unreadable one), its format, size, mip count and `GetPixels32(mip)` of
+every level: RGBA8, rows bottom first as Unity returns them, base64. The golden also holds the
+sha256 and build target of each bundle, and how plan section 5 compares it (`_comparison`).
+
+For a `DXT1`, `DXT5`, `BC7`, `ETC2_RGB` or `ETC2_RGBA8` level smaller than a 4x4 block (4x2,
+2x1, 1x1), `GetPixels32` returns the whole decoded block, 16 pixels; the level is its first rows
+and columns. The ASTC levels come at their own size. The golden keeps what the editor returns
+and says so (`_pixels`).
+
+How it is compared (`packages/texture/tests/mips.test.ts`):
+
+- `RGBA32` levels match exactly.
+- A compressed format's levels are within the largest channel difference that format has at
+  level 0 against the editor, over all its textures in the four editors. Measured (2026-11-10):
+
+  | Format | Level 0 | Levels 1-5 |
+  | --- | --- | --- |
+  | `RGBA32` (both sizes) | 0 | 0 |
+  | `DXT1`, `DXT5`, `BC7` | 0 | 0 |
+  | `ETC2_RGB`, `ETC2_RGBA8` | 0 | 0 |
+  | `ASTC_4x4` | 0 | 0 |
+  | `ASTC_6x6` | 1 | 1 |
+
+The oracle does not build a bundle, so it may be rerun, and it reproduces the golden byte for
+byte. Through `heavy --lock unity` (it runs the four editors):
+
+```bash
+python3 scripts/make-texture-pixel-goldens.py --work <scratch dir on the Windows host> --settings '<section 21 project>/uar-288-signed-eac-{version}' --unity 2019.4.41f2=<Unity.exe> --unity 2020.3.30f1=<Unity.exe> --unity 6000.3.26f1=<Unity.exe> --unity 6000.6.4f1=<Unity.exe>
 ```
