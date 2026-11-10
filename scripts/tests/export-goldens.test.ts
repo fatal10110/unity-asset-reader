@@ -246,8 +246,9 @@ test("only the objects AssetStudio cannot export lack a golden, each for its kno
   assert.equal(exported("Shader"), 23);
   // And the animation bundles' two textures (#302) of 2019.4, 2020.3 and 6000.3.26f1, typed
   // and not, and of 6000.6.4f1 without type trees: c37af7d fails on format 23's type trees,
-  // and reads a format-23 file without them.
-  assert.equal(exported("Texture2D"), 119);
+  // and reads a format-23 file without them. And the nine of each mips bundle pair (#331) of
+  // 2019.4, 2020.3 and 6000.3.26f1.
+  assert.equal(exported("Texture2D"), 146);
   assert.equal(
     exported("Sprite"),
     124,
