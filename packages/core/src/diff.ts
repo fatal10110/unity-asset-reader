@@ -53,7 +53,7 @@ export interface DiffEntry {
 /** Classes whose streamed data a file without type trees has its hardcoded reader find. */
 // ponytail: without type trees, the streamed data of CubemapArray is neither
 // compared nor counted in sizeDelta (a same-size repaint at the same offset
-// reads as unchanged). Add its class here when a CubemapArray reader lands.
+// reads as unchanged). Add its class here when a CubemapArray reader lands (#357).
 const STREAM_READERS = new Map<number, [(reader: ObjectReader) => object, string]>([
   [ClassID.Texture2D, [readTexture2D, "m_StreamData"]],
   [ClassID.Cubemap, [readCubemap, "m_StreamData"]],

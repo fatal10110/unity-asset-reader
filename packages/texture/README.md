@@ -479,7 +479,7 @@ Not provided at all:
 - Mip levels other than the first of Crunch, Switch and Xbox 360 textures.
 - Crunch cubemaps, and `Cubemap`, `Texture2DArray` and `Texture3D` of Switch, Xbox 360, PS4 and
   PS5 builds.
-- `CubemapArray`.
+- `CubemapArray` ([#357](https://github.com/fatal10110/unity-asset-reader/issues/357)).
 - JPEG encoding, and compressed PNG (`encodePng` stores the pixels uncompressed).
 
 Known differences and open questions:
