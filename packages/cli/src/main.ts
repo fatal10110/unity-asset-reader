@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join, relative, sep } from "node:path";
+import { basename, dirname, join, relative, sep } from "node:path";
 import { parseArgs } from "node:util";
 import {
   BuildTarget,
@@ -122,7 +122,7 @@ async function run(argv: string[], io: Io): Promise<number> {
   }
   const [name, ...inputs] = positionals;
   if (name === undefined) throw new UsageError("no command given");
-  if (!(name in COMMAND_OPTIONS)) throw new UsageError(`unknown command "${name}"`);
+  if (!Object.hasOwn(COMMAND_OPTIONS, name)) throw new UsageError(`unknown command "${name}"`);
   const command = name as Command;
   for (const option of Object.keys(values) as Option[]) {
     if (option !== "help" && !COMMAND_OPTIONS[command].includes(option)) {
@@ -275,8 +275,62 @@ function platformName(platform: number): string {
   return entry ? entry[0] : `platform ${platform}`;
 }
 
-/** The files a path stands for, as `loadPath` scans them: the file, or every file below it. */
-function inputFiles(input: string): string[] {
+/**
+ * One part of a file Unity split for size, as `loadPath` reads them:
+ * `<name>.split0`, `.split1`, ..., no leading zeros.
+ */
+const SPLIT_PART = /^(.+)\.split(0|[1-9]\d*)$/;
+
+/** One input file as `loadPath` reads it: a file, or the parts of a split file merged. */
+interface InputFile {
+  /** The path, or for a split file the merged name next to its parts. */
+  path: string;
+  /** How many parts it was merged from; 0 for a file that is not split. */
+  parts: number;
+  /** Its bytes. */
+  data: Uint8Array;
+}
+
+/**
+ * The files a path stands for, as `loadPath` scans them: the file, or every
+ * file below it, with the parts of a split file merged in part order.
+ */
+function inputFiles(input: string): InputFile[] {
+  const parts = new Map<string, Map<number, string>>();
+  const files: InputFile[] = [];
+  for (const path of inputPaths(input)) {
+    const split = SPLIT_PART.exec(basename(path));
+    if (!split) {
+      files.push({ path, parts: 0, data: readBytes(path) });
+      continue;
+    }
+    const merged = join(dirname(path), split[1]!);
+    const own = parts.get(merged) ?? new Map<number, string>();
+    own.set(Number(split[2]), path);
+    parts.set(merged, own);
+  }
+  for (const [path, own] of parts) {
+    // loadPath already refused a split file with a gap in its parts.
+    const ordered = [...own].sort((a, b) => a[0] - b[0]).map(([, part]) => readBytes(part));
+    const data = new Uint8Array(ordered.reduce((sum, part) => sum + part.length, 0));
+    let offset = 0;
+    for (const part of ordered) {
+      data.set(part, offset);
+      offset += part.length;
+    }
+    files.push({ path, parts: own.size, data });
+  }
+  return files.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+}
+
+/** A file's bytes, as a `Uint8Array`. */
+function readBytes(path: string): Uint8Array {
+  const buffer = readFileSync(path);
+  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+}
+
+/** The paths a path stands for: the file, or every file below it. */
+function inputPaths(input: string): string[] {
   if (!statSync(input).isDirectory()) return [input];
   const files: string[] = [];
   const walk = (dir: string): void => {
@@ -299,19 +353,21 @@ function inputFiles(input: string): string[] {
 function info(input: string, env: Env, io: Io): number {
   const lines: string[] = ["Inputs:"];
   const isDir = statSync(input).isDirectory();
-  for (const file of inputFiles(input)) {
-    const name = isDir ? relative(input, file).split(sep).join("/") : basename(file);
-    const buffer = readFileSync(file);
-    const data = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  for (const { path, parts, data } of inputFiles(input)) {
+    const name = isDir ? relative(input, path).split(sep).join("/") : basename(path);
     const type = detectFileType(data);
-    let line = `  ${name}: ${type}`;
+    let line = `  ${name}${parts > 0 ? ` (${parts} split parts)` : ""}: ${type}`;
     if (type === "UnityFS" || type === "UnityWeb" || type === "UnityRaw") {
       // ponytail: reads each bundle a second time, for its header only; a
       // header-only reader in core if a large input makes that matter.
-      const { header } = readBundle(data);
-      line += `, format ${header.version}, Unity ${header.unityRevision}`;
-      const compression = compressionOf(header);
-      if (compression !== undefined) line += `, ${compression}`;
+      try {
+        const { header } = readBundle(data);
+        line += `, format ${header.version}, Unity ${header.unityRevision}`;
+        const compression = compressionOf(header);
+        if (compression !== undefined) line += `, ${compression}`;
+      } catch (error) {
+        line += `, header not readable: ${describeError(error)}`;
+      }
     }
     lines.push(line);
   }

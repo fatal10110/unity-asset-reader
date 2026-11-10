@@ -81,6 +81,22 @@ test("info: each input's container and compression, the files, versions and clas
   assert.match(raw.stdout, /^ {2}unityraw\.bundle: UnityRaw, format \d, .*, uncompressed$/m);
 });
 
+test("info lists a split file once, by the name loadPath merges its parts to", () => {
+  const dir = tempDir();
+  const bytes = readFileSync(TEXTURE_BUNDLE);
+  const cut = Math.floor(bytes.length / 2);
+  writeFileSync(join(dir, "texture.split0"), bytes.subarray(0, cut));
+  writeFileSync(join(dir, "texture.split1"), bytes.subarray(cut));
+  const run = cli("info", dir);
+  assert.equal(run.status, 0, run.stderr);
+  const header = readBundle(new Uint8Array(bytes)).header;
+  const lines = run.stdout.split("\n");
+  const line = `  texture (2 split parts): UnityFS, format ${header.version}, Unity ${header.unityRevision}`;
+  assert.ok(lines.includes(line), run.stdout);
+  assert.doesNotMatch(run.stdout, /split0|split1/);
+  assert.ok(lines.includes(`Objects: ${loadPath(dir).objects.length}`), run.stdout);
+});
+
 test("dump prints readTypeTree() as JSON, 64-bit values as strings", () => {
   const env = loadPath(TEXTURE_BUNDLE);
   const texture = env.objects.find((obj) => obj.type === 28)!;
@@ -118,6 +134,7 @@ test("usage errors exit 2 with a message, before the input is read", () => {
   const cases: [string[], RegExp][] = [
     [[], /no command given/],
     [["list", LZ4_DIR], /unknown command "list"/],
+    [["toString", LZ4_DIR], /unknown command "toString"/],
     [["ls"], /ls needs a file or directory/],
     [["ls", TEXTURE_BUNDLE, LZ4_DIR], /takes one file or directory, got 2 paths.*one directory/],
     [["ls", LZ4_DIR, "-o", dir], /ls does not take --output/],

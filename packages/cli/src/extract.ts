@@ -25,6 +25,7 @@ import {
   encodePng,
   packedSprites,
   type PackedSprite,
+  type RgbaImage,
 } from "unity-asset-reader-texture";
 
 import type { Io } from "./main.js";
@@ -118,6 +119,9 @@ export async function extract(env: Env, options: ExtractOptions, io: Io): Promis
   const types = options.types ?? DEFAULT_TYPES;
   const out = new OutputDir(options.output);
   const tally = { written: 0, skipped: 0, failed: 0 };
+  // The atlases sprites cut from, decoded once per run. Only sprites fill it, so a
+  // run does not hold every Texture2D it wrote in memory.
+  const atlases = new Map<ObjectReader, RgbaImage>();
 
   const one = async (
     dir: string,
@@ -156,7 +160,7 @@ export async function extract(env: Env, options: ExtractOptions, io: Io): Promis
         tally.failed++;
       }
       for (const sprite of sprites) {
-        await one("Sprite", "packed Sprite", asset.reader, () => sprite.name, () => image(sprite));
+        await one("Sprite", "packed Sprite", asset.reader, () => sprite.name, () => image(sprite, atlases));
       }
     }
     if (!types.has(asset.typeName)) continue;
@@ -165,7 +169,7 @@ export async function extract(env: Env, options: ExtractOptions, io: Io): Promis
       asset.typeName,
       asset.reader,
       () => asset.name,
-      () => exportAsset(asset, options),
+      () => exportAsset(asset, options, atlases),
     );
   }
 
@@ -176,21 +180,32 @@ export async function extract(env: Env, options: ExtractOptions, io: Io): Promis
   return tally.failed > 0 ? 1 : 0;
 }
 
-/** A Texture2D or Sprite as a PNG. */
-async function image(asset: Asset<"Texture2D" | "Sprite"> | PackedSprite): Promise<Exported> {
-  const { rgba, width, height } = await decodeImage(asset);
+/**
+ * A Texture2D or Sprite as a PNG. `atlases` caches the textures sprites are
+ * cut from; a Texture2D is decoded without it.
+ */
+async function image(
+  asset: Asset<"Texture2D" | "Sprite"> | PackedSprite,
+  atlases: Map<ObjectReader, RgbaImage>,
+): Promise<Exported> {
+  const options = asset.type === "Texture2D" ? {} : { decodedTextures: atlases };
+  const { rgba, width, height } = await decodeImage(asset, options);
   // A dynamic font's texture, before Unity renders glyphs into it.
   if (width === 0 || height === 0) return { skip: `${width} x ${height} image, no pixels` };
   return { ext: "png", bytes: encodePng({ data: rgba, width, height }) };
 }
 
 /** One asset's file, by its class. */
-async function exportAsset(asset: Asset, options: ExtractOptions): Promise<Exported> {
+async function exportAsset(
+  asset: Asset,
+  options: ExtractOptions,
+  atlases: Map<ObjectReader, RgbaImage>,
+): Promise<Exported> {
   const reader = asset.reader;
   switch (asset.type) {
     case "Texture2D":
     case "Sprite":
-      return image(asset);
+      return image(asset, atlases);
     case "TextAsset": {
       // The bytes as they are; .txt when they are UTF-8 text, .bytes otherwise.
       const bytes = reader.read<TextAsset>().m_Script;
