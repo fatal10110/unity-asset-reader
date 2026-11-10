@@ -4,15 +4,18 @@
 For the humanoid muscle-to-bone conversion only, the oracle is the Unity editor
 (plan section 5, revision 2026-11-08e). In each fixture editor this script
 opens a scratch project outside the repository, loads the COMMITTED typed
-bundles with `AssetBundle.LoadFromFile`, instantiates their `humanoid` prefab
-and, for each humanoid fixture clip, feeds the clip's muscle values at its
-keys and at the midpoints between them to
+bundles with `AssetBundle.LoadFromFile`, instantiates the clip's humanoid
+prefab and, for each humanoid fixture clip, feeds the clip's muscle values at
+its keys and at the midpoints between them to
 `new HumanPoseHandler(avatar, root).SetHumanPose(...)`. It records the inputs
 (95 muscles, body position and rotation) and every transform's resulting
-local rotation and position in `fixtures/humanoid-unity-goldens.json`.
+local rotation and position: the first rig's clips in
+`fixtures/humanoid-unity-goldens.json`, the second and third rigs' (#325) in
+`fixtures/humanoid2-unity-goldens.json`.
 
 The clips' values are the authored curves of fixtures/BUILDING.md (section 28
-`pose`, section 24 `muscle`), evaluated by Unity's `AnimationCurve.Evaluate`;
+`pose`, section 24 `muscle`, section 31 `pose2` and `upperchest`), evaluated
+by Unity's `AnimationCurve.Evaluate`;
 nothing passes through an Animator, so neither clip compression nor root
 motion baking is part of the golden. Nothing here runs this library (R12).
 
@@ -39,11 +42,16 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUNDLES = ROOT / "fixtures" / "bundles"
 GOLDEN = ROOT / "fixtures" / "humanoid-unity-goldens.json"
+# The second rig's clips (#325) have a golden of their own, so the first stays as it was.
+GOLDEN2 = ROOT / "fixtures" / "humanoid2-unity-goldens.json"
 EDITORS = ("2019.4.41f2", "2020.3.30f1", "6000.3.26f1", "6000.6.4f1")
-# Clip name -> the committed typed bundle holding it, the humanoid prefab and its Avatar.
+# Clip name -> the committed typed bundle holding it, its humanoid prefab, the prefab's
+# Avatar and the golden it goes to, in golden order.
 CLIPS = {
-    "pose": "editor/{version}/humanoid/lz4/humanoid",
-    "muscle": "editor/{version}/scene/lz4/scene",
+    "pose": ("editor/{version}/humanoid/lz4/humanoid", "humanoid", "human", GOLDEN),
+    "muscle": ("editor/{version}/scene/lz4/scene", "humanoid", "human", GOLDEN),
+    "pose2": ("editor/{version}/humanoid2/lz4/humanoid2", "humanoid2", "human2", GOLDEN2),
+    "upperchest": ("editor/{version}/humanoid2/lz4/humanoid2", "humanoid3", "human3", GOLDEN2),
 }
 # How a reimplementation is compared with these values (plan section 5). The bound
 # itself is the owner's decision on #319, so the golden carries no number of its own.
@@ -62,12 +70,12 @@ using UnityEngine;
 
 // The humanoid oracle (#318), written into a scratch project by
 // scripts/make-humanoid-goldens.py. For each clip: load the committed bundle,
-// instantiate its "humanoid" prefab, and at every key and midpoint feed the
+// instantiate its humanoid prefab, and at every key and midpoint feed the
 // clip's authored values to HumanPoseHandler.SetHumanPose, then record every
 // transform's local rotation and position.
 public static class HumanoidOracle
 {
-    // fixtures/BUILDING.md section 28: muscle i at key k (times 0, 0.5, 1); never 0.
+    // fixtures/BUILDING.md section 28 (and 31): muscle i at key k (times 0, 0.5, 1); never 0.
     static float V(int i, int k) { return (i % 2 == 0 ? 1f : -1f) * ((i * 5 + k * 3) % 13 + 1) / 16f; }
 
     static AnimationCurve Keys(params float[] tv)
@@ -82,8 +90,9 @@ public static class HumanoidOracle
     {
         var c = new AnimationCurve[HumanTrait.MuscleCount + 7];
         int n = HumanTrait.MuscleCount;
-        if (clip == "pose")
+        if (clip == "pose" || clip == "pose2")
         {
+            // fixtures/BUILDING.md section 28 ("pose") and 31 ("pose2").
             for (int i = 0; i < n; i++) c[i] = Keys(0f, V(i, 0), 0.5f, V(i, 1), 1f, V(i, 2));
             c[n] = Keys(0f, 0.125f, 0.5f, -0.0625f, 1f, 0.25f);
             c[n + 1] = Keys(0f, 1f, 0.5f, 1.0625f, 1f, 0.9375f);
@@ -98,6 +107,11 @@ public static class HumanoidOracle
             c[Array.IndexOf(HumanTrait.MuscleName, "Left Arm Down-Up")] = Keys(0f, 0.25f, 1f, 0.75f);
             c[Array.IndexOf(HumanTrait.MuscleName, "Right Forearm Stretch")] = Keys(0f, 1f, 1f, 0.5f);
             c[n + 1] = Keys(0f, 1f, 1f, 1.05f);
+        }
+        else if (clip == "upperchest")
+        {
+            // fixtures/BUILDING.md section 31: the UpperChest muscles 6-8 only.
+            for (int i = 6; i <= 8; i++) c[i] = Keys(0f, V(i, 0), 0.5f, V(i, 1), 1f, V(i, 2));
         }
         else throw new Exception("unknown clip " + clip);
         return c;
@@ -122,25 +136,25 @@ public static class HumanoidOracle
         sb.Append(string.Join(",", HumanTrait.MuscleName.Select(m => "\"" + m + "\"").ToArray()));
         sb.Append("],\"clips\":{");
         bool first = true;
-        foreach (var clip in new[] { "pose", "muscle" })
+        foreach (var clip in new[] { "pose", "muscle", "pose2", "upperchest" })
         {
             var path = Arg(args, "-uarBundle-" + clip);
             if (path == null) continue;
             if (!first) sb.Append(",");
             first = false;
-            sb.Append("\"" + clip + "\":" + Sample(clip, path));
+            sb.Append("\"" + clip + "\":" + Sample(clip, path, Arg(args, "-uarPrefab-" + clip), Arg(args, "-uarAvatar-" + clip)));
         }
         sb.Append("}}");
         File.WriteAllText(Arg(args, "-uarOut"), sb.ToString());
         Debug.Log("ORACLE-OK humanoid " + Application.unityVersion);
     }
 
-    static string Sample(string clip, string path)
+    static string Sample(string clip, string path, string prefabName, string avatarName)
     {
         var bundle = AssetBundle.LoadFromFile(path);
         if (bundle == null) throw new Exception("cannot load " + path);
-        var prefab = bundle.LoadAsset<GameObject>("humanoid");
-        var avatar = bundle.LoadAsset<Avatar>("human");
+        var prefab = bundle.LoadAsset<GameObject>(prefabName);
+        var avatar = bundle.LoadAsset<Avatar>(avatarName);
         if (prefab == null || avatar == null || !avatar.isValid || !avatar.isHuman)
             throw new Exception("no humanoid prefab or human Avatar in " + path);
         var go = UnityEngine.Object.Instantiate(prefab);
@@ -214,13 +228,15 @@ def run_editor(version, exe, work, settings, clips):
             "-uarOut", win(out)]
     used = {}
     for clip in clips:
-        rel = CLIPS[clip].format(version=version)
+        bundle, prefab, avatar, _ = CLIPS[clip]
+        rel = bundle.format(version=version)
         src = BUNDLES / rel
         # A copy on the Windows side: the editor reads it from a local disk.
         local = project / "bundles" / clip
         local.parent.mkdir(exist_ok=True)
         shutil.copyfile(src, local)
-        args += ["-uarBundle-" + clip, win(local)]
+        args += ["-uarBundle-" + clip, win(local), "-uarPrefab-" + clip, prefab,
+                 "-uarAvatar-" + clip, avatar]
         used[clip] = {"bundle": rel, "sha256": hashlib.sha256(src.read_bytes()).hexdigest()}
     code = subprocess.run(args).returncode
     if code != 0 or not out.exists():
@@ -273,19 +289,21 @@ def main():
     if a.probe:
         print(json.dumps(editors["2019.4.41f2"]["clips"]["muscle"]["samples"][2])[:2000])
         return
-    golden = {
-        "_oracle": "Unity editor, HumanPoseHandler.SetHumanPose in batchmode (plan section 5)",
-        "_generator": "scripts/make-humanoid-goldens.py",
-        "_units": ("muscles and bodyPosition as HumanPose takes them: bodyPosition is in the "
-                   "Avatar's normalized units (divided by the human scale); local positions in "
-                   "metres, rotations as quaternions x, y, z, w, all in each transform's parent "
-                   "space; bones in GetComponentsInChildren order, root first"),
-        "_comparison": COMPARISON,
-        "muscleNames": editors[EDITORS[0]]["muscleNames"],
-        "editors": {v: {"clips": d["clips"]} for v, d in editors.items()},
-    }
-    GOLDEN.write_text(dump(golden) + "\n")
-    print(f"wrote {GOLDEN.relative_to(ROOT)}")
+    for path in dict.fromkeys(c[3] for c in CLIPS.values()):
+        golden = {
+            "_oracle": "Unity editor, HumanPoseHandler.SetHumanPose in batchmode (plan section 5)",
+            "_generator": "scripts/make-humanoid-goldens.py",
+            "_units": ("muscles and bodyPosition as HumanPose takes them: bodyPosition is in the "
+                       "Avatar's normalized units (divided by the human scale); local positions in "
+                       "metres, rotations as quaternions x, y, z, w, all in each transform's "
+                       "parent space; bones in GetComponentsInChildren order, root first"),
+            "_comparison": COMPARISON,
+            "muscleNames": editors[EDITORS[0]]["muscleNames"],
+            "editors": {v: {"clips": {c: d["clips"][c] for c in CLIPS if CLIPS[c][3] == path}}
+                        for v, d in editors.items()},
+        }
+        path.write_text(dump(golden) + "\n")
+        print(f"wrote {path.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
