@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Record the Unity editor's pixels of every mip level of the mips fixtures (#331).
+"""Record the Unity editor's pixels of every mip level, face and slice of the texture fixtures (#331).
 
 For the pixels of mip levels past the first, the oracle is the Unity editor
 (plan section 5, revision 2026-11-10a): AssetStudio c37af7d and UnityPy decode
 level 0 only. In each fixture editor this script opens a scratch project
-outside the repository, loads the COMMITTED `mips` bundles with
-`AssetBundle.LoadFromFile` (batchmode, `-buildTarget` the bundle's own
-platform, so the Android bundle loads in a Windows editor) and records
-`Texture2D.GetPixels32(mip)` of every level of every Texture2D in
-`fixtures/texture-pixel-unity-goldens.json`. The editor decodes compressed
+outside the repository, loads the COMMITTED `mips` and `cube-array-3d`
+bundles with `AssetBundle.LoadFromFile` (batchmode, `-buildTarget` the
+bundle's own platform, so the Android bundle loads in a Windows editor) and
+records `Texture2D.GetPixels32(mip)` of every level of every Texture2D in
+`fixtures/texture-pixel-unity-goldens.json`, and `Cubemap.GetPixels(face,
+mip)`, `Texture2DArray.GetPixels32(slice, mip)` and `Texture3D.GetPixels32(mip)`
+of every level, face and slice of every Cubemap, Texture2DArray and Texture3D
+in `fixtures/texture-layer-pixel-unity-goldens.json`. The editor decodes compressed
 levels on the CPU, without a GPU (`-nographics`). Nothing here runs this
 library (R12).
 
@@ -32,12 +35,19 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUNDLES = ROOT / "fixtures" / "bundles"
 GOLDEN = ROOT / "fixtures" / "texture-pixel-unity-goldens.json"
+LAYER_GOLDEN = ROOT / "fixtures" / "texture-layer-pixel-unity-goldens.json"
 EDITORS = ("2019.4.41f2", "2020.3.30f1", "6000.3.26f1", "6000.6.4f1")
 # Bundle name -> the committed bundle (fixtures/BUILDING.md section 29) and the
 # -buildTarget the editor loads it under.
 SETS = {
     "windows": ("editor/{version}/mips/windows", "Win64"),
     "android": ("editor/{version}/mips/android", "Android"),
+}
+# The same for the Cubemap, Texture2DArray and Texture3D bundles (section 31),
+# written to LAYER_GOLDEN under the same names.
+LAYER_SETS = {
+    "windows": ("editor/{version}/cube-array-3d/windows", "Win64"),
+    "android": ("editor/{version}/cube-array-3d/android", "Android"),
 }
 # How a decoder is compared with these pixels (plan section 5, the owner's rule on #331).
 COMPARISON = ("Uncompressed formats exactly. A compressed format's levels within the largest "
@@ -54,7 +64,9 @@ using UnityEngine;
 
 // The texture pixel oracle (#331), written into a scratch project by
 // scripts/make-texture-pixel-goldens.py. Load the committed bundle and record
-// GetPixels32 of every mip level of every Texture2D in it.
+// GetPixels32 of every mip level of every Texture2D in it ("textures"), and of
+// every level of every face or slice of every Cubemap, Texture2DArray and
+// Texture3D ("layered": levels[mip][face or slice]).
 public static class TexturePixelOracle
 {
     static string Arg(string[] args, string name)
@@ -74,6 +86,47 @@ public static class TexturePixelOracle
             b[4 * i + 3] = c[i].a;
         }
         return "\"" + Convert.ToBase64String(b) + "\"";
+    }
+
+    static Color32[] C32(Color[] c)
+    {
+        var o = new Color32[c.Length];
+        for (int i = 0; i < c.Length; i++) o[i] = c[i];
+        return o;
+    }
+
+    // One texture of "layered": its class, format, size, depth and every level
+    // as a list of faces or slices.
+    static void Layered(StringBuilder sb, Texture t, string cls, int format, int depth,
+        Func<int, List<Color32[]>> level)
+    {
+        if (!t.isReadable) throw new Exception(t.name + " is not readable");
+        sb.Append("\"" + t.name + "\":{\"class\":\"" + cls + "\",\"format\":" + format + ",\"width\":" + t.width
+            + ",\"height\":" + t.height + ",\"depth\":" + depth + ",\"mipCount\":" + t.mipmapCount + ",\"levels\":[");
+        for (int m = 0; m < t.mipmapCount; m++)
+        {
+            sb.Append(m > 0 ? ",[" : "[");
+            var layers = level(m);
+            for (int l = 0; l < layers.Count; l++) sb.Append((l > 0 ? "," : "") + Level(layers[l]));
+            sb.Append("]");
+        }
+        sb.Append("]}");
+    }
+
+    // Texture3D.GetPixels32(mip) is the level's depth slices one after another;
+    // split it into max(1, depth >> mip) equal slices.
+    static List<Color32[]> Slices(Color32[] all, int count)
+    {
+        if (all.Length % count != 0) throw new Exception(all.Length + " pixels in " + count + " slices");
+        var o = new List<Color32[]>();
+        int n = all.Length / count;
+        for (int z = 0; z < count; z++)
+        {
+            var s = new Color32[n];
+            Array.Copy(all, z * n, s, 0, n);
+            o.Add(s);
+        }
+        return o;
     }
 
     public static void Run()
@@ -96,6 +149,27 @@ public static class TexturePixelOracle
                 sb.Append((m > 0 ? "," : "") + Level(t.GetPixels32(m)));
             sb.Append("]}");
         }
+        sb.Append("},\"layered\":{");
+        var layered = new List<Action>();
+        foreach (var c in bundle.LoadAllAssets<Cubemap>())
+            layered.Add(() => Layered(sb, c, "Cubemap", (int)c.format, 6, m =>
+                Enumerable.Range(0, 6).Select(f => C32(c.GetPixels((CubemapFace)f, m))).ToList()));
+        foreach (var a in bundle.LoadAllAssets<Texture2DArray>())
+            layered.Add(() => Layered(sb, a, "Texture2DArray", (int)a.format, a.depth, m =>
+                Enumerable.Range(0, a.depth).Select(s => a.GetPixels32(s, m)).ToList()));
+        foreach (var v in bundle.LoadAllAssets<Texture3D>())
+            layered.Add(() => Layered(sb, v, "Texture3D", (int)v.format, v.depth, m =>
+                Slices(v.GetPixels32(m), Math.Max(1, v.depth >> m))));
+        var names = bundle.LoadAllAssets<Cubemap>().Select(t => t.name)
+            .Concat(bundle.LoadAllAssets<Texture2DArray>().Select(t => t.name))
+            .Concat(bundle.LoadAllAssets<Texture3D>().Select(t => t.name)).ToList();
+        first = true;
+        foreach (var i in Enumerable.Range(0, names.Count).OrderBy(i => names[i], StringComparer.Ordinal))
+        {
+            if (!first) sb.Append(",");
+            first = false;
+            layered[i]();
+        }
         sb.Append("}}");
         bundle.Unload(true);
         File.WriteAllText(Arg(args, "-uarOut"), sb.ToString());
@@ -111,9 +185,9 @@ def win(path):
                           text=True).stdout.strip()
 
 
-def run_editor(version, exe, work, settings, name):
+def run_editor(version, exe, work, settings, name, sets=SETS, key="textures"):
     """Run the oracle in one editor on one bundle; return its textures and the bundle's record."""
-    rel, target = SETS[name]
+    rel, target = sets[name]
     rel = rel.format(version=version)
     project = work / f"uar-331-oracle-{version}"
     template = pathlib.Path(settings.format(version=version))
@@ -125,14 +199,15 @@ def run_editor(version, exe, work, settings, name):
     (editor_dir / "TexturePixelOracle.cs").write_text(ORACLE_CS.lstrip(), newline="\n")
     src = BUNDLES / rel
     # A copy on the Windows side: the editor reads it from a local disk.
-    local = project / "bundles" / name
+    tag = name if key == "textures" else f"{name}-layered"
+    local = project / "bundles" / tag
     local.parent.mkdir(exist_ok=True)
     shutil.copyfile(src, local)
-    out = project / f"oracle-{name}.json"
+    out = project / f"oracle-{tag}.json"
     out.unlink(missing_ok=True)
     args = [exe, "-batchmode", "-nographics", "-quit", "-buildTarget", target,
             "-projectPath", win(project), "-executeMethod", "TexturePixelOracle.Run",
-            "-logFile", win(project / f"oracle-{name}.log"), "-uarBundle", win(local),
+            "-logFile", win(project / f"oracle-{tag}.log"), "-uarBundle", win(local),
             "-uarOut", win(out)]
     code = subprocess.run(args).returncode
     if code != 0 or not out.exists():
@@ -142,7 +217,7 @@ def run_editor(version, exe, work, settings, name):
         raise SystemExit(f"{exe} is Unity {data['unity']}, not {version}")
     record = {"bundle": rel, "sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
               "buildTarget": target}
-    return {**record, "textures": data["textures"]}
+    return {**record, "textures": data[key]}
 
 
 def dump(value, indent=0):
@@ -172,11 +247,17 @@ def main():
     if sorted(exes) != sorted(EDITORS):
         raise SystemExit(f"--unity wants exactly {', '.join(EDITORS)}")
     editors = {}
+    layered = {}
     for version in EDITORS:
         editors[version] = {name: run_editor(version, exes[version], a.work, a.settings, name)
                             for name in SETS}
+        layered[version] = {name: run_editor(version, exes[version], a.work, a.settings, name,
+                                             LAYER_SETS, "layered")
+                            for name in LAYER_SETS}
         print(f"{version}: " + ", ".join(f"{n} {len(d['textures'])} textures"
-                                         for n, d in editors[version].items()), flush=True)
+                                         for n, d in editors[version].items())
+              + ", " + ", ".join(f"cube-array-3d {n} {len(d['textures'])} textures"
+                                 for n, d in layered[version].items()), flush=True)
     golden = {
         "_oracle": "Unity editor, Texture2D.GetPixels32(mip) in batchmode (plan section 5)",
         "_generator": "scripts/make-texture-pixel-goldens.py",
@@ -189,6 +270,21 @@ def main():
     }
     GOLDEN.write_text(dump(golden) + "\n")
     print(f"wrote {GOLDEN.relative_to(ROOT)}")
+    layer_golden = {
+        "_oracle": ("Unity editor, in batchmode (plan section 5): Cubemap.GetPixels(face, mip), "
+                    "Texture2DArray.GetPixels32(slice, mip), Texture3D.GetPixels32(mip) split "
+                    "into its depth slices"),
+        "_generator": "scripts/make-texture-pixel-goldens.py",
+        "_pixels": ("levels[mip][face or slice]: cube faces in CubemapFace order (+X, -X, +Y, -Y, "
+                    "+Z, -Z), array slices, or the level's max(1, depth >> mip) depth slices; each "
+                    "as the editor returns it: RGBA8, rows bottom first (Unity's stored order), "
+                    "base64. For a DXT, BC or ETC level smaller than a 4x4 block the editor "
+                    "returns the whole block; the level is its first rows and columns"),
+        "_comparison": COMPARISON,
+        "editors": layered,
+    }
+    LAYER_GOLDEN.write_text(dump(layer_golden) + "\n")
+    print(f"wrote {LAYER_GOLDEN.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
