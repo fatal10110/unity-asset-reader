@@ -230,8 +230,8 @@ for (const obj of env.objects) {
 - **`env.resolve(pptr, obj)`** follows a pointer (see
   [Follow a pointer to another object](#follow-a-pointer-to-another-object)).
 - **`env.readResource(ref, obj)`** reads bulk data that an object keeps in a `.resS` /
-  `.resource` file. `obj.read()` already does that for `Texture2D`, `AudioClip` and `VideoClip`
-  (`imageData`, `audioData`, `videoData`).
+  `.resource` file. `obj.read()` already does that for `Texture2D`, `Cubemap`, `Texture2DArray`,
+  `Texture3D`, `AudioClip` and `VideoClip` (`imageData`, `audioData`, `videoData`).
 
 Returned bytes are views into your input or into the decompressed blocks, never copies. A small
 view keeps its whole buffer alive. To keep a small piece and let the rest be garbage-collected,
@@ -383,7 +383,7 @@ In the "Tested on" column:
 | `UnityWebData1.0` (WebGL `.data`) | Yes, and a bundle inside it is opened too | Generated |
 | A gzip-wrapped file | Unwrapped, then opened as whatever is inside | Generated |
 | A loose SerializedFile (`.assets`, `level0`, `globalgamemanagers`) | Yes | Fixtures' SerializedFile nodes, read on their own |
-| `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
+| `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `Cubemap`, `Texture2DArray`, `Texture3D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
 | Split files (`.split0`, `.split1`, ...) | Pass the joined file to `load()`; [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` joins them | Unit tests of `-node` |
 | Bundle block compression | None, LZMA, LZ4, LZ4HC (LZ4HC blocks decode as LZ4) | Fixtures (none, LZMA, LZ4), generated |
 | SerializedFile format versions | 2 to 23, little- and big-endian. See [Unity versions](#unity-versions) | Fixtures (21, 22, 23), unit tests (6, 8, 15; format-23 blob validation) |
@@ -416,6 +416,9 @@ starts there. The older readers keep the older layouts they already had.
 | `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
 | `Shader` (`ShaderFields`) | `parsedForm`: the parsed ShaderLab (`name`, properties, sub-shaders, passes, render state, keywords, each variant's parameters); `platforms` and `compressedBlob`: every platform's compiled programs, LZ4-compressed, not decoded | 2019.1 | 2019.4, 2020.3, 6000.3.26f1, 6000.6 |
 | `Texture2D` (`Texture2DFields`) | `width`, `height`, `format` (a `TextureFormat`), `mipCount`, `textureSettings`, `platform` and `imageData`, still encoded (inline or from the `.resS`). Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | Any (gates from 2.6; tested from 3.4) | Yes |
+| `Cubemap` (`CubemapFields`) | The `Texture2D` fields of its six faces (`imageData` holds each face with its own mip levels, one after the other) and `sourceTextures`. Decode it with [`unity-asset-reader-texture`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/texture/README.md) | 2019.1 | 2019.4, 2020.3, 6000.3, 6000.6 |
+| `Texture2DArray` (`Texture2DArrayFields`) | `width`, `height`, `depth` (the slice count), `format` (a `GraphicsFormat`; `textureFormatOfGraphicsFormat` maps it), `mipCount`, `colorSpace`, `textureSettings`, `platform` and `imageData`: each slice with its own mip levels, still encoded | 2019.1 | 2019.4, 2020.3, 6000.3, 6000.6 |
+| `Texture3D` (`Texture3DFields`) | The same fields as `Texture2DArray`; `depth` is the depth of level 0, and `imageData` holds the levels one after the other, level `n` `max(1, depth >> n)` slices deep | 2019.1 | 2019.4, 2020.3, 6000.3, 6000.6 |
 | `Sprite` (`SpriteFields`) | `rect`, `pivot`, `border`, `pixelsToUnits`, `renderData` (texture area and mesh). Cut it out with `unity-asset-reader-texture` | 4.3 | 2019.4, 6000.3, 6000.6 |
 | `SpriteAtlas` (`SpriteAtlasFields`) | `renderDataMap`; before 6000.6 also `packedSprites`, from 6000.6 each entry holds its sprite instead (`spriteInstanceData`: name, rect, pivot, border, mesh) | 2017.1 | 2019.4, 6000.3, 6000.6 |
 | `AudioClip` (`AudioClipFields`) | `channels`, `frequency`, `length`, `compressionFormat` and `audioData`: the sound bank as stored (usually FSB5), not decoded | 3.4 | Yes |
@@ -493,6 +496,9 @@ an object only when its bytes or the SerializedFile format leave one layout. Oth
 | `Material` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `Shader` | Read in format 21 (Unity 2019.3 and 2019.4), refused otherwise |
 | `Texture2D` | Refused |
+| `Cubemap` | Refused |
+| `Texture2DArray` | Refused |
+| `Texture3D` | Refused |
 | `Sprite` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `SpriteAtlas` | Read in formats 18 to 21 (Unity 2019), refused otherwise |
 | `AudioClip` | Read, format 18 and later |
@@ -609,6 +615,8 @@ you. Call one yourself only to read an object as a specific class.
 | `readMaterial` | `Material`, `UnityPropertySheet`, `UnityTexEnv`, `BuildTextureStackReference`, `Color`, `Vector2` |
 | `readShader` | `Shader`, `SerializedShader`, `SerializedProperty`, `SerializedTextureProperty`, `SerializedSubShader`, `SerializedPass`, `SerializedTagMap`, `SerializedShaderState`, `SerializedShaderRTBlendState`, `SerializedStencilOp`, `SerializedShaderFloatValue`, `SerializedShaderVectorValue`, `SerializedProgram`, `SerializedSubProgram`, `SerializedPlayerSubProgram`, `ParserBindChannels`, `ShaderBindChannel`, `ProgramParameters`, `VectorParameter`, `MatrixParameter`, `StructParameter`, `TextureParameter`, `BufferBinding`, `ConstantBuffer`, `UAVParameter`, `SamplerParameter`, `Binding` |
 | `readTexture`, `readTexture2D`, `TextureFormat` | `Texture`, `Texture2D`, `StreamingInfo`, `GLTextureSettings`; `Texture2DData` is what `obj.read()` returns |
+| `readCubemap`, `readTexture2DArray`, `readTexture3D` | `Cubemap`, `Texture2DArray`, `Texture3D`; `CubemapData`, `Texture2DArrayData`, `Texture3DData` are what `obj.read()` returns |
+| `GraphicsFormat`, `textureFormatOfGraphicsFormat(format)` | The `GraphicsFormat` values a fixture checks, and the `TextureFormat` a `Texture2DArray` or `Texture3D` `m_Format` decodes as (`UnsupportedError` of kind `"graphics format"` for any other value) |
 | `readSprite`, `SpritePackingRotation` | `Sprite`, `SpriteRenderData`, `SpriteVertex`, `SpriteBone`, `SecondarySpriteTexture`, `VertexData`, `ChannelInfo`, `SubMesh`, `BlendShapeData`, `BlendShapeVertex`, `MeshBlendShape`, `MeshBlendShapeChannel`, `BoneWeights4`, `AABB`, `Matrix4x4`, `Vector4`, `GUID` |
 | `readSpriteAtlas` | `SpriteAtlas`, `SpriteAtlasData`, `SpriteInstanceData` |
 | `readAudioClip` | `AudioClip`; `AudioClipData` is what `obj.read()` returns |
@@ -636,7 +644,7 @@ it. `env.assets()` calls them for you.
 
 | Export | Result types |
 |---|---|
-| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toShaderFields`, `toTexture2DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `ShaderFields` (`SerializedShaderFields`, `SerializedPropertyFields`, `SerializedSubShaderFields`, `SerializedPassFields`, `SerializedShaderStateFields`, `SerializedProgramFields`, `SerializedSubProgramFields`, `SerializedPlayerSubProgramFields`, `ProgramParametersFields`, `VectorParameterFields`, `MatrixParameterFields`, `StructParameterFields`, `TextureParameterFields`, `BufferBindingFields`, `ConstantBufferFields`, `UAVParameterFields`, `SamplerParameterFields`, `BindingFields`), `Texture2DFields` (`GLTextureSettingsFields`), `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
+| `toAssetBundleFields`, `toTextAssetFields`, `toMonoScriptFields`, `toMaterialFields`, `toShaderFields`, `toTexture2DFields`, `toCubemapFields`, `toTexture2DArrayFields`, `toTexture3DFields`, `toSpriteFields`, `toSpriteAtlasFields`, `toAudioClipFields`, `toVideoClipFields`, `toFontFields`, `toMovieTextureFields`, `toMeshFields` | `AssetBundleFields`, `TextAssetFields`, `MonoScriptFields`, `MaterialFields` (`UnityPropertySheetFields`, `UnityTexEnvFields`), `ShaderFields` (`SerializedShaderFields`, `SerializedPropertyFields`, `SerializedSubShaderFields`, `SerializedPassFields`, `SerializedShaderStateFields`, `SerializedProgramFields`, `SerializedSubProgramFields`, `SerializedPlayerSubProgramFields`, `ProgramParametersFields`, `VectorParameterFields`, `MatrixParameterFields`, `StructParameterFields`, `TextureParameterFields`, `BufferBindingFields`, `ConstantBufferFields`, `UAVParameterFields`, `SamplerParameterFields`, `BindingFields`), `Texture2DFields` (`GLTextureSettingsFields`), `CubemapFields`, `Texture2DArrayFields`, `Texture3DFields`, `SpriteFields` (`SpriteRenderDataFields`, `VertexDataFields`, `SubMeshFields`, `AABBFields`), `SpriteAtlasFields` (`SpriteAtlasDataFields`, `SpriteInstanceDataFields`), `AudioClipFields` and `VideoClipFields` (`StreamedResourceFields`), `FontFields`, `MovieTextureFields`, `MeshFields` (`CompressedMeshFields`, `PackedFloatVectorFields`, `PackedIntVectorFields`, `MinMaxAABBFields`, `MeshLodInfoFields`) |
 | `toAnimationFields` | `AnimationFields` |
 | `toRectTransformFields` | `RectTransformFields` |
 | `toAvatarFields`, `toAnimatorControllerFields`, `toAnimatorFields`, `toAnimatorOverrideControllerFields` | `AvatarFields`, `AnimatorControllerFields`, `AnimatorFields`, `AnimatorOverrideControllerFields` (`AnimationClipOverrideFields`, `ValueConstantFields`, `ValueArrayConstantFields`, `SkeletonMaskElementFields`, `SkeletonMaskFields`, `LayerConstantFields`, `ConditionConstantFields`, `TransitionConstantFields`, `MotionNeighborListFields`, `Blend2dDataConstantFields`, `Blend1dDataConstantFields`, `BlendDirectDataConstantFields`, `BlendTreeNodeConstantFields`, `BlendTreeConstantFields`, `StateConstantFields`, `SelectorTransitionConstantFields`, `SelectorStateConstantFields`, `StateMachineConstantFields`, `ValueArrayFields`, `ControllerConstantFields`, `StateKeyFields`, `StateRangeFields`, `StateMachineBehaviourVectorDescriptionFields`, `SkeletonNodeFields`, `LimitFields`, `AxesFields`, `SkeletonFields`, `SkeletonPoseFields`, `HandFields`, `HumanFields`, `AvatarConstantFields`, `SkeletonBoneLimitFields`, `HumanBoneFields`, `SkeletonBoneFields`, `HumanDescriptionFields`) |
