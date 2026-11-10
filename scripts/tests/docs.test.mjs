@@ -12,7 +12,7 @@ const read = (path) => readFileSync(join(root, path), "utf8");
 const REPO_BLOB = "https://github.com/fatal10110/unity-asset-reader/blob/main/";
 
 test("package repository metadata points at the renamed repo (#199)", () => {
-  for (const pkg of ["core", "texture", "node", "mesh", "audio", "spine", "shader", "animation", "decoder"]) {
+  for (const pkg of ["core", "texture", "node", "mesh", "audio", "spine", "shader", "animation", "cli", "decoder"]) {
     const { repository } = JSON.parse(read(`packages/${pkg}/package.json`));
     assert.equal(repository.type, "git");
     assert.equal(repository.url, "https://github.com/fatal10110/unity-asset-reader.git");
@@ -34,6 +34,9 @@ const PACKAGE_READMES = {
   shader: "packages/shader/README.md",
   animation: "packages/animation/README.md",
 };
+
+/** READMEs of applications, which ship in a tarball too but have no API to document (#338). */
+const APP_READMES = { cli: "packages/cli/README.md" };
 
 /** Markdown with fenced and inline code removed, so code is never read as a link. */
 function prose(markdown) {
@@ -108,7 +111,7 @@ for (const doc of REPO_DOCS) {
   });
 }
 
-for (const [pkg, readme] of Object.entries(PACKAGE_READMES)) {
+for (const readme of [...Object.values(PACKAGE_READMES), ...Object.values(APP_READMES)]) {
   test(`${readme}: links work outside the repo and resolve`, () => {
     const targets = links(read(readme));
     assert.ok(targets.length > 0, `${readme} has no links`);
@@ -122,7 +125,9 @@ for (const [pkg, readme] of Object.entries(PACKAGE_READMES)) {
       }
     }
   });
+}
 
+for (const [pkg, readme] of Object.entries(PACKAGE_READMES)) {
   test(`${readme}: the API reference names every export of packages/${pkg}/src/index.ts`, () => {
     const names = exportsOf(read(`packages/${pkg}/src/index.ts`));
     assert.ok(names.length > 0, `no exports found in packages/${pkg}/src/index.ts`);

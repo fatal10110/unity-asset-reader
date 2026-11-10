@@ -1,0 +1,46 @@
+{
+  "name": "unity-asset-reader-cli",
+  "version": "0.0.0",
+  "description": "Command line tool for Unity AssetBundles and asset files: list, inspect, dump and extract their assets.",
+  "license": "MIT",
+  "bin": {
+    "unity-asset-reader-cli": "dist/cli.mjs"
+  },
+  "files": [
+    "dist/**/*",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "pretest": "npm run build",
+    "build": "rollup -c rollup.config.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "prepublishOnly": "npm run verify --prefix ../.."
+  },
+  "keywords": [
+    "unity",
+    "assetbundle",
+    "cli",
+    "extract",
+    "texture",
+    "audioclip",
+    "mesh",
+    "nodejs"
+  ],
+  "dependencies": {
+    "unity-asset-reader": "^1.3.0",
+    "unity-asset-reader-audio": "^1.1.0",
+    "unity-asset-reader-mesh": "^1.0.1",
+    "unity-asset-reader-node": "^1.1.0",
+    "unity-asset-reader-shader": "^1.1.0",
+    "unity-asset-reader-texture": "^1.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fatal10110/unity-asset-reader.git",
+    "directory": "packages/cli"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

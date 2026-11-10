@@ -55,6 +55,22 @@ test("feature packages peer on core's major, or on the oldest core of it they wo
   }
 });
 
+// Plan D7's one exception (revision 2026-11-10b): the CLI is an application, installed and run on
+// its own through npx, so nothing else would install the core and the packages it uses.
+test("the CLI depends on core and the packages it uses, at ranges the workspace satisfies", () => {
+  const cli = manifest("cli");
+  assert.equal(cli.peerDependencies, undefined, cli.name);
+  const workspace = new Map(PACKAGE_DIRS.map((dir) => [manifest(dir).name, manifest(dir).version]));
+  const deps = Object.entries(cli.dependencies ?? {});
+  assert.ok(deps.some(([name]) => name === "unity-asset-reader"), "no dependency on core");
+  for (const [name, range] of deps) {
+    // Only this repo's packages: no third-party runtime dependency (plan section 1).
+    assert.ok(workspace.has(name), `${name} is not a package of this repo`);
+    assert.match(range, /^\^\d+\.\d+\.\d+$/, `${name}: ${range}`);
+    assert.ok(satisfies(workspace.get(name), range), `${name}: ${range}`);
+  }
+});
+
 test("the texture package depends on a decoder range the workspace decoder satisfies", () => {
   const decoder = manifest("decoder");
   const pkg = manifest("texture");
@@ -109,6 +125,7 @@ function repo({
   spine = UNRELEASED,
   shader = UNRELEASED,
   animation = UNRELEASED,
+  cli = UNRELEASED,
 } = {}) {
   return [
     { name: "texture2ddecoder-wasm", version: decoder },
@@ -155,6 +172,11 @@ function repo({
       version: animation,
       peerDependencies: { "unity-asset-reader": "^1.3.0" },
       devDependencies: { "unity-asset-reader": "*" },
+    },
+    {
+      name: "unity-asset-reader-cli",
+      version: cli,
+      dependencies: { "unity-asset-reader": "^1.3.0", "unity-asset-reader-node": "^1.1.0" },
     },
   ];
 }
@@ -281,7 +303,7 @@ test("release plan: a package new since the base commit is a candidate", () => {
 test("release plan: a package at 0.0.0 is scaffolded, never published", () => {
   const view = registry(...RELEASED);
   // New since the base commit, by push or by dispatch: still not a candidate.
-  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null, null, null, null, null], view), []);
+  assert.deepEqual(planRelease(repo(), [...repo().slice(0, 4), null, null, null, null, null, null], view), []);
   assert.deepEqual(planRelease(repo(), undefined, view), []);
   // Its first release is a version change like any other, once the core it peers on is out.
   const withCore = registry(...RELEASED, "unity-asset-reader@1.2.0");
@@ -353,6 +375,7 @@ test("release plan: publish order puts every package after what it depends on", 
       "unity-asset-reader-spine",
       "unity-asset-reader-shader",
       "unity-asset-reader-animation",
+      "unity-asset-reader-cli",
     ],
   );
   const names = manifests.map((pkg) => pkg.name);
@@ -395,11 +418,11 @@ function gitRepo() {
 
 test("release plan: base manifests come from the base commit", () => {
   const { dir, commit } = gitRepo();
-  const first = commit([...repo().slice(0, 3), null, null, null, null, null, null]);
+  const first = commit([...repo().slice(0, 3), null, null, null, null, null, null, null]);
   const second = commit(repo({ texture: "1.0.1" }));
   const base = readManifestsAt(dir, first);
   const versions = base.map((pkg) => pkg?.version ?? null);
-  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null, null, null, null, null]);
+  assert.deepEqual(versions, ["1.2.3", "1.0.0", "1.0.0", null, null, null, null, null, null, null]);
   const head = readManifestsAt(dir, second).map((pkg) => pkg ?? assert.fail("missing"));
   assert.deepEqual(specs(planRelease(head, base, registry(...RELEASED))), [
     "unity-asset-reader-texture@1.0.1",

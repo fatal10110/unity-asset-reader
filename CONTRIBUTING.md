@@ -314,9 +314,9 @@ success, so all of them can be required checks.
 
 | Status check | Runs when these change | What it does |
 |---|---|---|
-| `reader (node 20)`, `reader (node 22)` | `packages/{core,texture,node,mesh,audio,spine,shader,animation}/**`, `fixtures/**`, `scripts/**`, `.github/**`, root config | `npm ci && npm run verify` (build, test, `check:browser`, no-C# guard) |
+| `reader (node 20)`, `reader (node 22)` | `packages/{core,texture,node,mesh,audio,spine,shader,animation,cli}/**`, `fixtures/**`, `scripts/**`, `.github/**`, root config | `npm ci && npm run verify` (build, test, `check:browser`, no-C# guard) |
 | `reader floor (node 20.19.0)`, `reader floor (node 22.12.0)` | same as `reader` | Tests the lowest versions of the reader packages' `engines` (#172): `npm ci && npm run verify`, then `node scripts/check-node-floor.mjs` (`import` and `require()` of `unity-asset-reader`, `unity-asset-reader-texture` and `unity-asset-reader-node`) |
-| `decoder` | `packages/{decoder,core,texture}/**`, `fixtures/**`, `examples/**`, the `docs/` demo, `scripts/check-node-floor.mjs`, `.github/**`, root config | Checks out the submodules, then `build:wasm` (Docker), `build:rollup`, `npm test -w texture2ddecoder-wasm`, the texture package's tests with the WASM, and the Playwright tests (`npm run test:smoke`). Then `scripts/check-node-floor.mjs` with the WASM (`initTexture()` and decodes) on Node.js 20.19.0 and 22.12.0 |
+| `decoder` | `packages/{decoder,core,texture,cli}/**`, `fixtures/**`, `examples/**`, the `docs/` demo, `scripts/check-node-floor.mjs`, `.github/**`, root config | Checks out the submodules, then `build:wasm` (Docker), `build:rollup`, `npm test -w texture2ddecoder-wasm`, the texture package's and the CLI's tests with the WASM, and the Playwright tests (`npm run test:smoke`). Then `scripts/check-node-floor.mjs` with the WASM (`initTexture()` and decodes) on Node.js 20.19.0 and 22.12.0 |
 
 Run the reader job locally with `npm ci && npm run verify`.
 
@@ -369,6 +369,7 @@ For a feature request, describe:
     ├── spine/                    # unity-asset-reader-spine
     ├── shader/                   # unity-asset-reader-shader
     ├── animation/                # unity-asset-reader-animation
+    ├── cli/                      # unity-asset-reader-cli (the command line tool)
     └── decoder/                  # texture2ddecoder-wasm
         ├── src/                  # TypeScript source (index.ts)
         ├── tests/                # index.test.ts, samples.test.ts

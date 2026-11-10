@@ -39,6 +39,7 @@ test("root NOTICE points at every per-package notice file", () => {
     "packages/spine/NOTICE",
     "packages/shader/NOTICE",
     "packages/animation/NOTICE",
+    "packages/cli/NOTICE",
     "packages/decoder/LICENSE",
   ]) {
     assert.ok(rootNotice.includes(path), `root NOTICE does not mention ${path}`);

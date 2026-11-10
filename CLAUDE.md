@@ -20,11 +20,13 @@ them.
 | `unity-asset-reader-spine` | `packages/spine/` | in development | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
 | `unity-asset-reader-shader` | `packages/shader/` | in development | Shader inspection text as AssetStudio writes it: GL/Metal source, SPIR-V disassembly. Pure TS. Depends on core (peer). |
 | `unity-asset-reader-animation` | `packages/animation/` | in development | AnimationClip curves as AssetStudio's `.anim` holds them: decoded streamed/dense/constant data, named paths, muscle attributes, events. Pure TS. Depends on core (peer). |
+| `unity-asset-reader-cli` | `packages/cli/` | in development | Command line tool (bin `unity-asset-reader-cli`): `ls`, `info`, `extract`, `dump` over `loadPath()`. The one application: depends on core and the feature packages it uses as regular dependencies (plan D7). |
 | `texture2ddecoder-wasm` | `packages/decoder/` | published, stable | WASM bindings (emscripten, C++ submodule `texture2ddecoder/`) decoding BC/ETC/PVRTC/ASTC/ATC/Crunch textures to **BGRA**. Node + browser. |
 
-Dependencies point one way: feature packages → core. Core and `texture2ddecoder-wasm` import
-nothing from the repo. Do not change `packages/decoder/` unless the task says so; it must keep its
-npm name, public API and tarball file set, and keep building and passing.
+Dependencies point one way: feature packages → core. Libraries take core as a peer; the CLI,
+the one application, takes it as a regular dependency (plan D7). Core and `texture2ddecoder-wasm`
+import nothing from the repo. Do not change `packages/decoder/` unless the task says so; it must
+keep its npm name, public API and tarball file set, and keep building and passing.
 
 ## 2. Precedence
 

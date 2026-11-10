@@ -688,6 +688,26 @@ scene readers.
   - Not converted: the body position (`RootT`), finger muscles, root motion and IK goals. The
     Hips keep their skeleton position.
 
+## unity-asset-reader-cli
+
+### 1.0.0 - Unreleased
+
+First release (version 0.0.0 until then: plan revision 2026-11-10b). An application, run with
+`npx unity-asset-reader-cli`: it takes core, `unity-asset-reader-node`, `-texture`, `-audio`,
+`-mesh` and `-shader` as regular dependencies.
+
+- **A command line tool** for one Unity file or one directory, loaded with `loadPath()` (#338):
+  - `ls` lists the objects (class, name, container path, path id, size, file), `--type` to
+    filter, `--json` for a JSON array.
+  - `info` prints each input's container, format and Unity version, the unpacked files, the Unity
+    versions and platforms, and the object count per class. It names the compression of legacy
+    UnityWeb and UnityRaw files only (#355).
+  - `extract -o <dir>` writes textures and sprites as PNG, TextAssets as their bytes, AudioClips
+    as WAV (and Vorbis as Ogg with `--vorbis-headers`), meshes as OBJ or glTF (`--mesh`),
+    shaders as text, and any other class named with `--type` as type tree JSON. It goes on past
+    an asset that fails, reports it, and exits 1 at the end.
+  - `dump --path-id <n>` prints one object's type tree as JSON.
+
 ## texture2ddecoder-wasm
 
 ### 1.2.6 - 2026-10-16
