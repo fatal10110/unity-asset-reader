@@ -133,8 +133,33 @@ const MEASURED: Record<number, { bound: number; layers: number }> = {
   [TextureFormat.DXT1]: { bound: 0, layers: 0 },
   [TextureFormat.BC7]: { bound: 0, layers: 0 },
   [TextureFormat.ETC2_RGBA8]: { bound: 0, layers: 0 },
-  [TextureFormat.ASTC_RGB_4x4]: { bound: 0, layers: 0 },
+  // 1, not 0: the editor's own decode of ASTC cubemap faces and 3D slices
+  // (and of 2019.4's array slices) is 1 off, already at level 0. See ASTC_EXCEPTION.
+  [TextureFormat.ASTC_RGB_4x4]: { bound: 0, layers: 1 },
 };
+
+/**
+ * Exception 1, listed on #331 (question to the owner, comment 6779900269) and
+ * in fixtures/BUILDING.md section 31: against `Cubemap.GetPixels` (every
+ * editor), `Texture3D.GetPixels32` and 2019.4's `Texture2DArray.GetPixels32`
+ * an ASTC_4x4 face or slice is within 1 of the editor, already at level 0,
+ * while the same bytes as a Texture2D match exactly. 2020.3+ arrays match
+ * exactly. No other format or class gets this limit.
+ */
+function astcException(t: Layered, version: string): boolean {
+  return (
+    t.editor.format === TextureFormat.ASTC_RGB_4x4 &&
+    (t.editor.class !== "Texture2DArray" || version === "2019.4.41f2")
+  );
+}
+
+/**
+ * Exception 2: 2019.4's `Cubemap.GetPixels` returns the 2x2 level 3 of the
+ * ETC2_RGBA8 cubemap with its bottom row twice, on every face. The bytes of
+ * that level are the same in the 2019.4 and 2020.3 bundles (asserted below),
+ * so the level is compared with the 2020.3 editor's pixels.
+ */
+const ETC2_CUBE = { version: "2019.4.41f2", name: "cube_47_ETC2_RGBA8", mip: 3 };
 
 test("the bundles hold each class in each format, Texture3D compressed from 2020.3 on", () => {
   assert.deepEqual(Object.keys(LAYERS), ["2019.4.41f2", "2020.3.30f1", "6000.3.26f1", "6000.6.4f1"]);
@@ -182,10 +207,31 @@ wasmTest("every level of every face and slice = the editor's, as plan section 5 
     }
   }
   const measured = new Map<number, number>();
+  const astc = new Set<string>();
   for (const t of LAYERED) {
+    const version = t.where.split(" ")[0]!;
+    const etc2Cube = version === ETC2_CUBE.version && t.editor.class === "Cubemap" && t.editor.format === 47;
     for (let mip = 0; mip < t.editor.mipCount; mip++) {
       const images = await decode(t, mip);
-      const levels = t.editor.levels[mip]!;
+      let levels = t.editor.levels[mip]!;
+      if (etc2Cube && mip === ETC2_CUBE.mip) {
+        // The defect: each face's top row (row 1, rows bottom first) is its bottom row.
+        for (const face of levels) {
+          const px = Buffer.from(face, "base64");
+          assert.deepEqual(px.subarray(8, 16), px.subarray(0, 8), t.where);
+        }
+        const other = LAYERED.find(
+          (x) => x.where.startsWith("2020.3.30f1 ") && x.editor.class === "Cubemap" && x.editor.format === 47,
+        )!;
+        // Level 3 of each face: the one 16-byte block before level 4's (the face's last 16 bytes).
+        const level3 = (x: Layered) => {
+          const { imageData } = x.reader.read<CubemapData>();
+          const face = imageData.length / 6;
+          return [0, 1, 2, 3, 4, 5].map((f) => imageData.subarray((f + 1) * face - 32, (f + 1) * face - 16));
+        };
+        assert.deepEqual(level3(t), level3(other), "level 3 has the same bytes in 2019.4 and 2020.3");
+        levels = other.editor.levels[mip]!;
+      }
       assert.equal(images.length, levels.length, `${t.where} level ${mip}`);
       const width = Math.max(1, t.editor.width >> mip);
       const height = Math.max(1, t.editor.height >> mip);
@@ -194,11 +240,26 @@ wasmTest("every level of every face and slice = the editor's, as plan section 5 
         assert.deepEqual([image.width, image.height], [width, height], at);
         const error = maxError(image.data, editorPixels(levels[layer]!, width, height));
         measured.set(t.editor.format, Math.max(measured.get(t.editor.format) ?? 0, error));
-        const limit = t.editor.format === TextureFormat.RGBA32 ? 0 : bound.get(t.editor.format)!;
+        let limit = t.editor.format === TextureFormat.RGBA32 ? 0 : bound.get(t.editor.format)!;
+        if (astcException(t, version)) {
+          limit = 1;
+          if (error > 0) astc.add(`${version} ${t.editor.class}`);
+        }
         assert.ok(error <= limit, `${at}: error ${error}, level 0 bound ${limit}`);
       });
     }
   }
+  // The exception covers exactly the paths measured off by 1.
+  assert.deepEqual([...astc].sort(), [
+    "2019.4.41f2 Cubemap",
+    "2019.4.41f2 Texture2DArray",
+    "2020.3.30f1 Cubemap",
+    "2020.3.30f1 Texture3D",
+    "6000.3.26f1 Cubemap",
+    "6000.3.26f1 Texture3D",
+    "6000.6.4f1 Cubemap",
+    "6000.6.4f1 Texture3D",
+  ]);
   // The table BUILDING.md section 31 records.
   for (const [format, { bound: b, layers }] of Object.entries(MEASURED)) {
     assert.equal(bound.get(Number(format)), b, `bound of ${format}`);
@@ -217,7 +278,10 @@ wasmTest("level 0 of each array slice = UnityPy's Texture2DArray.images, the sec
   };
   let checked = 0;
   for (const t of LAYERED) {
-    if (t.reader.type !== ClassID.Texture2DArray) continue;
+    // UnityPy decodes ASTC with astcenc, not texture2ddecoder
+    // (UnityPy/export/Texture2DConverter.py), so its ASTC slices differ; the
+    // editor check above covers them.
+    if (t.reader.type !== ClassID.Texture2DArray || t.editor.format === TextureFormat.ASTC_RGB_4x4) continue;
     const [sf] = Object.values(goldens[t.bundle]!.serialized!);
     const want = sf!.textureArrays![String(t.reader.pathId)]!.rgbaSha256;
     assert.ok(want, `${t.where}: UnityPy decoded no slices`);
@@ -225,8 +289,8 @@ wasmTest("level 0 of each array slice = UnityPy's Texture2DArray.images, the sec
     assert.deepEqual(slices.map((s) => sha256(s.data)), want, t.where);
     checked++;
   }
-  // Six arrays in each windows bundle, four in each android one.
-  assert.equal(checked, 4 * 10);
+  // Six arrays in each windows bundle, two ETC2 ones in each android one.
+  assert.equal(checked, 4 * 8);
 });
 
 wasmTest("mip 0 is the default, and each face and slice has its own pixels", async () => {

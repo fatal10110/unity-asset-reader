@@ -1,7 +1,7 @@
 {
   "_oracle": "Unity editor, in batchmode (plan section 5): Cubemap.GetPixels(face, mip), Texture2DArray.GetPixels32(slice, mip), Texture3D.GetPixels32(mip) split into its depth slices",
   "_generator": "scripts/make-texture-pixel-goldens.py",
-  "_pixels": "levels[mip][face or slice]: cube faces in CubemapFace order (+X, -X, +Y, -Y, +Z, -Z), array slices, or the level's max(1, depth >> mip) depth slices; each as the editor returns it: RGBA8, rows bottom first (Unity's stored order), base64. For a DXT, BC or ETC level smaller than a 4x4 block the editor returns the whole block; the level is its first rows and columns",
+  "_pixels": "levels[mip][face or slice]: cube faces in CubemapFace order (+X, -X, +Y, -Y, +Z, -Z), array slices, or the level's max(1, depth >> mip) depth slices; each as the editor returns it: RGBA8, rows bottom first (Unity's stored order), base64, every level at its own size (also a DXT, BC or ETC level smaller than a 4x4 block)",
   "_comparison": "Uncompressed formats exactly. A compressed format's levels within the largest channel difference that format has at level 0, the first level, against these pixels; no other tolerance.",
   "editors": {
     "2019.4.41f2": {

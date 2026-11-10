@@ -278,8 +278,8 @@ def main():
         "_pixels": ("levels[mip][face or slice]: cube faces in CubemapFace order (+X, -X, +Y, -Y, "
                     "+Z, -Z), array slices, or the level's max(1, depth >> mip) depth slices; each "
                     "as the editor returns it: RGBA8, rows bottom first (Unity's stored order), "
-                    "base64. For a DXT, BC or ETC level smaller than a 4x4 block the editor "
-                    "returns the whole block; the level is its first rows and columns"),
+                    "base64, every level at its own size (also a DXT, BC or ETC level smaller "
+                    "than a 4x4 block)"),
         "_comparison": COMPARISON,
         "editors": layered,
     }
