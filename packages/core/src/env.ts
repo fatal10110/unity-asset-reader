@@ -347,6 +347,23 @@ interface EnvIndex {
   byName: Map<string, SerializedFileEntry[]>;
 }
 
+/** Each env {@link load} made, to its index, for {@link containerOf}. */
+const envIndexes = new WeakMap<Env, () => EnvIndex>();
+
+/**
+ * Which container `object` came out of in `env` ({@link ContainerId}): 0 for
+ * a SerializedFile the caller passed in itself, else one id per bundle or
+ * `UnityWebData` file. Internal: not exported from the package.
+ *
+ * @param env an env made by {@link load}
+ * @param object one of `env.objects`
+ * @returns its container id, or `undefined` when `env` was not made by
+ *   {@link load} or did not load `object`
+ */
+export function containerOf(env: Env, object: ObjectReader): number | undefined {
+  return envIndexes.get(env)?.().sourceOf.get(object)?.container;
+}
+
 /**
  * Unpack Unity files into their contents, and give access to the objects of
  * every SerializedFile among them.
@@ -467,6 +484,7 @@ export function load(inputs: LoadSource | readonly LoadSource[], options: LoadOp
       return readRange(findResource(ref.path, source.container, out.byName), ref);
     },
   };
+  envIndexes.set(env, indexed);
   return env;
 }
 

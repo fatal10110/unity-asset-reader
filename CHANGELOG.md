@@ -38,6 +38,14 @@ versioning policy below explains when they ship in a minor version.
 
 ## unity-asset-reader
 
+### 1.3.1 - Unreleased
+
+- **`resolveOrThrow` names the declared dependencies.** When a pointer leads into a
+  SerializedFile that is not loaded, the `ResourceNotFoundError` message now ends with the
+  dependencies the `AssetBundle` object of the pointing bundle declares (`m_Dependencies`, Unity
+  5.0+), as `(this bundle declares dependencies: a, b)`. They are bundle names, not file names.
+  No hint without an `AssetBundle`, with an empty list, or when it cannot be read (#330).
+
 ### 1.3.0 - 2026-11-09
 
 - **New `Animation` reader.** `readAnimation` reads the legacy `Animation` component, Unity

@@ -1,6 +1,8 @@
+import { readAssetBundle } from "./classes/AssetBundle.js";
 import type { PPtr } from "./classes/PPtr.js";
-import type { Env } from "./env.js";
+import { containerOf, type Env } from "./env.js";
 import { CorruptError, ResourceNotFoundError } from "./errors.js";
+import { ClassID } from "./serialized/ClassID.js";
 import type { ObjectReader } from "./serialized/ObjectReader.js";
 
 /**
@@ -16,7 +18,12 @@ import type { ObjectReader } from "./serialized/ObjectReader.js";
  * @param classId when given, the class the object must be of
  * @returns the object the pointer names
  * @throws {ResourceNotFoundError} when the pointer is into a SerializedFile
- *   that is not loaded; its `path` and `fileName` are that file's name
+ *   that is not loaded; its `path` and `fileName` are that file's name. When
+ *   an `AssetBundle` object in `from`'s bundle (for a SerializedFile passed in
+ *   on its own, in that file) declares dependencies
+ *   (`m_Dependencies`, Unity 5.0+), the message ends with them, as
+ *   `(this bundle declares dependencies: a, b)`: bundle names, not file names,
+ *   to narrow down which file to load
  * @throws {CorruptError} when the pointer is null, its file id is past the
  *   file's externals, its object is not in its file, or the object is not of
  *   class `classId`
@@ -43,9 +50,13 @@ export function resolveOrThrow(
     case "fileNotLoaded": {
       const { fileName } = resolution;
       const error = new ResourceNotFoundError(fileName, fileName);
+      const dependencies = declaredDependencies(env, from);
       error.message =
         `${what} (path id ${pptr.m_PathID}) is in ${fileName}, which is not loaded: ` +
-        "pass it to load() too";
+        "pass it to load() too" +
+        (dependencies.length > 0
+          ? ` (this bundle declares dependencies: ${dependencies.join(", ")})`
+          : "");
       throw error;
     }
     case "null":
@@ -55,4 +66,36 @@ export function resolveOrThrow(
     case "objectNotFound":
       throw new CorruptError(`${what} (path id ${pptr.m_PathID}) is not in ${resolution.fileName}`);
   }
+}
+
+/**
+ * The bundle names the `AssetBundle` objects of `from`'s bundle declare
+ * (`m_Dependencies`, Unity 5.0+), each once, for the `fileNotLoaded` message.
+ * "`from`'s bundle" is every SerializedFile of the bundle `from` came out of,
+ * so a scene bundle's scene files count too; for a SerializedFile the caller
+ * passed in itself, it is that file alone. Empty when there is no `AssetBundle`,
+ * the field is absent or empty, or an `AssetBundle` cannot be read: the hint
+ * must never replace the error it is added to. `env.objects` is already
+ * parsed, since `env.resolve` just ran.
+ */
+function declaredDependencies(env: Env, from: ObjectReader): string[] {
+  const container = containerOf(env, from);
+  // Loose inputs (container 0) share no bundle: only `from`'s own file counts.
+  const sameFileOnly = container === undefined || container === 0;
+  const names = new Set<string>();
+  for (const object of env.objects) {
+    if (object.type !== ClassID.AssetBundle) continue;
+    if (containerOf(env, object) !== container) continue;
+    if (sameFileOnly && object.fileName !== from.fileName) continue;
+    // The reader may be one the caller is reading too: leave it where it was.
+    const at = object.position;
+    try {
+      for (const name of readAssetBundle(object).m_Dependencies ?? []) names.add(name);
+    } catch {
+      // No hint from an AssetBundle this library cannot read.
+    } finally {
+      object.position = at;
+    }
+  }
+  return [...names];
 }
