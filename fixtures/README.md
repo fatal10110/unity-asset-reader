@@ -49,6 +49,8 @@ Other files here, each described further down or in `BUILDING.md`:
   apart from `goldens.json` (`BUILDING.md` section 13).
 - `humanoid-unity-goldens.json`: the Unity editor's poses for the humanoid fixture clips (plan §5,
   `BUILDING.md` section 28).
+- `humanoid2-unity-goldens.json`: the same for the second and third humanoid rigs (`BUILDING.md`
+  section 31).
 - `texture-pixel-unity-goldens.json`: the Unity editor's pixels of every mip level of the `mips`
   textures (plan §5, `BUILDING.md` section 29).
 - `assetstudio-fixture-cross-checks.json`, `assetstudio-modern-cross-checks.json`: AssetStudio
@@ -92,6 +94,7 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `legacy-animation/{lz4,lz4-notypetree}/legacy-animation` | the same four | a legacy `Animation` component | — | 25 |
 | `ui-animation/{lz4,lz4-notypetree}/ui-animation` | the same four | a `RectTransform` UI hierarchy and its clip | — | 26 |
 | `humanoid/lz4/humanoid` | the same four | the input of the humanoid oracle | — | 28 |
+| `humanoid2/lz4/humanoid2` | the same four | two more humanoid rigs for the humanoid oracle: rotated bind pose, fingers, UpperChest; no UpperChest | — | 31 |
 | `mips/windows`, `mips/android` | the same four | mipmapped Texture2Ds, every level its own pixels: RGBA32, DXT1, DXT5, BC7; ETC2, ASTC | — | 29 |
 | `diff/{v1,v2,v1-notypetree,v2-notypetree}/...` | 2019.4.41f2 | two builds of one project with known changes, for `diff()` | — | 30 |
 

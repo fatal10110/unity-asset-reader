@@ -134,7 +134,8 @@ def evidence(name, path):
             scene[obj.type.name] = scene.get(obj.type.name, 0) + 1
         if obj.type.name == "Animation":
             components.append(obj.read_typetree())
-        if obj.type.name == "AnimationClip" and ("/animation/" in name or "/humanoid/" in name):
+        if obj.type.name == "AnimationClip" and ("/animation/" in name or "/humanoid/" in name
+                                                or "/humanoid2/" in name):
             tree = obj.read_typetree()
             parts = tree["m_MuscleClip"]["m_Clip"]["data"]
             clips.append({"name": tree["m_Name"], "legacy": tree["m_Legacy"],
@@ -227,6 +228,18 @@ def evidence(name, path):
             ("pose", False, 102)], clips
         return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
                 "clips": clips}
+    if "/humanoid2/" in name:
+        # The second humanoid oracle input (#325): the "humanoid2" prefab (58
+        # GameObjects: fingers, eyes, jaw, an UpperChest, an Armature and a
+        # SpineMid) and the "humanoid3" one (22), an Animator on its humanoid
+        # Avatar each, the "pose2" clip (95 muscles, RootT and RootQ) and the
+        # "upperchest" one (3 muscles), three keys each.
+        assert scene == {"GameObject": 80, "Transform": 80}, scene
+        assert animation == {"AnimationClip": 2, "Animator": 2, "Avatar": 2}, animation
+        assert sorted((c["name"], c["legacy"], c["streamed"] + c["dense"]) for c in clips) == [
+            ("pose2", False, 102), ("upperchest", False, 3)], clips
+        return {"animation": dict(sorted(animation.items())), "scene": dict(sorted(scene.items())),
+                "clips": sorted(clips, key=lambda c: c["name"])}
     if "/legacy-animation/" in name:
         # The legacy-animation fixtures (#314): the "legacy" prefab (four
         # GameObjects, a SkinnedMeshRenderer), whose root's legacy Animation
@@ -322,6 +335,8 @@ def main():
         ("scene/lz4", "scene"), ("scene/lz4-notypetree", "scene"),
         # The humanoid oracle's input (#318): a clip driving every muscle, typed only.
         ("humanoid/lz4", "humanoid"),
+        # The second humanoid oracle input (#325): two rigs and their clips, typed only.
+        ("humanoid2/lz4", "humanoid2"),
         # The legacy Animation component (#314) and the clip it lists.
         ("legacy-animation/lz4", "legacy-animation"),
         ("legacy-animation/lz4-notypetree", "legacy-animation"),

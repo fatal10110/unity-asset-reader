@@ -54,6 +54,7 @@ How to use it:
 - [27. The scene export oracle: AssetStudio's ModelConverter](#27-the-scene-export-oracle-assetstudios-modelconverter-306) - goldens for the glTF scene export
 - [28. The `humanoid` bundles and the humanoid oracle](#28-the-humanoid-bundles-and-the-humanoid-oracle-318) - the humanoid clip and the Unity-sampled bone poses
 - [29. The `mips` bundles and the texture pixel oracle](#29-the-mips-bundles-and-the-texture-pixel-oracle-331) - mipmapped textures and the Unity-decoded pixels of every level
+- [31. The `humanoid2` bundles: two more humanoid rigs](#31-the-humanoid2-bundles-two-more-humanoid-rigs-325) - rotated bind pose, fingers, UpperChest, and a rig without one
 
 ## Editors
 
@@ -6688,7 +6689,8 @@ The commands:
 
 `scripts/make-humanoid-goldens.py` records Unity's muscle-to-bone conversion in
 `fixtures/humanoid-unity-goldens.json`, for two clips: this section's `pose` (on this bundle's
-prefab and Avatar) and section 24's `muscle` (on the `scene` bundle's).
+prefab and Avatar) and section 24's `muscle` (on the `scene` bundle's). In the same run it records
+section 31's `pose2` and `upperchest` in `fixtures/humanoid2-unity-goldens.json`.
 
 For each editor the script:
 
@@ -6700,12 +6702,13 @@ For each editor the script:
 4. Runs the editor in batchmode, without play mode:
 
 ```
-Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod HumanoidOracle.Run -logFile <project>\oracle.log -uarOut <project>\oracle.json -uarBundle-pose <bundle> -uarBundle-muscle <bundle>
+Unity.exe -batchmode -nographics -quit -projectPath <project> -executeMethod HumanoidOracle.Run -logFile <project>\oracle.log -uarOut <project>\oracle.json -uarBundle-pose <bundle> -uarPrefab-pose humanoid -uarAvatar-pose human ...
 ```
 
 What `HumanoidOracle.Run` does:
 
-1. Loads each bundle with `AssetBundle.LoadFromFile` and instantiates its `humanoid` prefab.
+1. Loads each bundle with `AssetBundle.LoadFromFile` and instantiates the clip's prefab
+   (`humanoid` here and in section 24, `humanoid2` or `humanoid3` in section 31) with its Avatar.
 2. At each key time of the clip and each midpoint between neighbouring keys, builds a
    `HumanPose` from the clip's authored curves, evaluated by `AnimationCurve.Evaluate`:
    - the 95 muscles (0 where the clip has no curve);
@@ -7106,4 +7109,330 @@ public static class BuildDiff
         });
     }
 }
+```
+
+## 31. The `humanoid2` bundles: two more humanoid rigs (#325)
+
+**What it is for:** more input for the humanoid oracle of section 28. Its rig leaves branches of
+the muscle-to-bone conversion unchecked: its bones are unrotated, its twist shares all 0.5, its
+limits Unity's defaults, and it has no bone between human bones, no UpperChest, no fingers, eyes
+or jaw. The bundles are `humanoid2/lz4/humanoid2` for **2019.4.41f2**, **2020.3.30f1**,
+**6000.3.26f1** and **6000.6.4f1**: one typed bundle per editor, made from code by an editor
+script.
+
+**Steps:**
+
+1. Make a fresh project per editor, named `uar-325-humanoid2-<editor version>`, holding
+   `ProjectSettings/` and `Packages/` of the section 28 project of the same editor and only
+   `Assets/Editor/BuildHumanoid2.cs` (below) under `Assets/`.
+2. Build each project once with `-executeMethod BuildHumanoid2.Build` (same command as section 2)
+   and check the log.
+3. Copy `Build/lz4/humanoid2` to `fixtures/bundles/editor/<editor version>/humanoid2/lz4/humanoid2`.
+4. Rerun the goldens as section 28 does, `make-modern-goldens.py` first. It lists the 6000.6.4f1
+   bundle and checks its counts. `make-export-goldens.py` adds AssetStudio's
+   `ExportAnimationClip` of both clips; for 6000.6.4f1's it adds an `exportError`, as in
+   section 28. No other entry changes.
+5. Then rerun the humanoid oracle (section 28): it writes `fixtures/humanoid2-unity-goldens.json`
+   and reproduces `fixtures/humanoid-unity-goldens.json` byte for byte.
+
+### What is in a bundle
+
+- `humanoid2`, a prefab of 58 GameObjects, with an `Animator` on its humanoid Avatar `human2`:
+  - every transform at a T-pose world position, but turned by a rotation of its own, so the
+    bind pose has rotated bones and each child's local position and rotation absorb its
+    parent's turn;
+  - `Armature`, a non-human node between the root and the Hips, turned -90° about X as Blender
+    exports it;
+  - `SpineMid`, a non-human bone between the Spine and the Chest;
+  - an UpperChest, both eyes, the jaw and all 30 finger bones;
+  - twist shares `upperArmTwist` 0.3, `lowerArmTwist` 0.7, `upperLegTwist` 0.2,
+    `lowerLegTwist` 0.6;
+  - custom limits on every bone with a muscle: each side of Unity's default range scaled by its
+    own factor (0.6 to 1.15), and a centre of -4°, 0° or 4°.
+- `humanoid3`, section 28's T-pose (22 GameObjects, no UpperChest) with an `Animator` on its
+  Avatar `human3`: default limits and twist shares, except the Chest, whose limits are
+  asymmetric: x (twist) -35° to 10°, y (left-right) -12° to 25°, z (front-back) -30° to 15°.
+  Half of each differs from Unity's default UpperChest range of ±20° by at least 2.5°.
+- `pose2`, the curves of section 28's `pose`: every one of the 95 muscles, `RootT` and `RootQ`,
+  three keys each.
+- `upperchest`, the three UpperChest muscles (6-8: `UpperChest Front-Back`, `Left-Right`,
+  `Twist Left-Right`) alone, with the same keys as `pose` gives them. On `humanoid3`, which has no
+  UpperChest, they turn only the Chest.
+
+The oracle poses `humanoid2` with `pose2` and `humanoid3` with `upperchest`.
+
+### The project
+
+`Assets/Editor/BuildHumanoid2.cs`:
+
+```csharp
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEngine;
+
+// The second humanoid oracle input (#325), created from code. Two prefabs:
+// - "humanoid2" (Avatar "human2"): a rotated bind pose under a rotated,
+//   Blender-style "Armature", a non-human "SpineMid" between Spine and Chest,
+//   an UpperChest, eyes, jaw and fingers, twist shares other than 0.5 and
+//   custom limits on every bone with a muscle;
+// - "humanoid3" (Avatar "human3"): the section 28 T-pose (no UpperChest) with
+//   custom Chest limits.
+// Clips: "pose2" drives every muscle, RootT and RootQ as section 28's "pose";
+// "upperchest" drives only the three UpperChest muscles.
+public static class BuildHumanoid2
+{
+    const string Dir = "Assets/Fixtures/humanoid2";
+
+    // humanoid2: name, parent, WORLD position in the T-pose; root first. Its
+    // right side mirrors the left one.
+    static readonly (string, string, Vector3)[] Centre =
+    {
+        ("humanoid2", null, Vector3.zero),
+        ("Armature", "humanoid2", Vector3.zero),
+        ("Hips", "Armature", new Vector3(0f, 1f, 0f)),
+        ("Spine", "Hips", new Vector3(0f, 1.1f, 0f)),
+        ("SpineMid", "Spine", new Vector3(0f, 1.18f, 0f)),
+        ("Chest", "SpineMid", new Vector3(0f, 1.25f, 0f)),
+        ("UpperChest", "Chest", new Vector3(0f, 1.37f, 0f)),
+        ("Neck", "UpperChest", new Vector3(0f, 1.55f, 0f)),
+        ("Head", "Neck", new Vector3(0f, 1.65f, 0f)),
+        ("Jaw", "Head", new Vector3(0f, 1.62f, 0.04f)),
+    };
+
+    static readonly (string, string, Vector3)[] Left =
+    {
+        ("LeftUpperLeg", "Hips", new Vector3(-0.1f, 0.95f, 0f)),
+        ("LeftLowerLeg", "LeftUpperLeg", new Vector3(-0.1f, 0.5f, 0f)),
+        ("LeftFoot", "LeftLowerLeg", new Vector3(-0.1f, 0.08f, 0f)),
+        ("LeftToes", "LeftFoot", new Vector3(-0.1f, 0.02f, 0.12f)),
+        ("LeftEye", "Head", new Vector3(-0.03f, 1.72f, 0.08f)),
+        ("LeftShoulder", "UpperChest", new Vector3(-0.05f, 1.5f, 0f)),
+        ("LeftUpperArm", "LeftShoulder", new Vector3(-0.17f, 1.5f, 0f)),
+        ("LeftLowerArm", "LeftUpperArm", new Vector3(-0.45f, 1.5f, 0f)),
+        ("LeftHand", "LeftLowerArm", new Vector3(-0.7f, 1.5f, 0f)),
+        ("LeftThumbProximal", "LeftHand", new Vector3(-0.72f, 1.49f, 0.03f)),
+        ("LeftThumbIntermediate", "LeftThumbProximal", new Vector3(-0.75f, 1.48f, 0.05f)),
+        ("LeftThumbDistal", "LeftThumbIntermediate", new Vector3(-0.77f, 1.47f, 0.065f)),
+        ("LeftIndexProximal", "LeftHand", new Vector3(-0.79f, 1.5f, 0.03f)),
+        ("LeftIndexIntermediate", "LeftIndexProximal", new Vector3(-0.83f, 1.5f, 0.03f)),
+        ("LeftIndexDistal", "LeftIndexIntermediate", new Vector3(-0.855f, 1.5f, 0.03f)),
+        ("LeftMiddleProximal", "LeftHand", new Vector3(-0.795f, 1.5f, 0.01f)),
+        ("LeftMiddleIntermediate", "LeftMiddleProximal", new Vector3(-0.84f, 1.5f, 0.01f)),
+        ("LeftMiddleDistal", "LeftMiddleIntermediate", new Vector3(-0.87f, 1.5f, 0.01f)),
+        ("LeftRingProximal", "LeftHand", new Vector3(-0.79f, 1.5f, -0.01f)),
+        ("LeftRingIntermediate", "LeftRingProximal", new Vector3(-0.83f, 1.5f, -0.01f)),
+        ("LeftRingDistal", "LeftRingIntermediate", new Vector3(-0.855f, 1.5f, -0.01f)),
+        ("LeftLittleProximal", "LeftHand", new Vector3(-0.78f, 1.5f, -0.03f)),
+        ("LeftLittleIntermediate", "LeftLittleProximal", new Vector3(-0.81f, 1.5f, -0.03f)),
+        ("LeftLittleDistal", "LeftLittleIntermediate", new Vector3(-0.83f, 1.5f, -0.03f)),
+    };
+
+    // humanoid3: name, parent, LOCAL position, identity rotations: section 28's rig.
+    static readonly (string, string, Vector3)[] Rig3 =
+    {
+        ("humanoid3", null, Vector3.zero),
+        ("Hips", "humanoid3", new Vector3(0f, 1f, 0f)),
+        ("LeftUpperLeg", "Hips", new Vector3(-0.1f, -0.05f, 0f)),
+        ("LeftLowerLeg", "LeftUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("LeftFoot", "LeftLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("LeftToes", "LeftFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("RightUpperLeg", "Hips", new Vector3(0.1f, -0.05f, 0f)),
+        ("RightLowerLeg", "RightUpperLeg", new Vector3(0f, -0.45f, 0f)),
+        ("RightFoot", "RightLowerLeg", new Vector3(0f, -0.42f, 0f)),
+        ("RightToes", "RightFoot", new Vector3(0f, -0.06f, 0.12f)),
+        ("Spine", "Hips", new Vector3(0f, 0.1f, 0f)),
+        ("Chest", "Spine", new Vector3(0f, 0.15f, 0f)),
+        ("Neck", "Chest", new Vector3(0f, 0.25f, 0f)),
+        ("Head", "Neck", new Vector3(0f, 0.1f, 0f)),
+        ("LeftShoulder", "Chest", new Vector3(-0.05f, 0.2f, 0f)),
+        ("LeftUpperArm", "LeftShoulder", new Vector3(-0.12f, 0f, 0f)),
+        ("LeftLowerArm", "LeftUpperArm", new Vector3(-0.28f, 0f, 0f)),
+        ("LeftHand", "LeftLowerArm", new Vector3(-0.25f, 0f, 0f)),
+        ("RightShoulder", "Chest", new Vector3(0.05f, 0.2f, 0f)),
+        ("RightUpperArm", "RightShoulder", new Vector3(0.12f, 0f, 0f)),
+        ("RightLowerArm", "RightUpperArm", new Vector3(0.28f, 0f, 0f)),
+        ("RightHand", "RightLowerArm", new Vector3(0.25f, 0f, 0f)),
+    };
+
+    // humanoid3's Chest limits (degrees, x twist, y left-right, z front-back): asymmetric and
+    // far from Unity's +-20 default.
+    static readonly Vector3 ChestMin = new Vector3(-35f, -12f, -30f);
+    static readonly Vector3 ChestMax = new Vector3(10f, 25f, 15f);
+
+    // Muscle i at key k (times 0, 0.5, 1); never 0. Section 28; scripts/make-humanoid-goldens.py has the same.
+    static float V(int i, int k) { return (i % 2 == 0 ? 1f : -1f) * ((i * 5 + k * 3) % 13 + 1) / 16f; }
+
+    static string Binding(string muscle)
+    {
+        return Regex.Replace(muscle, "^(Left|Right) (Thumb|Index|Middle|Ring|Little) ", "$1Hand.$2.");
+    }
+
+    public static void Build()
+    {
+        Directory.CreateDirectory(Dir);
+
+        var pose = new AnimationClip { name = "pose2" };
+        for (int i = 0; i < HumanTrait.MuscleCount; i++)
+            pose.SetCurve("", typeof(Animator), Binding(HumanTrait.MuscleName[i]), Keys(0f, V(i, 0), 0.5f, V(i, 1), 1f, V(i, 2)));
+        pose.SetCurve("", typeof(Animator), "RootT.x", Keys(0f, 0.125f, 0.5f, -0.0625f, 1f, 0.25f));
+        pose.SetCurve("", typeof(Animator), "RootT.y", Keys(0f, 1f, 0.5f, 1.0625f, 1f, 0.9375f));
+        pose.SetCurve("", typeof(Animator), "RootT.z", Keys(0f, -0.125f, 0.5f, 0.25f, 1f, 0.0625f));
+        var q = new[] { Quaternion.Euler(0f, 30f, 0f), Quaternion.Euler(15f, -20f, 10f), Quaternion.Euler(-10f, 45f, 5f) };
+        var axis = new[] { "x", "y", "z", "w" };
+        for (int j = 0; j < 4; j++)
+            pose.SetCurve("", typeof(Animator), "RootQ." + axis[j], Keys(0f, q[0][j], 0.5f, q[1][j], 1f, q[2][j]));
+        AssetDatabase.CreateAsset(pose, Dir + "/pose2.anim");
+        Info(pose);
+
+        // Muscles 6-8: UpperChest Front-Back, Left-Right, Twist Left-Right.
+        var upper = new AnimationClip { name = "upperchest" };
+        for (int i = 6; i <= 8; i++)
+            upper.SetCurve("", typeof(Animator), HumanTrait.MuscleName[i], Keys(0f, V(i, 0), 0.5f, V(i, 1), 1f, V(i, 2)));
+        AssetDatabase.CreateAsset(upper, Dir + "/upperchest.anim");
+        Info(upper);
+
+        var right = Left.Select(b => (b.Item1.Replace("Left", "Right"), b.Item2.Replace("Left", "Right"),
+            new Vector3(-b.Item3.x, b.Item3.y, b.Item3.z)));
+        var rig2 = Centre.Concat(Left).Concat(right).ToArray();
+        var humanoid2 = Rotated(rig2);
+        var human2 = BuildHuman(humanoid2, "human2", 0.3f, 0.7f, 0.2f, 0.6f, b => CustomLimit(humanoid2, b));
+        humanoid2.AddComponent<Animator>().avatar = human2;
+        PrefabUtility.SaveAsPrefabAsset(humanoid2, Dir + "/humanoid2.prefab");
+        Object.DestroyImmediate(humanoid2);
+
+        var humanoid3 = Plain(Rig3);
+        var human3 = BuildHuman(humanoid3, "human3", 0.5f, 0.5f, 0.5f, 0.5f, b => b == HumanBodyBones.Chest
+            ? new HumanLimit { useDefaultValues = false, min = ChestMin, max = ChestMax, center = Vector3.zero, axisLength = 0.25f }
+            : new HumanLimit { useDefaultValues = true });
+        humanoid3.AddComponent<Animator>().avatar = human3;
+        PrefabUtility.SaveAsPrefabAsset(humanoid3, Dir + "/humanoid3.prefab");
+        Object.DestroyImmediate(humanoid3);
+
+        AssetDatabase.SaveAssets();
+        var dir = Path.Combine("Build", "lz4");
+        Directory.CreateDirectory(dir);
+        var build = new AssetBundleBuild
+        {
+            assetBundleName = "humanoid2",
+            assetNames = new[] { "humanoid2.prefab", "human2.asset", "humanoid3.prefab", "human3.asset", "pose2.anim", "upperchest.anim" }
+                .Select(x => Dir + "/" + x).ToArray(),
+        };
+        var m = BuildPipeline.BuildAssetBundles(dir, new[] { build }, BuildAssetBundleOptions.ChunkBasedCompression,
+            BuildTarget.StandaloneWindows64);
+        if (m == null) throw new System.Exception("build failed: lz4");
+        Debug.Log("FIXTURE-OK humanoid2 lz4 -> " + dir);
+    }
+
+    static void Info(AnimationClip clip)
+    {
+        Debug.Log("FIXTURE-INFO clip " + clip.name + " legacy=" + clip.legacy + " human=" + clip.humanMotion +
+            " curves=" + AnimationUtility.GetCurveBindings(clip).Length);
+    }
+
+    // The rotated bind pose: each transform at its world T-pose position, then turned by its own
+    // local rotation, so a child's local position and rotation both absorb its parent's turn.
+    // The Armature turns as Blender exports it, -90 degrees about X.
+    static GameObject Rotated((string, string, Vector3)[] bones)
+    {
+        var made = new Dictionary<string, Transform>();
+        for (int i = 0; i < bones.Length; i++)
+        {
+            var (name, parent, world) = bones[i];
+            var t = new GameObject(name).transform;
+            if (parent != null) t.SetParent(made[parent], false);
+            t.position = world;
+            t.localRotation = i == 0 ? Quaternion.identity : name == "Armature" ? Quaternion.Euler(-90f, 0f, 0f)
+                : Quaternion.Euler((i * 37) % 61 - 30, (i * 53) % 71 - 35, (i * 29) % 47 - 23);
+            made[name] = t;
+        }
+        return made[bones[0].Item1].gameObject;
+    }
+
+    static GameObject Plain((string, string, Vector3)[] bones)
+    {
+        var made = new Dictionary<string, Transform>();
+        foreach (var (name, parent, pos) in bones)
+        {
+            var t = new GameObject(name).transform;
+            if (parent != null) t.SetParent(made[parent], false);
+            t.localPosition = pos;
+            made[name] = t;
+        }
+        return made[bones[0].Item1].gameObject;
+    }
+
+    // Each axis with a muscle: the default range scaled differently per side, bone and axis,
+    // and a centre of -4, 0 or 4 degrees. A bone without muscles keeps the defaults.
+    static HumanLimit CustomLimit(GameObject root, HumanBodyBones bone)
+    {
+        int b = (int)bone;
+        var min = Vector3.zero;
+        var max = Vector3.zero;
+        var center = Vector3.zero;
+        bool any = false;
+        for (int d = 0; d < 3; d++)
+        {
+            int m = HumanTrait.MuscleFromBone(b, d);
+            if (m < 0) continue;
+            any = true;
+            min[d] = HumanTrait.GetMuscleDefaultMin(m) * (0.6f + 0.1f * ((b + d) % 5));
+            max[d] = HumanTrait.GetMuscleDefaultMax(m) * (1.15f - 0.1f * ((b + 2 * d) % 4));
+            center[d] = ((b + d) % 3 - 1) * 4f;
+        }
+        if (!any) return new HumanLimit { useDefaultValues = true };
+        // The bone's length: the distance to its first child, as an imported model has it.
+        var t = root.GetComponentsInChildren<Transform>().First(x => x.name == bone.ToString());
+        float length = t.childCount > 0 ? t.GetChild(0).localPosition.magnitude : 0.02f;
+        return new HumanLimit { useDefaultValues = false, min = min, max = max, center = center, axisLength = length };
+    }
+
+    static Avatar BuildHuman(GameObject root, string name, float upperArm, float lowerArm, float upperLeg,
+        float lowerLeg, System.Func<HumanBodyBones, HumanLimit> limit)
+    {
+        var all = root.GetComponentsInChildren<Transform>();
+        var desc = new HumanDescription
+        {
+            skeleton = all.Select(t => new SkeletonBone
+            {
+                name = t.name, position = t.localPosition, rotation = t.localRotation, scale = t.localScale,
+            }).ToArray(),
+            // Every transform named after a HumanBodyBones value is that bone.
+            human = all.Skip(1).Where(t => System.Enum.IsDefined(typeof(HumanBodyBones), t.name)).Select(t =>
+            {
+                var b = (HumanBodyBones)System.Enum.Parse(typeof(HumanBodyBones), t.name);
+                return new HumanBone { boneName = t.name, humanName = HumanTrait.BoneName[(int)b], limit = limit(b) };
+            }).ToArray(),
+            upperArmTwist = upperArm, lowerArmTwist = lowerArm, upperLegTwist = upperLeg, lowerLegTwist = lowerLeg,
+            armStretch = 0.05f, legStretch = 0.05f, feetSpacing = 0f, hasTranslationDoF = false,
+        };
+        var avatar = AvatarBuilder.BuildHumanAvatar(root, desc);
+        avatar.name = name;
+        Debug.Log("FIXTURE-INFO " + name + " avatar valid=" + avatar.isValid + " human=" + avatar.isHuman +
+            " bones=" + desc.human.Length + " transforms=" + all.Length);
+        if (!avatar.isValid || !avatar.isHuman) throw new System.Exception("humanoid avatar refused: " + name);
+        AssetDatabase.CreateAsset(avatar, Dir + "/" + name + ".asset");
+        return avatar;
+    }
+
+    static AnimationCurve Keys(params float[] tv)
+    {
+        var keys = new Keyframe[tv.Length / 2];
+        for (int i = 0; i < keys.Length; i++) keys[i] = new Keyframe(tv[2 * i], tv[2 * i + 1]);
+        return new AnimationCurve(keys);
+    }
+}
+```
+
+### Building and checking
+
+The log must hold one `FIXTURE-OK humanoid2 lz4` line and these `FIXTURE-INFO` lines:
+
+```
+FIXTURE-INFO clip pose2 legacy=False human=True curves=102
+FIXTURE-INFO clip upperchest legacy=False human=True curves=3
+FIXTURE-INFO human2 avatar valid=True human=True bones=55 transforms=58
+FIXTURE-INFO human3 avatar valid=True human=True bones=21 transforms=22
 ```
