@@ -51,6 +51,9 @@ Other files here, each described further down or in `BUILDING.md`:
   `BUILDING.md` section 28).
 - `texture-pixel-unity-goldens.json`: the Unity editor's pixels of every mip level of the `mips`
   textures (plan §5, `BUILDING.md` section 29).
+- `texture-layer-pixel-unity-goldens.json`: the Unity editor's pixels of every level of each
+  cubemap face, array slice and 3D depth slice of the `cube-array-3d` textures (plan §5,
+  `BUILDING.md` sections 29 and 31).
 - `assetstudio-fixture-cross-checks.json`, `assetstudio-modern-cross-checks.json`: AssetStudio
   reference pixels for plain formats and variant sprites
   ([below](#plain-format-and-half-scale-variant-assetstudio-references)).
@@ -94,6 +97,7 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `humanoid/lz4/humanoid` | the same four | the input of the humanoid oracle | — | 28 |
 | `mips/windows`, `mips/android` | the same four | mipmapped Texture2Ds, every level its own pixels: RGBA32, DXT1, DXT5, BC7; ETC2, ASTC | — | 29 |
 | `diff/{v1,v2,v1-notypetree,v2-notypetree}/...` | 2019.4.41f2 | two builds of one project with known changes, for `diff()` | — | 30 |
+| `cube-array-3d/windows`, `cube-array-3d/android` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | `Cubemap`, `Texture2DArray`, `Texture3D`, every level, face and slice its own pixels: RGBA32, DXT1, BC7; ETC2, ASTC (2019.4: RGBA32 `Texture3D` only) | — | 31 |
 
 ## Editor-built fixtures (`bundles/editor/`)
 

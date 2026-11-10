@@ -6934,6 +6934,13 @@ How it is compared (`packages/texture/tests/mips.test.ts`):
   | `ASTC_4x4` | 0 | 0 |
   | `ASTC_6x6` | 1 | 1 |
 
+The same runs also load the section 31 `cube-array-3d` bundles and write
+`fixtures/texture-layer-pixel-unity-goldens.json`: for every `Cubemap`, `Texture2DArray` and
+`Texture3D`, `Cubemap.GetPixels(face, mip)`, `Texture2DArray.GetPixels32(slice, mip)` and
+`Texture3D.GetPixels32(mip)` (split into the level's depth slices) of every level, as
+`levels[mip][face or slice]`. Unlike `Texture2D.GetPixels32`, these return every level at its
+own size, also under a 4x4 block.
+
 The oracle does not build a bundle, so it may be rerun, and it reproduces the golden byte for
 byte. Through `heavy --lock unity` (it runs the four editors):
 
@@ -7107,3 +7114,289 @@ public static class BuildDiff
     }
 }
 ```
+
+## 31. The `cube-array-3d` bundles (#331)
+
+**What it is for:** the `Cubemap`, `Texture2DArray` and `Texture3D` readers in core, and
+`decodeCubemap`, `decodeTexture2DArray` and `decodeTexture3D` in the texture package. The
+bundles are `cube-array-3d/windows` and `cube-array-3d/android` for **2019.4.41f2**,
+**2020.3.30f1**, **6000.3.26f1** and **6000.6.4f1**: two typed lz4 bundles per editor, made from
+code by an editor script. Their pixels are checked against the editor's (section 29's oracle).
+
+**Steps:**
+
+1. Make a fresh project per editor, named `uar-331-cube-array-3d-<editor version>`, with
+   `ProjectSettings/` and `Packages/` of that editor's section 29 project.
+2. Add `Assets/Editor/BuildLayeredTextures.cs` (below).
+3. Build each project once with `-executeMethod BuildLayeredTextures.Build` (same command as
+   section 2) and check the log: `FIXTURE-OK layers windows`, `FIXTURE-OK layers android`, and
+   in 2019.4 a `FIXTURE-SKIP` line for each compressed `Texture3D`.
+4. Copy `Build/layers-windows/windows` and `Build/layers-android/android` into
+   `fixtures/bundles/editor/<editor version>/cube-array-3d/`.
+5. Rerun the goldens, `make-modern-goldens.py` first, then `make-goldens.py` (below).
+6. Then rerun the texture pixel oracle (section 29); it records each bundle's sha256.
+
+### What is in a bundle
+
+Every texture is readable, its image data inline:
+
+- `cube_<format>`: a 16x16 `Cubemap`, 5 levels, made with `EditorUtility.CompressCubemapTexture`.
+- `array_<format>` and `array_<format>_sRGB`: a 32x16 `Texture2DArray` of 3 slices, 6 levels,
+  filled level by level with `SetPixelData` from compressed `Texture2D`s. `_sRGB` has the sRGB
+  `GraphicsFormat` of the format, the other the UNorm one.
+- `volume_<format>`: a 16x16x4 `Texture3D`, 5 levels (depth 4, 2, 1, 1, 1), filled the same
+  way. Always a UNorm `GraphicsFormat`.
+
+The formats: `4_RGBA32`, `10_DXT1` and `25_BC7` in `windows` (StandaloneWindows64);
+`47_ETC2_RGBA8` and `48_ASTC_4x4` in `android`. **2019.4.41f2 makes no compressed `Texture3D`**
+(section 29 probes), so its bundles hold only `volume_4_RGBA32`. 2020.3 and later make all of
+them.
+
+Each level of each face or slice has its own pixels: R is an x ramp and G a y ramp over the
+level, B the level times 40 plus the face or slice times 9 plus a 4x4 dither, A 255 less 30 per
+level. A level or face read from the wrong offset, at the wrong size or with its rows the wrong
+way round does not match.
+
+What the editor writes, as the readers and the oracle confirm:
+
+- **Cubemap:** `m_TextureFormat` is a `TextureFormat`, `m_ImageCount` is 6 and
+  `m_CompleteImageSize` the bytes of one face. The image data is the six faces in `CubemapFace`
+  order (+X, -X, +Y, -Y, +Z, -Z), each with its own mip chain, largest first.
+- **Texture2DArray:** `m_Format` is a `GraphicsFormat`. The image data is the slices, each with
+  its own mip chain (`m_DataSize / m_Depth` bytes each).
+- **Texture3D:** `m_Format` is a `GraphicsFormat`. The image data is the levels, largest first;
+  level `n` is `max(1, m_Depth >> n)` depth slices of a 2D level.
+- Every level is in whole blocks, as for a `Texture2D` (section 29).
+- The project is in **Linear** color space: in Gamma space the editor writes the UNorm
+  `GraphicsFormat` for `linear: false` too, so no sRGB value would be checked. The values the
+  bundles hold are the ones `GraphicsFormat` in core lists: `R8G8B8A8_SRGB` (4),
+  `R8G8B8A8_UNorm` (8), `RGBA_DXT1_SRGB` (96), `RGBA_DXT1_UNorm` (97), `RGBA_BC7_SRGB` (108),
+  `RGBA_BC7_UNorm` (109), `RGBA_ETC2_SRGB` (123), `RGBA_ETC2_UNorm` (124), `RGBA_ASTC4X4_SRGB`
+  (129) and `RGBA_ASTC4X4_UNorm` (130). The editor reports the ASTC ones as `ASTC_4x4` (48);
+  UnityPy's experimental map says 54, the same blocks.
+- No Crunch: the WASM decoder unpacks only the first level of Crunch data (section 29).
+
+### The project
+
+Each project holds only this file under `Assets/`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+// Cubemap, Texture2DArray and Texture3D assets made by script (#331): every
+// face, slice and level gets its own pixels, so one read from the wrong offset
+// or at the wrong size shows.
+public static class BuildLayeredTextures
+{
+    const string Dir = "Assets/Fixtures/layers";
+    // By value: RGBA32, DXT1, BC7 (Windows); ETC2_RGBA8, ASTC_4x4 (Android).
+    static readonly int[] Windows = { 4, 10, 25 };
+    static readonly int[] Android = { 47, 48 };
+    // Fixed names: the TextureFormat enum names differ between editors.
+    static readonly Dictionary<int, string> Names = new Dictionary<int, string> {
+        { 4, "RGBA32" }, { 10, "DXT1" }, { 25, "BC7" }, { 47, "ETC2_RGBA8" }, { 48, "ASTC_4x4" } };
+
+    static int BlockSide(int f) { return f == 4 ? 1 : 4; }
+    static int BlockBytes(int f) { return f == 4 ? 4 : f == 10 ? 8 : 16; }
+    static int LevelBytes(int f, int w, int h)
+    {
+        int b = BlockSide(f);
+        return ((w + b - 1) / b) * ((h + b - 1) / b) * BlockBytes(f);
+    }
+
+    // Level m of layer l (cube face, array slice or depth slice) of a w x h
+    // image: R = x ramp, G = y ramp, B = level, layer and a 4x4 dither, A = level.
+    static Color32[] Level(int w, int h, int m, int l)
+    {
+        var c = new Color32[w * h];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                c[y * w + x] = new Color32((byte)(x * 255 / Math.Max(1, w - 1)), (byte)(y * 255 / Math.Max(1, h - 1)),
+                    (byte)((m * 40 + l * 9 + ((x ^ y) & 3) * 16) & 255), (byte)(255 - m * 30));
+        return c;
+    }
+
+    // A mipmapped w x h Texture2D of layer l in format f: the source of a slice.
+    static Texture2D Source(int f, int w, int h, int l)
+    {
+        var t = new Texture2D(w, h, TextureFormat.RGBA32, true);
+        for (int m = 0; m < t.mipmapCount; m++)
+            t.SetPixels32(Level(Math.Max(1, w >> m), Math.Max(1, h >> m), m, l), m);
+        t.Apply(false, false);
+        if (f != 4) EditorUtility.CompressTexture(t, (TextureFormat)f, TextureCompressionQuality.Normal);
+        if ((int)t.format != f) throw new Exception("source is " + t.format + ", not " + f);
+        return t;
+    }
+
+    // Level m of a mipmapped Texture2D's raw data.
+    static byte[] RawLevel(Texture2D t, int f, int m)
+    {
+        var raw = t.GetRawTextureData();
+        int off = 0;
+        for (int i = 0; i < m; i++) off += LevelBytes(f, Math.Max(1, t.width >> i), Math.Max(1, t.height >> i));
+        int size = LevelBytes(f, Math.Max(1, t.width >> m), Math.Max(1, t.height >> m));
+        var level = new byte[size];
+        Array.Copy(raw, off, level, 0, size);
+        return level;
+    }
+
+    static string Save(UnityEngine.Object o, string name, string what)
+    {
+        var path = Dir + "/" + name + ".asset";
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.CreateAsset(o, path);
+        var t = (Texture)o;
+        Debug.Log("FIXTURE-TEX " + name + " " + what + " " + t.width + "x" + t.height + " mips " + t.mipmapCount
+            + ", readable " + t.isReadable);
+        return path;
+    }
+
+    // A 16x16 cubemap with 5 levels, each face its own layer.
+    static string Cube(int f)
+    {
+        var c = new Cubemap(16, TextureFormat.RGBA32, true);
+        for (int face = 0; face < 6; face++)
+            for (int m = 0; m < c.mipmapCount; m++)
+            {
+                int s = Math.Max(1, 16 >> m);
+                c.SetPixels(Level(s, s, m, face).Select(v => (Color)v).ToArray(), (CubemapFace)face, m);
+            }
+        c.Apply(false, false);
+        if (f != 4) EditorUtility.CompressCubemapTexture(c, (TextureFormat)f, TextureCompressionQuality.Normal);
+        if ((int)c.format != f) throw new Exception("cube is " + c.format + ", not " + f);
+        c.name = "cube_" + f + "_" + Names[f];
+        return Save(c, c.name, "Cubemap " + c.format);
+    }
+
+    // A 32x16 array of 3 slices with 6 levels, filled level by level from
+    // compressed Texture2Ds. srgb: the sRGB GraphicsFormat of f (the project
+    // is in Linear color space, so linear: false gives it), else the UNorm one.
+    static string Array2D(int f, bool srgb)
+    {
+        var a = new Texture2DArray(32, 16, 3, (TextureFormat)f, true, !srgb);
+        for (int s = 0; s < 3; s++)
+        {
+            var src = Source(f, 32, 16, s);
+            for (int m = 0; m < a.mipmapCount; m++) a.SetPixelData(RawLevel(src, f, m), m, s);
+        }
+        a.Apply(false, false);
+        if ((int)a.format != f) throw new Exception("array is " + a.format + ", not " + f);
+        if (a.graphicsFormat.ToString().EndsWith("SRGB") != srgb) throw new Exception("array is " + a.graphicsFormat);
+        a.name = "array_" + f + "_" + Names[f] + (srgb ? "_sRGB" : "");
+        return Save(a, a.name, "Texture2DArray " + a.format + " " + a.graphicsFormat + " depth " + a.depth);
+    }
+
+    // A 16x16x4 volume with 5 levels (depth 4, 2, 1, 1, 1); depth slice z is layer z.
+    static string Volume(int f)
+    {
+        var name = "volume_" + f + "_" + Names[f];
+        Texture3D v;
+        try { v = new Texture3D(16, 16, 4, (TextureFormat)f, true); }
+        catch (Exception e)
+        {
+            // 2019.4 refuses a compressed Texture3D (fixtures/BUILDING.md section 29 probes).
+            Debug.Log("FIXTURE-SKIP " + name + " " + e.Message);
+            return null;
+        }
+        var src = new Texture2D[4];
+        for (int z = 0; z < 4; z++) src[z] = Source(f, 16, 16, z);
+        for (int m = 0; m < v.mipmapCount; m++)
+        {
+            int d = Math.Max(1, 4 >> m);
+            var level = new List<byte>();
+            for (int z = 0; z < d; z++) level.AddRange(RawLevel(src[z], f, m));
+            v.SetPixelData(level.ToArray(), m);
+        }
+        v.Apply(false, false);
+        if ((int)v.format != f) throw new Exception("volume is " + v.format + ", not " + f);
+        v.name = name;
+        return Save(v, name, "Texture3D " + v.format + " " + v.graphicsFormat + " depth " + v.depth);
+    }
+
+    public static void Build()
+    {
+        // Linear color space: the only way the editor writes an sRGB GraphicsFormat.
+        PlayerSettings.colorSpace = ColorSpace.Linear;
+        if (!AssetDatabase.IsValidFolder("Assets/Fixtures")) AssetDatabase.CreateFolder("Assets", "Fixtures");
+        if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/Fixtures", "layers");
+        var windows = new List<string>();
+        var android = new List<string>();
+        foreach (var f in Windows)
+        {
+            windows.Add(Cube(f));
+            windows.Add(Array2D(f, false));
+            windows.Add(Array2D(f, true));
+            windows.Add(Volume(f));
+        }
+        foreach (var f in Android)
+        {
+            android.Add(Cube(f));
+            android.Add(Array2D(f, false));
+            android.Add(Array2D(f, true));
+            android.Add(Volume(f));
+        }
+        AssetDatabase.SaveAssets();
+        Bundle("windows", windows.Where(p => p != null).ToList(), BuildTarget.StandaloneWindows64);
+        Bundle("android", android.Where(p => p != null).ToList(), BuildTarget.Android);
+    }
+
+    static void Bundle(string name, List<string> paths, BuildTarget target)
+    {
+        var dir = Path.Combine("Build", "layers-" + name);
+        Directory.CreateDirectory(dir);
+        var builds = new[] { new AssetBundleBuild { assetBundleName = name, assetNames = paths.ToArray() } };
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, BuildAssetBundleOptions.ChunkBasedCompression, target);
+        if (m == null) throw new Exception("build failed: layers " + name);
+        Debug.Log("FIXTURE-OK layers " + name + " -> " + dir);
+    }
+}
+```
+
+### Goldens
+
+In this order (`make-goldens.py` skips what `modern-goldens.json` holds):
+
+```bash
+<modern-oracle>/bin/python scripts/make-modern-goldens.py
+.venv-oracle/bin/python scripts/make-goldens.py
+```
+
+- UnityPy records the class fields of each object (it has no hand-written reader for these
+  classes; it reads them through the type tree). For each `Texture2DArray` it also records the
+  sha256 of the RGBA of level 0 of each slice (`textureArrays`), the second check of the owner's
+  decision on #331. It decodes ASTC with astcenc, not texture2ddecoder, so its ASTC slices differ
+  from ours by rounding; the test checks the other formats against it.
+- The section 17 export goldens are not rerun: AssetStudio c37af7d has no `Cubemap`,
+  `Texture2DArray` or `Texture3D` class.
+- `fixtures/tpk-trees.json` holds Unity's own player type trees of classes 89, 117 and 187 for
+  the layout tests (`scripts/make-tpk-trees.py`, every class id on one command line).
+
+### Measured against the editor (2026-11-10)
+
+`packages/texture/tests/layers.test.ts` compares every level of every face and slice with
+`fixtures/texture-layer-pixel-unity-goldens.json`. The bound of a compressed format is its
+largest error at level 0 of the section 29 `Texture2D`s.
+
+| Format | Bound (`Texture2D` level 0) | Faces and slices, every level |
+| --- | --- | --- |
+| `RGBA32` | 0 | 0 |
+| `DXT1`, `BC7` | 0 | 0 |
+| `ETC2_RGBA8` | 0 | 0 (see 2) |
+| `ASTC_4x4` | 0 | 1 (see 1) |
+
+Two listed exceptions, asked on #331 (question to the owner, 2026-11-10):
+
+1. **ASTC_4x4 within 1.** Against `Cubemap.GetPixels` (every editor), `Texture3D.GetPixels32`
+   (2020.3, 6000.3, 6000.6) and 2019.4's `Texture2DArray.GetPixels32`, an `ASTC_4x4` face or slice
+   is off by 1, already at level 0, while 2020.3+ arrays match exactly. Each face or slice is a
+   view of the image data through the same block decoder as a `Texture2D`, so the difference is
+   the editor's own decode path for those classes. The test allows 1 for exactly these paths.
+2. **2019.4's ETC2 cube level 3.** For the 2x2 level 3 of `cube_47_ETC2_RGBA8`, 2019.4's
+   `Cubemap.GetPixels` returns the bottom row twice, on every face. The bytes of that level are
+   the same in the 2019.4 and 2020.3 bundles, and 2020.3 and later return the pixels we decode,
+   so the test compares that level with the 2020.3 editor's pixels and asserts the defect.
