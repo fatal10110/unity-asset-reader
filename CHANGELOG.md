@@ -38,7 +38,7 @@ versioning policy below explains when they ship in a minor version.
 
 ## unity-asset-reader
 
-### 1.3.1 - Unreleased
+### 1.4.0 - Unreleased
 
 - **Compare two builds.** `diff(oldEnv, newEnv)` lists the assets added, removed or modified
   between two loaded builds. It matches them by container path, then by path id within the same

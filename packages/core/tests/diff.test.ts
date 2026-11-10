@@ -174,3 +174,53 @@ test("a build compared with itself has no differences", () => {
   assert.deepEqual(diff(env, env), []);
   assert.deepEqual(diff(v1(), v1()), []);
 });
+
+/**
+ * `data`, a SerializedFile, with its `AssetBundle` type (class 142, not
+ * stripped, no script) renamed to an unknown class, so no object of it names
+ * a bundle: the file then stands for a loose file without one.
+ */
+function withoutAssetBundle(data: Uint8Array): Uint8Array {
+  const out = data.slice();
+  const pattern = [142, 0, 0, 0, 0, 0xff, 0xff];
+  const view = new DataView(out.buffer, out.byteOffset, out.byteLength);
+  const dataOffset = view.getUint32(12, false);
+  const hits: number[] = [];
+  for (let i = 0; i + pattern.length <= dataOffset; i++) {
+    if (pattern.every((b, j) => out[i + j] === b)) hits.push(i);
+  }
+  assert.equal(hits.length, 1, "one AssetBundle type entry in the metadata");
+  out[hits[0]! + 1] = 0x7f; // class 32654, which Unity does not have
+  return out;
+}
+
+test("a SerializedFile without an AssetBundle object matches by its file name", () => {
+  const files = v1().files;
+  const cab = files.find((f) => !f.path.endsWith(".resS") && f.path.startsWith("CAB-"))!;
+  const resS = files.filter((f) => f.path.startsWith(`${cab.path}.`));
+  const loose = (data: Uint8Array): Env =>
+    load([{ name: cab.path, data }, ...resS.map((f) => ({ name: f.path, data: f.data }))]);
+  const plain = withoutAssetBundle(cab.data);
+  const before = loose(plain);
+  assert.ok(![...before.assets()].some((a) => a.type === "AssetBundle"));
+  assert.ok([...before.assets()].every((a) => a.path === undefined));
+
+  assert.deepEqual(diff(before, loose(plain.slice())), []);
+
+  // One byte of an object's own data: the first letter of changed.png's m_Name.
+  const target = [...before.assets()].find((a) => a.name === "changed")!;
+  const edited = plain.slice();
+  const at = target.reader.byteStart + 4;
+  assert.equal(String.fromCharCode(edited[at]!), "c");
+  edited[at] = "C".charCodeAt(0);
+  const entries = diff(before, loose(edited));
+  assert.equal(entries.length, 1);
+  const [e] = entries;
+  assert.equal(e!.change, "modified");
+  assert.equal(e!.file, cab.path);
+  assert.equal(e!.pathId, target.pathId);
+  assert.equal(e!.name, "Changed");
+  assert.equal(e!.path, undefined);
+  assert.deepEqual(e!.fields, ["m_Name"]);
+  assert.equal(e!.sizeDelta, 0);
+});

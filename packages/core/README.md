@@ -270,10 +270,14 @@ for (const e of diff(load(oldFiles), load(newFiles))) {
   path id and bundle name (the `AssetBundle` object's `m_AssetBundleName`), so a bundle whose CAB
   name changed still matches. Where there is no bundle name, the file name is used.
 - **Content:** the object's bytes, and the bytes of its streamed data in the `.resS` or
-  `.resource` file. A texture whose data only moved within its `.resS` is not modified.
+  `.resource` file. Different object bytes make an asset modified. The one exception is an
+  object with streamed data: its fields are compared instead, the streamed data by its bytes, so
+  a texture whose data only moved within its `.resS` is not modified. In a build without type
+  trees, the streamed data of `Cubemap`, `Texture2DArray`, `Texture3D` and `CubemapArray` is not
+  compared yet.
 - **`fields`:** for a modified asset with a type tree on both sides, the top-level fields that
   differ. `m_StreamData` (or `m_Resource`, `m_ExternalResources`) is listed when the streamed
-  bytes differ.
+  bytes differ. The list is empty when only bytes no field shows differ, such as padding.
 - **`sizeDelta`:** the object plus its streamed data, new less old.
 - `before` and `after` are the two `Asset`s. Load each build with its own `load()`, with its
   `.resS` files.

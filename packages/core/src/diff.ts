@@ -42,12 +42,17 @@ export interface DiffEntry {
    * the top-level fields whose values differ, in type tree order, a field one
    * side lacks included. A streamed-data field (`m_StreamData`, ...) is listed
    * when its bytes in the resource file differ, not when only its offset or
-   * file name does. `undefined` otherwise.
+   * file name does. Empty when the object bytes differ but no top-level value
+   * does (padding, NaN payload bits). `undefined` otherwise.
    */
   fields?: string[];
 }
 
 /** Classes whose streamed data a file without type trees has its hardcoded reader find. */
+// ponytail: without type trees, the streamed data of Cubemap, Texture2DArray,
+// Texture3D and CubemapArray is neither compared nor counted in sizeDelta (a
+// same-size repaint at the same offset reads as unchanged). Add their classes
+// here when the #331 Cubemap / Texture2DArray / Texture3D readers land.
 const STREAM_READERS = new Map<number, [(reader: ObjectReader) => object, string]>([
   [ClassID.Texture2D, [readTexture2D, "m_StreamData"]],
   [ClassID.Mesh, [readMesh, "m_StreamData"]],
@@ -82,12 +87,15 @@ interface Parsed {
  *
  * Content: two matched assets are the same when their object bytes are
  * equal and so are the bytes of their streamed data in a resource file
- * (`.resS`, `.resource`), read with `Env.readResource`. Where the object bytes
- * differ and the object has streamed data, its fields are compared instead,
- * the streamed data by its bytes: a texture whose data only moved within its
- * `.resS`, or whose CAB name changed, is not modified. Fields come from the
- * type tree, or without one from the hardcoded reader of `Texture2D`, `Mesh`,
- * `AudioClip` and `VideoClip`.
+ * (`.resS`, `.resource`), read with `Env.readResource`. Different object
+ * bytes make an asset modified, except for an object with a streamed-data
+ * field (`StreamingInfo`, `StreamedResource`): its fields are compared
+ * instead, the streamed data by its bytes, so a texture whose data only moved
+ * within its `.resS`, or whose CAB name changed, is not modified. Fields come
+ * from the type tree, or without one from the hardcoded reader of
+ * `Texture2D`, `Mesh`, `AudioClip` and `VideoClip`. In a file without type
+ * trees the streamed data of `Cubemap`, `Texture2DArray`, `Texture3D` and
+ * `CubemapArray` is neither compared nor counted in `sizeDelta`.
  *
  * Entries are the removed and modified assets in `oldEnv`'s object order, then
  * the added ones in `newEnv`'s. Both envs stay usable; nothing is copied.
@@ -222,7 +230,10 @@ function compare(
     }
     return !(key in pa.values && key in pb.values && same(pa.values[key], pb.values[key]));
   });
-  if (fields.length === 0) return undefined;
+  // Only streamed data can make different bytes the same asset: its offset and
+  // resource file name change with the build, not with the asset.
+  const streams = pa.streams.length > 0 || pb.streams.length > 0;
+  if (fields.length === 0 && (sameBytes || streams)) return undefined;
   return pa.typeTree && pb.typeTree ? { sizeDelta, fields } : { sizeDelta };
 }
 
