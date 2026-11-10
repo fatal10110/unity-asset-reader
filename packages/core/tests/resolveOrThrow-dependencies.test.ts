@@ -84,11 +84,14 @@ test("an AssetBundle declaring no dependencies adds no hint, nor does another bu
   );
 });
 
-test("an AssetBundle that cannot be read adds no hint and keeps the ResourceNotFoundError", () => {
+/**
+ * A copy of the uncompressed main bundle, and where its `m_Dependencies` (count
+ * 1, then one string, as the bundle stores it uncompressed) starts in it.
+ */
+function uncompressedMain(): { name: string; dependency: string; data: Uint8Array; at: number } {
   const name = "editor/2019.4.41f2/uncompressed/main";
   const [dependency, ...rest] = declared(name);
   assert.ok(dependency !== undefined && rest.length === 0);
-  // m_Dependencies as the bundle stores it uncompressed: count 1, then one string.
   const pattern = [1, 0, 0, 0, dependency.length, 0, 0, 0, ...new TextEncoder().encode(dependency)];
   const data = loadFixture(name).slice();
   const at: number[] = [];
@@ -96,8 +99,40 @@ test("an AssetBundle that cannot be read adds no hint and keeps the ResourceNotF
     if (pattern.every((byte, j) => data[i + j] === byte)) at.push(i);
   }
   assert.equal(at.length, 1, "m_Dependencies not found once in the bundle");
+  return { name, dependency, data, at: at[0]! };
+}
+
+test("two bundles with the same CAB name: each message names its own bundle's dependencies", () => {
+  const { name, dependency, data: original, at } = uncompressedMain();
+  // The same bundle, its one dependency renamed in place (same length).
+  const renamed = dependency.slice(0, -1) + (dependency.endsWith("x") ? "y" : "x");
+  const data = original.slice();
+  data.set(new TextEncoder().encode(renamed), at + 8);
+
+  const env = load([
+    { name: "first/main", data: original },
+    { name: "second/main", data },
+  ]);
+  const [cab] = Object.keys(golden(name).serialized ?? {});
+  const external = golden(name).serialized![cab!]!.externals[0]!.path.split("/").at(-1);
+  // Objects come in load order: the first bundle's, then the second's.
+  const inCab = env.objects.filter((o) => o.fileName === cab);
+  assert.equal(inCab.length % 2, 0);
+  const prefix = `${WHAT} (path id 1) is in ${external}, which is not loaded: pass it to load() too`;
+  assert.equal(
+    messageFor(env, inCab[0]!),
+    `${prefix} (this bundle declares dependencies: ${dependency})`,
+  );
+  assert.equal(
+    messageFor(env, inCab.at(-1)!),
+    `${prefix} (this bundle declares dependencies: ${renamed})`,
+  );
+});
+
+test("an AssetBundle that cannot be read adds no hint and keeps the ResourceNotFoundError", () => {
+  const { name, data, at } = uncompressedMain();
   // A count far past the object's end: readAssetBundle throws a CorruptError.
-  new DataView(data.buffer).setInt32(at[0]!, 0x7fffffff, true);
+  new DataView(data.buffer).setInt32(at, 0x7fffffff, true);
 
   const env = load([{ name, data }]);
   const [cab] = Object.keys(golden(name).serialized ?? {});
