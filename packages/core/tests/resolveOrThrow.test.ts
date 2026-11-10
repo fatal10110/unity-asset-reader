@@ -88,7 +88,7 @@ test("a file id past the file's externals: CorruptError with the file id", () =>
   );
 });
 
-test("a file not loaded: ResourceNotFoundError naming the file", () => {
+test("a file not loaded: ResourceNotFoundError naming the file and declared dependencies", () => {
   const env = loadFixtures(MAIN);
   const behaviour = behaviourOf(env);
   const pointer = textRef(behaviour);
@@ -98,10 +98,14 @@ test("a file not loaded: ResourceNotFoundError naming the file", () => {
       assert.ok(error instanceof ResourceNotFoundError, `got ${String(error)}`);
       assert.equal(error.path, SHARED_CAB);
       assert.equal(error.fileName, SHARED_CAB);
+      // main's AssetBundle (path id 1) declares the bundles it needs.
+      const { m_Dependencies } = golden(MAIN).serialized?.[MAIN_CAB]?.typetrees["1"]?.value as {
+        m_Dependencies: string[];
+      };
       assert.equal(
         error.message,
         `${WHAT} (path id ${pointer.m_PathID}) is in ${SHARED_CAB}, which is not loaded: ` +
-          "pass it to load() too",
+          `pass it to load() too (this bundle declares dependencies: ${m_Dependencies.join(", ")})`,
       );
       return true;
     },

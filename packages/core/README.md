@@ -325,7 +325,7 @@ Three error classes let you tell the cases apart:
 |---|---|---|
 | `UnsupportedError` | The input is well-formed, but it uses something this library does not read: a compression type, a container, a format or Unity version. | `kind` (`"compression type"`, `"container"`, `"Unity version"`, ...), `found` |
 | `CorruptError` | The input claims to be something this library reads, but it does not hold together: it is truncated, a size disagrees with its header, the magic number is wrong. | |
-| `ResourceNotFoundError` | An object's data is in a `.resS` / `.resource` file that was not passed to `load()`. Load it too. | `path`, `fileName` |
+| `ResourceNotFoundError` | An object's data is in a `.resS` / `.resource` file that was not passed to `load()`, or a pointer followed by `resolveOrThrow` leads into a SerializedFile (`CAB-<hash>`) of a bundle that was not. Load it too. For a bundle, the message ends with the dependencies the pointing bundle's `AssetBundle` object declares, when it declares any: `asset.data.dependencies` (`m_Dependencies`, Unity 5.0+). They are bundle names, not file names, so they narrow down which file to pass rather than name it. | `path`, `fileName` |
 
 Nothing returns partial or garbage data without an error.
 
@@ -505,7 +505,7 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | `ResourceRef` | `{ path, offset, size }`: a byte range of a resource file (a `StreamingInfo`) |
 | `PPtr` | `{ m_FileID, m_PathID }`: a pointer as a type tree holds it |
 | `PPtrResolution` | What `env.resolve` returns: `found` with the object, or why not |
-| `resolveOrThrow(env, pptr, from, what, classId?)` | `env.resolve` for a pointer that must lead somewhere: the object, optionally checked to be of class `classId`, or an error naming the field (`what`): `ResourceNotFoundError` for a file not loaded, `CorruptError` otherwise |
+| `resolveOrThrow(env, pptr, from, what, classId?)` | `env.resolve` for a pointer that must lead somewhere: the object, optionally checked to be of class `classId`, or an error naming the field (`what`): `ResourceNotFoundError` for a file not loaded, its message ending with the dependencies the `AssetBundle` in `from`'s file declares (`(this bundle declares dependencies: a, b)`) when there are any, `CorruptError` otherwise |
 
 ### Objects
 
