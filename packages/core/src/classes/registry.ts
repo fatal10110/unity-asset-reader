@@ -8,7 +8,7 @@ import type { BuildTarget } from "../serialized/BuildTarget.js";
 import { ClassID } from "../serialized/ClassID.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
 import { baseName } from "../serialized/SerializedFile.js";
-import { readTypeTree, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
+import { readTypeTree, typeTreeOf, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
 import { readAnimation, type Animation } from "./AnimationComponent.js";
 import { readAnimationClip, type AnimationClip } from "./AnimationClip.js";
 import { readAnimator, type Animator } from "./Animator.js";
@@ -407,6 +407,7 @@ function readTexture2DData(
 
 /**
  * The whole `MonoBehaviour` when there is a way to read it: its type tree,
+ * the file's own or one supplied through `LoadOptions.typeTrees` (#339),
  * which starts with the header `readMonoBehaviour` reads and goes on through
  * the script's fields. Without one, the header alone, which is all a file
  * built without type trees gives up without the script's assembly (upstream
@@ -417,10 +418,10 @@ function readTexture2DData(
  * does would drop data the file holds.
  */
 function readMonoBehaviourData(reader: ObjectReader): MonoBehaviourData {
-  const nodes = reader.serializedType?.nodes;
-  // The type tree holds the header under the same names: its first four fields
-  // in a player build, with editor fields around them in an editor file.
-  if (nodes && nodes.length > 0) return readTypeTree(reader) as MonoBehaviourData;
+  // The type tree, the file's own or a supplied one (#339), holds the header
+  // under the same names: its first four fields in a player build, with editor
+  // fields around them in an editor file.
+  if (typeTreeOf(reader)) return readTypeTree(reader) as MonoBehaviourData;
   // An interface has no implicit index signature; the header has no other keys.
   return readMonoBehaviour(reader) as MonoBehaviourData;
 }

@@ -115,7 +115,8 @@ const env = await open(url, { fetch: (input) => fetch(input, { headers }) });
 ```
 
 Both `load()` and `open()` accept `{ unityVersion }` for
-[version-stripped files](#version-stripped-files).
+[version-stripped files](#version-stripped-files), and `{ typeTrees }` for the scripts of
+[files built without type trees](#scripts-in-files-built-without-type-trees).
 
 ### List and filter assets
 
@@ -224,7 +225,8 @@ for (const obj of env.objects) {
     checks it at run time.
 - **`obj.readTypeTree()`** reads any object into a plain JS object by walking its type tree.
   That works for every class, including your own `MonoBehaviour`/`ScriptableObject` fields, as
-  long as the bundle was built with type trees (the Unity default).
+  long as the bundle was built with type trees (the Unity default), or you
+  [supply your scripts' type trees](#scripts-in-files-built-without-type-trees).
 - **`env.resolve(pptr, obj)`** follows a pointer (see
   [Follow a pointer to another object](#follow-a-pointer-to-another-object)).
 - **`env.readResource(ref, obj)`** reads bulk data that an object keeps in a `.resS` /
@@ -378,7 +380,7 @@ starts there. The older readers keep the older layouts they already had.
 |---|---|---|---|
 | `AssetBundle` (`AssetBundleFields`) | `container`: asset path to object, the bundle's table of contents; `preloadTable`, `dependencies` | 3.4 | Yes |
 | `TextAsset` (`TextAssetFields`) | `bytes`: the file as stored; `text`: those bytes decoded as UTF-8 (on first use) | 3.4 | Yes |
-| `MonoBehaviour` (`MonoBehaviourFields`) | `script` (the `MonoScript` pointer), `gameObject`, `enabled`, `name`, and `fields`: every field of the script, with a type tree only | Any | Yes |
+| `MonoBehaviour` (`MonoBehaviourFields`) | `script` (the `MonoScript` pointer), `gameObject`, `enabled`, `name`, and `fields`: every field of the script, with a type tree only, the file's own or [a supplied one](#scripts-in-files-built-without-type-trees) | Any | Yes |
 | `MonoScript` (`MonoScriptFields`) | `className`, `namespace`, `assemblyName` | 3.4 | Yes |
 | `Material` (`MaterialFields`) | `shader` pointer, keywords, and `savedProperties`: `texEnvs` (texture slots), `floats`, `ints`, `colors` | 3.4 | Yes |
 | `Shader` (`ShaderFields`) | `parsedForm`: the parsed ShaderLab (`name`, properties, sub-shaders, passes, render state, keywords, each variant's parameters); `platforms` and `compressedBlob`: every platform's compiled programs, LZ4-compressed, not decoded | 2019.1 | 2019.4, 2020.3, 6000.3.26f1, 6000.6 |
@@ -484,6 +486,44 @@ The version-stripped fixtures, in formats 21 and 22, hold a `TextAsset`, a `Mate
 `AudioClip`s, a `VideoClip`, a `Font`, the font's `Texture2D` and the bundle's `AssetBundle`.
 The other rows are unit tests.
 
+### Scripts in files built without type trees
+
+Most player builds strip type trees (`DisableWriteTypeTree`), so a `MonoBehaviour` or
+`ScriptableObject` gives up only its header: the script's own fields need the script's type
+tree. If you have it, pass it to `load()` or `open()`, keyed by script:
+
+```ts
+const env = load(bytes, {
+  typeTrees: {
+    // The MonoScript's "<m_AssemblyName>:<m_Namespace>.<m_ClassName>"
+    "Assembly-CSharp.dll:Game.ItemDatabase": itemDatabaseNodes,
+    // or the script id of the object's type entry, as 32 hex digits
+    "15f441d01838cd812fdb2c200c404b22": otherNodes,
+  },
+});
+for (const asset of env.assets("MonoBehaviour")) console.log(asset.data.fields);
+```
+
+- **Making the trees** is up to you: this library does not read assemblies. Generators such
+  as UnityPy's `TypeTreeGenerator` build them from the game's DLLs (or, for IL2CPP, from
+  Il2CppDumper's dummy DLLs).
+- **The format** is a `TypeTreeNodeData[]`: the nodes in pre-order, the root (`level` 0)
+  first, each `{ type, name, level, byteSize, metaFlag }`, optionally `typeFlags` and
+  `version`. It is plain JSON. A `TypeTreeNode[]` of another file is accepted as it is. From a
+  UnityPy `TypeTreeNode` `node`:
+  `[{"type": d["m_Type"], "name": d["m_Name"], "level": d["m_Level"], "byteSize": d["m_ByteSize"], "metaFlag": d["m_MetaFlag"]} for d in node.to_dict_list()]`.
+- **Keys:** the script name uses the `MonoScript` the object's `m_Script` points at
+  (`"<m_AssemblyName>:<m_ClassName>"` in the global namespace; the assembly is
+  `"Assembly-CSharp"`, without `.dll`, from Unity 6). The script id
+  (`SerializedType.scriptId`) is for when that `MonoScript` is not loaded or cannot be read.
+- **Lookup order:** the file's own type tree, then the tree of the script's name, then the tree
+  of its script id, then the header only.
+- **A tree that does not fit** (it does not consume exactly the object's bytes) throws
+  `CorruptError` naming the script, rather than reading garbage.
+- **`[SerializeReference]` data** cannot be read this way: the file has no type trees for the
+  referenced types either, so a supplied tree reaching a referenced object throws
+  `UnsupportedError`. An empty `[SerializeReference]` registry reads.
+
 ## API reference
 
 Every export, grouped. Each one has full JSDoc (parameters, return values, what it throws) in the
@@ -500,7 +540,7 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | `Env` | `files`, `objects`, `assets(...types)`, `get(path)`, `resolve(pptr, from)`, `readResource(ref, from)` |
 | `LoadSource` | One input of `load()`: bytes, a `LoadInput`, or `{ data }` without a name (called `input <index>`) |
 | `LoadInput` | `{ name, data }`: one named file for `load()`; `data` is a `Uint8Array` or `ArrayBuffer` |
-| `LoadOptions` | `unityVersion`: fallback editor version for files that record none or have a stripped version |
+| `LoadOptions` | `unityVersion`: fallback editor version for files that record none or have a stripped version; `typeTrees`: type trees for the MonoBehaviours of files built without them, by script ([details](#scripts-in-files-built-without-type-trees)) |
 | `LoadedFile` | `{ path, data }`: one unpacked file |
 | `ResourceRef` | `{ path, offset, size }`: a byte range of a resource file (a `StreamingInfo`) |
 | `PPtr` | `{ m_FileID, m_PathID }`: a pointer as a type tree holds it |
@@ -584,6 +624,7 @@ For tools that work below `load()`:
 | `readWebFile(data)`, `WebFile` | Unpack one `UnityWebData1.0` file |
 | `readSerializedFile(data)`, `SerializedFile`, `SerializedFileHeader`, `ObjectInfo`, `FileIdentifier`, `LocalSerializedObjectIdentifier`, `UnityVersion` | Parse a SerializedFile's header, type trees and object table |
 | `SerializedType`, `TypeTreeNode` | A type entry and its type tree |
+| `TypeTreeNodeData` | One node of a type tree supplied through `LoadOptions.typeTrees`: `{ type, name, level, byteSize, metaFlag }`, plain JSON |
 | `SerializedFileFormatVersion`, `BuildTarget` | Format version and target platform constants |
 | `decompressLz4`, `lzmaDecompress`, `gunzip`, `unzlib` | The block decompressors, each checking its output size |
 | `formatSingle(value)`, `formatSingleInvariant(value)` | Write a float32 as .NET 8's `float.ToString()` does, under en-US and invariant culture |
