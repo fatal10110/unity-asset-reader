@@ -129,6 +129,39 @@ test("two bundles with the same CAB name: each message names its own bundle's de
   );
 });
 
+test("SerializedFiles passed in on their own: each gets only its own file's dependencies", () => {
+  const font = "editor/2019.4.41f2/lz4/font";
+  const main = "editor/2019.4.41f2/lz4/main";
+  assert.deepEqual(declared(font), []);
+  const mainDependencies = declared(main);
+  assert.ok(mainDependencies.length > 0);
+  // Each bundle's SerializedFile, taken out and passed to load() as a loose input.
+  const loose = (name: string): { name: string; data: Uint8Array } => {
+    const [cab] = Object.keys(golden(name).serialized ?? {});
+    const file = load([{ name, data: loadFixture(name) }]).files.find(
+      (f) => f.path.split("/").at(-1) === cab,
+    );
+    assert.ok(file, `${name}: no ${cab} in the bundle`);
+    return { name: cab!, data: file.data };
+  };
+  const fontFile = loose(font);
+  const mainFile = loose(main);
+  const env = load([fontFile, mainFile]);
+
+  // main's AssetBundle is loaded next to font's file, but in another file.
+  assert.equal(
+    messageFor(env, objectOf(env, fontFile.name)),
+    `${WHAT} (path id 1) is in unity default resources, which is not loaded: ` +
+      "pass it to load() too",
+  );
+  const external = golden(main).serialized![mainFile.name]!.externals[0]!.path.split("/").at(-1);
+  assert.equal(
+    messageFor(env, objectOf(env, mainFile.name)),
+    `${WHAT} (path id 1) is in ${external}, which is not loaded: pass it to load() too ` +
+      `(this bundle declares dependencies: ${mainDependencies.join(", ")})`,
+  );
+});
+
 test("an AssetBundle that cannot be read adds no hint and keeps the ResourceNotFoundError", () => {
   const { name, data, at } = uncompressedMain();
   // A count far past the object's end: readAssetBundle throws a CorruptError.
