@@ -71,6 +71,7 @@ feature PR.
 | `unity-asset-reader-spine` | `packages/spine` | 7 |
 | `unity-asset-reader-shader` | `packages/shader` | 8 |
 | `unity-asset-reader-animation` | `packages/animation` | 9 |
+| `unity-asset-reader-cli` | `packages/cli` | 10 |
 
 ### Adding a new package
 

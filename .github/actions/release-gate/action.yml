@@ -96,6 +96,10 @@ runs:
       if: steps.plan.outputs.packages != ''
       shell: bash
       run: npm test -w unity-asset-reader-animation
+    - name: "cli: build and test"
+      if: steps.plan.outputs.packages != ''
+      shell: bash
+      run: npm test -w unity-asset-reader-cli
     - name: Repo script tests
       if: steps.plan.outputs.packages != ''
       shell: bash
