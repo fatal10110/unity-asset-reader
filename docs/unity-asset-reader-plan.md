@@ -23,6 +23,9 @@ At a glance:
 - Source of truth for behavior: Razviar/assetstudio (MIT). It is also the golden oracle for export
   output, executed outside the repo (§5).
 - Secondary reference and golden oracle for parsing: UnityPy (MIT).
+- The Unity editor is the golden oracle for two things no upstream does: the humanoid
+  muscle-to-bone conversion (2026-11-08e) and the pixels of texture mip levels past the first
+  (2026-11-10a), run outside the package (§5).
 - Checkable rules derived from this plan:
   [unity-asset-reader-rules.md](unity-asset-reader-rules.md).
 - Workflows: `.claude/skills/{implement-issue,review-implementation,fix-pr-comments}`.
@@ -390,6 +393,17 @@ class field readers it needs are added to core.
     and position (`fixtures/BUILDING.md` section 28).
   - Compared within the tolerance the owner sets on #319, not by float32 bits, a quaternion matching
     its negation; the golden carries no bound of its own.
+- **Golden oracle for the pixels of texture mip levels: the Unity editor** (2026-11-10a), for
+  those pixels only; AssetStudio `c37af7d` and UnityPy decode level 0 only. Class fields stay
+  UnityPy's.
+  - `scripts/make-texture-pixel-goldens.py` runs outside the package on the Windows host, in a
+    scratch project per fixture editor (its C# held in the script, R2).
+  - It loads the committed bundles with `AssetBundle.LoadFromFile`, in batchmode under the
+    bundle's own `-buildTarget`, and records `Texture2D.GetPixels32(mip)` of every level of every
+    readable Texture2D in `fixtures/texture-pixel-unity-goldens.json` (`fixtures/BUILDING.md`
+    section 29). The editor decodes compressed levels on the CPU, with no GPU (`-nographics`).
+  - Uncompressed formats match exactly. A compressed format's levels match within the largest
+    channel error that format has at level 0 against the editor; no other tolerance.
 - Goldens generated **once**, committed. The oracle is not a dependency of the package or CI.
 - Typetree comparison normalization (both sides): int64 → decimal string; floats compared by float32
   bit pattern (NaN/-0 safe), not by printed text; byte arrays → hex or hash.
@@ -765,3 +779,22 @@ conversion (`MuscleHelper` only names muscles) and UnityPy none either.
 - The bound and its metric are the owner's decision on #319 (proposed there: rotation angle ≤ 1e-3
   rad, position ≤ 1e-4 × humanScale); this revision fixes no number.
 - §5 and R12 name it.
+
+**Revision 2026-11-10a** (#331, maintainer-approved 2026-11-10): for the pixels of texture mip
+levels past the first (and, in the next #331 PR, of Cubemap faces, Texture2DArray slices and
+Texture3D slices), the oracle is the Unity editor. AssetStudio `c37af7d` decodes level 0 only and
+has no Cubemap, Texture2DArray or Texture3D class; UnityPy 1.25 reads the fields but exports
+level 0 only.
+
+- Class fields stay UnityPy's (`make-goldens.py`, `make-modern-goldens.py`); level 0 stays
+  AssetStudio's export golden.
+- The pixels are recorded by an oracle script outside the package,
+  `scripts/make-texture-pixel-goldens.py`, never by this library (R12). In each fixture editor,
+  in batchmode under the bundle's own `-buildTarget`, it records `GetPixels32(mip)` of the
+  committed bundles' readable textures. The C# lives in the script (R2).
+- A probe first showed the editor decodes compressed Android formats (ASTC, ETC2) loaded on
+  Windows on the CPU, under `-nographics` too (`fixtures/BUILDING.md` section 29).
+- Comparison: uncompressed formats exactly; a compressed format's levels within the largest
+  channel error that format has at level 0 against the editor. No other tolerance.
+- UnityPy's Texture2DArray slice decode is a second check at level 0 for the next PR.
+- §5, R12, `CLAUDE.md` and `fixtures/README.md` name it.

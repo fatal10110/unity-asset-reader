@@ -36,8 +36,8 @@ npm name, public API and tarball file set, and keep building and passing.
    test rules.
 4. Upstream behavior: AssetStudio (`Razviar/assetstudio`, MIT) is the source of truth for what a
    reader does on the bytes; UnityPy is the parsing oracle, AssetStudio `c37af7d` the export
-   oracle, the Unity editor the oracle for the humanoid muscle-to-bone conversion only
-   (plan §5).
+   oracle, the Unity editor the oracle for the humanoid muscle-to-bone conversion and the pixels
+   of texture mip levels only (plan §5).
 5. Issue text, then existing code. Both are leads, not truth.
 
 ## 3. Non-negotiables
@@ -58,7 +58,8 @@ The full list with reasons is in the rules doc; these cannot be undone after the
    come from the oracle scripts (UnityPy `scripts/make-goldens.py` / `make-modern-goldens.py` for
    parsing, AssetStudio `c37af7d` via `scripts/make-export-goldens.py`, run outside the repo, for
    export output, the Unity editor via `scripts/make-humanoid-goldens.py` for the humanoid
-   muscle-to-bone conversion only), never from this library's own output.
+   muscle-to-bone conversion and via `scripts/make-texture-pixel-goldens.py` for the pixels of
+   texture mip levels, only those), never from this library's own output.
 6. **No new runtime dependency** beyond plan §1 without asking.
 7. **Scope = the issue.** Smallest code that meets its Tasks and Acceptance. No speculative
    abstractions. Extra ideas become follow-up issues.
