@@ -30,6 +30,29 @@ import type { ObjectReader, Texture2DData } from "unity-asset-reader";
 import { convertPlain, type RgbaImage } from "./convert.js";
 import { deswizzle, refuseTiledPlatform, switchLayout, xbox360Swap } from "./platform.js";
 
+/** Which Crunch variant a DXT1 or DXT5 Crunch texture holds; see {@link DecodeTexture2DOptions}. */
+type Crunch = "unity" | "original";
+
+/** The Texture2D fields {@link decodeTexture2D} reads, of which only four are required. */
+type Texture2DInput = Pick<
+  Texture2DData,
+  "m_Width" | "m_Height" | "m_TextureFormat" | "imageData"
+> &
+  Partial<Texture2DData>;
+
+/** Options of {@link decodeTexture2D}, for input that is not read from a bundle. */
+export interface DecodeTexture2DOptions {
+  /**
+   * The Crunch variant of a `DXT1Crunched` or `DXT5Crunched` texture:
+   * `"unity"`, Unity's own crunch (Unity 2017.3 and later), or `"original"`,
+   * the original crunch (before 2017.3). Without it the variant follows from
+   * the 2017.3 fields, as {@link decodeTexture2D} says; with it, those fields
+   * are ignored. Other formats ignore it, except the ETC Crunch formats, which
+   * only Unity's crunch has: `"original"` is an `UnsupportedError` for them.
+   */
+  crunch?: "unity" | "original";
+}
+
 /** Where `initTexture` finds the WASM files; passed to `texture2ddecoder-wasm` as it is. */
 export interface InitTextureOptions {
   /**
@@ -232,13 +255,18 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  * from Unity 2017.3 on, and the original crunch before. The Unity version is
  * not a Texture2D field, so the fields 2017.3 added stand in for it: a
  * texture with `m_DownscaleFallback` or `m_IsAlphaChannelOptional` is 2017.3
- * or later. The ETC Crunch formats only exist in Unity's variant.
+ * or later. Input built by hand, not read from a bundle, says which variant
+ * it holds with `options.crunch` instead, which wins over the fields. The ETC
+ * Crunch formats only exist in Unity's variant.
  *
- * @param texture a Texture2D as `obj.read()` returns it. Only `m_Width`,
- *   `m_Height`, `m_TextureFormat` and `imageData` are required at run time
- *   (and `m_DownscaleFallback` / `m_IsAlphaChannelOptional` for DXT Crunch,
- *   `platform` and `m_PlatformBlob` for consoles, see above); they are
- *   checked, since `obj.read()`'s type is the caller's claim
+ * @param texture a Texture2D as `obj.read()` returns it, or one built by
+ *   hand. Only `m_Width`, `m_Height`, `m_TextureFormat` and `imageData` are
+ *   required (and `m_DownscaleFallback` / `m_IsAlphaChannelOptional` or
+ *   `options.crunch` for DXT Crunch, `platform` and `m_PlatformBlob` for
+ *   consoles, see above); they are checked at run time too, since
+ *   `obj.read()`'s type is the caller's claim
+ * @param options how to read input that is not from a bundle; see
+ *   {@link DecodeTexture2DOptions}
  * @returns a new RGBA image, `width * height * 4` bytes, top row first;
  *   `imageData` is not modified. A texture 0 pixels wide or high (such as a
  *   dynamic font's 0x0 "Font Texture", whose `imageData` is empty, #139) gives
@@ -249,7 +277,8 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  *   (`obj.read()`'s type is not checked): `m_Width`, `m_Height` or
  *   `m_TextureFormat` is not a number, `imageData` is not a `Uint8Array`, or
  *   `platform` / `m_PlatformBlob`, when present, is not a number /
- *   `Uint8Array`; the message names each
+ *   `Uint8Array`; the message names each. Also when `options` is not an
+ *   object, or `options.crunch` is neither `"unity"` nor `"original"`
  * @throws {Error} before {@link initTexture} has finished
  * @throws {UnsupportedError} for a format with no decoder here (DXT3, and
  *   formats neither this nor `convertPlain` knows); for a Switch-swizzled
@@ -258,7 +287,9 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  *   texture (kind `"texture platform"`). For a texture 0 pixels wide or high
  *   only the format refusals apply (a format with no decoder, YUY2 of odd
  *   width), not the Switch and PS4/PS5 ones: it has no pixels to lay out
- *   (#139)
+ *   (#139). Also for an ETC Crunch format with `options.crunch` set to
+ *   `"original"` (kind `"texture format"`): the original crunch has no ETC
+ *   formats
  * @throws {CorruptError} when the image data is shorter than the first level
  *   needs (for Switch, the padded level), the Crunch data does not unpack,
  *   the block decoder refuses the data (such as PVRTC whose block counts are
@@ -267,8 +298,44 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  * await initTexture();
  * const { data, width, height } = await decodeTexture2D(obj.read());
  */
-export async function decodeTexture2D(texture: Texture2DData): Promise<RgbaImage> {
+export async function decodeTexture2D(
+  texture: Texture2DData,
+  options?: DecodeTexture2DOptions,
+): Promise<RgbaImage>;
+/**
+ * Decode a Texture2D built by hand, such as raw texture data from outside a
+ * bundle, to RGBA8. The same as the signature above, which `obj.read()` needs
+ * to infer its type: only `m_Width`, `m_Height`, `m_TextureFormat` and
+ * `imageData` are required, every other Texture2D field may be left out, and
+ * the same errors are thrown.
+ *
+ * @param texture the four required fields, and any other Texture2D field
+ * @param options the Crunch variant of DXT Crunch data, see
+ *   {@link DecodeTexture2DOptions}
+ * @returns a new RGBA image, `width * height * 4` bytes, top row first
+ * @example
+ * await initTexture();
+ * // Raw DXT1 data, 4 x 4 pixels:
+ * const { data } = await decodeTexture2D({
+ *   m_Width: 4,
+ *   m_Height: 4,
+ *   m_TextureFormat: TextureFormat.DXT1,
+ *   imageData: new Uint8Array(8),
+ * });
+ * // Crunch data from a Unity 2017.1 project, which has none of the 2017.3 fields:
+ * await decodeTexture2D(crunched, { crunch: "original" });
+ */
+export async function decodeTexture2D(
+  texture: Pick<Texture2DData, "m_Width" | "m_Height" | "m_TextureFormat" | "imageData"> &
+    Partial<Texture2DData>,
+  options?: DecodeTexture2DOptions,
+): Promise<RgbaImage>;
+export async function decodeTexture2D(
+  texture: Texture2DInput,
+  options: DecodeTexture2DOptions = {},
+): Promise<RgbaImage> {
   checkInput(texture);
+  const crunch = checkOptions(texture.m_TextureFormat, options);
   if (!initialized) throw new Error(NOT_INITIALIZED);
   const { m_Width: width, m_Height: height, m_TextureFormat: format } = texture;
   if (!Number.isInteger(width) || width < 0 || !Number.isInteger(height) || height < 0) {
@@ -287,11 +354,18 @@ export async function decodeTexture2D(texture: Texture2DData): Promise<RgbaImage
   const layout = switchLayout(platform, texture.m_PlatformBlob, format, width, height);
   let image: RgbaImage;
   if (layout === undefined) {
-    image = await decodeLinear(texture, format, data, width, height);
+    image = await decodeLinear(texture, crunch, format, data, width, height);
   } else {
     const { paddedWidth, paddedHeight } = layout;
     const linear = deswizzle(data, layout);
-    const padded = await decodeLinear(texture, layout.format, linear, paddedWidth, paddedHeight);
+    const padded = await decodeLinear(
+      texture,
+      crunch,
+      layout.format,
+      linear,
+      paddedWidth,
+      paddedHeight,
+    );
     image = crop(padded, width, height);
   }
   flipRows(image);
@@ -303,7 +377,8 @@ export async function decodeTexture2D(texture: Texture2DData): Promise<RgbaImage
  * stored: `convertPlain`, or the WASM decoder and the BGRA -> RGBA swap.
  */
 async function decodeLinear(
-  texture: Texture2DData,
+  texture: Texture2DInput,
+  crunch: Crunch | undefined,
   format: number,
   data: Uint8Array,
   width: number,
@@ -314,7 +389,7 @@ async function decodeLinear(
   if (codec === undefined) return plain(data, width, height, format);
 
   // Crunch is neither byte-swapped nor swizzled, so its data is `imageData`.
-  const blocks = unpackedFormat === undefined ? data : await unpack(texture);
+  const blocks = unpackedFormat === undefined ? data : await unpack(texture, crunch);
   const need =
     Math.ceil(width / codec.blockWidth) * Math.ceil(height / codec.blockHeight) * codec.blockBytes;
   if (blocks.length < need) {
@@ -369,7 +444,7 @@ function flipRows({ data, width, height }: RgbaImage): void {
  * `obj.read()` is typed by its caller, not checked, so a non-Texture2D can
  * get here; name what is missing rather than decode `undefined`.
  */
-function checkInput(texture: unknown): asserts texture is Texture2DData {
+function checkInput(texture: unknown): asserts texture is Texture2DInput {
   if (typeof texture !== "object" || texture === null) {
     throw new TypeError(`decodeTexture2D: expected a Texture2D object, got ${texture}`);
   }
@@ -390,6 +465,33 @@ function checkInput(texture: unknown): asserts texture is Texture2DData {
   if (problems.length > 0) {
     throw new TypeError(`decodeTexture2D: not a Texture2D with image data: ${problems.join(", ")}`);
   }
+}
+
+/**
+ * `options` is the caller's claim too; return its `crunch`, refusing an ETC
+ * Crunch format read as the original crunch, which never had ETC.
+ */
+function checkOptions(format: number, options: unknown): Crunch | undefined {
+  if (typeof options !== "object" || options === null) {
+    throw new TypeError(`decodeTexture2D: options must be an object (${got(options)})`);
+  }
+  const { crunch } = options as { crunch?: unknown };
+  if (crunch === undefined) return undefined;
+  if (crunch !== "unity" && crunch !== "original") {
+    throw new TypeError(
+      `decodeTexture2D: options.crunch must be "unity" or "original" (${
+        typeof crunch === "string" ? JSON.stringify(crunch) : got(crunch)
+      })`,
+    );
+  }
+  if (crunch === "original" && UNITY_ONLY_CRUNCH.has(format)) {
+    throw new UnsupportedError(
+      "texture format",
+      format,
+      `${describe(format)} exists only in Unity's Crunch, not the original one options.crunch names`,
+    );
+  }
+  return crunch;
 }
 
 /** `"missing"`, a class name such as `"Array"`, or a `typeof` such as `"string"`. */
@@ -413,14 +515,15 @@ function plain(data: Uint8Array, width: number, height: number, format: number):
 }
 
 /** Upstream `UnpackCrunch`: the first level of a Crunch texture, as block data. */
-async function unpack(texture: Texture2DData): Promise<Uint8Array> {
+async function unpack(texture: Texture2DInput, crunch: Crunch | undefined): Promise<Uint8Array> {
   const format = texture.m_TextureFormat;
   const unity =
-    format === TextureFormat.ETC_RGB4Crunched ||
-    format === TextureFormat.ETC2_RGBA8Crunched ||
-    // Unity 2017.3+, see decodeTexture2D.
-    texture.m_DownscaleFallback !== undefined ||
-    texture.m_IsAlphaChannelOptional !== undefined;
+    crunch === undefined
+      ? UNITY_ONLY_CRUNCH.has(format) ||
+        // Unity 2017.3+, see decodeTexture2D.
+        texture.m_DownscaleFallback !== undefined ||
+        texture.m_IsAlphaChannelOptional !== undefined
+      : crunch === "unity";
   const out = await (unity ? unpack_unity_crunch : unpack_crunch)(texture.imageData);
   if (out === null) {
     throw new CorruptError(
@@ -430,6 +533,12 @@ async function unpack(texture: Texture2DData): Promise<Uint8Array> {
   }
   return out;
 }
+
+/** The Crunch formats only Unity's crunch (2017.3+) has. */
+const UNITY_ONLY_CRUNCH: ReadonlySet<number> = new Set([
+  TextureFormat.ETC_RGB4Crunched,
+  TextureFormat.ETC2_RGBA8Crunched,
+]);
 
 /** `"DXT1 (10)"`, or the bare number for a value `TextureFormat` does not name. */
 function describe(format: number): string {
