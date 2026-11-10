@@ -15,7 +15,7 @@
 // - HumanDescription (upperArmTwist, foreArmTwist, upperLegTwist, legTwist):
 //   https://docs.unity3d.com/ScriptReference/HumanDescription.html
 
-import type { Avatar, Axes, Human } from "unity-asset-reader";
+import type { Avatar, Axes, Hand, Human } from "unity-asset-reader";
 import type { FloatCurve } from "./converter.js";
 import { evaluate } from "./cubic.js";
 import { MUSCLE_COUNT, muscleIndex } from "./muscle.js";
@@ -174,13 +174,21 @@ const TWISTS: readonly [number, number, keyof Human][] = [
 ];
 
 /**
- * The range of the UpperChest muscles, in radians, for an avatar without an
- * UpperChest bone: Unity's default, +-20 degrees
- * (`HumanTrait.GetMuscleDefaultMin`/`GetMuscleDefaultMax` of muscles 6-8).
- * Such an avatar has no axes, so no limits, for the bone; Unity then turns
- * the Chest by the UpperChest muscles too, over this range.
+ * Each finger bone's muscles by axis (x, y, z), as {@link BONE_MUSCLES} pairs
+ * a body bone's, by phalanx (proximal, intermediate, distal); an offset from
+ * the finger's first muscle, -1 where the axis has none. A finger's four
+ * muscles in `HumanTrait.MuscleName` order are `1 Stretched`, `Spread`,
+ * `2 Stretched` and `3 Stretched`; the fingers follow each other (thumb,
+ * index, middle, ring, little), the left hand's from muscle 55, the right
+ * hand's from 75. `m_HandBoneIndex` lists the bones in the same order.
  */
-const UPPER_CHEST_RANGE = (20 * Math.PI) / 180;
+const FINGER_MUSCLES: readonly (readonly [number, number, number])[] = [
+  [-1, 1, 0], // proximal: spread, stretch
+  [-1, -1, 2], // intermediate: stretch
+  [-1, -1, 3], // distal: stretch
+];
+const LEFT_FINGERS = 55;
+const RIGHT_FINGERS = 75;
 
 /** A pose as `HumanPoseHandler.SetHumanPose` takes it (HumanPose), without the body position. */
 export interface HumanPose {
@@ -200,8 +208,10 @@ export interface HumanPose {
  * - Muscles: {@link muscleAngle} on the bone's `m_Limit`, then
  *   {@link axesRotation}.
  * - Twists: see `TWISTS`.
+ * - Fingers: as the body's bones, by `FINGER_MUSCLES`, without twist.
  * - UpperChest muscles of an avatar without an UpperChest add to the Chest's
- *   angles, over `UPPER_CHEST_RANGE`.
+ *   angles, each over half the Chest's own limit on that side (such an
+ *   avatar has no axes, so no limits, for the UpperChest).
  * - Hips: the body's rotation is the frame whose up runs from the middle of
  *   the upper legs to the middle of the upper arms and whose right runs from
  *   the left upper leg and arm to the right ones (Unity's T-pose body frame
@@ -229,22 +239,36 @@ export function humanRotations(avatar: Avatar, pose: HumanPose): Quat[] {
     return axesId < 0 ? undefined : skeleton.m_AxesArray[axesId];
   };
   const muscle = (m: number) => pose.muscles[m] ?? 0;
+  const anglesOf = (axes: Axes, muscles: readonly number[], scale = 1): number[] => {
+    const min = vec(axes.m_Limit.m_Min);
+    const max = vec(axes.m_Limit.m_Max);
+    return muscles.map((m, d) =>
+      m < 0 ? 0 : muscleAngle(muscle(m), scale * min[d]!, scale * max[d]!),
+    );
+  };
 
   const twist: number[] = [];
   for (let bone = 0; bone < BONES; bone++) {
     const muscles = BONE_MUSCLES[bone]!;
     const axes = axesOf(bone);
     if (!axes || muscles.every((m) => m < 0)) continue;
-    const min = vec(axes.m_Limit.m_Min);
-    const max = vec(axes.m_Limit.m_Max);
-    const angles = muscles.map((m, d) => (m < 0 ? 0 : muscleAngle(muscle(m), min[d]!, max[d]!)));
+    const angles = anglesOf(axes, muscles);
     if (bone === CHEST && (index[UPPER_CHEST] ?? -1) < 0) {
-      BONE_MUSCLES[UPPER_CHEST]!.forEach((m, d) => {
-        angles[d]! += muscleAngle(muscle(m), -UPPER_CHEST_RANGE, UPPER_CHEST_RANGE);
-      });
+      anglesOf(axes, BONE_MUSCLES[UPPER_CHEST]!, 0.5).forEach((a, d) => (angles[d]! += a));
     }
     twist[bone] = axes.m_Sgn.x * angles[0]!;
     rotations[index[bone]!] = axesRotation(axes, angles as Vec3);
+  }
+
+  for (const [hand, first] of fingerHands(human)) {
+    hand.m_HandBoneIndex.forEach((node, i) => {
+      const axesId = node < 0 ? -1 : skeleton.m_Node[node]!.m_AxesId;
+      const axes = axesId < 0 ? undefined : skeleton.m_AxesArray[axesId];
+      if (!axes) return;
+      const base = first + 4 * Math.floor(i / 3);
+      const muscles = FINGER_MUSCLES[i % 3]!.map((m) => (m < 0 ? -1 : base + m));
+      rotations[node] = axesRotation(axes, anglesOf(axes, muscles) as Vec3);
+    });
   }
 
   for (const [bone, child, field] of TWISTS) {
@@ -273,6 +297,14 @@ export function humanRotations(avatar: Avatar, pose: HumanPose): Quat[] {
     rotations[hips] = qnorm(qmul(qconj(above), qmul(qnorm(pose.bodyRotation), qconj(body))));
   }
   return rotations;
+}
+
+/** The avatar's hands with their first finger muscle. */
+function fingerHands(human: Human): [Hand, number][] {
+  const hands: [Hand, number][] = [];
+  if (human.m_HasLeftHand) hands.push([human.m_LeftHand.data, LEFT_FINGERS]);
+  if (human.m_HasRightHand) hands.push([human.m_RightHand.data, RIGHT_FINGERS]);
+  return hands;
 }
 
 /** Each human skeleton node's position relative to the Hips, at the given local rotations. */
@@ -337,13 +369,17 @@ const ROOT_Q = ["RootQ.x", "RootQ.y", "RootQ.z", "RootQ.w"];
 export interface HumanoidSamples {
   /** The sample times, seconds, float32, ascending. */
   times: number[];
-  /** Each human bone the avatar has: its `m_Human.m_Skeleton` node and its rotation per time. */
+  /**
+   * Each human bone the avatar has, fingers included: its `m_Human.m_Skeleton`
+   * node and its rotation per time.
+   */
   bones: { node: number; rotations: Quat[] }[];
 }
 
 /**
  * Sample a clip's humanoid curves as each human bone's local rotation
- * ({@link humanRotations}), in Unity space.
+ * ({@link humanRotations}), in Unity space: the body's bones, then each
+ * hand's finger bones.
  *
  * The conversion is not linear in the muscles, so the curves' tangents do not
  * carry over: the clip is sampled at its `m_SampleRate` from 0 to its last
@@ -353,9 +389,8 @@ export interface HumanoidSamples {
  * the one before, so interpolating takes the short way. The muscles are found
  * by index ({@link muscleIndex}), `RootQ` gives the body rotation; `RootT`
  * (the body position, see {@link humanRotations}), the motion curves
- * (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...), the finger
- * muscles (the fingers are not converted) and the translation DoFs are left
- * out.
+ * (`MotionT`, `MotionQ`), the IK goals (`LeftFootT`, ...) and the
+ * translation DoFs are left out.
  *
  * @param avatar the Avatar, with a human description
  * @param curves the clip's float curves ({@link clipCurves}'s `float`)
@@ -400,6 +435,9 @@ export function sampleHumanoid(
   for (let bone = 0; bone < BONES; bone++) {
     const node = human.m_HumanBoneIndex[bone] ?? -1;
     if (node >= 0) bones.push({ node, rotations: [] });
+  }
+  for (const [hand] of fingerHands(human)) {
+    for (const node of hand.m_HandBoneIndex) if (node >= 0) bones.push({ node, rotations: [] });
   }
   const values = new Array<number>(MUSCLE_COUNT);
   for (const t of sorted) {

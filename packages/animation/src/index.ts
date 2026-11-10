@@ -193,7 +193,7 @@ export interface SceneToGltfOptions {
  *   against Unity's own poses; the package README describes each step).
  *   These replace any Transform curve on the human bones. Not converted:
  *   the body position (`RootT`; the Hips keep their skeleton position, as
- *   no centre of mass definition met #319's tolerance), the finger muscles,
+ *   no centre of mass definition met #319's tolerance),
  *   `MotionT`/`MotionQ`, the IK goals and the translation DoFs. Without a
  *   humanoid Avatar, muscle curves are skipped.
  *

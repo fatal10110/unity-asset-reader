@@ -633,6 +633,22 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ## unity-asset-reader-animation
 
+### 1.1.0 - Unreleased
+
+- **Humanoid clips: the fingers are converted, and the UpperChest fold follows the Avatar**
+  (#325). Checked against Unity's poses of two new fixture rigs in all four fixture editors
+  (`fixtures/humanoid2-unity-goldens.json`, `fixtures/BUILDING.md` section 31).
+  - The finger muscles now turn the finger bones, as the body's muscles turn theirs. Before, the
+    fingers kept their skeleton pose.
+  - Fix: on an Avatar without an UpperChest, the UpperChest muscles turn the Chest over half the
+    Chest's own limit on each side, not over a fixed ±20°. The two agree only on Unity's default
+    Chest limits.
+  - The new rigs have a rotated bind pose, a rotated `Armature` above the Hips, a non-human bone
+    between the Spine and the Chest, an UpperChest, eyes, jaw and fingers, twist shares other
+    than 0.5 and custom limits. Every bone's rotation is within 8e-7 rad of Unity's, the Hips'
+    within 7.1e-5 rad (tolerance 1e-3 rad).
+  - Still not converted: the body position (`RootT`).
+
 ### 1.0.0 - 2026-11-09
 
 First release (version 0.0.0 until then: plan revision 2026-11-08c). Peer:
