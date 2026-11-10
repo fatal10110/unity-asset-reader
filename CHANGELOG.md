@@ -334,6 +334,17 @@ WASM.
 
 ## unity-asset-reader-texture
 
+### 1.4.0 - Unreleased
+
+- **`decodeTexture2D` takes a Texture2D built by hand** (#335), such as raw texture data from
+  outside a bundle. Only `m_Width`, `m_Height`, `m_TextureFormat` and `imageData` are required;
+  before, TypeScript asked for every Texture2D field, so such input needed a cast.
+  `decodeTexture2D(obj.read())` compiles as before.
+- **New `crunch` option for `decodeTexture2D`** (#335): `"unity"` or `"original"` names the
+  Crunch variant of DXT1 and DXT5 Crunch data, and wins over the Unity 2017.3 fields that decide
+  it otherwise. `"original"` on an ETC Crunch format is an `UnsupportedError`. New exported type
+  `DecodeTexture2DOptions`.
+
 ### 1.3.0 - 2026-11-09
 
 - **Peer:** `unity-asset-reader@^1.3.0`, the first core with `resolveOrThrow`.

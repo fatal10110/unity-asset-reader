@@ -197,6 +197,30 @@ for (const obj of env.objects) {
 }
 ```
 
+`decodeTexture2D` also decodes texture data from outside a bundle. Give it an object with
+`m_Width`, `m_Height`, `m_TextureFormat` and `imageData`; every other Texture2D field is
+optional. The rows of `imageData` are bottom row first, as Unity stores them.
+
+```ts
+import { TextureFormat } from "unity-asset-reader";
+import { initTexture, decodeTexture2D } from "unity-asset-reader-texture";
+
+await initTexture();
+
+const { data } = await decodeTexture2D({
+  m_Width: 256,
+  m_Height: 256,
+  m_TextureFormat: TextureFormat.DXT1Crunched,
+  imageData: crunchBytes,
+}, { crunch: "original" });
+```
+
+DXT1 and DXT5 Crunch data comes in two variants. Unity 2017.3 and later write Unity's own
+crunch, earlier versions the original one. A Texture2D read from a bundle tells them apart by
+the fields Unity 2017.3 added, which hand-built input does not have. So say which one it is with
+`crunch`: `"unity"` or `"original"`. Without it, data with none of those fields is read as the
+original crunch. The ETC Crunch formats exist only in Unity's crunch.
+
 ### Where the WASM files come from
 
 `initTexture()` loads `texture2ddecoder.js` and `texture2ddecoder.wasm`. Every format needs
@@ -323,7 +347,8 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `DecodeImageOptions`, `ImagesOptions` | `{ wasmPath?, decodedTextures? }`, and `{ wasmPath?, decodedTextures?, onError? }` |
 | `initTexture(options?)` | Load the WASM decoder. Optional before `decodeImage` and `images`; call it once, and await it, before `decodeTexture2D` and `decodeSprite` |
 | `InitTextureOptions` | `{ wasmPath?, locateFile? }`, passed to `texture2ddecoder-wasm`'s `initialize` |
-| `decodeTexture2D(texture)` | A `Texture2D`, as `obj.read()` returns it, to RGBA, top row first |
+| `decodeTexture2D(texture, options?)` | A `Texture2D`, as `obj.read()` returns it or built by hand (only `m_Width`, `m_Height`, `m_TextureFormat`, `imageData` required), to RGBA, top row first |
+| `DecodeTexture2DOptions` | `{ crunch? }`: `"unity"` or `"original"`, the Crunch variant of hand-built DXT Crunch data |
 | `decodeSprite(obj, env, options?)` | A `Sprite` (or a `PackedSprite`) to RGBA, top row first, cut out of its texture or atlas |
 | `DecodeSpriteOptions` | `{ tightMesh?, preferMasterAtlas?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
