@@ -6940,3 +6940,170 @@ byte. Through `heavy --lock unity` (it runs the four editors):
 ```bash
 python3 scripts/make-texture-pixel-goldens.py --work <scratch dir on the Windows host> --settings '<section 21 project>/uar-288-signed-eac-{version}' --unity 2019.4.41f2=<Unity.exe> --unity 2020.3.30f1=<Unity.exe> --unity 6000.3.26f1=<Unity.exe> --unity 6000.6.4f1=<Unity.exe>
 ```
+
+## 30. The `diff` bundles (#342)
+
+**What it is for:** `diff(oldEnv, newEnv)` (`packages/core/tests/diff.test.ts`). Two builds of one
+project, v1 and v2, with known changes between them. The tests assert those changes directly, so
+there is no golden (R12).
+
+The bundles, for **2019.4.41f2** (one editor is enough: `diff` reads no class layout of its own),
+StandaloneWindows64, lz4, under `fixtures/bundles/editor/2019.4.41f2/diff/`:
+
+- `v1/textures`, `v1/oldname` and `v2/textures`, `v2/newname`, with type trees.
+- The same four built with `DisableWriteTypeTree`, under `v1-notypetree/` and `v2-notypetree/`.
+
+**Steps:**
+
+1. Make a fresh project named `uar-342-diff-2019.4.41f2`, holding `ProjectSettings/` and
+   `Packages/` of the section 29 project of the same editor and only the file below under
+   `Assets/`.
+2. Build it once with `-executeMethod BuildDiff.Build` (same command as section 2) and check the
+   log.
+3. Copy `Build/<v>/diff/textures` and `oldname` (v1) or `newname` (v2) into
+   `fixtures/bundles/editor/2019.4.41f2/diff/<v>/`, for `v` in `v1`, `v2`, `v1-notypetree`,
+   `v2-notypetree`.
+
+No goldens to rerun: nothing reads these bundles but `diff.test.ts`.
+
+### What is in the builds
+
+The textures are imported PNGs, uncompressed, without mips and not readable, so their pixels are
+in the bundle's `.resS`.
+
+| Asset | v1 | v2 |
+|---|---|---|
+| `changed.png` (`textures`) | 32x32 `RGBA32` | 64x32 `RGB24` |
+| `repainted.png` (`textures`) | 16x16 `RGBA32` | same size, other pixels: only its `.resS` bytes differ |
+| `removed.png` (`textures`) | 16x16 `RGBA32` | gone |
+| `added.png` (`textures`) | — | 16x16 `RGBA32` |
+| `same.png`, `note.txt` (`textures`) | 16x16 `RGBA32`; a TextAsset | unchanged, though `same.png`'s data moves within the `.resS` |
+| `moved.png` | in the bundle `oldname` | in the bundle `newname`: another CAB name |
+
+The log holds eight `FIXTURE-TEX` lines (name, format, size) and six `FIXTURE-OK` lines.
+
+### Probes (2026-11-10)
+
+- **CAB names follow the bundle name alone.** `BuildPipeline.BuildAssetBundles` names a bundle's
+  SerializedFile `CAB-<hash>` from its bundle name only: `textures` is
+  `CAB-b6ec7271e16d6169fe23b363bfe34b24` in both builds here and in the `more-plain/textures`
+  bundle (section 13), and
+  every other bundle name in `bundles/editor/2019.4.41f2/` keeps its CAB name across projects.
+  `AppendHashToAssetBundleName` (the `-hash` builds of the script) changes the file name, not the
+  CAB name. So no BuildPipeline build keeps a bundle name and changes its CAB name, as
+  Addressables' internal bundle id modes do. The test makes that case by renaming the CAB in the
+  v1 files, at the same length. The `-hash` builds are not committed.
+- **Object bytes of an unchanged asset can differ.** `same.png`'s object holds its `.resS`
+  offset, which `added.png` shifts in v2. `note.txt`'s bytes are identical in both builds.
+
+### The project
+
+`Assets/Editor/BuildDiff.cs`:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+// Two builds of one project with known changes between them (#342): v2
+// resizes and reformats one texture, repaints another at the same size,
+// removes one, adds one, and moves one into a renamed bundle.
+public static class BuildDiff
+{
+    const string Dir = "Assets/Fixtures/diff";
+
+    // A w x h PNG: R an x ramp, G a y ramp, B the seed, A opaque or a ramp.
+    static void Png(string name, int w, int h, int seed, bool alpha)
+    {
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        var c = new Color32[w * h];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                c[y * w + x] = new Color32((byte)(x * 255 / (w - 1)), (byte)(y * 255 / (h - 1)),
+                    (byte)(seed * 40 + ((x ^ y) & 7) * 8), alpha ? (byte)(255 - x * 4) : (byte)255);
+        tex.SetPixels32(c);
+        tex.Apply();
+        var path = Dir + "/" + name + ".png";
+        File.WriteAllBytes(path, tex.EncodeToPNG());
+        UnityEngine.Object.DestroyImmediate(tex);
+        AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+        var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.mipmapEnabled = false;
+        importer.isReadable = false;
+        importer.alphaSource = alpha ? TextureImporterAlphaSource.FromInput : TextureImporterAlphaSource.None;
+        importer.SaveAndReimport();
+        var t = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        Debug.Log("FIXTURE-TEX " + name + " " + t.format + " " + t.width + "x" + t.height);
+    }
+
+    static void Text(string name, string text)
+    {
+        var path = Dir + "/" + name + ".txt";
+        File.WriteAllText(path, text);
+        AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+    }
+
+    static string[] Paths(params string[] files)
+    {
+        var list = new List<string>();
+        foreach (var f in files) list.Add(Dir + "/" + f);
+        return list.ToArray();
+    }
+
+    static void Bundle(string dir, AssetBundleBuild[] builds, BuildAssetBundleOptions options)
+    {
+        dir = Path.Combine("Build", dir, "diff");
+        Directory.CreateDirectory(dir);
+        var m = BuildPipeline.BuildAssetBundles(dir, builds, options, BuildTarget.StandaloneWindows64);
+        if (m == null) throw new Exception("build failed: " + dir);
+        foreach (var b in m.GetAllAssetBundles()) Debug.Log("FIXTURE-BUNDLE " + dir + " " + b + " " + m.GetAssetBundleHash(b));
+        Debug.Log("FIXTURE-OK " + dir);
+    }
+
+    static void All(string version, AssetBundleBuild[] builds)
+    {
+        Bundle(version, builds, BuildAssetBundleOptions.ChunkBasedCompression);
+        Bundle(version + "-notypetree", builds,
+            BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DisableWriteTypeTree);
+        Bundle(version + "-hash", builds,
+            BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.AppendHashToAssetBundleName);
+    }
+
+    public static void Build()
+    {
+        if (!AssetDatabase.IsValidFolder("Assets/Fixtures")) AssetDatabase.CreateFolder("Assets", "Fixtures");
+        if (!AssetDatabase.IsValidFolder(Dir)) AssetDatabase.CreateFolder("Assets/Fixtures", "diff");
+
+        // v1
+        Png("changed", 32, 32, 1, true);
+        Png("same", 16, 16, 2, true);
+        Png("repainted", 16, 16, 3, true);
+        Png("removed", 16, 16, 4, true);
+        Png("moved", 16, 16, 5, true);
+        Text("note", "unchanged text asset\n");
+        AssetDatabase.SaveAssets();
+        All("v1", new[] {
+            new AssetBundleBuild { assetBundleName = "textures",
+                assetNames = Paths("changed.png", "same.png", "repainted.png", "removed.png", "note.txt") },
+            new AssetBundleBuild { assetBundleName = "oldname", assetNames = Paths("moved.png") },
+        });
+
+        // v2: changed is 64x32 without alpha (RGB24, was RGBA32 32x32);
+        // repainted keeps its size with other pixels; removed is gone; added is new;
+        // moved goes into the bundle "newname" (another CAB name).
+        Png("changed", 64, 32, 1, false);
+        Png("repainted", 16, 16, 6, true);
+        AssetDatabase.DeleteAsset(Dir + "/removed.png");
+        Png("added", 16, 16, 7, true);
+        AssetDatabase.SaveAssets();
+        All("v2", new[] {
+            new AssetBundleBuild { assetBundleName = "textures",
+                assetNames = Paths("changed.png", "same.png", "repainted.png", "added.png", "note.txt") },
+            new AssetBundleBuild { assetBundleName = "newname", assetNames = Paths("moved.png") },
+        });
+    }
+}
+```

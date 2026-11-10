@@ -250,6 +250,38 @@ In Node.js,
 [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s
 `loadPath()` reads a file with its sidecars, or a whole folder, and calls `load()` for you.
 
+### Compare two builds
+
+**`diff(oldEnv, newEnv)`** lists the assets one build added, removed or modified against another,
+for a CI check on an asset pipeline or a patch-size estimate. Assets that did not change are left
+out.
+
+```ts
+import { diff, load } from "unity-asset-reader";
+
+for (const e of diff(load(oldFiles), load(newFiles))) {
+  console.log(e.change, e.type, e.path ?? `${e.file} ${e.pathId}`, e.sizeDelta, e.fields);
+}
+// modified Texture2D assets/ui/star.png 2048 [ "m_Width", "m_CompleteImageSize", "m_TextureFormat", "m_StreamData" ]
+// added Texture2D assets/ui/moon.png 1216 undefined
+```
+
+- **Matching:** by container path (with the class and name) first. The rest match by class,
+  path id and bundle name (the `AssetBundle` object's `m_AssetBundleName`), so a bundle whose CAB
+  name changed still matches. Where there is no bundle name, the file name is used.
+- **Content:** the object's bytes, and the bytes of its streamed data in the `.resS` or
+  `.resource` file. Different object bytes make an asset modified. The one exception is an
+  object with streamed data: its fields are compared instead, the streamed data by its bytes, so
+  a texture whose data only moved within its `.resS` is not modified. In a build without type
+  trees, the streamed data of `Cubemap`, `Texture2DArray`, `Texture3D` and `CubemapArray` is not
+  compared yet.
+- **`fields`:** for a modified asset with a type tree on both sides, the top-level fields that
+  differ. `m_StreamData` (or `m_Resource`, `m_ExternalResources`) is listed when the streamed
+  bytes differ. The list is empty when only bytes no field shows differ, such as padding.
+- **`sizeDelta`:** the object plus its streamed data, new less old.
+- `before` and `after` are the two `Asset`s. Load each build with its own `load()`, with its
+  `.resS` files.
+
 ### Run it in a Worker
 
 Parsing is synchronous, so a big bundle blocks the thread it runs on until it is done. In a
@@ -558,6 +590,8 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | `ObjectData` | The union `obj.read()` returns |
 | `readTypeTree(reader)` | Read an object into a plain JS object by walking its type tree |
 | `TypeTreeObject`, `TypeTreeValue` | What `readTypeTree` returns; the JSDoc lists each Unity type's JS shape |
+| `diff(oldEnv, newEnv)` | The assets added, removed or modified between two loaded builds ([details](#compare-two-builds)) |
+| `DiffEntry` | One `diff` result: `change`, `type`, `path`, `name`, `file`, `pathId`, `before`, `after`, `sizeDelta`, and `fields` (top-level fields that differ) |
 | `ClassID`, `classIdName(id)` | Unity class ids by name (`ClassID.Texture2D === 28`), and back |
 | `Vector3`, `Quaternion`, `XForm` | Shapes read by `ObjectReader.readVector3` / `readXForm` (and by the animation readers' `float3`, `float4` and `xform` fields) |
 
