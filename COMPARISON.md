@@ -11,7 +11,7 @@ Unity textures. Each row says whether a library's documentation claims the featu
 - The **Our library** column covers this project as one library: `unity-asset-reader`,
   `unity-asset-reader-texture`, `unity-asset-reader-node`, `unity-asset-reader-mesh`,
   `unity-asset-reader-audio`, `unity-asset-reader-spine`, `unity-asset-reader-shader`,
-  `unity-asset-reader-animation` and `texture2ddecoder-wasm`.
+  `unity-asset-reader-animation`, `unity-asset-reader-cli` and `texture2ddecoder-wasm`.
 - The **Studio CLI** column's features include those provided by its required AssetStudioMod
   application.
 
@@ -28,7 +28,7 @@ Unity textures. Each row says whether a library's documentation claims the featu
 
 | Column | Library | Documentation |
 |---|---|---|
-| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [audio](packages/audio/README.md), [Spine](packages/spine/README.md), [shaders](packages/shader/README.md), [animation](packages/animation/README.md), [decoder](packages/decoder/README.md) |
+| Our library | `unity-asset-reader` | [Core](packages/core/README.md), [textures](packages/texture/README.md), [Node.js](packages/node/README.md), [meshes](packages/mesh/README.md), [audio](packages/audio/README.md), [Spine](packages/spine/README.md), [shaders](packages/shader/README.md), [animation](packages/animation/README.md), [command line](packages/cli/README.md), [decoder](packages/decoder/README.md) |
 | unity-js | `@arkntools/unity-js` | [npm README](https://www.npmjs.com/package/@arkntools/unity-js), [tools README](https://www.npmjs.com/package/@arkntools/unity-js-tools) |
 | unityfs-js | `unityfs-js` | [npm README](https://www.npmjs.com/package/unityfs-js) |
 | Studio JS | `node-asset-studio-mod-js` | [npm README](https://www.npmjs.com/package/node-asset-studio-mod-js) |

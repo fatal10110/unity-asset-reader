@@ -28,6 +28,7 @@ For `texture2ddecoder-wasm` on its own, see its
 | `unity-asset-reader-spine` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-shader` | Nothing, like `unity-asset-reader`. |
 | `unity-asset-reader-animation` | Nothing, like `unity-asset-reader`. |
+| `unity-asset-reader-cli` | Not for bundling: a command line tool, run with `npx unity-asset-reader-cli`. |
 
 - None of them needs COOP/COEP headers or `SharedArrayBuffer`: everything is single-threaded.
 - The pages work from any static host.
