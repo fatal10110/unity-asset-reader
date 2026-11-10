@@ -40,7 +40,7 @@ At a glance:
 | D4 | Core **parsing is sync; `open()` (loading input) and texture decoding are async.** Async is `open()` (fetching / reading the bytes, then a sync `load()`), `initialize()` / `initTexture()` and texture decode; nothing that parses returns a promise (2026-09-28b). | Matches existing lib; avoids async colouring the whole reader. Consequence: big bundles block the calling thread — docs and `examples/cdn.html` run the reader in a **Worker**. |
 | D5 | No image encoding in core. Output `{ data: Uint8Array /*RGBA*/, width, height }`. | Kills Jimp/ImageSharp class of deps. Browser → `ImageData`; Node → caller's choice. |
 | D6 | Single-threaded WASM only. No pthreads/SharedArrayBuffer. | pthreads force COOP/COEP headers → breaks drop-in CDN use. |
-| D7 | **Several npm packages around one shared core.** `unity-asset-reader` (dir `packages/core`) is the isomorphic parser and the only place parsing lives; it also holds the glTF 2.0 `.glb` writer's building blocks, which more than one export package needs (2026-11-08d). Feature packages depend on it and never on each other's internals: `unity-asset-reader-texture` (`packages/texture`), `unity-asset-reader-node` (`packages/node`), M6 items each get their own (`-mesh`, `-audio`, ...). `texture2ddecoder-wasm` (`packages/decoder`) is a standalone leaf: it depends on nothing in the repo and keeps its npm name, API and 1.x version line (see the 2026-09-28a revision). **Every package versions independently** (2026-09-28c): `unity-asset-reader`, `-texture`, `-node` and `texture2ddecoder-wasm` each have their own version, starting at 1.0.0 for the readers, and each is released only when its own version changes. The ranges between packages say which versions go together: a feature package's peer `^<major>` on core, or `^<major>.<minor>.<patch>` naming the oldest core it works with (2026-10-16d), the texture package's `^` on the decoder. | A user who only unpacks bundles does not install WASM; a user who only decodes textures keeps using `texture2ddecoder-wasm` alone. Heavy M6 codecs (ACL, vorbis, spirv-cross) never bloat the core. Separate packages also make the decoder a normal `dependency` of the texture package instead of an optional-peer workaround. The decoder has nothing Unity-specific in it (it is Texture2DDecoder built to WASM), and its published name is what people search for; the texture package's `^` range on it says which decoder goes with which reader. Names are final at first publish (#45); if an npm org is available, `@unity-asset-reader/{core,texture,node}` is the alternative. |
+| D7 | **Several npm packages around one shared core.** `unity-asset-reader` (dir `packages/core`) is the isomorphic parser and the only place parsing lives; it also holds the glTF 2.0 `.glb` writer's building blocks, which more than one export package needs (2026-11-08d). Feature packages depend on it and never on each other's internals: `unity-asset-reader-texture` (`packages/texture`), `unity-asset-reader-node` (`packages/node`), M6 items each get their own (`-mesh`, `-audio`, ...). `texture2ddecoder-wasm` (`packages/decoder`) is a standalone leaf: it depends on nothing in the repo and keeps its npm name, API and 1.x version line (see the 2026-09-28a revision). **Every package versions independently** (2026-09-28c): `unity-asset-reader`, `-texture`, `-node` and `texture2ddecoder-wasm` each have their own version, starting at 1.0.0 for the readers, and each is released only when its own version changes. The ranges between packages say which versions go together: a feature package's peer `^<major>` on core, or `^<major>.<minor>.<patch>` naming the oldest core it works with (2026-10-16d), the texture package's `^` on the decoder. **One application** (2026-11-10b): the command line tool `unity-asset-reader-cli` (`packages/cli`) is run on its own through `npx`, so it takes core and the feature packages it uses as regular `dependencies` with `^` ranges; every library keeps core as a peer. | A user who only unpacks bundles does not install WASM; a user who only decodes textures keeps using `texture2ddecoder-wasm` alone. Heavy M6 codecs (ACL, vorbis, spirv-cross) never bloat the core. Separate packages also make the decoder a normal `dependency` of the texture package instead of an optional-peer workaround. The decoder has nothing Unity-specific in it (it is Texture2DDecoder built to WASM), and its published name is what people search for; the texture package's `^` range on it says which decoder goes with which reader. Names are final at first publish (#45); if an npm org is available, `@unity-asset-reader/{core,texture,node}` is the alternative. |
 | D8 | **One git repo, npm workspaces, everything under `packages/`; repo is `unity-asset-reader`.** Root `package.json` is `private`, `"workspaces": ["packages/*"]`, and holds only shared dev tooling and scripts. The existing decoder package **moved** from repo root to `packages/` together with its submodule, `wasm_bindings.cpp`, `scripts/`, `examples/`, tests and README (#55); its folder is `packages/decoder` since #174 and publishes as `texture2ddecoder-wasm` (folder names are internal; `packages/core` publishes as `unity-asset-reader`). Plain npm workspaces only: no lerna / nx / turbo / changesets. **A release is a merged version bump** (2026-09-28c): `.github/workflows/release.yml` publishes each package whose `package.json` `version` changed on `main` and is not on npm yet, in dependency order; a pull request gets the same plan as a dry run. | Issues, CI and scaffolding already here. Workspaces link the packages in dev (no `file:..`), give one lockfile and one `npm ci`. The move is mechanical but touches the submodule path, `build-wasm.sh` paths and the npm publish dir, so it is its own M0 issue with a hard check: `npm pack --dry-run` file list of the decoder identical before and after (the #174 rename and its #182 revert kept that check). `docs/` stays at repo root (GitHub Pages serves from it). GitHub redirects old repo URLs after rename; update `repository.url` (and add `repository.directory`) in every `package.json` then. |
 | D9 | 64-bit integers: **always `bigint`** for SInt64/UInt64 typetree fields and pathIDs. File offsets/sizes stay `number` with a `> 2^53` guard throw. | Typetrees carry int64 everywhere (every PPtr). "number when safe" gives a value whose type depends on its magnitude. Ship a documented JSON replacer (`bigint → string`). |
 
@@ -50,7 +50,9 @@ These are runtime deps of `packages/core` unless the note names another package.
 
 Between workspace packages, feature packages list `unity-asset-reader` as a `peerDependency` (one
 core instance per app, so `instanceof` and `ClassID` stay shared) plus a `devDependency` for the
-workspace link.
+workspace link. The CLI (`packages/cli`, 2026-11-10b) is the exception: an application nothing
+else installs core for, it lists core and the packages it uses as regular `dependencies`, and no
+third-party one (`node:util`'s `parseArgs` reads its command line).
 
 | Need | Dep | Note |
 |---|---|---|
@@ -109,6 +111,9 @@ packages/
     tests/
   animation/            npm: unity-asset-reader-animation  isomorphic, sync; deps: core (peer)   (M6, #304)
     src/         converter.ts (AnimationClipConverter) streamed.ts tos.ts custom.ts muscle.ts crc.ts index.ts
+    tests/
+  cli/                  npm: unity-asset-reader-cli      Node only, bin; deps: core, node, texture, audio, mesh, shader (regular, D7)   (#338)
+    src/         cli.ts (bin) main.ts (ls, info, dump) extract.ts util.ts
     tests/
   decoder/              npm: texture2ddecoder-wasm       standalone WASM texture decoder, own version line
     src/ tests/ scripts/ examples/ texture2ddecoder/ (submodule) wasm_bindings.cpp
@@ -423,7 +428,7 @@ class field readers it needs are added to core.
 | Memory in browser | zero-copy `subarray` everywhere, never `slice` (note: a `subarray` pins its whole parent buffer); size guard throw; `ByteSource` seam deferred to M6 |
 | Main-thread jank | D4: Worker usage in docs + example |
 | Moving a published package breaks its build or tarball | own M0 issue, no source changes in the same PR, `npm pack --dry-run` diff must be empty, Docker `build:wasm` rerun once after the move |
-| Two copies of core in one app (feature package pulls its own) | core is a `peerDependency` of feature packages, never a `dependency` |
+| Two copies of core in one app (feature package pulls its own) | core is a `peerDependency` of feature packages, never a `dependency`; the CLI is no library, so nothing imports it next to an app's own core (D7, 2026-11-10b) |
 | Scope creep toward full AssetStudio | M6 items need a named consumer before starting |
 
 ## 7. Explicitly not doing
@@ -431,6 +436,8 @@ class field readers it needs are added to core.
 - C#→WASM, FBX, Mono.Cecil DLL reflection, YAML export, LZMA/LZ4 *compression*, repacking/writing
   bundles, brotli, LZHAM, UnityArchive, GUI, multi-threading, JPEG encoding.
 - PNG encoding left this list with #234, see the 2026-10-16c revision.
+- "GUI" means a graphical application; the command line tool (`packages/cli`, 2026-11-10b) is not
+  one.
 
 **Core to 1.0: ~16–21 working days.**
 
@@ -798,3 +805,22 @@ level 0 only.
   channel error that format has at level 0 against the editor. No other tolerance.
 - UnityPy's Texture2DArray slice decode is a second check at level 0 for the next PR.
 - §5, R12, `CLAUDE.md` and `fixtures/README.md` name it.
+
+**Revision 2026-11-10b** (#338, owner-approved 2026-11-10 on the issue): a command line tool, the
+new package `unity-asset-reader-cli` (`packages/cli`, bin `unity-asset-reader-cli`).
+
+- It is an application, run through `npx`: it takes `unity-asset-reader`,
+  `unity-asset-reader-node`, `-texture`, `-audio`, `-mesh` and `-shader` as regular
+  `dependencies`, with the `^` ranges of their current versions. As a peer, `npx` would install it
+  without them. Every library keeps core as a peer dependency: this is the one exception, written
+  into D7, §1, §6 and R14.
+- No third-party runtime dependency: `node:util`'s `parseArgs` and `node:fs`. Node only, like
+  `packages/node`, so `check:browser` does not cover it (R4).
+- Input: one file or directory, through `loadPath()`; a directory covers multi-file loads with
+  sidecars and cross-bundle pointers. Several paths and globs are refused.
+- The bin is not `unity-asset-reader`: `npx unity-asset-reader` resolves core, which has no bin
+  and stays isomorphic (R4).
+- Its tests run the built bin on committed fixtures and compare what it writes with the library
+  calls' output; no golden of its own.
+- §1, §2, D7, §6 and R14 updated; §7's "GUI" does not cover it. Version 0.0.0 until its first
+  release.

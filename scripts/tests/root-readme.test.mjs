@@ -8,7 +8,7 @@ import { test } from "node:test";
 const root = join(import.meta.dirname, "../..");
 const read = (path) => readFileSync(join(root, path), "utf8");
 
-const PACKAGES = ["core", "texture", "node", "mesh", "audio", "spine", "shader", "animation", "decoder"];
+const PACKAGES = ["core", "texture", "node", "mesh", "audio", "spine", "shader", "animation", "cli", "decoder"];
 const manifest = (pkg) => JSON.parse(read(`packages/${pkg}/package.json`));
 
 /** The "Choose your packages" section of the root README, up to the next `##` heading. */
@@ -20,7 +20,7 @@ function guide() {
   return readme.slice(start, end === -1 ? undefined : end);
 }
 
-test("the package guide names all 9 packages by their npm names", () => {
+test("the package guide names all 10 packages by their npm names", () => {
   const section = guide();
   for (const pkg of PACKAGES) {
     const { name } = manifest(pkg);

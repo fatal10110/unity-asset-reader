@@ -9,6 +9,7 @@ browse its contents, and preview its textures and sprites.
 - The parser is written in TypeScript. Compressed texture decoding uses WebAssembly.
 - You do not need Unity, .NET, or a native application installed.
 - Packages for meshes, audio, Spine, shaders and animation build on the same core.
+- A command line tool lists, inspects and extracts bundles: `npx unity-asset-reader-cli`.
 
 ## Quick start
 
@@ -80,12 +81,15 @@ the Vite and Next.js setups.
 | Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
 | Decode animation clips into curves, or export an animated scene to glTF (`.glb`) | Add `unity-asset-reader-animation` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
+| List, inspect or extract bundles from the command line, without writing code | `npx unity-asset-reader-cli` |
 
 How they fit together:
 
 - Every package except `texture2ddecoder-wasm` builds on the core. The feature packages list
   `unity-asset-reader` as a peer dependency, so install it next to them.
 - The texture package installs `texture2ddecoder-wasm` automatically.
+- The command line tool is an application, not a library: it installs the core and the packages
+  it uses itself.
 - Install only what you need: reading text or script data does not load the texture decoder.
 - Each package has its own version.
 
@@ -133,6 +137,11 @@ What each package does, and what it leaves out:
 
   It does not write `.anim` YAML. Of a humanoid clip, it does not convert the body position
   (the Hips keep their own position), the finger muscles, the root motion or the IK goals.
+- **[Command line](packages/cli/README.md)** (`unity-asset-reader-cli`): `ls`, `info`,
+  `extract` and `dump` for one bundle, file or folder, built on the packages above. `extract`
+  writes images as PNG, audio as WAV or Ogg, meshes as OBJ or glTF, shaders and text as text.
+  It does not take several paths or globs (pass their folder), and does not export what the
+  packages above do not (Direct3D shaders, MPEG audio, Vorbis audio without its setup headers).
 - **[Standalone decoder](packages/decoder/README.md)** (`texture2ddecoder-wasm`): decodes
   compressed texture blocks to **BGRA**. It does not read Unity files.
 
@@ -153,6 +162,8 @@ What each package does, and what it leaves out:
   - [`unity-asset-reader-shader`](packages/shader/README.md): `shaderToText()`.
   - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`,
     `sceneToGltf()`.
+  - [`unity-asset-reader-cli`](packages/cli/README.md): the `ls`, `info`, `extract` and `dump`
+    commands.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 

@@ -1,0 +1,10 @@
+unity-asset-reader-cli
+Copyright (c) 2026 fatal10110
+
+This package is a command line front end: it holds no code ported from other
+projects. What it reads and writes is done by the packages it depends on,
+unity-asset-reader, unity-asset-reader-node, unity-asset-reader-texture,
+unity-asset-reader-audio, unity-asset-reader-mesh and
+unity-asset-reader-shader, which are installed beside it with their own
+LICENSE and NOTICE files; see those for the projects they derive from
+(AssetStudio, UnityPy and others).
