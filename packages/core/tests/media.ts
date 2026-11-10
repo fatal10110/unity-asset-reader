@@ -45,7 +45,8 @@ export interface TreeNode {
   children: TreeNode[];
 }
 
-function nest(nodes: GoldenNode[]): TreeNode {
+/** Golden type tree nodes, in pre-order, as nested nodes. */
+export function nest(nodes: GoldenNode[]): TreeNode {
   const root: TreeNode = { type: nodes[0]![1], name: nodes[0]![2], children: [] };
   const stack: [number, TreeNode][] = [[nodes[0]![0], root]];
   for (const [level, type, name] of nodes.slice(1)) {

@@ -114,6 +114,23 @@ MIPS = {
     "android": ["45_ETC2_RGB", "47_ETC2_RGBA8", "48_ASTC_4x4", "50_ASTC_6x6"],
 }
 
+# The Cubemap, Texture2DArray and Texture3D of the cube-array-3d bundles
+# (fixtures/BUILDING.md section 31), by bundle: class name -> texture names.
+LAYERED = {
+    "windows": {
+        "Cubemap": ["cube_10_DXT1", "cube_25_BC7", "cube_4_RGBA32"],
+        "Texture2DArray": ["array_10_DXT1", "array_10_DXT1_sRGB", "array_25_BC7",
+                           "array_25_BC7_sRGB", "array_4_RGBA32", "array_4_RGBA32_sRGB"],
+        "Texture3D": ["volume_10_DXT1", "volume_25_BC7", "volume_4_RGBA32"],
+    },
+    "android": {
+        "Cubemap": ["cube_47_ETC2_RGBA8", "cube_48_ASTC_4x4"],
+        "Texture2DArray": ["array_47_ETC2_RGBA8", "array_47_ETC2_RGBA8_sRGB",
+                           "array_48_ASTC_4x4", "array_48_ASTC_4x4_sRGB"],
+        "Texture3D": ["volume_47_ETC2_RGBA8", "volume_48_ASTC_4x4"],
+    },
+}
+
 # An AnimationClip's legacy curve arrays.
 CURVE_ARRAYS = ("m_RotationCurves", "m_CompressedRotationCurves", "m_EulerCurves",
                 "m_PositionCurves", "m_ScaleCurves", "m_FloatCurves", "m_PPtrCurves")
@@ -123,9 +140,11 @@ def evidence(name, path):
     """Check the fixture's intended content directly with UnityPy, not our reader."""
     env = UnityPy.load(str(path))
     textures, atlases, shaders, meshes, clips = [], [], [], [], []
-    animation, scene, components = {}, {}, []
+    animation, scene, components, layered = {}, {}, [], {}
     for obj in env.objects:
         assert obj.assets_file.header.version == 23
+        if obj.type.name in ("Cubemap", "Texture2DArray", "Texture3D"):
+            layered.setdefault(obj.type.name, []).append(obj.read_typetree()["m_Name"])
         if obj.type.name in ("AnimationClip", "Animator", "AnimatorController",
                              "AnimatorOverrideController", "Avatar"):
             animation[obj.type.name] = animation.get(obj.type.name, 0) + 1
@@ -282,6 +301,13 @@ def evidence(name, path):
         # etc2comp payloads by packages/texture/tests/signed-eac.test.ts.
         assert sorted(textures) == ["42_EAC_R_SIGNED", "44_EAC_RG_SIGNED"]
         return {"textures": sorted(textures)}
+    if "/cube-array-3d/" in name:
+        # The Cubemap, Texture2DArray and Texture3D textures (#331); the pixels
+        # of their faces, slices and levels are the editor's, in
+        # texture-layer-pixel-unity-goldens.json.
+        layered = {k: sorted(v) for k, v in sorted(layered.items())}
+        assert layered == LAYERED[name.rsplit("/", 1)[1]], layered
+        return {"layered": layered}
     if "/mips/" in name:
         # The mipmapped textures (#331); the pixels of their levels are the
         # editor's, in texture-pixel-unity-goldens.json.
@@ -314,6 +340,8 @@ def main():
         ("signed-eac", "android"),
         # Mipmapped textures, every level its own pixels (#331).
         ("mips", "windows"), ("mips", "android"),
+        # Cubemap, Texture2DArray and Texture3D, every face, slice and level its own pixels (#331).
+        ("cube-array-3d", "windows"), ("cube-array-3d", "android"),
         # Animator, AnimatorController, AnimatorOverrideController and Avatar (#303).
         ("animator/lz4", "animator"), ("animator/lz4-notypetree", "animator"),
         # AnimationClip (#302): legacy, streamed, dense and constant clips.
