@@ -205,6 +205,7 @@ export class ObjectReader extends BinaryReader {
    * the `readTypeTree` function for the value shapes.
    *
    * @throws {UnsupportedError} when the file has no type tree for the object
+   *   and none was supplied (`LoadOptions.typeTrees`)
    * @throws {CorruptError} when the data does not match the type tree, or does
    *   not end exactly at `byteSize`
    */
@@ -223,7 +224,8 @@ export class ObjectReader extends BinaryReader {
    * named by `m_StreamData`) reads it through the env that built this reader.
    *
    * `MonoBehaviour` is the exception: its hardcoded reader reads only the
-   * header, so when the file has a type tree `read()` is the whole
+   * header, so when the file has a type tree, or `load()` was given the
+   * script's in `LoadOptions.typeTrees`, `read()` is the whole
    * {@link readTypeTree} result, the script's fields included, and only
    * without one is it the header `readMonoBehaviour` reads.
    *

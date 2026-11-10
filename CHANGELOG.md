@@ -45,6 +45,12 @@ versioning policy below explains when they ship in a minor version.
   dependencies the `AssetBundle` object of the pointing bundle declares (`m_Dependencies`, Unity
   5.0+), as `(this bundle declares dependencies: a, b)`. They are bundle names, not file names.
   No hint without an `AssetBundle`, with an empty list, or when it cannot be read (#330).
+- **Read scripts of builds without type trees.** `load()` and `open()` take
+  `typeTrees`: type trees for the `MonoBehaviour`s of files built without them, keyed by the
+  MonoScript's `"<assembly>:<namespace>.<class>"` or by the script id. `asset.data.fields`,
+  `obj.read()` and `obj.readTypeTree()` then read the script's fields. A tree that does not fit
+  throws `CorruptError` naming the script; `[SerializeReference]` data throws
+  `UnsupportedError`. New type `TypeTreeNodeData`, the plain-JSON node format (#339).
 
 ### 1.3.0 - 2026-11-09
 
