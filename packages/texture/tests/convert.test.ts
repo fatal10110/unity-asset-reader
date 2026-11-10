@@ -34,8 +34,9 @@ interface FixtureTexture {
 function fixtureTextures(fixtures = fixtureNames(), getGolden = golden): FixtureTexture[] {
   const out: FixtureTexture[] = [];
   for (const fixture of fixtures) {
-    // Block and Crunch formats go through texture2ddecoder-wasm: decode.test.ts (#32).
-    if (fixture.includes("/block/")) continue;
+    // Block and Crunch formats go through texture2ddecoder-wasm: decode.test.ts (#32);
+    // the mipmapped textures, block formats among them, through mips.test.ts (#331).
+    if (fixture.includes("/block/") || fixture.includes("/mips/")) continue;
     const serialized = Object.values(getGolden(fixture).serialized ?? {});
     if (!serialized.some((s) => s.textures)) continue;
     const env = load([{ name: fixture, data: loadFixture(fixture) }]);

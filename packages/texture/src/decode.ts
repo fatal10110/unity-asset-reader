@@ -27,7 +27,7 @@ import {
 } from "texture2ddecoder-wasm";
 import { BuildTarget, CorruptError, TextureFormat, UnsupportedError } from "unity-asset-reader";
 import type { ObjectReader, Texture2DData } from "unity-asset-reader";
-import { convertPlain, type RgbaImage } from "./convert.js";
+import { BYTES_PER_PIXEL, convertPlain, type RgbaImage } from "./convert.js";
 import { deswizzle, refuseTiledPlatform, switchLayout, xbox360Swap } from "./platform.js";
 
 /** Which Crunch variant a DXT1 or DXT5 Crunch texture holds; see {@link DecodeTexture2DOptions}. */
@@ -51,6 +51,16 @@ export interface DecodeTexture2DOptions {
    * only Unity's crunch has: `"original"` is an `UnsupportedError` for them.
    */
   crunch?: "unity" | "original";
+  /**
+   * The mip level to decode: 0, the default, is the full image; level `n` is
+   * `max(1, floor(m_Width / 2^n))` by `max(1, floor(m_Height / 2^n))` pixels.
+   * It must be below the texture's mip count: `m_MipCount`, or before Unity
+   * 5.2 the full chain down to 1x1 when `m_MipMap` is set, and 1 without
+   * either (so input built by hand sets `m_MipCount` to decode past level 0).
+   * The levels are stored largest first, each at its own size: whole blocks
+   * for a block format, and for PVRTC at least 2 x 2 blocks.
+   */
+  mip?: number;
 }
 
 /** Where `initTexture` finds the WASM files; passed to `texture2ddecoder-wasm` as it is. */
@@ -226,8 +236,8 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
 }
 
 /**
- * Decode the first mip level of a Texture2D to RGBA8, top row first, whatever
- * its format: the plain formats in TS (`convertPlain`), the block and Crunch
+ * Decode one mip level of a Texture2D, the first unless `options.mip` names
+ * another, to RGBA8, top row first, whatever its format: the plain formats in TS (`convertPlain`), the block and Crunch
  * formats - BC1-BC7, ETC1/ETC2/EAC, PVRTC, ASTC, ATC and Crunch - through
  * `texture2ddecoder-wasm`. Its BGRA output is swapped to RGBA once (D5).
  *
@@ -259,16 +269,21 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  * it holds with `options.crunch` instead, which wins over the fields. The ETC
  * Crunch formats only exist in Unity's variant.
  *
+ * Mip levels past the first (`options.mip`) are decoded for every format and
+ * platform above except three, which give level 0 only: Crunch (the decoder
+ * unpacks only its first level), and Switch and Xbox 360 textures, whose
+ * later levels' console layout no upstream reads.
+ *
  * @param texture a Texture2D as `obj.read()` returns it, or one built by
  *   hand. Only `m_Width`, `m_Height`, `m_TextureFormat` and `imageData` are
  *   required (and `m_DownscaleFallback` / `m_IsAlphaChannelOptional` or
  *   `options.crunch` for DXT Crunch, `platform` and `m_PlatformBlob` for
  *   consoles, see above); they are checked at run time too, since
  *   `obj.read()`'s type is the caller's claim
- * @param options how to read input that is not from a bundle; see
- *   {@link DecodeTexture2DOptions}
- * @returns a new RGBA image, `width * height * 4` bytes, top row first;
- *   `imageData` is not modified. A texture 0 pixels wide or high (such as a
+ * @param options the mip level, and how to read input that is not from a
+ *   bundle; see {@link DecodeTexture2DOptions}
+ * @returns a new RGBA image of the level, `width * height * 4` bytes, top row
+ *   first; `imageData` is not modified. A texture 0 pixels wide or high (such as a
  *   dynamic font's 0x0 "Font Texture", whose `imageData` is empty, #139) gives
  *   an empty image of its size, whatever its platform and `imageData`, if its
  *   format has a decoder: nothing is decoded, but {@link initTexture} is
@@ -278,7 +293,10 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  *   `m_TextureFormat` is not a number, `imageData` is not a `Uint8Array`, or
  *   `platform` / `m_PlatformBlob`, when present, is not a number /
  *   `Uint8Array`; the message names each. Also when `options` is not an
- *   object, or `options.crunch` is neither `"unity"` nor `"original"`
+ *   object, `options.crunch` is neither `"unity"` nor `"original"`, or
+ *   `options.mip` is not a number
+ * @throws {RangeError} when `options.mip` is not a whole number from 0 to the
+ *   mip count less 1
  * @throws {Error} before {@link initTexture} has finished
  * @throws {UnsupportedError} for a format with no decoder here (DXT3, and
  *   formats neither this nor `convertPlain` knows); for a Switch-swizzled
@@ -289,9 +307,12 @@ export async function ensureTexture(options?: InitTextureOptions): Promise<void>
  *   width), not the Switch and PS4/PS5 ones: it has no pixels to lay out
  *   (#139). Also for an ETC Crunch format with `options.crunch` set to
  *   `"original"` (kind `"texture format"`): the original crunch has no ETC
- *   formats
+ *   formats. And for a mip level past the first of a Crunch texture (kind
+ *   `"texture format"`) or of a Switch or Xbox 360 texture (kind
+ *   `"texture platform"`)
  * @throws {CorruptError} when the image data is shorter than the first level
- *   needs (for Switch, the padded level), the Crunch data does not unpack,
+ *   needs (for Switch, the padded level), or than the levels up to and
+ *   including `options.mip`; when the Crunch data does not unpack,
  *   the block decoder refuses the data (such as PVRTC whose block counts are
  *   not powers of two), or the size is not a non-negative integer
  * @example
@@ -310,8 +331,8 @@ export async function decodeTexture2D(
  * the same errors are thrown.
  *
  * @param texture the four required fields, and any other Texture2D field
- * @param options the Crunch variant of DXT Crunch data, see
- *   {@link DecodeTexture2DOptions}
+ * @param options the mip level, and the Crunch variant of DXT Crunch data;
+ *   see {@link DecodeTexture2DOptions}
  * @returns a new RGBA image, `width * height * 4` bytes, top row first
  * @example
  * await initTexture();
@@ -324,6 +345,8 @@ export async function decodeTexture2D(
  * });
  * // Crunch data from a Unity 2017.1 project, which has none of the 2017.3 fields:
  * await decodeTexture2D(crunched, { crunch: "original" });
+ * // Level 2 of raw RGBA32 data with three levels, 8 x 8, 4 x 4 and 2 x 2:
+ * await decodeTexture2D({ ...rgba, m_MipCount: 3 }, { mip: 2 });
  */
 export async function decodeTexture2D(
   texture: Pick<Texture2DData, "m_Width" | "m_Height" | "m_TextureFormat" | "imageData"> &
@@ -335,25 +358,36 @@ export async function decodeTexture2D(
   options: DecodeTexture2DOptions = {},
 ): Promise<RgbaImage> {
   checkInput(texture);
-  const crunch = checkOptions(texture.m_TextureFormat, options);
+  const { crunch, mip } = checkOptions(texture.m_TextureFormat, options);
   if (!initialized) throw new Error(NOT_INITIALIZED);
   const { m_Width: width, m_Height: height, m_TextureFormat: format } = texture;
   if (!Number.isInteger(width) || width < 0 || !Number.isInteger(height) || height < 0) {
     throw new CorruptError(`texture size ${width} x ${height} is not a non-negative integer size`);
   }
+  const mipCount = mipCountOf(texture);
+  if (mip > 0 && mip >= mipCount) {
+    throw new RangeError(
+      `decodeTexture2D: options.mip is ${mip}, but the texture has ${mipCount} mip ` +
+        `level${mipCount === 1 ? "" : "s"}`,
+    );
+  }
   // No pixels: no layout to undo or refuse, nothing to decode (#139). A format
   // with no decoder is still refused (R9): `plain` checks it, at no cost here.
   if (width === 0 || height === 0) {
     if (!BLOCK.has(CRUNCHED.get(format) ?? format)) plain(texture.imageData, width, height, format);
-    return { data: new Uint8Array(0), width, height };
+    return { data: new Uint8Array(0), width: side(width, mip), height: side(height, mip) };
   }
   const platform = texture.platform ?? BuildTarget.UnknownPlatform;
   refuseTiledPlatform(platform);
+  if (mip > 0) refuseLevel(format, platform);
   // Upstream's order: the Xbox swap, then (UnityPy) the Switch deswizzle, then decode.
   const data = xbox360Swap(texture.imageData, platform, format);
-  const layout = switchLayout(platform, texture.m_PlatformBlob, format, width, height);
+  const layout =
+    mip > 0 ? undefined : switchLayout(platform, texture.m_PlatformBlob, format, width, height);
   let image: RgbaImage;
-  if (layout === undefined) {
+  if (mip > 0) {
+    image = await decodeLevel(texture, format, data, width, height, mip);
+  } else if (layout === undefined) {
     image = await decodeLinear(texture, crunch, format, data, width, height);
   } else {
     const { paddedWidth, paddedHeight } = layout;
@@ -375,6 +409,7 @@ export async function decodeTexture2D(
 /**
  * The first level of `data`, stored linear, to RGBA8 with the rows as
  * stored: `convertPlain`, or the WASM decoder and the BGRA -> RGBA swap.
+ * `decodeLevel` passes a later level as `data`, never Crunch.
  */
 async function decodeLinear(
   texture: Texture2DInput,
@@ -414,6 +449,118 @@ async function decodeLinear(
     out[i + 2] = b;
   }
   return { data: out, width, height };
+}
+
+/**
+ * Level `mip` (> 0) of linear `data`, with the rows as stored: the levels
+ * before it are skipped, each at its own stored size, and a level stored
+ * larger than it is (PVRTC) is decoded at that size and cropped.
+ */
+async function decodeLevel(
+  texture: Texture2DInput,
+  format: number,
+  data: Uint8Array,
+  width: number,
+  height: number,
+  mip: number,
+): Promise<RgbaImage> {
+  let offset = 0;
+  for (let n = 0; n < mip; n++) offset += levelLayout(format, width, height, n).bytes;
+  const level = levelLayout(format, width, height, mip);
+  const end = offset + level.bytes;
+  if (data.length < end) {
+    throw new CorruptError(
+      `${describe(format)} image data is ${data.length} bytes, mip level ${mip} ` +
+        `(${level.width} x ${level.height}) of ${width} x ${height} ends at byte ${end}`,
+    );
+  }
+  const stored = await decodeLinear(
+    texture,
+    undefined,
+    format,
+    data.subarray(offset, end),
+    level.storedWidth,
+    level.storedHeight,
+  );
+  // In stored order the level's pixels are the first rows and columns.
+  return crop(stored, level.width, level.height);
+}
+
+/** One mip level: its size in pixels, the size it is stored at, and its bytes. */
+interface LevelLayout {
+  width: number;
+  height: number;
+  storedWidth: number;
+  storedHeight: number;
+  bytes: number;
+}
+
+/**
+ * Level `n` of a `width x height` texture in `format` (not Crunch): each side
+ * halved `n` times, down to 1. A block format stores whole blocks; PVRTC at
+ * least 2 x 2 of them, so 8 x 8 pixels at 4 bpp and 16 x 8 at 2 bpp (the
+ * PVRTC1 size rule, which the PVRTC fixtures' `m_CompleteImageSize` follows).
+ */
+function levelLayout(format: number, width: number, height: number, n: number): LevelLayout {
+  const w = side(width, n);
+  const h = side(height, n);
+  const codec = BLOCK.get(format);
+  if (codec === undefined) {
+    const bpp = BYTES_PER_PIXEL.get(format);
+    if (bpp === undefined) throw noDecoder(format);
+    return { width: w, height: h, storedWidth: w, storedHeight: h, bytes: w * h * bpp };
+  }
+  const pvrtc = codec === PVRTC_2BPP || codec === PVRTC_4BPP;
+  const storedWidth = pvrtc ? Math.max(w, 2 * codec.blockWidth) : w;
+  const storedHeight = pvrtc ? Math.max(h, 2 * codec.blockHeight) : h;
+  const bytes =
+    Math.ceil(storedWidth / codec.blockWidth) *
+    Math.ceil(storedHeight / codec.blockHeight) *
+    codec.blockBytes;
+  return { width: w, height: h, storedWidth, storedHeight, bytes };
+}
+
+/** A side of level `n`: halved `n` times, rounding down, but not below 1 (0 stays 0). */
+function side(size: number, n: number): number {
+  return size === 0 ? 0 : Math.max(1, Math.floor(size / 2 ** n));
+}
+
+/**
+ * The mip levels a Texture2D stores: `m_MipCount` (Unity 5.2+); before 5.2
+ * the full chain down to 1x1 when `m_MipMap` is set, and 1 otherwise.
+ * Internal: for `imageInfo` too.
+ */
+export function mipCountOf(
+  texture: Pick<Texture2DData, "m_Width" | "m_Height"> & Partial<Texture2DData>,
+): number {
+  if (typeof texture.m_MipCount === "number") return texture.m_MipCount;
+  // 5.2: the m_MipMap flag became a count; a mipmapped texture before has
+  // every level down to 1x1.
+  return texture.m_MipMap === true
+    ? Math.floor(Math.log2(Math.max(texture.m_Width, texture.m_Height, 1))) + 1
+    : 1;
+}
+
+/** Refuse a mip level past the first where only the first can be read. */
+function refuseLevel(format: number, platform: number): void {
+  if (CRUNCHED.has(format)) {
+    // ponytail: texture2ddecoder-wasm's Crunch bindings unpack level 0 only; a
+    // binding taking the level would lift this.
+    throw new UnsupportedError(
+      "texture format",
+      format,
+      `${describe(format)}: only mip level 0 unpacks, the Crunch decoder has no other level`,
+    );
+  }
+  if (platform === BuildTarget.Switch || platform === BuildTarget.XBOX360) {
+    throw new UnsupportedError(
+      "texture platform",
+      platform,
+      `mip levels past the first of a ${
+        platform === BuildTarget.Switch ? "Switch" : "Xbox 360"
+      } texture: no upstream reads their console layout`,
+    );
+  }
 }
 
 /** The top-left `width x height` of a padded image, as UnityPy crops a Switch texture. */
@@ -468,15 +615,25 @@ function checkInput(texture: unknown): asserts texture is Texture2DInput {
 }
 
 /**
- * `options` is the caller's claim too; return its `crunch`, refusing an ETC
- * Crunch format read as the original crunch, which never had ETC.
+ * `options` is the caller's claim too; return its `crunch` and `mip` (0 when
+ * left out), refusing an ETC Crunch format read as the original crunch, which
+ * never had ETC. The mip count is checked later, once the size is known.
  */
-function checkOptions(format: number, options: unknown): Crunch | undefined {
+function checkOptions(
+  format: number,
+  options: unknown,
+): { crunch: Crunch | undefined; mip: number } {
   if (typeof options !== "object" || options === null) {
     throw new TypeError(`decodeTexture2D: options must be an object (${got(options)})`);
   }
-  const { crunch } = options as { crunch?: unknown };
-  if (crunch === undefined) return undefined;
+  const { crunch, mip = 0 } = options as { crunch?: unknown; mip?: unknown };
+  if (typeof mip !== "number") {
+    throw new TypeError(`decodeTexture2D: options.mip must be a number (${got(mip)})`);
+  }
+  if (!Number.isInteger(mip) || mip < 0) {
+    throw new RangeError(`decodeTexture2D: options.mip must be a whole number from 0 (${mip})`);
+  }
+  if (crunch === undefined) return { crunch: undefined, mip };
   if (crunch !== "unity" && crunch !== "original") {
     throw new TypeError(
       `decodeTexture2D: options.crunch must be "unity" or "original" (${
@@ -491,7 +648,7 @@ function checkOptions(format: number, options: unknown): Crunch | undefined {
       `${describe(format)} exists only in Unity's Crunch, not the original one options.crunch names`,
     );
   }
-  return crunch;
+  return { crunch, mip };
 }
 
 /** `"missing"`, a class name such as `"Array"`, or a `typeof` such as `"string"`. */
@@ -506,12 +663,15 @@ function plain(data: Uint8Array, width: number, height: number, format: number):
   try {
     return convertPlain(data, width, height, format);
   } catch (error) {
-    if (error instanceof UnsupportedError && error.kind === "texture format") {
-      const name = FORMAT_NAMES.get(format) ?? "unknown";
-      throw new UnsupportedError("texture format", format, `${name}: no decoder for it`);
-    }
+    if (error instanceof UnsupportedError && error.kind === "texture format") throw noDecoder(format);
     throw error;
   }
+}
+
+/** The refusal of a format neither the block decoder nor `convertPlain` knows. */
+function noDecoder(format: number): UnsupportedError {
+  const name = FORMAT_NAMES.get(format) ?? "unknown";
+  return new UnsupportedError("texture format", format, `${name}: no decoder for it`);
 }
 
 /** Upstream `UnpackCrunch`: the first level of a Crunch texture, as block data. */

@@ -348,7 +348,7 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `initTexture(options?)` | Load the WASM decoder. Optional before `decodeImage` and `images`; call it once, and await it, before `decodeTexture2D` and `decodeSprite` |
 | `InitTextureOptions` | `{ wasmPath?, locateFile? }`, passed to `texture2ddecoder-wasm`'s `initialize` |
 | `decodeTexture2D(texture, options?)` | A `Texture2D`, as `obj.read()` returns it or built by hand (only `m_Width`, `m_Height`, `m_TextureFormat`, `imageData` required), to RGBA, top row first |
-| `DecodeTexture2DOptions` | `{ crunch? }`: `"unity"` or `"original"`, the Crunch variant of hand-built DXT Crunch data |
+| `DecodeTexture2DOptions` | `{ crunch?, mip? }`: `"unity"` or `"original"`, the Crunch variant of hand-built DXT Crunch data; the mip level to decode (default 0) |
 | `decodeSprite(obj, env, options?)` | A `Sprite` (or a `PackedSprite`) to RGBA, top row first, cut out of its texture or atlas |
 | `DecodeSpriteOptions` | `{ tightMesh?, preferMasterAtlas?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
@@ -357,8 +357,9 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 
 ## Texture formats
 
-`decodeTexture2D` decodes the first mip level. The **Tested on** column says what test data each
-format is checked on (see [How it is tested](#how-it-is-tested)):
+`decodeTexture2D` decodes the first mip level, or the one `options.mip` names (see
+[Mip levels](#mip-levels)). The **Tested on** column says what test data each format is checked on
+(see [How it is tested](#how-it-is-tested)):
 
 - **Editor-built:** the test texture was made by the Unity editor.
 - **Synthetic:** generated block data. No current editor writes those formats.
@@ -392,6 +393,28 @@ Details worth knowing:
 - `DXT5` color is decoded in 4-color mode, as the S3TC spec says. On blocks with `c0 <= c1`
   that differs from AssetStudio (see [Not supported](#not-supported)).
 
+### Mip levels
+
+`decodeTexture2D(texture, { mip: n })` decodes level `n`, `max(1, width >> n)` by
+`max(1, height >> n)` pixels:
+
+```ts
+const info = imageInfo(asset); // info.mipCount levels, 0 to mipCount - 1
+const half = await decodeTexture2D(obj.read(), { mip: 1 });
+```
+
+- The levels follow each other in the image data, largest first, each in whole blocks; PVRTC
+  stores at least 2 x 2 blocks per level and is cropped back.
+- `n` must be below the mip count (`m_MipCount`, or before Unity 5.2 the full chain when
+  `m_MipMap` is set): a larger or negative one, or a fraction, is a `RangeError`. Data built by
+  hand sets `m_MipCount` to decode past level 0.
+- Level 0 only, an `UnsupportedError` past it: the Crunch formats (the WASM decoder unpacks only
+  their first level), and Switch and Xbox 360 textures (no reference reads their later levels).
+- Checked against the Unity editor's own pixels of every level (`GetPixels32(mip)`), for
+  `RGBA32` (also at a size that is not a power of two), `DXT1`, `DXT5`, `BC7`, `ETC2_RGB`,
+  `ETC2_RGBA8`, `ASTC_4x4` and `ASTC_6x6`, in the four fixture editors; the level layout of every
+  other block format against Unity's stored image size.
+
 ### Platforms
 
 - **Switch:** swizzled textures are deswizzled first (as UnityPy does; AssetStudio has no Switch
@@ -420,7 +443,7 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 
 Not provided at all:
 
-- Mip levels other than the first.
+- Mip levels other than the first of Crunch, Switch and Xbox 360 textures.
 - The `Cubemap`, `Texture2DArray` and `Texture3D` classes.
 - JPEG encoding, and compressed PNG (`encodePng` stores the pixels uncompressed).
 

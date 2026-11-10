@@ -20,8 +20,9 @@ export interface RgbaImage {
 /**
  * The plain formats: Unity `TextureFormat` value -> bytes per pixel.
  * Block and Crunch formats go through `texture2ddecoder-wasm` instead (#32).
+ * Internal: `decodeTexture2D` sizes the mip levels with it too.
  */
-const BYTES_PER_PIXEL: ReadonlyMap<number, number> = new Map([
+export const BYTES_PER_PIXEL: ReadonlyMap<number, number> = new Map([
   [TextureFormat.Alpha8, 1],
   [TextureFormat.ARGB4444, 2],
   [TextureFormat.RGB24, 3],
