@@ -6,8 +6,8 @@ Shared test data for every reader package. Nothing here is published. It holds t
   written by a script. No third-party game data, ever (R11).
 - **Goldens:** what an independent tool, the *oracle*, says each fixture contains. UnityPy is the
   oracle for parsing, AssetStudio `c37af7d` for export output, and the Unity editor for the humanoid
-  muscle-to-bone conversion and the pixels of texture mip levels (plan §5). Goldens never come
-  from this library's own output (R12).
+  muscle-to-bone conversion and the pixels of texture mip levels, cubemap faces, array slices and
+  3D slices (plan §5). Goldens never come from this library's own output (R12).
 
 This page says what each fixture is and how each golden was made. [`BUILDING.md`](BUILDING.md) says
 how to build the fixtures with Unity.
