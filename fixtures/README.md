@@ -93,6 +93,7 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `ui-animation/{lz4,lz4-notypetree}/ui-animation` | the same four | a `RectTransform` UI hierarchy and its clip | — | 26 |
 | `humanoid/lz4/humanoid` | the same four | the input of the humanoid oracle | — | 28 |
 | `mips/windows`, `mips/android` | the same four | mipmapped Texture2Ds, every level its own pixels: RGBA32, DXT1, DXT5, BC7; ETC2, ASTC | — | 29 |
+| `diff/{v1,v2,v1-notypetree,v2-notypetree}/...` | 2019.4.41f2 | two builds of one project with known changes, for `diff()` | — | 30 |
 
 ## Editor-built fixtures (`bundles/editor/`)
 

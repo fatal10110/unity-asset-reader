@@ -40,6 +40,11 @@ versioning policy below explains when they ship in a minor version.
 
 ### 1.3.1 - Unreleased
 
+- **Compare two builds.** `diff(oldEnv, newEnv)` lists the assets added, removed or modified
+  between two loaded builds. It matches them by container path, then by path id within the same
+  bundle name, so a changed CAB name still matches. It compares object bytes and the streamed
+  `.resS` data, and for a modified asset gives the top-level type-tree fields that differ and the
+  size delta (#342).
 - **`resolveOrThrow` names the declared dependencies.** When a pointer leads into a
   SerializedFile that is not loaded, the `ResourceNotFoundError` message now ends with the
   dependencies the `AssetBundle` object of the pointing bundle declares (`m_Dependencies`, Unity

@@ -9,6 +9,8 @@ export type { WebFile } from "./bundle/WebFile.js";
 export { gunzip, unzlib } from "./codec/inflate.js";
 export { decompressLz4 } from "./codec/lz4.js";
 export { lzmaDecompress } from "./codec/lzma.js";
+export { diff } from "./diff.js";
+export type { DiffEntry } from "./diff.js";
 export { load } from "./env.js";
 export { formatSingle, formatSingleInvariant } from "./float.js";
 export { GltfWriter } from "./gltf/writer.js";
