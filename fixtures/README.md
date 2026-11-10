@@ -257,6 +257,9 @@ atlas asset, which takes its atlas text, Material and page with it;
 atlas type; `spine/lz4-notypetree/splitatlas` is `splitatlas` without type
 trees. The pages are 8x8 RGBA32 textures. [`BUILDING.md`](BUILDING.md) section 19
 lists what each skeleton is grouped as.
+`goldens.json`'s `suppliedTypeTrees` reads the MonoBehaviours of
+`spine/lz4-notypetree/skeletons` with type trees supplied from outside the file, the typed
+build's (#339).
 
 ### 2019.4 acceptance fixtures and rotation probes
 

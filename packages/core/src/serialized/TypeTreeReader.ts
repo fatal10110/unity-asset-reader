@@ -58,12 +58,50 @@ interface Walk {
    * rest of that class and everything read under it (UnityPy `has_registry`).
    */
   classHasRegistry: boolean;
+  /** The script a supplied type tree was found for; `undefined` for the file's own tree. */
+  script: string | undefined;
+}
+
+/**
+ * A type tree supplied through `LoadOptions.typeTrees` for an object whose
+ * file has none (#339), and the script it was found for, which errors name.
+ */
+export interface SuppliedTypeTree {
+  nodes: TypeTreeNode[];
+  script: string;
+}
+
+/** For each MonoBehaviour without its own type tree, how to find a supplied one. */
+const suppliers = new WeakMap<ObjectReader, () => SuppliedTypeTree | null>();
+
+/**
+ * Let `reader` be read with a supplied type tree, which `supply` finds when
+ * first needed. Internal: `load()` calls it when given `typeTrees`.
+ */
+export function setTypeTreeSupplier(
+  reader: ObjectReader,
+  supply: () => SuppliedTypeTree | null,
+): void {
+  suppliers.set(reader, supply);
+}
+
+/**
+ * The type tree an object is read with: its file's own, else one supplied
+ * through `LoadOptions.typeTrees` (#339), else `null` (header only).
+ */
+export function typeTreeOf(
+  reader: ObjectReader,
+): { nodes: TypeTreeNode[]; script?: string } | null {
+  const own = reader.serializedType?.nodes;
+  if (own && own.length > 0) return { nodes: own };
+  return suppliers.get(reader)?.() ?? null;
 }
 
 /**
  * Read an object into a plain JS object by walking its type tree (upstream
  * `TypeTreeHelper.ReadType`). This decodes any class, including script data,
- * as long as the file was built with type trees.
+ * as long as the file was built with type trees, or, for a `MonoBehaviour`,
+ * `load()` was given its script's type tree in `LoadOptions.typeTrees`.
  *
  * Reads from the object's first byte whatever the reader's position, and
  * leaves the reader at its end.
@@ -89,16 +127,20 @@ interface Walk {
  * @param reader the object to read
  * @returns the object's fields by name
  * @throws {UnsupportedError} when the file has no type tree for the object
- *   (built with `DisableWriteTypeTree`): the data is valid, but only a
- *   hand-written class reader can read it. Of kind `"EntityId size"` for an
- *   `EntityId` node without children whose `byteSize` is not 4 or 8
+ *   (built with `DisableWriteTypeTree`) and none was supplied: the data is
+ *   valid, but only a hand-written class reader can read it. Of kind
+ *   `"EntityId size"` for an `EntityId` node without children whose
+ *   `byteSize` is not 4 or 8. Of kind `"[SerializeReference] data without a
+ *   type tree"`, `found` naming the script, when a supplied tree reaches a
+ *   referenced object: the file's ref types lost their trees too
  * @throws {CorruptError} when the data runs out, holds a negative or impossible
  *   count, references a ref type the file does not declare, or ends after
- *   more or fewer bytes than the object's `byteSize`
+ *   more or fewer bytes than the object's `byteSize`; for a supplied tree, the
+ *   message names its script
  */
 export function readTypeTree(reader: ObjectReader): TypeTreeObject {
-  const nodes = reader.serializedType?.nodes ?? null;
-  if (nodes === null || nodes.length === 0) {
+  const found = typeTreeOf(reader);
+  if (found === null) {
     throw new UnsupportedError(
       "object without a type tree",
       `class ${reader.type}, path id ${reader.pathId}`,
@@ -106,18 +148,27 @@ export function readTypeTree(reader: ObjectReader): TypeTreeObject {
     );
   }
 
-  const walk: Walk = { reader, refTrees: new Map(), classHasRegistry: false };
-  reader.position = 0;
-  // The root's own align flag is not applied, as upstream reads its children only.
-  const value = readClass(walk, tree(nodes), 0);
+  const walk: Walk = { reader, refTrees: new Map(), classHasRegistry: false, script: found.script };
+  try {
+    reader.position = 0;
+    // The root's own align flag is not applied, as upstream reads its children only.
+    const value = readClass(walk, tree(found.nodes), 0);
 
-  if (reader.position !== reader.byteSize) {
+    if (reader.position !== reader.byteSize) {
+      throw new CorruptError(
+        `type tree of object ${reader.pathId} (class ${reader.type}) read ${reader.position} ` +
+          `bytes but expected ${reader.byteSize} bytes`,
+      );
+    }
+    return value;
+  } catch (error) {
+    // A wrong supplied tree must not pass for corrupt data: say whose it was.
+    if (found.script === undefined || !(error instanceof CorruptError)) throw error;
     throw new CorruptError(
-      `type tree of object ${reader.pathId} (class ${reader.type}) read ${reader.position} ` +
-        `bytes but expected ${reader.byteSize} bytes`,
+      `supplied type tree of script ${found.script} does not fit object ${reader.pathId}: ` +
+        error.message,
     );
   }
-  return value;
 }
 
 /**
@@ -135,8 +186,8 @@ export function readTypeTree(reader: ObjectReader): TypeTreeObject {
  *   `m_Name` and `m_Name` itself
  */
 export function readTypeTreeName(reader: ObjectReader): string | undefined {
-  const nodes = reader.serializedType?.nodes ?? null;
-  if (nodes === null || nodes.length === 0) return undefined;
+  const nodes = typeTreeOf(reader)?.nodes;
+  if (nodes === undefined) return undefined;
   let t = trees.get(nodes);
   if (!t) {
     t = tree(nodes);
@@ -151,7 +202,7 @@ export function readTypeTreeName(reader: ObjectReader): string | undefined {
   }
   if (at < 0) return undefined;
 
-  const walk: Walk = { reader, refTrees: new Map(), classHasRegistry: false };
+  const walk: Walk = { reader, refTrees: new Map(), classHasRegistry: false, script: undefined };
   reader.position = 0;
   // The fields before it as `readClass` reads them; only their bytes matter.
   for (let c = 1; c < at; c = t.end[c]!) {
@@ -403,6 +454,15 @@ function readReferencedObject(
 /** The data of one referenced object, read with the ref type it names. */
 function readRefData(walk: Walk, cls: unknown, ns: unknown, asm: unknown): TypeTreeValue {
   const { reader } = walk;
+  // A file built without type trees keeps none for its ref types either, so
+  // a supplied tree cannot go on into referenced data.
+  if (walk.script !== undefined) {
+    throw new UnsupportedError(
+      "[SerializeReference] data without a type tree",
+      walk.script,
+      `object ${reader.pathId} references "${String(cls)}" "${String(ns)}" "${String(asm)}"`,
+    );
+  }
   const refType = reader.refTypes.find(
     (r) => r.className === cls && r.namespace === ns && r.assemblyName === asm,
   );

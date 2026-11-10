@@ -225,11 +225,35 @@ export interface GoldenDeswizzle {
   outputSha256: string;
 }
 
+/**
+ * The MonoBehaviours of one build without type trees, read by the oracle with
+ * type trees supplied from outside the file (#339).
+ */
+export interface GoldenSuppliedTypeTrees {
+  /** The same bundle built with type trees, whose trees `nodes` are. */
+  typedTwin: string;
+  /** By path id. */
+  objects: Record<
+    string,
+    {
+      /** `"<m_AssemblyName>:<m_Namespace>.<m_ClassName>"` of the object's MonoScript. */
+      script: string;
+      /** The object's type entry's script id, as hex. */
+      scriptId: string;
+      /** The supplied tree: `[level, type, name, byteSize, metaFlag]` per node, in pre-order. */
+      nodes: [number, string, string, number, number][];
+      /** UnityPy's `read_typetree(nodes)` of the stripped object, normalized (plan §5). */
+      value: Record<string, unknown>;
+    }
+  >;
+}
+
 const goldenFile: {
   fixtures: Record<string, Golden>;
   synthetic: Record<string, GoldenSynthetic>;
   platform: Record<string, GoldenPlatform>;
   deswizzle: Record<string, GoldenDeswizzle>;
+  suppliedTypeTrees: Record<string, GoldenSuppliedTypeTrees>;
 } = JSON.parse(readFileSync(join(HERE, "goldens.json"), "utf8"));
 const goldens = goldenFile.fixtures;
 
@@ -270,6 +294,11 @@ export function platformGoldens(): Record<string, GoldenPlatform> {
 /** Every Switch deswizzle golden, by texel shape (`"8x4"`). */
 export function deswizzleGoldens(): Record<string, GoldenDeswizzle> {
   return goldenFile.deswizzle;
+}
+
+/** Every supplied-type-tree golden, by the stripped fixture's name (#339). */
+export function suppliedTypeTreeGoldens(): Record<string, GoldenSuppliedTypeTrees> {
+  return goldenFile.suppliedTypeTrees;
 }
 
 /**

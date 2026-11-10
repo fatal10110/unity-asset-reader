@@ -22,6 +22,11 @@ import {
   setUnityVersion,
   type SerializedFile,
 } from "./serialized/SerializedFile.js";
+import {
+  readTypeTreesOption,
+  supplyTypeTrees,
+  type TypeTreeNodeData,
+} from "./serialized/supplied.js";
 
 /**
  * How deep containers may nest before the input is refused.
@@ -91,6 +96,31 @@ export interface LoadOptions {
    * Use a version such as `"2019.4.41f2"`; `"0.0.0"` is not an editor version.
    */
   unityVersion?: string;
+  /**
+   * Type trees for the `MonoBehaviour`s of files built without them
+   * (`DisableWriteTypeTree`, as most player builds are), so `asset.data`,
+   * `obj.read()` and `obj.readTypeTree()` read the script's own fields too
+   * (#339). Produce them elsewhere, from the game's assemblies (UnityPy's
+   * `TypeTreeGenerator`, for one); this library does not read assemblies.
+   *
+   * Keyed by script, in one of two forms:
+   * - `"<m_AssemblyName>:<m_Namespace>.<m_ClassName>"` of the `MonoScript` the
+   *   object's `m_Script` points at, e.g.
+   *   `"Assembly-CSharp.dll:Game.ItemDatabase"`; `"<m_AssemblyName>:<m_ClassName>"`
+   *   in the global namespace. The assembly name is the MonoScript's own
+   *   (`"Assembly-CSharp"` without `.dll` from Unity 6).
+   * - the script id of the object's type entry (`SerializedType.scriptId`) as
+   *   32 hex digits, its bytes in file order, for when that MonoScript is not
+   *   loaded or cannot be read.
+   *
+   * An object is read with its file's own type tree when it has one, else the
+   * tree of its script's key, else the tree of its script id, else its header
+   * only. A supplied tree must consume exactly the object's bytes, or reading
+   * throws `CorruptError` naming the script, and it cannot reach
+   * `[SerializeReference]` data (`UnsupportedError`): those types' trees are
+   * stripped too.
+   */
+  typeTrees?: Readonly<Record<string, readonly TypeTreeNodeData[]>>;
 }
 
 /** One unpacked file, as {@link Env.files} yields it. */
@@ -393,12 +423,17 @@ export function containerOf(env: Env, object: ObjectReader): number | undefined 
  *   an `ArrayBuffer` is wrapped, never copied. Files without a name are
  *   called `"input <index>"`, which is fine for a bundle but not for a loose
  *   file whose name is looked up (see {@link LoadInput.name}).
- * @param options a fallback editor version for files that record none
+ * @param options a fallback editor version for files that record none, and
+ *   type trees for the MonoBehaviours of files built without them
  * @returns an {@link Env} whose `files` hold every unpacked file
  * @throws {TypeError} for an input that is neither bytes nor `{ name, data }`,
- *   or a `unityVersion` that is not a string
+ *   a `unityVersion` that is not a string, or `typeTrees` that are not an
+ *   object of node arrays with string and integer fields
  * @throws {RangeError} for a `unityVersion` that is not `major.minor.patch`
- *   with an optional build suffix and custom postfix, or whose major version is 0
+ *   with an optional build suffix and custom postfix, or whose major version
+ *   is 0; for a `typeTrees` key that is neither `"<assembly>:<class>"` nor a
+ *   32-digit hex script id, an empty node list, or node levels that do not
+ *   form one tree under a level-0 root
  * @throws {UnsupportedError} for a container, compression type or nesting depth
  *   this library does not implement, its message naming the containers it was
  *   found under, outermost first
@@ -406,13 +441,14 @@ export function containerOf(env: Env, object: ObjectReader): number | undefined 
  *   together, named the same way
  */
 export function load(inputs: LoadSource | readonly LoadSource[], options: LoadOptions = {}): Env {
-  const { unityVersion } = options;
+  const { unityVersion, typeTrees } = options;
   if (unityVersion !== undefined) {
     if (typeof unityVersion !== "string") throw new TypeError("unityVersion must be a string");
     if (!/^[1-9]\d*\.\d+\.\d+(?:[A-Za-z]+\d+.*)?$/s.test(unityVersion)) {
       throw new RangeError(`unityVersion ${JSON.stringify(unityVersion)} does not name an editor`);
     }
   }
+  const supplied = typeTrees === undefined ? undefined : readTypeTreesOption(typeTrees);
   const out: Collected = { files: [], serialized: [], byName: new Map(), lastContainer: 0 };
   const list: readonly LoadSource[] = isList(inputs) ? inputs : [inputs];
   list.forEach((input, index) => {
@@ -427,6 +463,7 @@ export function load(inputs: LoadSource | readonly LoadSource[], options: LoadOp
     // `obj.read()` reads a texture's `.resS` data through this env (#103).
     const readResource = env.readResource.bind(env);
     for (const object of index.objects) setResourceReader(object, readResource);
+    if (supplied) supplyTypeTrees(index.objects, supplied, env.resolve.bind(env));
     return index;
   };
 

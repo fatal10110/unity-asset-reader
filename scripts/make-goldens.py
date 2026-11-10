@@ -26,7 +26,9 @@ Per fixture (keyed by its path under fixtures/bundles/):
 Plus `synthetic`: UnityPy's RGBA for generated block data in the formats no
 editor on hand writes (ATC, signed EAC - #32); `platform`: the same for the
 console layouts no editor on hand builds (Switch swizzle, Xbox 360 byte swap),
-in both row orders; and `deswizzle`: UnityPy's Switch deswizzle alone (#33).
+in both row orders; `deswizzle`: UnityPy's Switch deswizzle alone (#33); and
+`suppliedTypeTrees`: the MonoBehaviours of a build without type trees, read by
+UnityPy with type trees supplied from outside the file (#339).
 
 Normalization (plan section 5), applied by walking the type tree next to the
 value so the node type decides, not the Python type:
@@ -67,6 +69,7 @@ from UnityPy.helpers.TypeTreeHelper import (
     metaflag_is_aligned,
     read_value,
 )
+from UnityPy.helpers.TypeTreeNode import TypeTreeNode
 from UnityPy.streams import EndianBinaryReader
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -828,6 +831,53 @@ def synthetic_goldens() -> dict:
     return out
 
 
+# Builds without type trees whose MonoBehaviours `suppliedTypeTrees` reads, each
+# with its typed twin: the same objects under the same path ids (#339).
+SUPPLIED_TYPE_TREES = {
+    "editor/2019.4.41f2/spine/lz4-notypetree/skeletons": "editor/2019.4.41f2/spine/lz4/skeletons",
+}
+
+
+def supplied_type_tree_goldens() -> dict:
+    """MonoBehaviours of a type-tree-stripped build, read with supplied type trees (#339).
+
+    Each one's nodes are its typed twin's type tree, reduced to the rows
+    `flatten` writes ([level, type, name, byteSize, metaFlag]); UnityPy is
+    handed them as the list of dicts `TypeTreeNode.from_list` takes, the form
+    a caller supplies, and reads the STRIPPED object with them, checking it
+    consumes exactly the object's bytes. `script` is the MonoScript key
+    ("<m_AssemblyName>:<m_Namespace>.<m_ClassName>"), read by UnityPy from the
+    stripped file, and `scriptId` its type entry's script id.
+    """
+    out = {}
+    for stripped_name, typed_name in SUPPLIED_TYPE_TREES.items():
+        typed = {o.path_id: o for o in UnityPy.load(str(FIXTURES / typed_name)).objects}
+        stripped_env = UnityPy.load(str(FIXTURES / stripped_name))
+        stripped = {o.path_id: o for o in stripped_env.objects}
+        objects = {}
+        for path_id, obj in sorted(stripped.items()):
+            if obj.type.name != "MonoBehaviour":
+                continue
+            assert obj.serialized_type.node is None, f"{stripped_name} has type trees"
+            rows = flatten(typed[path_id].serialized_type.node)
+            keys = ("m_Level", "m_Type", "m_Name", "m_ByteSize", "m_MetaFlag")
+            node = TypeTreeNode.from_list([dict(zip(keys, row)) for row in rows])
+            value = obj.read_typetree(nodes=node)
+            script_ptr = value["m_Script"]
+            assert script_ptr["m_FileID"] == 0, "script in another file"
+            script = stripped[script_ptr["m_PathID"]].read_typetree()
+            ns = script["m_Namespace"]
+            full = f"{ns}.{script['m_ClassName']}" if ns else script["m_ClassName"]
+            objects[str(path_id)] = {
+                "script": f"{script['m_AssemblyName']}:{full}",
+                "scriptId": hex_or_none(obj.serialized_type.script_id),
+                "nodes": rows,
+                "value": normalize(node, value, obj.assets_file),
+            }
+        out[stripped_name] = {"typedTwin": typed_name, "objects": objects}
+    return out
+
+
 def four_color(data: bytes, stride: int, c0_high: int, c1_high: int) -> bytes:
     """`data` with c0 > c1 in every BC1 colour block; see PLATFORM."""
     out = bytearray(data)
@@ -1067,6 +1117,7 @@ def main() -> None:
     goldens["synthetic"] = synthetic_goldens()
     goldens["platform"] = platform_goldens()
     goldens["deswizzle"] = deswizzle_goldens()
+    goldens["suppliedTypeTrees"] = supplied_type_tree_goldens()
 
     GOLDENS.write_text(to_json(goldens) + "\n")
     print(f"\n{len(goldens['fixtures'])} goldens -> {GOLDENS.relative_to(ROOT)}")

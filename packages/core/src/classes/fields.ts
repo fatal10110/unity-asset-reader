@@ -8,7 +8,7 @@
 
 import type { BuildTarget } from "../serialized/BuildTarget.js";
 import type { ObjectReader, Quaternion, Vector3, XForm } from "../serialized/ObjectReader.js";
-import type { TypeTreeObject } from "../serialized/TypeTreeReader.js";
+import { typeTreeOf, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
 import type {
   AssetBundle,
   AssetBundleScriptInfo,
@@ -323,8 +323,9 @@ export interface MonoBehaviourFields extends EditorExtensionFields {
   /**
    * The script's own serialized fields, under the names the script gives
    * them: the object's type tree without the header fields above. Absent
-   * when the file has no type tree, which is the only way to read them here
-   * (see {@link MonoBehaviourData}).
+   * when the file has no type tree and `load()` was given none for the script
+   * in `LoadOptions.typeTrees`, as a type tree is the only way to read them
+   * here (see {@link MonoBehaviourData}).
    */
   fields?: TypeTreeObject;
 }
@@ -367,8 +368,8 @@ export function toMonoBehaviourFields(
     name: data.m_Name,
     editorClassIdentifier: data.m_EditorClassIdentifier as string | undefined,
   });
-  const nodes = reader.serializedType?.nodes;
-  if (nodes && nodes.length > 0) {
+  // The file's own type tree or a supplied one (#339).
+  if (typeTreeOf(reader)) {
     // With a type tree, `data` is `readTypeTree()`'s result: every value past
     // the header is a TypeTreeValue.
     const entries = Object.entries(data).filter(([key]) => !MONO_BEHAVIOUR_HEADER.has(key));

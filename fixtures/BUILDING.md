@@ -3558,6 +3558,10 @@ Bundles that `spineSkeletons` refuses, and bundles that need a partner (#254):
 - `spine/lz4-notypetree/skeletons`: the `skeletons` bundle built with `DisableWriteTypeTree`,
   which has no field names to go by. `spineSkeletons` refuses it, naming the
   `SkeletonDataAsset` script.
+  Core reads its MonoBehaviours with type trees supplied through `LoadOptions.typeTrees`
+  (#339): `make-goldens.py`'s `suppliedTypeTrees` key holds, per MonoBehaviour, the typed
+  build's tree for it and UnityPy's `read_typetree(nodes)` of the stripped object. Section 4's
+  command regenerates it; no Unity build is needed.
 
 ### How names resolve
 

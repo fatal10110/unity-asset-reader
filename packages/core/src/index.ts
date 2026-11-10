@@ -49,6 +49,7 @@ export type {
   UnityVersion,
 } from "./serialized/SerializedFile.js";
 export type { SerializedType, TypeTreeNode } from "./serialized/TypeTree.js";
+export type { TypeTreeNodeData } from "./serialized/supplied.js";
 export { ClassID, classIdName } from "./serialized/ClassID.js";
 export { ObjectReader } from "./serialized/ObjectReader.js";
 export type { PPtr, PPtrResolution } from "./classes/PPtr.js";
