@@ -43787,6 +43787,1044 @@
         "textures": ["42_EAC_R_SIGNED", "44_EAC_RG_SIGNED"]
       }
     },
+    "editor/6000.6.4f1/mips/windows": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.6.4f1",
+      "files": {
+        "CAB-591a9771352deb056ec1e4e650bb0860": {
+          "sha256": "c624263670e4a684e68cc4afebda72a5cb100b28f4a33c284ec31437309cdbc2",
+          "size": 11272
+        }
+      },
+      "objects": {
+        "CAB-591a9771352deb056ec1e4e650bb0860": [
+          {
+            "pathId": "-1528520625887356718",
+            "classId": 28,
+            "byteSize": 2852
+          },
+          {
+            "pathId": "-2143690447048081145",
+            "classId": 28,
+            "byteSize": 840
+          },
+          {
+            "pathId": "-2273592715059114221",
+            "classId": 28,
+            "byteSize": 1400
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 444
+          },
+          {
+            "pathId": "4863836735735522975",
+            "classId": 28,
+            "byteSize": 480
+          },
+          {
+            "pathId": "5976602445202045685",
+            "classId": 28,
+            "byteSize": 840
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-591a9771352deb056ec1e4e650bb0860": {
+          "formatVersion": 23,
+          "unityVersion": "6000.6.4f1",
+          "targetPlatform": 19,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "b55819307006ed40e7e0f5f45a50c015",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "bool", "m_IsAlphaChannelOptional", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "unsigned int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_MipsStripped", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_IgnoreMipmapLimit", 1, 16384],
+                [1, "string", "m_MipmapLimitGroupName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "vector", "m_PlatformBlob", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 0],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "UInt64", "offset", 8, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 0],
+                [4, "char", "data", 1, 0]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 0],
+                [5, "char", "data", 1, 0],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-1528520625887356718": {
+              "value": {
+                "m_Name": "4_RGBA32",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 2732,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 4,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:000000ff080010ff100020ff180030ff200000ff290010ff310020ff390030ff410000ff4a0010ff520020ff5a0030ff620000ff6a0010ff730020ff7b0030ff830000ff8b0010ff940020ff9c0030ffa40000ffac0010ffb40020ffbd0030ffc50000ffcd0010ffd50020ffde0030ffe60000ffee0010fff60020ffff0030ff001110ff081100ff101130ff181120ff201110ff291100ff311130ff391120ff411110ff4a1100ff521130ff5a1120ff621110ff6a1100ff731130ff7b1120ff831110ff8b1100ff941130ff9c1120ffa41110ffac1100ffb41130ffbd1120ffc51110ffcd1100ffd51130ffde1120ffe61110ffee1100fff61130ffff1120ff002220ff082230ff102200ff182210ff202220ff292230ff312200ff392210ff412220ff4a2230ff522200ff5a2210ff622220ff6a2230ff732200ff7b2210ff832220ff8b2230ff942200ff9c2210ffa42220ffac2230ffb42200ffbd2210ffc52220ffcd2230ffd52200ffde2210ffe62220ffee2230fff62200ffff2210ff003330ff083320ff103310ff183300ff203330ff293320ff313310ff393300ff413330ff4a3320ff523310ff5a3300ff623330ff6a3320ff733310ff7b3300ff833330ff8b3320ff943310ff9c3300ffa43330ffac3320ffb43310ffbd3300ffc53330ffcd3320ffd53310ffde3300ffe63330ffee3320fff63310ffff3300ff004400ff084410ff104420ff184430ff204400ff294410ff314420ff394430ff414400ff4a4410ff524420ff5a4430ff624400ff6a4410ff734420ff7b4430ff834400ff8b4410ff944420ff9c4430ffa44400ffac4410ffb44420ffbd4430ffc54400ffcd4410ffd54420ffde4430ffe64400ffee4410fff64420ffff4430ff005510ff085500ff105530ff185520ff205510ff295500ff315530ff395520ff415510ff4a5500ff525530ff5a5520ff625510ff6a5500ff735530ff7b5520ff835510ff8b5500ff945530ff9c5520ffa45510ffac5500ffb45530ffbd5520ffc55510ffcd5500ffd55530ffde5520ffe65510ffee5500fff65530ffff5520ff006620ff086630ff106600ff186610ff206620ff296630ff316600ff396610ff416620ff4a6630ff526600ff5a6610ff626620ff6a6630ff736600ff7b6610ff836620ff8b6630ff946600ff9c6610ffa46620ffac6630ffb46600ffbd6610ffc56620ffcd6630ffd56600ffde6610ffe66620ffee6630fff66600ffff6610ff007730ff087720ff107710ff187700ff207730ff297720ff317710ff397700ff417730ff4a7720ff527710ff5a7700ff627730ff6a7720ff737710ff7b7700ff837730ff8b7720ff947710ff9c7700ffa47730ffac7720ffb47710ffbd7700ffc57730ffcd7720ffd57710ffde7700ffe67730ffee7720fff67710ffff7700ff008800ff088810ff108820ff188830ff208800ff298810ff318820ff398830ff418800ff4a8810ff528820ff5a8830ff628800ff6a8810ff738820ff7b8830ff838800ff8b8810ff948820ff9c8830ffa48800ffac8810ffb48820ffbd8830ffc58800ffcd8810ffd58820ffde8830ffe68800ffee8810fff68820ffff8830ff009910ff089900ff109930ff189920ff209910ff299900ff319930ff399920ff419910ff4a9900ff529930ff5a9920ff629910ff6a9900ff739930ff7b9920ff839910ff8b9900ff949930ff9c9920ffa49910ffac9900ffb49930ffbd9920ffc59910ffcd9900ffd59930ffde9920ffe69910ffee9900fff69930ffff9920ff00aa20ff08aa30ff10aa00ff18aa10ff20aa20ff29aa30ff31aa00ff39aa10ff41aa20ff4aaa30ff52aa00ff5aaa10ff62aa20ff6aaa30ff73aa00ff7baa10ff83aa20ff8baa30ff94aa00ff9caa10ffa4aa20ffacaa30ffb4aa00ffbdaa10ffc5aa20ffcdaa30ffd5aa00ffdeaa10ffe6aa20ffeeaa30fff6aa00ffffaa10ff00bb30ff08bb20ff10bb10ff18bb00ff20bb30ff29bb20ff31bb10ff39bb00ff41bb30ff4abb20ff52bb10ff5abb00ff62bb30ff6abb20ff73bb10ff7bbb00ff83bb30ff8bbb20ff94bb10ff9cbb00ffa4bb30ffacbb20ffb4bb10ffbdbb00ffc5bb30ffcdbb20ffd5bb10ffdebb00ffe6bb30ffeebb20fff6bb10ffffbb00ff00cc00ff08cc10ff10cc20ff18cc30ff20cc00ff29cc10ff31cc20ff39cc30ff41cc00ff4acc10ff52cc20ff5acc30ff62cc00ff6acc10ff73cc20ff7bcc30ff83cc00ff8bcc10ff94cc20ff9ccc30ffa4cc00ffaccc10ffb4cc20ffbdcc30ffc5cc00ffcdcc10ffd5cc20ffdecc30ffe6cc00ffeecc10fff6cc20ffffcc30ff00dd10ff08dd00ff10dd30ff18dd20ff20dd10ff29dd00ff31dd30ff39dd20ff41dd10ff4add00ff52dd30ff5add20ff62dd10ff6add00ff73dd30ff7bdd20ff83dd10ff8bdd00ff94dd30ff9cdd20ffa4dd10ffacdd00ffb4dd30ffbddd20ffc5dd10ffcddd00ffd5dd30ffdedd20ffe6dd10ffeedd00fff6dd30ffffdd20ff00ee20ff08ee30ff10ee00ff18ee10ff20ee20ff29ee30ff31ee00ff39ee10ff41ee20ff4aee30ff52ee00ff5aee10ff62ee20ff6aee30ff73ee00ff7bee10ff83ee20ff8bee30ff94ee00ff9cee10ffa4ee20ffacee30ffb4ee00ffbdee10ffc5ee20ffcdee30ffd5ee00ffdeee10ffe6ee20ffeeee30fff6ee00ffffee10ff00ff30ff08ff20ff10ff10ff18ff00ff20ff30ff29ff20ff31ff10ff39ff00ff41ff30ff4aff20ff52ff10ff5aff00ff62ff30ff6aff20ff73ff10ff7bff00ff83ff30ff8bff20ff94ff10ff9cff00ffa4ff30ffacff20ffb4ff10ffbdff00ffc5ff30ffcdff20ffd5ff10ffdeff00ffe6ff30ffeeff20fff6ff10ffffff00ff000032e1110042e1220052e1330062e1440032e1550042e1660052e1770062e1880032e1990042e1aa0052e1bb0062e1cc0032e1dd0042e1ee0052e1ff0062e1002442e1112432e1222462e1332452e1442442e1552432e1662462e1772452e1882442e1992432e1aa2462e1bb2452e1cc2442e1dd2432e1ee2462e1ff2452e1004852e1114862e1224832e1334842e1444852e1554862e1664832e1774842e1884852e1994862e1aa4832e1bb4842e1cc4852e1dd4862e1ee4832e1ff4842e1006d62e1116d52e1226d42e1336d32e1446d62e1556d52e1666d42e1776d32e1886d62e1996d52e1aa6d42e1bb6d32e1cc6d62e1dd6d52e1ee6d42e1ff6d32e1009132e1119142e1229152e1339162e1449132e1559142e1669152e1779162e1889132e1999142e1aa9152e1bb9162e1cc9132e1dd9142e1ee9152e1ff9162e100b642e111b632e122b662e133b652e144b642e155b632e166b662e177b652e188b642e199b632e1aab662e1bbb652e1ccb642e1ddb632e1eeb662e1ffb652e100da52e111da62e122da32e133da42e144da52e155da62e166da32e177da42e188da52e199da62e1aada32e1bbda42e1ccda52e1ddda62e1eeda32e1ffda42e100ff62e111ff52e122ff42e133ff32e144ff62e155ff52e166ff42e177ff32e188ff62e199ff52e1aaff42e1bbff32e1ccff62e1ddff52e1eeff42e1ffff32e1000064c3240074c3480084c36d0094c3910064c3b60074c3da0084c3ff0094c3005574c3245564c3485594c36d5584c3915574c3b65564c3da5594c3ff5584c300aa84c324aa94c348aa64c36daa74c391aa84c3b6aa94c3daaa64c3ffaa74c300ff94c324ff84c348ff74c36dff64c391ff94c3b6ff84c3daff74c3ffff64c3000096a55500a6a5aa00b6a5ff00c6a500ffa6a555ff96a5aaffc6a5ffffb6a50000c887ff00d8870000fa69",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "-2143690447048081145": {
+              "value": {
+                "m_Name": "12_DXT5",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 720,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 12,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:ffff49922449922485090108f5e7b2a0ffff49922449922485290128f5e7b2a0ffff49922449922485490148f5e7b2a0ffff49922449922485690168f5e7b2a0ffff49922449922485910188f5a7b2a0ffff49922449922485b101a8f5a7b2a0ffff49922449922485d101c8f5a7b2a0ffff49922449922485f101e8f5a7b2a0ffff499224499224850b000abdafb2a0ffff499224499224852b002abdafb2a0ffff499224499224854b004abdafb2a0ffff499224499224856b006abdafb2a0ffff499224499224858b008abdafb2a0ffff49922449922485ab00aabdafb2a0ffff49922449922485cb00cabdafb2a0ffff49922449922485eb00eabdafb2a0ffff499224499224e50d210cf5efbaa0ffff499224499224e52d212cf5efbaa0ffff499224499224e54d214cf5efbaa0ffff499224499224e56d216cf5efbaa0ffff499224499224e58d218cf5efbaa0ffff499224499224e5ad21acf5efbaa0ffff499224499224e5cd21ccf5efbaa0ffff499224499224e5ed21ecf5efbaa0ffff499224499224c50f410ef5efb2a0ffff499224499224c52f412ef5efb2a0ffff499224499224c54f414ef5efb2a0ffff499224499224c56f416ef5efb2a0ffff499224499224c597418ef5afb2a0ffff499224499224c5b741aef5afb2a0ffff499224499224c5d741cef5afb2a0ffff499224499224c5f741eef5afb2a0e1e1499224499224691b091855ffaa00e1e1499224499224695b095855ffaa00e1e149922449922469a309a055ffaa00e1e149922449922469e309e055ffaa00e1e1499224499224e91f891c55ffaa00e1e1499224499224e95f895c55ffaa00e1e1499224499224e9a789a455ffaa00e1e1499224499224e9e789e455ffaa00c3c3499224499224ef3f0f3855ffaa00c3c3499224499224efc70fc055ffaa00a5a5499224499224f57f15785500550087874992244992241af818001111111169694992244992241f001e00ffffffff",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "-2273592715059114221": {
+              "value": {
+                "m_Name": "4_RGBA32_20x12",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 20,
+                "m_Height": 12,
+                "m_CompleteImageSize": 1272,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 4,
+                "m_MipCount": 5,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:000000ff0d0010ff1a0020ff280030ff350000ff430010ff500020ff5d0030ff6b0000ff780010ff860020ff930030ffa10000ffae0010ffbb0020ffc90030ffd60000ffe40010fff10020ffff0030ff001710ff0d1700ff1a1730ff281720ff351710ff431700ff501730ff5d1720ff6b1710ff781700ff861730ff931720ffa11710ffae1700ffbb1730ffc91720ffd61710ffe41700fff11730ffff1720ff002e20ff0d2e30ff1a2e00ff282e10ff352e20ff432e30ff502e00ff5d2e10ff6b2e20ff782e30ff862e00ff932e10ffa12e20ffae2e30ffbb2e00ffc92e10ffd62e20ffe42e30fff12e00ffff2e10ff004530ff0d4520ff1a4510ff284500ff354530ff434520ff504510ff5d4500ff6b4530ff784520ff864510ff934500ffa14530ffae4520ffbb4510ffc94500ffd64530ffe44520fff14510ffff4500ff005c00ff0d5c10ff1a5c20ff285c30ff355c00ff435c10ff505c20ff5d5c30ff6b5c00ff785c10ff865c20ff935c30ffa15c00ffae5c10ffbb5c20ffc95c30ffd65c00ffe45c10fff15c20ffff5c30ff007310ff0d7300ff1a7330ff287320ff357310ff437300ff507330ff5d7320ff6b7310ff787300ff867330ff937320ffa17310ffae7300ffbb7330ffc97320ffd67310ffe47300fff17330ffff7320ff008b20ff0d8b30ff1a8b00ff288b10ff358b20ff438b30ff508b00ff5d8b10ff6b8b20ff788b30ff868b00ff938b10ffa18b20ffae8b30ffbb8b00ffc98b10ffd68b20ffe48b30fff18b00ffff8b10ff00a230ff0da220ff1aa210ff28a200ff35a230ff43a220ff50a210ff5da200ff6ba230ff78a220ff86a210ff93a200ffa1a230ffaea220ffbba210ffc9a200ffd6a230ffe4a220fff1a210ffffa200ff00b900ff0db910ff1ab920ff28b930ff35b900ff43b910ff50b920ff5db930ff6bb900ff78b910ff86b920ff93b930ffa1b900ffaeb910ffbbb920ffc9b930ffd6b900ffe4b910fff1b920ffffb930ff00d010ff0dd000ff1ad030ff28d020ff35d010ff43d000ff50d030ff5dd020ff6bd010ff78d000ff86d030ff93d020ffa1d010ffaed000ffbbd030ffc9d020ffd6d010ffe4d000fff1d030ffffd020ff00e720ff0de730ff1ae700ff28e710ff35e720ff43e730ff50e700ff5de710ff6be720ff78e730ff86e700ff93e710ffa1e720ffaee730ffbbe700ffc9e710ffd6e720ffe4e730fff1e700ffffe710ff00ff30ff0dff20ff1aff10ff28ff00ff35ff30ff43ff20ff50ff10ff5dff00ff6bff30ff78ff20ff86ff10ff93ff00ffa1ff30ffaeff20ffbbff10ffc9ff00ffd6ff30ffe4ff20fff1ff10ffffff00ff000032e11c0042e1380052e1550062e1710032e18d0042e1aa0052e1c60062e1e20032e1ff0042e1003342e11c3332e1383362e1553352e1713342e18d3332e1aa3362e1c63352e1e23342e1ff3332e1006652e11c6662e1386632e1556642e1716652e18d6662e1aa6632e1c66642e1e26652e1ff6662e1009962e11c9952e1389942e1559932e1719962e18d9952e1aa9942e1c69932e1e29962e1ff9952e100cc32e11ccc42e138cc52e155cc62e171cc32e18dcc42e1aacc52e1c6cc62e1e2cc32e1ffcc42e100ff42e11cff32e138ff62e155ff52e171ff42e18dff32e1aaff62e1c6ff52e1e2ff42e1ffff32e1000064c33f0074c37f0084c3bf0094c3ff0064c3007f74c33f7f64c37f7f94c3bf7f84c3ff7f74c300ff84c33fff94c37fff64c3bfff74c3ffff84c3000096a5ff00a6a50000c887",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "windows",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "4863836735735522975"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "5976602445202045685"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2273592715059114221"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-1528520625887356718"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-2143690447048081145"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/mips/10_dxt1.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "4863836735735522975"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/12_dxt5.asset",
+                    {
+                      "preloadIndex": 4,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-2143690447048081145"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/25_bc7.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "5976602445202045685"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/4_rgba32.asset",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-1528520625887356718"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/4_rgba32_20x12.asset",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-2273592715059114221"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "windows",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "4863836735735522975": {
+              "value": {
+                "m_Name": "10_DXT1",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 360,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 10,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:85090108f5e7b2a085290128f5e7b2a085490148f5e7b2a085690168f5e7b2a085910188f5a7b2a085b101a8f5a7b2a085d101c8f5a7b2a085f101e8f5a7b2a0850b000abdafb2a0852b002abdafb2a0854b004abdafb2a0856b006abdafb2a0858b008abdafb2a085ab00aabdafb2a085cb00cabdafb2a085eb00eabdafb2a0e50d210cf5efbaa0e52d212cf5efbaa0e54d214cf5efbaa0e56d216cf5efbaa0e58d218cf5efbaa0e5ad21acf5efbaa0e5cd21ccf5efbaa0e5ed21ecf5efbaa0c50f410ef5efb2a0c52f412ef5efb2a0c54f414ef5efb2a0c56f416ef5efb2a0c597418ef5afb2a0c5b741aef5afb2a0c5d741cef5afb2a0c5f741eef5afb2a0691b091855ffaa00695b095855ffaa0069a309a055ffaa0069e309e055ffaa00e91f891c55ffaa00e95f895c55ffaa00e9a789a455ffaa00e9e789e455ffaa00ef3f0f3855ffaa00efc70fc055ffaa00f57f1578550055001af81800111111111e001f00aaaaaaaa",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "5976602445202045685": {
+              "value": {
+                "m_Name": "25_BC7",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 720,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 25,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:0242501840f300c10230805f6adbed4f024ad23840f300c10230805f6adbed4f0252645540f300c00230805f6adbed4f0259f67980f300000330815f6ac9cd4e0261589a80f300000330815f6ac9cd4e026aeaba40e300c00230805f6adbed4f02b26cdb00e300c10230805f6adbed4f02baeefb40e300c00230805f6adbed4f0242501891f745c1022c805f6adbed4f024ad23891f745c1022c805f6adbed4f0291645591f74500032c805f6adbed4f0299f67991f74500032c805f6adbed4f0221589a51f74581022c815f6adbed4f02a9daba91e745001328805f6a5be90702b25cdb51f745c1022c805f6adbed4f027adefb51d745811228835f6a5be90702816014221c8b01032c805f6ac9cd4e0289e234221c8b01032c805f6ac9cd4e02525455a2eb82c1022c025b225be9070299f679a11b8bc0022c815f6adbed4f0260589aa10b8bc0022c815f6adbed4f02a9eaba221c8b01032c805f6ac9cd4e02b16cd7221c8b01032c805f6ac9cd4e027aeef7e2eb86c1022c825f2a59e90702415014f1ffc7000330147b235be907024ad234f3ffc7c10230025b225be90702525455f3ffcbc1022c825f6a5be907025ad675f2ffc7c00230035b225be90702215896f2ffc7c00230035b225be907026adab6f3ffc7c10230025b225be90702b26cdbf3ffc7c10230025b225be907027adefbf3ffcbc1022c825f6a5be907208d06c0562a858703aa54ff0100000020af17c0562a858703aa54ff01000000205028c0562a858703aa54ff01000000207239c0562a858703aa54ff010000004006a3f82f95e0f011115566aaaaffff4097abf82f95e0f011115566aaaaffff4028b4f82f95e0f011115566aaaaffff40b9bcf82f95e0f011115566aaaaffff8080106b81ff419b4d628c31e04bb51e8000a5bd83ff41934d628c31e04bb51e8021f81f00f0ffc477524aa9cb37c83720803f0040661f1e9a9999990100000020000000b0ffa7a5adaaaaaa00000000",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            }
+          },
+          "names": {
+            "-1528520625887356718": "4_RGBA32",
+            "-2143690447048081145": "12_DXT5",
+            "-2273592715059114221": "4_RGBA32_20x12",
+            "1": "windows",
+            "4863836735735522975": "10_DXT1",
+            "5976602445202045685": "25_BC7"
+          },
+          "textures": {
+            "-1528520625887356718": {
+              "name": "4_RGBA32",
+              "format": 4,
+              "width": 32,
+              "height": 16,
+              "imageSize": 2732,
+              "imageSha256": "0264e2f79cdaf6c54b65449808652f728c0cf9b151b72b460f39bc37a32c0bc0",
+              "rgbaSha256": "aecc327be10da6e941ef273a96678dedc1e9a7370d997e950c5e47eaaedbfdd0"
+            },
+            "-2143690447048081145": {
+              "name": "12_DXT5",
+              "format": 12,
+              "width": 32,
+              "height": 16,
+              "imageSize": 720,
+              "imageSha256": "dda8cfc9196a9f212cb49a0d4a01da3029a126a165eab27ef0a03d8f4edb5ed6",
+              "rgbaSha256": "7761b145403a91511e0ba9f11c27a1265f4dd37725b0dfaebd360e5eef997dd9"
+            },
+            "-2273592715059114221": {
+              "name": "4_RGBA32_20x12",
+              "format": 4,
+              "width": 20,
+              "height": 12,
+              "imageSize": 1272,
+              "imageSha256": "614baf7e12f9097f458d06a5936b1527ce69fc8c09b73435318a622a4fd95f80",
+              "rgbaSha256": "94884480c22aae1b578aff50acd69475d14be3be19650b0cb185472ddc6b98c2"
+            },
+            "4863836735735522975": {
+              "name": "10_DXT1",
+              "format": 10,
+              "width": 32,
+              "height": 16,
+              "imageSize": 360,
+              "imageSha256": "cca5c9a376b2c37616223d7821c2d747b1a9aa629470b356fb43b2839c58b047",
+              "rgbaSha256": "7761b145403a91511e0ba9f11c27a1265f4dd37725b0dfaebd360e5eef997dd9"
+            },
+            "5976602445202045685": {
+              "name": "25_BC7",
+              "format": 25,
+              "width": 32,
+              "height": 16,
+              "imageSize": 720,
+              "imageSha256": "a4d2593e31cdb80c12517713abd13e7967706bb46d92592198cf7644ac9d0588",
+              "rgbaSha256": "3eeba2d9a92602f0b25a3601ad5c334f0ace04e45c2b37541ffcd823eb9025b3"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/mips/10_dxt1.asset",
+          "file": "CAB-591a9771352deb056ec1e4e650bb0860",
+          "pathId": "4863836735735522975"
+        },
+        {
+          "path": "assets/fixtures/mips/12_dxt5.asset",
+          "file": "CAB-591a9771352deb056ec1e4e650bb0860",
+          "pathId": "-2143690447048081145"
+        },
+        {
+          "path": "assets/fixtures/mips/25_bc7.asset",
+          "file": "CAB-591a9771352deb056ec1e4e650bb0860",
+          "pathId": "5976602445202045685"
+        },
+        {
+          "path": "assets/fixtures/mips/4_rgba32.asset",
+          "file": "CAB-591a9771352deb056ec1e4e650bb0860",
+          "pathId": "-1528520625887356718"
+        },
+        {
+          "path": "assets/fixtures/mips/4_rgba32_20x12.asset",
+          "file": "CAB-591a9771352deb056ec1e4e650bb0860",
+          "pathId": "-2273592715059114221"
+        }
+      ],
+      "evidence": {
+        "textures": ["10_DXT1", "12_DXT5", "25_BC7", "4_RGBA32", "4_RGBA32_20x12"]
+      }
+    },
+    "editor/6000.6.4f1/mips/android": {
+      "signature": "UnityFS",
+      "formatVersion": 8,
+      "unityVersion": "5.x.x",
+      "unityRevision": "6000.6.4f1",
+      "files": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "sha256": "7ba1d2673144572b140fde3284abeb42a6e6e34e9306ede2d21b788d5c33d861",
+          "size": 7516
+        }
+      },
+      "objects": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": [
+          {
+            "pathId": "-5440913581138414732",
+            "classId": 28,
+            "byteSize": 484
+          },
+          {
+            "pathId": "-957748411102173032",
+            "classId": 28,
+            "byteSize": 588
+          },
+          {
+            "pathId": "1",
+            "classId": 142,
+            "byteSize": 380
+          },
+          {
+            "pathId": "359294285772570849",
+            "classId": 28,
+            "byteSize": 848
+          },
+          {
+            "pathId": "8905704025771143665",
+            "classId": 28,
+            "byteSize": 844
+          }
+        ]
+      },
+      "serialized": {
+        "CAB-0b4babce2a4c621212247e1cc0422aa9": {
+          "formatVersion": 23,
+          "unityVersion": "6000.6.4f1",
+          "targetPlatform": 13,
+          "bigEndian": false,
+          "enableTypeTree": true,
+          "externals": [],
+          "types": [
+            {
+              "classId": 28,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "b55819307006ed40e7e0f5f45a50c015",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "Texture2D", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "bool", "m_IsAlphaChannelOptional", 1, 16384],
+                [1, "int", "m_Width", 4, 16],
+                [1, "int", "m_Height", 4, 16],
+                [1, "unsigned int", "m_CompleteImageSize", 4, 16],
+                [1, "int", "m_MipsStripped", 4, 16],
+                [1, "int", "m_TextureFormat", 4, 1],
+                [1, "int", "m_MipCount", 4, 16],
+                [1, "bool", "m_IsReadable", 1, 0],
+                [1, "bool", "m_IsPreProcessed", 1, 1],
+                [1, "bool", "m_IgnoreMipmapLimit", 1, 16384],
+                [1, "string", "m_MipmapLimitGroupName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "bool", "m_StreamingMipmaps", 1, 16384],
+                [1, "int", "m_StreamingMipmapsPriority", 4, 16384],
+                [1, "int", "m_ImageCount", 4, 16],
+                [1, "int", "m_TextureDimension", 4, 1],
+                [1, "GLTextureSettings", "m_TextureSettings", 24, 0],
+                [2, "int", "m_FilterMode", 4, 0],
+                [2, "int", "m_Aniso", 4, 0],
+                [2, "float", "m_MipBias", 4, 0],
+                [2, "int", "m_WrapU", 4, 0],
+                [2, "int", "m_WrapV", 4, 0],
+                [2, "int", "m_WrapW", 4, 0],
+                [1, "int", "m_LightmapFormat", 4, 0],
+                [1, "int", "m_ColorSpace", 4, 0],
+                [1, "vector", "m_PlatformBlob", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "UInt8", "data", 1, 0],
+                [1, "TypelessData", "image data", -1, 16385],
+                [2, "int", "size", 4, 0],
+                [2, "UInt8", "data", 1, 1],
+                [1, "StreamingInfo", "m_StreamData", -1, 32768],
+                [2, "UInt64", "offset", 8, 0],
+                [2, "unsigned int", "size", 4, 0],
+                [2, "string", "path", -1, 32768],
+                [3, "Array", "Array", -1, 16385],
+                [4, "int", "size", 4, 0],
+                [4, "char", "data", 1, 0]
+              ]
+            },
+            {
+              "classId": 142,
+              "isStrippedType": false,
+              "scriptTypeIndex": -1,
+              "scriptId": null,
+              "oldTypeHash": "97da5f4688e45a57c8b42d4f42497297",
+              "typeDependencies": [],
+              "nodes": [
+                [0, "AssetBundle", "Base", -1, 32768],
+                [1, "string", "m_Name", -1, 557057],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_PreloadTable", -1, 32768],
+                [2, "Array", "Array", -1, 16384],
+                [3, "int", "size", 4, 0],
+                [3, "PPtr<Object>", "data", 12, 0],
+                [4, "int", "m_FileID", 4, 8388609],
+                [4, "SInt64", "m_PathID", 8, 8388609],
+                [1, "map", "m_Container", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "AssetInfo", "second", 20, 0],
+                [5, "int", "preloadIndex", 4, 0],
+                [5, "int", "preloadSize", 4, 0],
+                [5, "PPtr<Object>", "asset", 12, 0],
+                [6, "int", "m_FileID", 4, 8388609],
+                [6, "SInt64", "m_PathID", 8, 8388609],
+                [1, "AssetInfo", "m_MainAsset", 20, 0],
+                [2, "int", "preloadIndex", 4, 0],
+                [2, "int", "preloadSize", 4, 0],
+                [2, "PPtr<Object>", "asset", 12, 0],
+                [3, "int", "m_FileID", 4, 8388609],
+                [3, "SInt64", "m_PathID", 8, 8388609],
+                [1, "unsigned int", "m_RuntimeCompatibility", 4, 0],
+                [1, "string", "m_AssetBundleName", -1, 32768],
+                [2, "Array", "Array", -1, 16385],
+                [3, "int", "size", 4, 0],
+                [3, "char", "data", 1, 0],
+                [1, "vector", "m_Dependencies", -1, 32768],
+                [2, "Array", "Array", -1, 49152],
+                [3, "int", "size", 4, 0],
+                [3, "string", "data", -1, 32768],
+                [4, "Array", "Array", -1, 16385],
+                [5, "int", "size", 4, 0],
+                [5, "char", "data", 1, 0],
+                [1, "bool", "m_IsStreamedSceneAssetBundle", 1, 16384],
+                [1, "int", "m_ExplicitDataLayout", 4, 0],
+                [1, "int", "m_PathFlags", 4, 0],
+                [1, "map", "m_SceneHashes", -1, 32768],
+                [2, "Array", "Array", -1, 32768],
+                [3, "int", "size", 4, 0],
+                [3, "pair", "data", -1, 32768],
+                [4, "string", "first", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0],
+                [4, "string", "second", -1, 32768],
+                [5, "Array", "Array", -1, 16385],
+                [6, "int", "size", 4, 0],
+                [6, "char", "data", 1, 0]
+              ]
+            }
+          ],
+          "refTypes": [],
+          "typetrees": {
+            "-5440913581138414732": {
+              "value": {
+                "m_Name": "45_ETC2_RGB",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 360,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 45,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:80800712003008869080072200310886a080073200320886b0800742003308864080075300340886508007630035088662800773003628867280077f0037288680440712443011069044072244311106a044073244321106b0440742443311064044075344341106504407634435110662440773443631067244077f4437310681880712883019869188072288311986a188073288321986b1880742883319864188075388341986518807638835198663880773883639867388077f88373986814c0712cc301fc6914c0722cc311fc6a14c0732cc321fc6b14c0742cc331fc6414c0753cc341fc6514c0763cc351fc6634c0773cc363fc6734c077fcc373fc68080152300901212a28015460092321244801566009452126480157f009652128190152390901fd2a390154690923fd24590156690945fd2dd9d44450015aa88332c776d4555aa05bb2c776d0555aa852c779bbc5555aafffb0d00c20f0f0f0f8081fb0201f0003e",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "-957748411102173032": {
+              "value": {
+                "m_Name": "50_ASTC_6x6",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 464,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 50,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:b2040134a01145f86d52fb2945610401b2040d3aa09165f86d52fb29456104013205efa06088f5c975e710b925800e01320555a160c89379f984d62114474018b2046f03a01145f86d52fb29456104013e04ffa16078e5fbde8cb42ab8d2ca18b20401349b9165f86d52fb2945610401b2040d3a9b1145f86d52fb29456104013205ef6c61c89379f984d621144740183205556d6188f5c975e710b925800e01b2046f039b9165f86d52fb29456104013e04ff6d6108d5b9c6afaeae89508a00b20401f4190508f8eb52fe7503632401320589f86188b5c97558df54174740183205eff861489359f95f99d727800e01320555f96188b5c97558df5417474018b2046fc3190508f8eb52fe75036324017dc889e19f7be4ff1d02808080bfbf80c284c130926a7fbbd355116eaac28408c2846d30926a7fb7d355196ea6c24408c2843330b26aff3f535519e6a6c2cc000289830318ff99d95bfd85f7867f5227b2844dc92c6e0cc42d02e96a876164015d84f9fb6dba733b7f53ff72f7bf160e628461d0da19dfcedfcedfce9b8a13026e804321106dd8f3f1ffffff57a52a005d84e1e17355733b7f53ff72f7bf160e028101fe010090b10f0f010000fff33ffcfdffffffffffff00000000fafa6969",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "1": {
+              "value": {
+                "m_Name": "android",
+                "m_PreloadTable": [
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "359294285772570849"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-5440913581138414732"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "-957748411102173032"
+                  },
+                  {
+                    "m_FileID": 0,
+                    "m_PathID": "8905704025771143665"
+                  }
+                ],
+                "m_Container": [
+                  [
+                    "assets/fixtures/mips/45_etc2_rgb.asset",
+                    {
+                      "preloadIndex": 1,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-5440913581138414732"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/47_etc2_rgba8.asset",
+                    {
+                      "preloadIndex": 0,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "359294285772570849"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/48_astc_4x4.asset",
+                    {
+                      "preloadIndex": 3,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "8905704025771143665"
+                      }
+                    }
+                  ],
+                  [
+                    "assets/fixtures/mips/50_astc_6x6.asset",
+                    {
+                      "preloadIndex": 2,
+                      "preloadSize": 1,
+                      "asset": {
+                        "m_FileID": 0,
+                        "m_PathID": "-957748411102173032"
+                      }
+                    }
+                  ]
+                ],
+                "m_MainAsset": {
+                  "preloadIndex": 0,
+                  "preloadSize": 0,
+                  "asset": {
+                    "m_FileID": 0,
+                    "m_PathID": "0"
+                  }
+                },
+                "m_RuntimeCompatibility": 1,
+                "m_AssetBundleName": "android",
+                "m_Dependencies": [],
+                "m_IsStreamedSceneAssetBundle": false,
+                "m_ExplicitDataLayout": 0,
+                "m_PathFlags": 7,
+                "m_SceneHashes": []
+              }
+            },
+            "359294285772570849": {
+              "value": {
+                "m_Name": "47_ETC2_RGBA8",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 720,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 47,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:ff000000000000008080071200300886ff000000000000009080072200310886ff00000000000000a080073200320886ff00000000000000b080074200330886ff000000000000004080075300340886ff000000000000005080076300350886ff000000000000006280077300362886ff000000000000007280077f00372886ff000000000000008044071244301106ff000000000000009044072244311106ff00000000000000a044073244321106ff00000000000000b044074244331106ff000000000000004044075344341106ff000000000000005044076344351106ff000000000000006244077344363106ff000000000000007244077f44373106ff000000000000008188071288301986ff000000000000009188072288311986ff00000000000000a188073288321986ff00000000000000b188074288331986ff000000000000004188075388341986ff000000000000005188076388351986ff000000000000006388077388363986ff000000000000007388077f88373986ff00000000000000814c0712cc301fc6ff00000000000000914c0722cc311fc6ff00000000000000a14c0732cc321fc6ff00000000000000b14c0742cc331fc6ff00000000000000414c0753cc341fc6ff00000000000000514c0763cc351fc6ff00000000000000634c0773cc363fc6ff00000000000000734c077fcc373fc6e1000000000000008080152300901212e100000000000000a280154600923212e1000000000000004480156600945212e1000000000000006480157f00965212e1000000000000008190152390901fd2e100000000000000a390154690923fd2e1000000000000004590156690945fd2e100000000000000dd9d44450015aa88c300000000000000332c776d4555aa05c300000000000000bb2c776d0555aa85a5000000000000002c779bbc5555aaff8700000000000000fb0d00c20f0f0f0f69000000000000008081fb0201f0003e",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            },
+            "8905704025771143665": {
+              "value": {
+                "m_Name": "48_ASTC_4x4",
+                "m_IsAlphaChannelOptional": false,
+                "m_Width": 32,
+                "m_Height": 16,
+                "m_CompleteImageSize": 720,
+                "m_MipsStripped": 0,
+                "m_TextureFormat": 48,
+                "m_MipCount": 6,
+                "m_IsReadable": true,
+                "m_IsPreProcessed": false,
+                "m_IgnoreMipmapLimit": true,
+                "m_MipmapLimitGroupName": "",
+                "m_StreamingMipmaps": false,
+                "m_StreamingMipmapsPriority": 0,
+                "m_ImageCount": 1,
+                "m_TextureDimension": 2,
+                "m_TextureSettings": {
+                  "m_FilterMode": 1,
+                  "m_Aniso": 1,
+                  "m_MipBias": "f32:00000000",
+                  "m_WrapU": 0,
+                  "m_WrapV": 0,
+                  "m_WrapW": 0
+                },
+                "m_LightmapFormat": 0,
+                "m_ColorSpace": 1,
+                "m_PlatformBlob": "hex:",
+                "image data": "hex:4204c5c400260083ecfd4657b9a813024204d56d6c000680ecfd4657b9a813024204f5f34c000640b3f7195de6a24c084204eb536c000680ecfd4657b9a8130242043b3a00260083ecfd4657b9a813024204a72700260083ecfd4657b9a813024204971700260083ecfd4657b9a813024204c7c600260083ecfd4657b9a813024204c5c4704e0083ecfd4657b9a813024204556cb14e0680ecfd4657b9a813024204f5f2b14e0640b3f7195de6a24c0842046b52b14e0680ecfd4657b9a8130242043b3a704e0083ecfd4657b9a813024204a7e7104e0083ecfd4657b9a81302420497d7104e0083ecfd4657b9a813024204c7c6704e0083ecfd4657b9a813024204c5c5dd380083ecfd4657b9a813024204d5d5dd380083ecfd4657b9a813024204e5e59d380083ecfd4657b9a813024204f5f59d380083ecfd4657b9a813024204bb3bfd380083ecfd4657b9a813024204e7e79d380083ecfd4657b9a813024204d7d79d380083ecfd4657b9a813024204c7c7dd380083ecfd4657b9a813024204c5c4cd000083ecfd4657b9a813024204d5d4cd000083ecfd4657b9a813024204a5a58d000083ecfd4657b9a813024204b5b58d000083ecfd4657b9a8130242043b3acd000083ecfd4657b9a813024204a7a78d000083ecfd4657b9a81302420497978d000083ecfd4657b9a813024204c7c6cd000083ecfd4657b9a813024284011b32082d4a7f3b5d196e2a4c084284311f72082d4a7f3b5d196e2a4c084284bf1c72082d4a7f3b5d196e2a4c0842848f1832082d4a7f3b5d196e2a4c08428461a3c5082d4a7f3b5d196e2a4c08428471afc7082d4a7f3b5d196e2a4c084284ffacc7082d4a7f3b5d196e2a4c084284efa0c5082d4a7f3b5d196e2a4c0842840116c4cebd4f7f3b5d196e2a4c084284db00c4cebd4f7f3b5d196e2a4c0842848100042dd9577f3b7f3b7f3b4c08428001fe010090b10f0f01003f3f3f3ffcfdffffffffffff00000000fafa6969",
+                "m_StreamData": {
+                  "offset": "0",
+                  "size": 0,
+                  "path": ""
+                }
+              }
+            }
+          },
+          "names": {
+            "-5440913581138414732": "45_ETC2_RGB",
+            "-957748411102173032": "50_ASTC_6x6",
+            "1": "android",
+            "359294285772570849": "47_ETC2_RGBA8",
+            "8905704025771143665": "48_ASTC_4x4"
+          },
+          "textures": {
+            "-5440913581138414732": {
+              "name": "45_ETC2_RGB",
+              "format": 45,
+              "width": 32,
+              "height": 16,
+              "imageSize": 360,
+              "imageSha256": "d2106a26eca7822efe6fa48955c247f8a050183f3d7a9c1b4bf6d864050439c0",
+              "rgbaSha256": "bfd29528c83498f8cf8bf1a19e432843579ed9b44454f92c8a61b4db166fb28b"
+            },
+            "-957748411102173032": {
+              "name": "50_ASTC_6x6",
+              "format": 50,
+              "width": 32,
+              "height": 16,
+              "imageSize": 464,
+              "imageSha256": "a630a53d2ac73351dfb7556cc9c0764e535d052471fcb90085f58925a15817c7",
+              "rgbaSha256": "a7794e09c1e52a6001d75c0fc3e3bde4d36a26d024ff79fd0d7bae5250247a9e",
+              "oracleNote": "ASTC: UnityPy decodes with astc-encoder (unorm8), AssetStudio with its Texture2DDecoder; channels differ by at most 1. Verdict: AssetStudio - see #32"
+            },
+            "359294285772570849": {
+              "name": "47_ETC2_RGBA8",
+              "format": 47,
+              "width": 32,
+              "height": 16,
+              "imageSize": 720,
+              "imageSha256": "0c3f897f2f4bef00e5851bf598aff3bcc86ad3aae4ce00d965b3a6b0e710f605",
+              "rgbaSha256": "bfd29528c83498f8cf8bf1a19e432843579ed9b44454f92c8a61b4db166fb28b"
+            },
+            "8905704025771143665": {
+              "name": "48_ASTC_4x4",
+              "format": 48,
+              "width": 32,
+              "height": 16,
+              "imageSize": 720,
+              "imageSha256": "0517b270f3f6e2eaf8e8557c1218f17b753986ab28dae2b852fe24f10f3e1e31",
+              "rgbaSha256": "45a2427bbed82704e1d6402d0c1e508ceff2077dbdf0d8936a3fdb6a416abf18",
+              "oracleNote": "ASTC: UnityPy decodes with astc-encoder (unorm8), AssetStudio with its Texture2DDecoder; channels differ by at most 1. Verdict: AssetStudio - see #32"
+            }
+          }
+        }
+      },
+      "container": [
+        {
+          "path": "assets/fixtures/mips/45_etc2_rgb.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "-5440913581138414732"
+        },
+        {
+          "path": "assets/fixtures/mips/47_etc2_rgba8.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "359294285772570849"
+        },
+        {
+          "path": "assets/fixtures/mips/48_astc_4x4.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "8905704025771143665"
+        },
+        {
+          "path": "assets/fixtures/mips/50_astc_6x6.asset",
+          "file": "CAB-0b4babce2a4c621212247e1cc0422aa9",
+          "pathId": "-957748411102173032"
+        }
+      ],
+      "evidence": {
+        "textures": ["45_ETC2_RGB", "47_ETC2_RGBA8", "48_ASTC_4x4", "50_ASTC_6x6"]
+      }
+    },
     "editor/6000.6.4f1/animator/lz4/animator": {
       "signature": "UnityFS",
       "formatVersion": 8,

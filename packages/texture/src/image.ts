@@ -8,7 +8,7 @@ import type {
   Vector2,
   Vector4,
 } from "unity-asset-reader";
-import { decodeTextureObject, ensureTexture, FORMAT_NAMES } from "./decode.js";
+import { decodeTextureObject, ensureTexture, FORMAT_NAMES, mipCountOf } from "./decode.js";
 import { decodeSprite, locateSprite, packedSprites, spriteSize } from "./sprite.js";
 import type { DecodeSpriteOptions, PackedSprite } from "./sprite.js";
 
@@ -395,11 +395,7 @@ function textureInfo(asset: Asset<"Texture2D">): TextureImageInfo {
     format,
     formatName: FORMAT_NAMES.get(format) ?? "unknown",
     compression: compressionOf(format),
-    // 5.2: the m_MipMap flag became a count; a mipmapped texture before has
-    // every level down to 1x1.
-    mipCount:
-      texture.m_MipCount ??
-      (texture.m_MipMap ? Math.floor(Math.log2(Math.max(width, height, 1))) + 1 : 1),
+    mipCount: mipCountOf(texture),
     readable: texture.m_IsReadable === true,
     colorSpace: texture.m_ColorSpace === 0 ? "linear" : "srgb",
     filterMode: settings.m_FilterMode,

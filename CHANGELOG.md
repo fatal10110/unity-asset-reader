@@ -344,6 +344,10 @@ WASM.
   Crunch variant of DXT1 and DXT5 Crunch data, and wins over the Unity 2017.3 fields that decide
   it otherwise. `"original"` on an ETC Crunch format is an `UnsupportedError`. New exported type
   `DecodeTexture2DOptions`.
+- **New `mip` option for `decodeTexture2D`** (#331): decodes mip level `n`, not only the first,
+  for every plain and block format; checked against the Unity editor's pixels of every level. A
+  level past the mip count is a `RangeError`; past level 0, Crunch, Switch and Xbox 360 textures
+  are an `UnsupportedError`.
 
 ### 1.3.0 - 2026-11-09
 
