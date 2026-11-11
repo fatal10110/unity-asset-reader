@@ -20,9 +20,14 @@ interface Clip {
   }[];
 }
 
-const golden = JSON.parse(
-  readFileSync(new URL("../../../fixtures/humanoid-unity-goldens.json", import.meta.url), "utf8"),
-) as { muscleNames: string[]; editors: Record<string, { clips: Record<string, Clip> }> };
+/** The first rig's golden (#318) and the second rigs' (#325). */
+const goldens = ["humanoid-unity-goldens.json", "humanoid2-unity-goldens.json"].map(
+  (file) =>
+    JSON.parse(readFileSync(new URL(`../../../fixtures/${file}`, import.meta.url), "utf8")) as {
+      muscleNames: string[];
+      editors: Record<string, { clips: Record<string, Clip> }>;
+    },
+);
 
 /** A clip binds `Left Thumb 1 Stretched` as `LeftHand.Thumb.1 Stretched` (BUILDING.md section 28). */
 const binding = (muscle: string) =>
@@ -30,7 +35,7 @@ const binding = (muscle: string) =>
 
 test("the oracle's inputs at the keys are the keys of the committed clips", () => {
   let checked = 0;
-  for (const [editor, { clips }] of Object.entries(golden.editors)) {
+  for (const golden of goldens) for (const [editor, { clips }] of Object.entries(golden.editors)) {
     for (const [name, clip] of Object.entries(clips)) {
       const env = fixtureEnv(clip.bundle);
       const asset = [...env.assets("AnimationClip")].find((a) => a.name === name);
@@ -72,7 +77,8 @@ test("the oracle's inputs at the keys are the keys of the committed clips", () =
       }
     }
   }
-  // pose: 102 curves at 3 keys. muscle: the keys of its three muscle curves (3, 2, 2) and of
-  // RootT.y (2), and its absent RootT.x, RootT.z and RootQ at the 3 key times.
-  assert.equal(checked, 4 * (102 * 3 + (3 + 2 + 2) + 2 + 6 * 3));
+  // pose and pose2: 102 curves at 3 keys. muscle: the keys of its three muscle curves (3, 2,
+  // 2) and of RootT.y (2), and its absent RootT.x, RootT.z and RootQ at the 3 key times.
+  // upperchest: three muscle curves at 3 keys, and its absent RootT and RootQ at the 3 key times.
+  assert.equal(checked, 4 * (102 * 3 + (3 + 2 + 2) + 2 + 6 * 3) + 4 * (102 * 3 + 3 * 3 + 7 * 3));
 });

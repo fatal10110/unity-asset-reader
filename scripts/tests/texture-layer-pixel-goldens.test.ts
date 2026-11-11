@@ -3,7 +3,7 @@
 // slice of the cube-array-3d bundles, recorded by
 // scripts/make-texture-pixel-goldens.py (plan section 5, revision 2026-11-10a).
 // Checks its shape, that it was made from the committed bundles, and that the
-// uncompressed levels are the pixels fixtures/BUILDING.md section 31 authors.
+// uncompressed levels are the pixels fixtures/BUILDING.md section 32 authors.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -41,7 +41,7 @@ const FORMATS: Record<string, string[]> = {
   android: ["47_ETC2_RGBA8", "48_ASTC_4x4"],
 };
 
-/** The textures BUILDING.md section 31 makes for one bundle; 2019.4 makes no compressed Texture3D. */
+/** The textures BUILDING.md section 32 makes for one bundle; 2019.4 makes no compressed Texture3D. */
 function expected(editor: string, target: string): string[] {
   return FORMATS[target]!.flatMap((f) => [
     `cube_${f}`,
@@ -51,7 +51,7 @@ function expected(editor: string, target: string): string[] {
   ]).sort();
 }
 
-/** BUILDING.md section 31: pixel (x, y) of level m of face or slice l, w x h, rows bottom first. */
+/** BUILDING.md section 32: pixel (x, y) of level m of face or slice l, w x h, rows bottom first. */
 function authored(w: number, h: number, m: number, l: number): Uint8Array {
   const out = new Uint8Array(w * h * 4);
   for (let y = 0; y < h; y++) {

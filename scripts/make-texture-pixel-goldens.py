@@ -43,7 +43,7 @@ SETS = {
     "windows": ("editor/{version}/mips/windows", "Win64"),
     "android": ("editor/{version}/mips/android", "Android"),
 }
-# The same for the Cubemap, Texture2DArray and Texture3D bundles (section 31),
+# The same for the Cubemap, Texture2DArray and Texture3D bundles (section 32),
 # written to LAYER_GOLDEN under the same names.
 LAYER_SETS = {
     "windows": ("editor/{version}/cube-array-3d/windows", "Win64"),

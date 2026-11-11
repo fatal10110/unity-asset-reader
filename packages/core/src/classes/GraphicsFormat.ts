@@ -7,7 +7,7 @@ import { TextureFormat } from "./TextureFormat.js";
  * The `GraphicsFormat` values (`m_Format` of a `Texture2DArray` or
  * `Texture3D`) this library decodes, by the value the file holds: only those
  * a fixture holds, each checked against the Unity editor's own pixels
- * (fixtures/BUILDING.md section 31). Every other value is refused, since
+ * (fixtures/BUILDING.md section 32). Every other value is refused, since
  * UnityPy, which maps them all, calls its map experimental and untested.
  *
  * @example

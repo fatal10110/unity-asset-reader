@@ -410,7 +410,7 @@ class field readers it needs are added to core.
     section 29), and `Cubemap.GetPixels(face, mip)`, `Texture2DArray.GetPixels32(slice, mip)`
     and `Texture3D.GetPixels32(mip)` of every level of every face and slice of the readable
     Cubemap, Texture2DArray and Texture3D objects in
-    `fixtures/texture-layer-pixel-unity-goldens.json` (`fixtures/BUILDING.md` section 31). The
+    `fixtures/texture-layer-pixel-unity-goldens.json` (`fixtures/BUILDING.md` section 32). The
     editor decodes compressed levels on the CPU, with no GPU (`-nographics`).
   - Uncompressed formats match exactly. A compressed format's levels, faces and slices match
     within the largest channel error that format has at level 0 of a plain Texture2D against the
@@ -809,6 +809,13 @@ level 0 only.
   Windows on the CPU, under `-nographics` too (`fixtures/BUILDING.md` section 29).
 - Comparison: uncompressed formats exactly; a compressed format's levels within the largest
   channel error that format has at level 0 against the editor. No other tolerance.
+- Owner ruling 2026-11-11 on #331
+  (https://github.com/fatal10110/unity-asset-reader/issues/331#issuecomment-6788141425): two
+  listed exceptions, nothing else. `ASTC_4x4` within 1 of the editor, only where measured:
+  `Cubemap.GetPixels` (all four editors), `Texture3D.GetPixels32` (2020.3, 6000.3, 6000.6) and
+  2019.4's `Texture2DArray.GetPixels32`. 2019.4's `ETC2_RGBA8` cubemap level 3 (2x2), where the
+  editor returns the bottom row twice, is checked against the 2020.3 editor's pixels of the
+  byte-identical level (`fixtures/BUILDING.md` section 32).
 - UnityPy's Texture2DArray slice decode is a second check at level 0 for the next PR.
 - §5, R12, `CLAUDE.md` and `fixtures/README.md` name it.
 

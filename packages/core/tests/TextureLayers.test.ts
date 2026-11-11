@@ -1,6 +1,6 @@
 // The Cubemap, Texture2DArray and Texture3D readers (#331). On the
 // cube-array-3d bundles of the four fixture editors (fixtures/BUILDING.md
-// section 31), each against UnityPy's read_typetree() dump (goldens.json and,
+// section 32), each against UnityPy's read_typetree() dump (goldens.json and,
 // for 6000.6, modern-goldens.json) and the object's own type tree; and on
 // objects laid out from Unity's own player type trees at every version TPK
 // records from 2019.1 (fixtures/tpk-trees.json), R12.
@@ -157,7 +157,7 @@ test("the image data's layout: six faces, slices of m_DataSize / m_Depth, levels
 
 test("each GraphicsFormat in the fixtures maps to the format the editor reports", () => {
   // The editor's own Texture2DArray.format / Texture3D.format for each fixture
-  // (BUILDING.md section 31's names: <TextureFormat>_<name>).
+  // (BUILDING.md section 32's names: <TextureFormat>_<name>).
   const seen = new Set<number>();
   for (const name of BUNDLES) {
     for (const reader of objects(name)) {

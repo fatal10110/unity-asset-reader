@@ -1,7 +1,7 @@
 // Cubemap faces, Texture2DArray slices and Texture3D depth slices to RGBA8
 // (#331). No upstream decodes them past level 0 of an array slice (UnityPy),
 // so the layouts here are the ones the Unity editor's own pixels confirm
-// (fixtures/BUILDING.md section 31): each face or slice is a Texture2D for
+// (fixtures/BUILDING.md section 32): each face or slice is a Texture2D for
 // `decodeTexture2D`.
 
 import {

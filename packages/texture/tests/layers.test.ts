@@ -24,7 +24,7 @@ import { decodeCubemap, decodeTexture2DArray, decodeTexture3D } from "../src/lay
 
 // Cubemap faces, Texture2DArray slices and Texture3D depth slices (#331). The
 // pixels of every level of each face and slice of the cube-array-3d bundles
-// (fixtures/BUILDING.md section 31) are the Unity editor's, recorded by
+// (fixtures/BUILDING.md section 32) are the Unity editor's, recorded by
 // scripts/make-texture-pixel-goldens.py (plan section 5, revision
 // 2026-11-10a); UnityPy's level 0 of each array slice is a second check.
 // Without a built WASM the decode tests skip, as in decode.test.ts.
@@ -125,7 +125,7 @@ function maxError(a: Uint8Array, b: Uint8Array): number {
 
 /**
  * Measured largest channel difference against the editor, per format
- * (2026-11-10, fixtures/BUILDING.md section 31): at level 0 of the mips
+ * (2026-11-10, fixtures/BUILDING.md section 32): at level 0 of the mips
  * Texture2Ds (the bound), and over every level, face and slice here.
  */
 const MEASURED: Record<number, { bound: number; layers: number }> = {
@@ -139,8 +139,8 @@ const MEASURED: Record<number, { bound: number; layers: number }> = {
 };
 
 /**
- * Exception 1, listed on #331 (question to the owner, comment 6779900269) and
- * in fixtures/BUILDING.md section 31: against `Cubemap.GetPixels` (every
+ * Exception 1, accepted by the owner on #331 (comment 6788141425, plan §5
+ * revision 2026-11-10a) and recorded in fixtures/BUILDING.md section 32: against `Cubemap.GetPixels` (every
  * editor), `Texture3D.GetPixels32` and 2019.4's `Texture2DArray.GetPixels32`
  * an ASTC_4x4 face or slice is within 1 of the editor, already at level 0,
  * while the same bytes as a Texture2D match exactly. 2020.3+ arrays match
@@ -154,7 +154,7 @@ function astcException(t: Layered, version: string): boolean {
 }
 
 /**
- * Exception 2: 2019.4's `Cubemap.GetPixels` returns the 2x2 level 3 of the
+ * Exception 2, accepted in the same ruling: 2019.4's `Cubemap.GetPixels` returns the 2x2 level 3 of the
  * ETC2_RGBA8 cubemap with its bottom row twice, on every face. The bytes of
  * that level are the same in the 2019.4 and 2020.3 bundles (asserted below),
  * so the level is compared with the 2020.3 editor's pixels.
@@ -260,7 +260,7 @@ wasmTest("every level of every face and slice = the editor's, as plan section 5 
     "6000.6.4f1 Cubemap",
     "6000.6.4f1 Texture3D",
   ]);
-  // The table BUILDING.md section 31 records.
+  // The table BUILDING.md section 32 records.
   for (const [format, { bound: b, layers }] of Object.entries(MEASURED)) {
     assert.equal(bound.get(Number(format)), b, `bound of ${format}`);
     assert.equal(measured.get(Number(format)), layers, `layers of ${format}`);

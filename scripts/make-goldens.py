@@ -1146,8 +1146,8 @@ def main() -> None:
             continue
         if key.startswith(("editor/6000.6.4f1/shader/", "editor/6000.6.4f1/shader-variants/")):
             continue
-        # The diff builds (BUILDING.md section 30, #342) are checked by
-        # construction, not against UnityPy: their expected changes are known.
+        # The diff builds (#342) have no golden: diff.test.ts asserts their known changes
+        # (fixtures/BUILDING.md section 30).
         if key.startswith("editor/2019.4.41f2/diff/"):
             continue
         goldens["fixtures"][key] = read_with_fallback(path)
