@@ -130,6 +130,11 @@ function expected(type: string, low: Record<string, unknown>, reader: ObjectRead
       clips: m_Animations,
     };
   }
+  if (type === "Texture2DArray" || type === "Texture3D") {
+    // Their m_DataSize is a byte count, `dataSize`; VertexData's is the bytes, `data` (#331).
+    const { m_DataSize, ...rest } = low;
+    return { ...(renamed(rest) as object), dataSize: m_DataSize };
+  }
   return renamed(low);
 }
 
@@ -165,6 +170,7 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "AssetBundle",
       "AudioClip",
       "Avatar",
+      "Cubemap",
       "Font",
       "GameObject",
       "Material",
@@ -180,6 +186,8 @@ test("asset.data is obj.read() under the friendly names, for every class on the 
       "SpriteAtlas",
       "TextAsset",
       "Texture2D",
+      "Texture2DArray",
+      "Texture3D",
       "Transform",
       "VideoClip",
     ],

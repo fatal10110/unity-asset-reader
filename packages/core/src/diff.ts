@@ -1,7 +1,9 @@
 import type { Asset } from "./asset.js";
 import { readAudioClip } from "./classes/AudioClip.js";
+import { readCubemap } from "./classes/Cubemap.js";
 import { readMesh } from "./classes/Mesh.js";
 import { readTexture2D } from "./classes/Texture2D.js";
+import { readTexture2DArray, readTexture3D } from "./classes/Texture2DArray.js";
 import { readVideoClip } from "./classes/VideoClip.js";
 import { containerOf, type Env, type ResourceRef } from "./env.js";
 import { CorruptError } from "./errors.js";
@@ -49,12 +51,14 @@ export interface DiffEntry {
 }
 
 /** Classes whose streamed data a file without type trees has its hardcoded reader find. */
-// ponytail: without type trees, the streamed data of Cubemap, Texture2DArray,
-// Texture3D and CubemapArray is neither compared nor counted in sizeDelta (a
-// same-size repaint at the same offset reads as unchanged). Add their classes
-// here when the #331 Cubemap / Texture2DArray / Texture3D readers land.
+// ponytail: without type trees, the streamed data of CubemapArray is neither
+// compared nor counted in sizeDelta (a same-size repaint at the same offset
+// reads as unchanged). Add its class here when a CubemapArray reader lands (#357).
 const STREAM_READERS = new Map<number, [(reader: ObjectReader) => object, string]>([
   [ClassID.Texture2D, [readTexture2D, "m_StreamData"]],
+  [ClassID.Cubemap, [readCubemap, "m_StreamData"]],
+  [ClassID.Texture2DArray, [readTexture2DArray, "m_StreamData"]],
+  [ClassID.Texture3D, [readTexture3D, "m_StreamData"]],
   [ClassID.Mesh, [readMesh, "m_StreamData"]],
   [ClassID.AudioClip, [readAudioClip, "m_Resource"]],
   [ClassID.VideoClip, [readVideoClip, "m_ExternalResources"]],
@@ -93,8 +97,8 @@ interface Parsed {
  * instead, the streamed data by its bytes, so a texture whose data only moved
  * within its `.resS`, or whose CAB name changed, is not modified. Fields come
  * from the type tree, or without one from the hardcoded reader of
- * `Texture2D`, `Mesh`, `AudioClip` and `VideoClip`. In a file without type
- * trees the streamed data of `Cubemap`, `Texture2DArray`, `Texture3D` and
+ * `Texture2D`, `Cubemap`, `Texture2DArray`, `Texture3D`, `Mesh`, `AudioClip`
+ * and `VideoClip`. In a file without type trees the streamed data of
  * `CubemapArray` is neither compared nor counted in `sizeDelta`.
  *
  * Entries are the removed and modified assets in `oldEnv`'s object order, then

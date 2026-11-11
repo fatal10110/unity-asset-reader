@@ -6,8 +6,8 @@ Shared test data for every reader package. Nothing here is published. It holds t
   written by a script. No third-party game data, ever (R11).
 - **Goldens:** what an independent tool, the *oracle*, says each fixture contains. UnityPy is the
   oracle for parsing, AssetStudio `c37af7d` for export output, and the Unity editor for the humanoid
-  muscle-to-bone conversion and the pixels of texture mip levels (plan §5). Goldens never come
-  from this library's own output (R12).
+  muscle-to-bone conversion and the pixels of texture mip levels, cubemap faces, array slices and
+  3D slices (plan §5). Goldens never come from this library's own output (R12).
 
 This page says what each fixture is and how each golden was made. [`BUILDING.md`](BUILDING.md) says
 how to build the fixtures with Unity.
@@ -53,6 +53,9 @@ Other files here, each described further down or in `BUILDING.md`:
   section 31).
 - `texture-pixel-unity-goldens.json`: the Unity editor's pixels of every mip level of the `mips`
   textures (plan §5, `BUILDING.md` section 29).
+- `texture-layer-pixel-unity-goldens.json`: the Unity editor's pixels of every level of each
+  cubemap face, array slice and 3D depth slice of the `cube-array-3d` textures (plan §5,
+  `BUILDING.md` sections 29 and 32).
 - `assetstudio-fixture-cross-checks.json`, `assetstudio-modern-cross-checks.json`: AssetStudio
   reference pixels for plain formats and variant sprites
   ([below](#plain-format-and-half-scale-variant-assetstudio-references)).
@@ -97,6 +100,7 @@ column is the [`BUILDING.md`](BUILDING.md) section that builds them.
 | `humanoid2/lz4/humanoid2` | the same four | two more humanoid rigs for the humanoid oracle: rotated bind pose, fingers, UpperChest; no UpperChest | — | 31 |
 | `mips/windows`, `mips/android` | the same four | mipmapped Texture2Ds, every level its own pixels: RGBA32, DXT1, DXT5, BC7; ETC2, ASTC | — | 29 |
 | `diff/{v1,v2,v1-notypetree,v2-notypetree}/...` | 2019.4.41f2 | two builds of one project with known changes, for `diff()` | — | 30 |
+| `cube-array-3d/windows`, `cube-array-3d/android` | 2019.4.41f2, 2020.3.30f1, 6000.3.26f1, 6000.6.4f1 | `Cubemap`, `Texture2DArray`, `Texture3D`, every level, face and slice its own pixels: RGBA32, DXT1, BC7; ETC2, ASTC (2019.4: RGBA32 `Texture3D` only) | — | 32 |
 
 ## Editor-built fixtures (`bundles/editor/`)
 

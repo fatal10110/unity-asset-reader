@@ -349,6 +349,10 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `InitTextureOptions` | `{ wasmPath?, locateFile? }`, passed to `texture2ddecoder-wasm`'s `initialize` |
 | `decodeTexture2D(texture, options?)` | A `Texture2D`, as `obj.read()` returns it or built by hand (only `m_Width`, `m_Height`, `m_TextureFormat`, `imageData` required), to RGBA, top row first |
 | `DecodeTexture2DOptions` | `{ crunch?, mip? }`: `"unity"` or `"original"`, the Crunch variant of hand-built DXT Crunch data; the mip level to decode (default 0) |
+| `decodeCubemap(cubemap, options?)` | A `Cubemap`'s six faces at one mip level, as `RgbaImage[]` in Unity's `CubemapFace` order (+X, -X, +Y, -Y, +Z, -Z), each top row first |
+| `decodeTexture2DArray(array, options?)` | Every slice of a `Texture2DArray` at one mip level, as `RgbaImage[]` in slice order |
+| `decodeTexture3D(texture, options?)` | The depth slices of one mip level of a `Texture3D`, as `RgbaImage[]`: `max(1, depth >> mip)` of them, front to back |
+| `DecodeLayersOptions` | `{ mip? }`: the mip level to decode (default 0), for the three functions above |
 | `decodeSprite(obj, env, options?)` | A `Sprite` (or a `PackedSprite`) to RGBA, top row first, cut out of its texture or atlas |
 | `DecodeSpriteOptions` | `{ tightMesh?, preferMasterAtlas?, decodedTextures? }` |
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
@@ -415,6 +419,35 @@ const half = await decodeTexture2D(obj.read(), { mip: 1 });
   `ETC2_RGBA8`, `ASTC_4x4` and `ASTC_6x6`, in the four fixture editors; the level layout of every
   other block format against Unity's stored image size.
 
+### Cubemaps, texture arrays and 3D textures
+
+Each face or slice decodes like a `Texture2D` of the same format, so you get one `RgbaImage` per
+face or slice, top row first:
+
+```ts
+await initTexture();
+const [px, nx, py, ny, pz, nz] = await decodeCubemap(cubemap.read());
+const slices = await decodeTexture2DArray(array.read(), { mip: 1 });
+const depth = await decodeTexture3D(volume.read()); // m_Depth slices at level 0
+```
+
+- **Cubemap:** six faces, each with its own mip chain, one after the other. `m_TextureFormat` is a
+  `TextureFormat`, as for a `Texture2D`.
+- **Texture2DArray:** `m_Depth` slices, each with its own mip chain.
+- **Texture3D:** the levels follow each other, largest first; level `n` holds
+  `max(1, m_Depth >> n)` depth slices.
+- A `Texture2DArray` or `Texture3D` stores a `GraphicsFormat` in `m_Format`. Core's
+  `textureFormatOfGraphicsFormat` maps the values a fixture checks (`RGBA32`, `DXT1`, `BC7`,
+  `ETC2_RGBA8` and `ASTC_4x4`, UNorm and sRGB); any other value is refused.
+- Refused: Crunch cubemaps, and Switch, Xbox 360, PS4 and PS5 builds of the three classes (no
+  reference reads them).
+- Checked against the Unity editor's pixels of every level of every face and slice
+  (`Cubemap.GetPixels(face, mip)`, `Texture2DArray.GetPixels32(slice, mip)`,
+  `Texture3D.GetPixels32(mip)`) for `RGBA32`, `DXT1`, `BC7`, `ETC2_RGBA8` and `ASTC_4x4`, in the
+  four fixture editors (Unity 2019.4 makes only `RGBA32` 3D textures). All match exactly except
+  `ASTC_4x4` cubemap faces and 3D slices, which are within 1 of the editor: the editor's own
+  decode of those classes differs, already at level 0.
+
 ### Platforms
 
 - **Switch:** swizzled textures are deswizzled first (as UnityPy does; AssetStudio has no Switch
@@ -444,7 +477,9 @@ Each of these throws `UnsupportedError`, whose `kind` and `found` say what was r
 Not provided at all:
 
 - Mip levels other than the first of Crunch, Switch and Xbox 360 textures.
-- The `Cubemap`, `Texture2DArray` and `Texture3D` classes.
+- Crunch cubemaps, and `Cubemap`, `Texture2DArray` and `Texture3D` of Switch, Xbox 360, PS4 and
+  PS5 builds.
+- `CubemapArray` ([#357](https://github.com/fatal10110/unity-asset-reader/issues/357)).
 - JPEG encoding, and compressed PNG (`encodePng` stores the pixels uncompressed).
 
 Known differences and open questions:

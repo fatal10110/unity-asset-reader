@@ -115,6 +115,7 @@ const NAMED_CLASSES: ReadonlySet<number> = new Set([
   ClassID.AssetBundleManifest,
   ClassID.AudioClip,
   ClassID.Avatar,
+  ClassID.Cubemap,
   ClassID.Font,
   ClassID.Material,
   ClassID.Mesh,
@@ -125,6 +126,8 @@ const NAMED_CLASSES: ReadonlySet<number> = new Set([
   ClassID.SpriteAtlas,
   ClassID.TextAsset,
   ClassID.Texture2D,
+  ClassID.Texture2DArray,
+  ClassID.Texture3D,
   ClassID.VideoClip,
 ]);
 

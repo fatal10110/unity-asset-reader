@@ -104,8 +104,8 @@ What each package does, and what it leaves out:
   it does not read.
 - **[Textures](packages/texture/README.md)** (`unity-asset-reader-texture`): converts
   `Texture2D` and `Sprite` assets to RGBA pixels with `await decodeImage(asset)`.
-  It does not decode mip levels past the first, `Cubemap`, `Texture2DArray` or `Texture3D`
-  assets, or a few formats such as `DXT3` and `ARGBFloat` (see
+  It also decodes every mip level, and the faces and slices of `Cubemap`, `Texture2DArray` and
+  `Texture3D` assets. It does not decode a few formats such as `DXT3` and `ARGBFloat` (see
   [Texture formats](packages/texture/README.md#texture-formats)).
 - **[Node.js](packages/node/README.md)** (`unity-asset-reader-node`): loads a file or folder
   with `loadPath()`, including split bundles and resource sidecars.
@@ -198,12 +198,14 @@ A few terms used below:
 - **SerializedFile formats:** 2 to 23, little- and big-endian.
 - **Classes:** any class, through its type tree. These classes have a hand-written reader,
   which also reads bundles built without type trees: `AssetBundle`, `TextAsset`,
-  `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Sprite`, `SpriteAtlas`,
+  `MonoBehaviour`, `MonoScript`, `Material`, `Shader`, `Texture2D`, `Cubemap`, `Texture2DArray`,
+  `Texture3D`, `Sprite`, `SpriteAtlas`,
   `AudioClip`, `VideoClip`, `Font`, `MovieTexture`, `Mesh` (its vertices and triangles
   decoded), `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`,
   `AnimationClip`, `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`,
   `MeshRenderer` and `SkinnedMeshRenderer`.
-- **Texture formats:** output is RGBA8, top row first, first mip level.
+- **Texture formats:** output is RGBA8, top row first, first mip level unless you ask for
+  another.
   - 22 plain formats (`RGBA32`, `RGB565`, `RHalf`, `RGB9e5Float`, `YUY2`, `RGBA64`, ...), in
     TypeScript.
   - Through WASM: BC1 (`DXT1`), BC3 (`DXT5`), BC4 to BC7; ETC1, ETC2 and their 3DS variants;
@@ -321,8 +323,8 @@ Not provided at all:
 
 - decoding video;
 - exporting models as FBX;
-- mip levels other than the first;
-- the `Cubemap`, `Texture2DArray` and `Texture3D` classes;
+- mip levels other than the first of Crunch, Switch and Xbox 360 textures;
+- the `CubemapArray` class;
 - JPEG encoding;
 - writing or repacking bundles.
 

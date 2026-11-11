@@ -24,8 +24,9 @@ At a glance:
   output, executed outside the repo (§5).
 - Secondary reference and golden oracle for parsing: UnityPy (MIT).
 - The Unity editor is the golden oracle for two things no upstream does: the humanoid
-  muscle-to-bone conversion (2026-11-08e) and the pixels of texture mip levels past the first
-  (2026-11-10a), run outside the package (§5).
+  muscle-to-bone conversion (2026-11-08e) and the pixels of texture mip levels past the first,
+  cubemap faces, texture array slices and 3D texture depth slices (2026-11-10a), run outside the
+  package (§5).
 - Checkable rules derived from this plan:
   [unity-asset-reader-rules.md](unity-asset-reader-rules.md).
 - Workflows: `.claude/skills/{implement-issue,review-implementation,fix-pr-comments}`.
@@ -398,17 +399,22 @@ class field readers it needs are added to core.
     and position (`fixtures/BUILDING.md` section 28).
   - Compared within the tolerance the owner sets on #319, not by float32 bits, a quaternion matching
     its negation; the golden carries no bound of its own.
-- **Golden oracle for the pixels of texture mip levels: the Unity editor** (2026-11-10a), for
-  those pixels only; AssetStudio `c37af7d` and UnityPy decode level 0 only. Class fields stay
+- **Golden oracle for the pixels of texture mip levels, cubemap faces, texture array slices and
+  3D texture depth slices: the Unity editor** (2026-11-10a), for those pixels only; AssetStudio `c37af7d` and UnityPy decode level 0 only. Class fields stay
   UnityPy's.
   - `scripts/make-texture-pixel-goldens.py` runs outside the package on the Windows host, in a
     scratch project per fixture editor (its C# held in the script, R2).
   - It loads the committed bundles with `AssetBundle.LoadFromFile`, in batchmode under the
     bundle's own `-buildTarget`, and records `Texture2D.GetPixels32(mip)` of every level of every
     readable Texture2D in `fixtures/texture-pixel-unity-goldens.json` (`fixtures/BUILDING.md`
-    section 29). The editor decodes compressed levels on the CPU, with no GPU (`-nographics`).
-  - Uncompressed formats match exactly. A compressed format's levels match within the largest
-    channel error that format has at level 0 against the editor; no other tolerance.
+    section 29), and `Cubemap.GetPixels(face, mip)`, `Texture2DArray.GetPixels32(slice, mip)`
+    and `Texture3D.GetPixels32(mip)` of every level of every face and slice of the readable
+    Cubemap, Texture2DArray and Texture3D objects in
+    `fixtures/texture-layer-pixel-unity-goldens.json` (`fixtures/BUILDING.md` section 32). The
+    editor decodes compressed levels on the CPU, with no GPU (`-nographics`).
+  - Uncompressed formats match exactly. A compressed format's levels, faces and slices match
+    within the largest channel error that format has at level 0 of a plain Texture2D against the
+    editor; no other tolerance.
 - Goldens generated **once**, committed. The oracle is not a dependency of the package or CI.
 - Typetree comparison normalization (both sides): int64 → decimal string; floats compared by float32
   bit pattern (NaN/-0 safe), not by printed text; byte arrays → hex or hash.
@@ -803,6 +809,13 @@ level 0 only.
   Windows on the CPU, under `-nographics` too (`fixtures/BUILDING.md` section 29).
 - Comparison: uncompressed formats exactly; a compressed format's levels within the largest
   channel error that format has at level 0 against the editor. No other tolerance.
+- Owner ruling 2026-11-11 on #331
+  (https://github.com/fatal10110/unity-asset-reader/issues/331#issuecomment-6788141425): two
+  listed exceptions, nothing else. `ASTC_4x4` within 1 of the editor, only where measured:
+  `Cubemap.GetPixels` (all four editors), `Texture3D.GetPixels32` (2020.3, 6000.3, 6000.6) and
+  2019.4's `Texture2DArray.GetPixels32`. 2019.4's `ETC2_RGBA8` cubemap level 3 (2x2), where the
+  editor returns the bottom row twice, is checked against the 2020.3 editor's pixels of the
+  byte-identical level (`fixtures/BUILDING.md` section 32).
 - UnityPy's Texture2DArray slice decode is a second check at level 0 for the next PR.
 - §5, R12, `CLAUDE.md` and `fixtures/README.md` name it.
 

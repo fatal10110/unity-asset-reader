@@ -18,6 +18,9 @@ const EDITOR = fixtureNames().filter((name) => golden(name).serialized !== undef
 /** Classes with a hardcoded reader, whose `type` is their class name. */
 const KNOWN = new Set([
   "Texture2D",
+  "Cubemap",
+  "Texture2DArray",
+  "Texture3D",
   "AssetBundle",
   "TextAsset",
   "MonoScript",

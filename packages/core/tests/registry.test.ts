@@ -41,6 +41,9 @@ const NO_TYPE_TREE = fixtureNames().filter((name) => name.includes("/lz4-notypet
  */
 const HARDCODED: ReadonlySet<number> = new Set([
   ClassID.Texture2D,
+  ClassID.Cubemap,
+  ClassID.Texture2DArray,
+  ClassID.Texture3D,
   ClassID.AssetBundle,
   ClassID.TextAsset,
   ClassID.MonoScript,
