@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-audio",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "AudioClip (FSB5) to WAV conversion for unity-asset-reader.",
   "license": "MIT",
   "main": "dist/index.cjs",
@@ -34,7 +34,7 @@
     "browser"
   ],
   "peerDependencies": {
-    "unity-asset-reader": "^1"
+    "unity-asset-reader": "^2"
   },
   "devDependencies": {
     "unity-asset-reader": "*"

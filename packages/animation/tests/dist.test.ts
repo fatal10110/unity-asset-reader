@@ -35,5 +35,5 @@ test("no runtime dependency: core is a peer at the first release with the reader
   const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   assert.equal(manifest.dependencies, undefined);
   assert.equal(manifest.optionalDependencies, undefined);
-  assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^1.3.0" });
+  assert.deepEqual(manifest.peerDependencies, { "unity-asset-reader": "^2" });
 });
