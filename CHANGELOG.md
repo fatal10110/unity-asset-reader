@@ -376,6 +376,10 @@ WASM.
   every level, face and slice. Crunch cubemaps, console builds of the three classes and a
   `GraphicsFormat` no fixture checks are an `UnsupportedError`. New exported type
   `DecodeLayersOptions`.
+- **New `diffTexture`** (#352): compares a modified Texture2D of core's `diff()`, or its two
+  sides, pixel by pixel after decoding: the changed pixels, their share and an RGBA image marking
+  them. A width or height change is reported with both sizes, without a comparison. New exported
+  types `TextureDiff`, `TexturePixelDiff` and `TextureSizeChange`.
 
 ### 1.3.0 - 2026-11-09
 

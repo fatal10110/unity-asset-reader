@@ -19,3 +19,5 @@ export { decodeSprite, packedSprites } from "./sprite.js";
 export type { DecodeSpriteOptions, PackedSprite } from "./sprite.js";
 export { decodeCubemap, decodeTexture2DArray, decodeTexture3D } from "./layers.js";
 export type { DecodeLayersOptions } from "./layers.js";
+export { diffTexture } from "./diff.js";
+export type { TextureDiff, TexturePixelDiff, TextureSizeChange } from "./diff.js";
