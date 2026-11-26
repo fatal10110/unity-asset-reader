@@ -381,6 +381,11 @@ WASM.
 
 ### 1.4.0 - Unreleased
 
+- **New `encodePngCompressed(image)`** (#337, plan revision 2026-11-26b): an async PNG encoder
+  that filters each row (None, Sub or Up) and deflates it with the platform's
+  `CompressionStream("deflate")`, for a much smaller file of the same pixels as `encodePng`.
+  `encodePng` is unchanged: sync, uncompressed. `CompressionStream` is in Chrome 80+,
+  Firefox 113+, Safari 16.4+, Workers, Deno and Node.js 18+.
 - **`decodeTexture2D` takes a Texture2D built by hand** (#335), such as raw texture data from
   outside a bundle. Only `m_Width`, `m_Height`, `m_TextureFormat` and `imageData` are required;
   before, TypeScript asked for every Texture2D field, so such input needed a cast.

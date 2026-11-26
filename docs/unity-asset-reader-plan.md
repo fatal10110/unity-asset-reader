@@ -61,6 +61,7 @@ third-party one (`node:util`'s `parseArgs` reads its command line).
 | LZ4 / LZ4HC block | none — ~40 LOC in `packages/core/src/codec/lz4.ts` | port `AssetStudio/LZ4/LZ4.cs`. LZ4HC decodes identically; no separate path or fixture. |
 | LZMA | `lzma1` (pure TS) — **decided**, see M1 spike #13 | Two stream shapes, see M1. Correct on both; ~10 MB/s, under the original 20 MB/s bar. Kept anyway: it is sync, zero-dep and browser-safe, so core stays WASM-free. WASM fallback deferred to M6 (#69), to be built only if real bundles make this hurt. |
 | gzip/zlib | none — the platform's `DecompressionStream` | async, so only `open()` uses it: it unwraps a gzip-wrapped input before the sync `load()`, which refuses gzip (D4). The stream checks the CRC32 / Adler-32 trailer itself. `unity-asset-reader-node` unwraps with `node:zlib`, sync. `fflate` until 2026-11-26a. |
+| PNG compression | none — the platform's `CompressionStream` | async, so only `unity-asset-reader-texture`'s `encodePngCompressed()` uses it; `encodePng()` stays sync and writes stored blocks (2026-11-26b). |
 | LZHAM, brotli | — | skipped; throw `UnsupportedError` |
 | zstd (M6 only) | `fzstd` | **not stock Unity** — only game-specific forks emit it. Lands with game variants (#50). |
 | AES (M6 only) | `aes-js` | WebCrypto is async + no ECB |
@@ -857,3 +858,21 @@ new package `unity-asset-reader-cli` (`packages/cli`, bin `unity-asset-reader-cl
 - Breaking for `unity-asset-reader` (2.0.0): `gunzip()` / `unzlib()` are async, `load()` refuses
   gzip.
 - §1, D4, the §2 externalization note and M1 updated; R5 names `gunzip()` / `unzlib()`.
+
+**Revision 2026-11-26b** (#337, owner-approved 2026-11-26 on the issue): compressed PNG output
+through the platform's `CompressionStream`, amending 2026-10-16c.
+
+- `unity-asset-reader-texture` also exports `encodePngCompressed(image)`, an async function
+  returning a promise of a PNG file of the same pixels as `encodePng(image)`. Each row is filtered
+  (None, Sub or Up, per row) and deflated by `CompressionStream("deflate")`, whose zlib stream is
+  the `IDAT` chunk. It is in every target (Chrome 80+, Firefox 113+, Safari 16.4+, Workers, Deno,
+  Node.js 18+) and adds no dependency (§1, R8).
+- `encodePng` is unchanged: sync, stored deflate blocks, no dependency. A separate function, not
+  an option, so `encodePng`'s return type never depends on an argument.
+- 2026-10-16c's "`CompressionStream` is out" no longer holds for this function; the rest of that
+  revision stands.
+- D4 is unaffected: encoding is not parsing, and texture work is already async. D3 and R4 hold:
+  `CompressionStream` is declared locally, as core declares `DecompressionStream`.
+- Tested by decoding its output with `node:zlib` (in the tests only) to the same pixels as
+  `encodePng`'s and AssetStudio's PNG exports in `fixtures/assetstudio-export-goldens.json`.
+- §1 updated; R5 names `encodePngCompressed()`.
