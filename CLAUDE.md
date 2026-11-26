@@ -12,15 +12,15 @@ them.
 
 | Package | Path | State | What |
 |---|---|---|---|
-| `unity-asset-reader` | `packages/core/` | in development | **Shared core.** Browser-first Unity AssetBundle parser, isomorphic and sync. TS hand-ported from AssetStudio (MIT). No WASM, no workspace deps. |
-| `unity-asset-reader-texture` | `packages/texture/` | in development | Texture2D / Sprite → RGBA. Depends on core (peer) and `texture2ddecoder-wasm`. |
-| `unity-asset-reader-node` | `packages/node/` | in development | Node adapter: `loadPath()`, dir scan, sidecars. Depends on core (peer). |
-| `unity-asset-reader-mesh` | `packages/mesh/` | in development | Mesh export: `meshToObj()` (Wavefront OBJ, as AssetStudio writes it), `meshToGltf()` (glTF 2.0 `.glb`). Depends on core (peer). |
-| `unity-asset-reader-audio` | `packages/audio/` | in development | AudioClip (FSB5) → WAV, pure TS. Depends on core (peer). |
-| `unity-asset-reader-spine` | `packages/spine/` | in development | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
-| `unity-asset-reader-shader` | `packages/shader/` | in development | Shader inspection text as AssetStudio writes it: GL/Metal source, SPIR-V disassembly. Pure TS. Depends on core (peer). |
-| `unity-asset-reader-animation` | `packages/animation/` | in development | AnimationClip curves as AssetStudio's `.anim` holds them: decoded streamed/dense/constant data, named paths, muscle attributes, events. Pure TS. Depends on core (peer). |
-| `unity-asset-reader-cli` | `packages/cli/` | in development | Command line tool (bin `unity-asset-reader-cli`): `ls`, `info`, `extract`, `dump` over `loadPath()`. The one application: depends on core and the feature packages it uses as regular dependencies (plan D7). |
+| `unity-asset-reader` | `packages/core/` | published (2.x) | **Shared core.** Browser-first Unity AssetBundle parser, isomorphic and sync. TS hand-ported from AssetStudio (MIT). No WASM, no workspace deps. |
+| `unity-asset-reader-texture` | `packages/texture/` | published (2.x) | Texture2D / Sprite → RGBA. Depends on core (peer) and `texture2ddecoder-wasm`. |
+| `unity-asset-reader-node` | `packages/node/` | published (2.x) | Node adapter: `loadPath()`, dir scan, sidecars. Depends on core (peer). |
+| `unity-asset-reader-mesh` | `packages/mesh/` | published (2.x) | Mesh export: `meshToObj()` (Wavefront OBJ, as AssetStudio writes it), `meshToGltf()` (glTF 2.0 `.glb`). Depends on core (peer). |
+| `unity-asset-reader-audio` | `packages/audio/` | published (2.x) | AudioClip (FSB5) → WAV (PCM, IMA ADPCM) and Ogg (Vorbis), pure TS. Depends on core (peer). |
+| `unity-asset-reader-spine` | `packages/spine/` | published (2.x) | Spine export: groups skeleton data, atlases and page textures. Isomorphic. Depends on core (peer). |
+| `unity-asset-reader-shader` | `packages/shader/` | published (2.x) | Shader inspection text as AssetStudio writes it: GL/Metal source, SPIR-V disassembly. Pure TS. Depends on core (peer). |
+| `unity-asset-reader-animation` | `packages/animation/` | published (2.x) | AnimationClip curves as AssetStudio's `.anim` holds them: decoded streamed/dense/constant data, named paths, muscle attributes, events. Pure TS. Depends on core (peer). |
+| `unity-asset-reader-cli` | `packages/cli/` | published (1.x) | Command line tool (bin `unity-asset-reader-cli`): `ls`, `info`, `extract`, `dump`, `diff` over `loadPath()`. The one application: depends on core and the feature packages it uses as regular dependencies (plan D7). |
 | `texture2ddecoder-wasm` | `packages/decoder/` | published, stable | WASM bindings (emscripten, C++ submodule `texture2ddecoder/`) decoding BC/ETC/PVRTC/ASTC/ATC/Crunch textures to **BGRA**. Node + browser. |
 
 Dependencies point one way: feature packages → core. Libraries take core as a peer; the CLI,

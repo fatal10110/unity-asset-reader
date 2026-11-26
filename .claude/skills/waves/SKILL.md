@@ -69,7 +69,10 @@ notes and the barrier markers. It survives container restarts. Lane worktrees ar
 Every workflow agent runs as a role-specific type from `.claude/agents/wave-*.md`. Each type lists
 only the tools its role uses (Bash, Read/Edit/Write), so no agent loads the session's MCP tools,
 the skill listing or the deferred-tool list. GitHub goes through `gh`, which the skills already
-use. Implementation and review agents read their skill files with Read instead of the Skill tool;
+use. Where GraphQL is blocked (Claude Code cloud sessions answer it with HTTP 403), only `gh api`
+REST calls work: put the REST equivalents in the plan's `env`, which every prompt carries
+([tooling.md](../../../docs/agents/tooling.md#github-from-a-cloud-session)). The merge prompt
+already merges through REST. Implementation and review agents read their skill files with Read instead of the Skill tool;
 the prompt adds WAVE OVERRIDES where a skill would stop to ask the user. A role that needs a new
 tool needs it added to its agent file. A session loads `.claude/agents` at start: types added
 after it started fall back to the default subagent (the script logs it).

@@ -62,6 +62,27 @@ Golden regeneration, the AssetStudio .NET harness and the Unity fixture builds a
 cannot run any of them: whoever changes a golden runs its oracle locally and names the command in
 the PR.
 
+## GitHub from a cloud session
+
+In a Claude Code cloud session, GitHub's GraphQL API answers HTTP 403. So `gh pr view`, `create`,
+`edit`, `comment`, `merge`, `ready`, `checks`, `diff`, `checkout`, `gh issue view` / `create` /
+`list` and every `gh api graphql` call in the skills fail there. REST through `gh api` works
+(`R` = `fatal10110/unity-asset-reader`):
+
+| Instead of | Use |
+| --- | --- |
+| `gh pr view N`, `gh pr diff N` | `gh api repos/R/pulls/N`; `git fetch origin <branch> main && git diff origin/main...origin/<branch>` |
+| `gh issue view N`, `gh issue list --search` | `gh api repos/R/issues/N` (and `/comments`); `gh api -X GET search/issues -f q='repo:R is:issue <terms>'` |
+| `gh pr create` | `gh api repos/R/pulls -f title='<t>' -f head='<branch>' -f base=main -F body=@<file>` |
+| `gh pr edit`, `gh pr comment` | `gh api -X PATCH repos/R/pulls/N -F body=@<file>`; `gh api repos/R/issues/N/comments -F body=@<file>` |
+| review threads, resolve (GraphQL in `fix-pr-comments`) | `gh api repos/R/pulls/N/ccr/review_threads`; `gh api -X POST repos/R/pulls/N/ccr/comments/<id>/resolve` |
+| `gh pr ready N` | `gh api -X POST repos/R/pulls/N/ccr/ready_for_review` |
+| `gh pr checks N` | `gh api repos/R/commits/<sha>/check-runs`, or `wave_mail.py ci-wait` |
+| `gh pr merge N --squash` | `gh api -X PUT repos/R/pulls/N/merge -f merge_method=squash -f sha=<verified head>` |
+
+`gh run view`, `list` and `rerun` are REST and work. Such a session's proxy also refuses deleting
+branches and creating GitHub releases: leave those to the owner (RELEASING.md, step 5).
+
 ## Lane tools (`scripts/agent-tools/`)
 
 Built for the [`waves`](../../.claude/skills/waves/SKILL.md) skill; usable on their own.
