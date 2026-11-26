@@ -58,7 +58,7 @@ test("info: each input's container and compression, the files, versions and clas
   const header = readBundle(new Uint8Array(readFileSync(TEXTURE_BUNDLE))).header;
   assert.ok(
     lines.includes(
-      `  texture: UnityFS, format ${header.version}, Unity ${header.unityRevision}`,
+      `  texture: UnityFS, format ${header.version}, Unity ${header.unityRevision}, LZ4HC`,
     ),
     run.stdout,
   );
@@ -73,8 +73,17 @@ test("info: each input's container and compression, the files, versions and clas
   for (const { typeName } of env.assets()) counts.set(typeName, (counts.get(typeName) ?? 0) + 1);
   for (const [type, count] of counts) assert.ok(lines.includes(`  ${type}: ${count}`), type);
 
-  // The compression of pre-format-6 UnityWeb (one LZMA stream) and UnityRaw files. A UnityFS
-  // header names only its blocks info's (#355).
+  // A UnityFS bundle's data block codec, from the build options in fixtures/BUILDING.md: the
+  // default (None) option writes LZMA, UncompressedAssetBundle stored blocks. Its header names
+  // LZ4HC in all three builds, the blocks info's codec (#355).
+  for (const [build, codec] of [
+    ["lzma", "LZMA"],
+    ["uncompressed", "uncompressed"],
+  ]) {
+    const run = cli("info", fixture(`${EDITOR}/${build}/texture`));
+    assert.match(run.stdout, new RegExp(`^ {2}texture: UnityFS, format \\d+, .*, ${codec}$`, "m"));
+  }
+  // The compression of pre-format-6 UnityWeb (one LZMA stream) and UnityRaw files.
   const web = cli("info", fixture("unityweb-lzma.bundle"));
   assert.match(web.stdout, /^ {2}unityweb-lzma\.bundle: UnityWeb, format 3, .*, LZMA$/m);
   const raw = cli("info", fixture("unityraw.bundle"));
@@ -91,7 +100,9 @@ test("info lists a split file once, by the name loadPath merges its parts to", (
   assert.equal(run.status, 0, run.stderr);
   const header = readBundle(new Uint8Array(bytes)).header;
   const lines = run.stdout.split("\n");
-  const line = `  texture (2 split parts): UnityFS, format ${header.version}, Unity ${header.unityRevision}`;
+  const line =
+    `  texture (2 split parts): UnityFS, format ${header.version}, Unity ${header.unityRevision}` +
+    ", LZ4HC";
   assert.ok(lines.includes(line), run.stdout);
   assert.doesNotMatch(run.stdout, /split0|split1/);
   assert.ok(lines.includes(`Objects: ${loadPath(dir).objects.length}`), run.stdout);

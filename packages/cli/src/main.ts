@@ -6,7 +6,7 @@ import {
   detectFileType,
   readBundle,
   readTypeTree,
-  type BundleHeader,
+  type BundleFile,
   type Env,
   type ObjectReader,
 } from "unity-asset-reader";
@@ -257,16 +257,22 @@ function where(reader: ObjectReader): string {
   return `${reader.fileName}, path id ${reader.pathId}`;
 }
 
-/** A legacy bundle's compression: before format 6, UnityWeb is one LZMA stream, UnityRaw stored. */
-function compressionOf(header: BundleHeader): string | undefined {
+/** Block codec names, indexed by `flags & 0x3f`; readBundle() refuses any other. */
+const BLOCK_CODECS = ["uncompressed", "LZMA", "LZ4", "LZ4HC"];
+
+/**
+ * A bundle's data compression. Before format 6, UnityWeb is one LZMA stream and UnityRaw stored;
+ * a UnityFS bundle names each data block's codec in its blocks info (its header's compression
+ * bits name only the blocks info's), so the distinct ones in block order.
+ */
+function compressionOf({ header, blocks }: BundleFile): string | undefined {
   if (header.signature !== "UnityFS" && header.version !== 6) {
     return header.signature === "UnityWeb" ? "LZMA" : "uncompressed";
   }
-  // ponytail: a UnityFS header names the codec of its blocks info only (LZ4HC
-  // in an LZMA or an uncompressed build too); each data block's is in the
-  // blocks info, which readBundle() keeps to itself. Named once core exposes
-  // the blocks (#355).
-  return undefined;
+  const names = new Set(
+    blocks.map(({ flags }) => BLOCK_CODECS[flags & 0x3f] ?? `codec ${flags & 0x3f}`),
+  );
+  return names.size > 0 ? [...names].join(", ") : undefined;
 }
 
 /** The name of a `BuildTarget` value, or the number for one this library does not name. */
@@ -358,12 +364,12 @@ function info(input: string, env: Env, io: Io): number {
     const type = detectFileType(data);
     let line = `  ${name}${parts > 0 ? ` (${parts} split parts)` : ""}: ${type}`;
     if (type === "UnityFS" || type === "UnityWeb" || type === "UnityRaw") {
-      // ponytail: reads each bundle a second time, for its header only; a
+      // ponytail: reads each bundle a second time, for its header and blocks; a
       // header-only reader in core if a large input makes that matter.
       try {
-        const { header } = readBundle(data);
-        line += `, format ${header.version}, Unity ${header.unityRevision}`;
-        const compression = compressionOf(header);
+        const bundle = readBundle(data);
+        line += `, format ${bundle.header.version}, Unity ${bundle.header.unityRevision}`;
+        const compression = compressionOf(bundle);
         if (compression !== undefined) line += `, ${compression}`;
       } catch (error) {
         line += `, header not readable: ${describeError(error)}`;

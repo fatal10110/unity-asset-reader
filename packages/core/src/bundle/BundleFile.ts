@@ -135,15 +135,30 @@ export interface StreamFile {
   flags: number;
 }
 
-/** A parsed bundle: its header plus every file it contains. */
+/** A parsed bundle: its header, its storage blocks and every file it contains. */
 export interface BundleFile {
   header: BundleHeader;
+  /**
+   * The data blocks as the blocks info lists them, in file order. `[]` for a
+   * UnityWeb or UnityRaw bundle before format 6, which stores levels instead.
+   * Their codec is in {@link StorageBlock.flags}; the header's own
+   * compression bits name only the blocks info's.
+   */
+  blocks: StorageBlock[];
   files: StreamFile[];
 }
 
-interface StorageBlock {
+/** One UnityFS data block, as the blocks info describes it. */
+export interface StorageBlock {
+  /** Size of the block in the file. */
   compressedSize: number;
+  /** Size of the block once decompressed. */
   uncompressedSize: number;
+  /**
+   * Raw block flags. `flags & 0x3f` is the block's codec: 0 none, 1 LZMA,
+   * 2 LZ4, 3 LZ4HC (4 LZHAM and 5 zstd are refused, R9); `0x40` marks it
+   * streamed.
+   */
   flags: number;
 }
 
@@ -254,7 +269,7 @@ function readArchiveBundle(
 
   const { blocks, nodes } = readBlocksInfoAndDirectory(reader, header, version);
   const blocksData = readBlocks(reader, blocks);
-  return { header, files: readFiles(nodes, blocksData) };
+  return { header, blocks, files: readFiles(nodes, blocksData) };
 }
 
 /**
@@ -310,7 +325,11 @@ function readStrippedPadded(
   }
   // The padded reading fits, so from here on a failure is plain corruption,
   // reported as it would be for a bundle that names its editor.
-  return { header, files: readFiles(layout.nodes, readBlocks(reader, layout.blocks)) };
+  return {
+    header,
+    blocks: layout.blocks,
+    files: readFiles(layout.nodes, readBlocks(reader, layout.blocks)),
+  };
 }
 
 /**
@@ -376,7 +395,7 @@ function readLegacyBundle(reader: BinaryReader, base: HeaderStart): BundleFile {
       flags: 0,
     });
   }
-  return { header, files: readFiles(nodes, blocksData) };
+  return { header, blocks: [], files: readFiles(nodes, blocksData) };
 }
 
 /**

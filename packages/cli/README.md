@@ -69,9 +69,10 @@ npx unity-asset-reader-cli info ui.bundle
 
 Prints:
 
-- each input file's container (`UnityFS`, `UnityWeb`, ...), format version and Unity version, and
-  for a `UnityWeb` or `UnityRaw` file from before format 6 its compression (`LZMA` or
-  `uncompressed`);
+- each input file's container (`UnityFS`, `UnityWeb`, ...), format version, Unity version and
+  compression: for a `UnityFS` bundle the codec of its data blocks (`uncompressed`, `LZMA`, `LZ4`
+  or `LZ4HC`, each distinct one when they differ), for a `UnityWeb` or `UnityRaw` file from
+  before format 6 `LZMA` or `uncompressed`;
 - each file unpacked from it, with the Unity version, platform and object count of the serialized
   ones;
 - the Unity versions and platforms found;
