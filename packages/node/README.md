@@ -90,9 +90,18 @@ All the files of one call share one container. If one folder holds two builds th
 for example, a `sharedassets0.assets.resS`, the first one (in name order) serves both. Load each
 build with its own call to keep them apart.
 
+### gzip-wrapped files
+
+A gzip-wrapped file (a web server's `.gz`) is unwrapped before `load()` sees it, as often as it is
+wrapped, and keeps its name: a wrapped bundle's files carry their own names, a wrapped `.resS`
+the `.gz` one. That is what core's `open()` does; `load()` itself refuses gzip, because the
+platform's inflate is async. `loadPath()` uses `node:zlib`'s sync one instead, so it stays
+synchronous.
+
 ### Synchronous, like `load()`
 
-`loadPath()` is synchronous, like `load()`: it reads with `readFileSync`.
+`loadPath()` is synchronous, like `load()`: it reads with `readFileSync`, and inflates gzip with
+`gunzipSync`.
 
 ## Errors
 
@@ -104,6 +113,8 @@ build with its own call to keep them apart.
 - `Error` when the path is neither a file nor a folder (a socket, a device).
 - `CorruptError` when the parts of a split file have a gap. The message names the file and the
   first missing part.
+- `CorruptError` when a gzip-wrapped file does not inflate (truncated, damaged, a CRC32 or length
+  that disagrees), naming the file; `UnsupportedError` when one is wrapped more than 16 times.
 - Anything `load()` or `readSerializedFile()` throws: `UnsupportedError`, `CorruptError`.
 
 Loading a single loose serialized file parses its metadata to find its externals. So invalid

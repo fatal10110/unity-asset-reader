@@ -12,7 +12,6 @@ import { readBundle } from "./bundle/BundleFile.js";
 import { detectContainer, detectFileType, type FileType } from "./bundle/detect.js";
 import { readWebFile } from "./bundle/WebFile.js";
 import { resolvePPtr, type PPtr, type PPtrResolution } from "./classes/PPtr.js";
-import { gunzip } from "./codec/inflate.js";
 import { CorruptError, ResourceNotFoundError, UnsupportedError } from "./errors.js";
 import { SerializedFileFormatVersion as V } from "./serialized/FormatVersion.js";
 import { ObjectReader, setResourceReader } from "./serialized/ObjectReader.js";
@@ -35,7 +34,7 @@ import {
  * this; the cap only stops a crafted file from recursing until the stack goes.
  * Upstream has no equivalent because it never recurses into a bundle node.
  */
-const MAX_DEPTH = 16;
+export const MAX_DEPTH = 16;
 
 /**
  * The editor version a build with `AssetBundleStripUnityVersion` writes, in
@@ -332,9 +331,7 @@ export interface SerializedFileEntry {
 
 /**
  * Which container a file came out of: 0 for the caller's own inputs, then one
- * id per bundle or `UnityWebData` file opened. A gzip wrapper holds one file
- * and names no directory, so it is not a container: what it unwraps to keeps
- * the wrapper's own.
+ * id per bundle or `UnityWebData` file opened.
  */
 type ContainerId = number;
 
@@ -398,10 +395,10 @@ export function containerOf(env: Env, object: ObjectReader): number | undefined 
  * Unpack Unity files into their contents, and give access to the objects of
  * every SerializedFile among them.
  *
- * Each input is sniffed, and containers are opened recursively: a gzip wrapper
- * is removed and the result sniffed again, a bundle or `UnityWebData` file is
- * unpacked and every node sniffed in turn. Anything that is not a container -
- * a SerializedFile, a `.resS` sidecar - is kept as it is, under its own name.
+ * Each input is sniffed, and containers are opened recursively: a bundle or
+ * `UnityWebData` file is unpacked and every node sniffed in turn. Anything
+ * that is not a container - a SerializedFile, a `.resS` sidecar - is kept as
+ * it is, under its own name.
  * A node only counts as a container when Unity's own signature says so; a
  * wrapper detected by a magic number is opened for an input, never for a node.
  *
@@ -413,7 +410,9 @@ export function containerOf(env: Env, object: ObjectReader): number | undefined 
  * views into the decompressed blocks.
  *
  * To fetch the files or read them out of a `Blob` first, use `open()`, which
- * then calls this.
+ * then calls this. A gzip-wrapped file is refused: inflating it is async (the
+ * platform's `DecompressionStream`), and this is sync (D4). `open()` unwraps
+ * one before calling this, or `await gunzip(bytes)` first.
  *
  * @example
  * const env = load(bundleBytes);
@@ -436,7 +435,8 @@ export function containerOf(env: Env, object: ObjectReader): number | undefined 
  *   form one tree under a level-0 root
  * @throws {UnsupportedError} for a container, compression type or nesting depth
  *   this library does not implement, its message naming the containers it was
- *   found under, outermost first
+ *   found under, outermost first; and for a gzip-wrapped input (`found`
+ *   `"gzip"`), its message naming `open()` and `gunzip()`
  * @throws {CorruptError} when a file claims to be a container but does not hold
  *   together, named the same way
  */
@@ -536,7 +536,7 @@ function isList(inputs: LoadSource | readonly LoadSource[]): inputs is readonly 
  *
  * @throws {TypeError} when it is neither bytes nor `{ name, data }`
  */
-function toInput(input: LoadSource, index: number): { name: string; data: Uint8Array } {
+export function toInput(input: LoadSource, index: number): { name: string; data: Uint8Array } {
   // A `Uint8Array` or `ArrayBuffer` has no `data`; `{ name, data }` does.
   const named = typeof input === "object" && input !== null && "data" in input;
   const name = (named ? input.name : undefined) ?? `input ${index}`;
@@ -796,17 +796,21 @@ function openFile(
   // reason each refused type is refused (R9).
   //
   // Only a bundle's own nodes get its revision: upstream's `LoadWebFile`
-  // passes none, and a gzip wrapper is only ever opened for an input.
+  // passes none.
   const inner = `${trail}${name}: `;
   switch (detectContainer(data)) {
     case "serialized":
       keep(name, data, type, trail, revision, container, out);
       return;
-    // Upstream re-sniffs the decompressed bytes under the same path, so a
-    // gzip-wrapped bundle keeps the `.gz` name only if it unwraps to a leaf.
+    // Inflating is async (`DecompressionStream`) and this is sync (D4), so
+    // `open()` unwraps gzip before it gets here; only a node is ever kept.
     case "gzip":
-      ingest(name, gunzip(data), depth + 1, packed, inner, undefined, container, out);
-      return;
+      throw new UnsupportedError(
+        "container",
+        "gzip",
+        "load() is sync and cannot inflate it; pass the file to open(), which unwraps it, " +
+          "or unwrap it with await gunzip(bytes) first",
+      );
     case "UnityWebData": {
       const own = ++out.lastContainer;
       for (const file of readWebFile(data).files) {

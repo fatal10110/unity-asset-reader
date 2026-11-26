@@ -38,7 +38,7 @@ At a glance:
 | D1 | **Port from AssetStudio (MIT). Do not fork, copy from, or import `@arkntools/unity-js` anywhere — including tests.** | unity-js is **AGPL-3.0**. A fork forces AGPL on the package and on every web app that ships it. AssetStudio, UnityPy and all chosen deps are MIT. This is a derivative port, not clean-room: keep Perfare / RazTools / Razviar (and UnityPy, where consulted) copyright notices in `LICENSE`/`NOTICE`. Two exceptions to MIT-only sources, both in the texture package and shipped with attribution and `LICENSE-APACHE`: the sprite tight-mesh fill is derived from ImageSharp.Drawing (Apache-2.0, #34), and the variant-atlas bicubic resize from ImageSharp 2.1.3 (Apache-2.0, #153). |
 | D2 | TS parser, WASM only for leaf **C/C++** codecs. **No C# is ever compiled to WASM** (no Blazor / .NET-wasm / NativeAOT-LLVM / IL2CPP output). AssetStudio C# is a read-only behavior reference, hand-ported to TS. | Parsing is byte shuffling; WASM boundary = copies, no gain. A .NET runtime in WASM = multi-MB download + own GC, kills CDN drop-in. WASM inputs allowed: `texture2ddecoder` (C++), fallback `LzmaDec.c` (C), M6 `acl` (C++), `libvorbis` (C), `spirv-cross` (C++). |
 | D3 | Core is isomorphic: zero `node:*`, zero DOM. Input = `Uint8Array`; `open()` gets it from a URL, `Request`, `Response` or `Blob` with the WHATWG `fetch` / `Response` / `Blob` / `URL` globals only, which Node has too (2026-09-28b). | "Works in browser same as the texture decoder". |
-| D4 | Core **parsing is sync; `open()` (loading input) and texture decoding are async.** Async is `open()` (fetching / reading the bytes, then a sync `load()`), `initialize()` / `initTexture()` and texture decode; nothing that parses returns a promise (2026-09-28b). | Matches existing lib; avoids async colouring the whole reader. Consequence: big bundles block the calling thread — docs and `examples/cdn.html` run the reader in a **Worker**. |
+| D4 | Core **parsing is sync; `open()` (loading input) and texture decoding are async.** Async is `open()` (fetching / reading the bytes, unwrapping gzip, then a sync `load()`), `gunzip()` / `unzlib()` (the platform's `DecompressionStream`), `initialize()` / `initTexture()` and texture decode; nothing that parses returns a promise, and `load()` refuses a gzip-wrapped file instead of unwrapping it (2026-09-28b, 2026-11-26a). | Matches existing lib; avoids async colouring the whole reader. Consequence: big bundles block the calling thread — docs and `examples/cdn.html` run the reader in a **Worker**. |
 | D5 | No image encoding in core. Output `{ data: Uint8Array /*RGBA*/, width, height }`. | Kills Jimp/ImageSharp class of deps. Browser → `ImageData`; Node → caller's choice. |
 | D6 | Single-threaded WASM only. No pthreads/SharedArrayBuffer. | pthreads force COOP/COEP headers → breaks drop-in CDN use. |
 | D7 | **Several npm packages around one shared core.** `unity-asset-reader` (dir `packages/core`) is the isomorphic parser and the only place parsing lives; it also holds the glTF 2.0 `.glb` writer's building blocks, which more than one export package needs (2026-11-08d). Feature packages depend on it and never on each other's internals: `unity-asset-reader-texture` (`packages/texture`), `unity-asset-reader-node` (`packages/node`), M6 items each get their own (`-mesh`, `-audio`, ...). `texture2ddecoder-wasm` (`packages/decoder`) is a standalone leaf: it depends on nothing in the repo and keeps its npm name, API and 1.x version line (see the 2026-09-28a revision). **Every package versions independently** (2026-09-28c): `unity-asset-reader`, `-texture`, `-node` and `texture2ddecoder-wasm` each have their own version, starting at 1.0.0 for the readers, and each is released only when its own version changes. The ranges between packages say which versions go together: a feature package's peer `^<major>` on core, or `^<major>.<minor>.<patch>` naming the oldest core it works with (2026-10-16d), the texture package's `^` on the decoder. **One application** (2026-11-10b): the command line tool `unity-asset-reader-cli` (`packages/cli`) is run on its own through `npx`, so it takes core and the feature packages it uses as regular `dependencies` with `^` ranges; every library keeps core as a peer. | A user who only unpacks bundles does not install WASM; a user who only decodes textures keeps using `texture2ddecoder-wasm` alone. Heavy M6 codecs (ACL, vorbis, spirv-cross) never bloat the core. Separate packages also make the decoder a normal `dependency` of the texture package instead of an optional-peer workaround. The decoder has nothing Unity-specific in it (it is Texture2DDecoder built to WASM), and its published name is what people search for; the texture package's `^` range on it says which decoder goes with which reader. Names are final at first publish (#45); if an npm org is available, `@unity-asset-reader/{core,texture,node}` is the alternative. |
@@ -60,7 +60,7 @@ third-party one (`node:util`'s `parseArgs` reads its command line).
 | Block texture decode + Crunch | `texture2ddecoder-wasm` (workspace package) | regular `dependency` of `unity-asset-reader-texture` only; core never imports it. Outputs **BGRA** → swap to RGBA (M3). |
 | LZ4 / LZ4HC block | none — ~40 LOC in `packages/core/src/codec/lz4.ts` | port `AssetStudio/LZ4/LZ4.cs`. LZ4HC decodes identically; no separate path or fixture. |
 | LZMA | `lzma1` (pure TS) — **decided**, see M1 spike #13 | Two stream shapes, see M1. Correct on both; ~10 MB/s, under the original 20 MB/s bar. Kept anyway: it is sync, zero-dep and browser-safe, so core stays WASM-free. WASM fallback deferred to M6 (#69), to be built only if real bundles make this hurt. |
-| gzip/zlib | `fflate` | 8KB, sync (native `DecompressionStream` is async → violates D4) |
+| gzip/zlib | none — the platform's `DecompressionStream` | async, so only `open()` uses it: it unwraps a gzip-wrapped input before the sync `load()`, which refuses gzip (D4). The stream checks the CRC32 / Adler-32 trailer itself. `unity-asset-reader-node` unwraps with `node:zlib`, sync. `fflate` until 2026-11-26a. |
 | LZHAM, brotli | — | skipped; throw `UnsupportedError` |
 | zstd (M6 only) | `fzstd` | **not stock Unity** — only game-specific forks emit it. Lands with game variants (#50). |
 | AES (M6 only) | `aes-js` | WebCrypto is async + no ECB |
@@ -145,7 +145,7 @@ npm resolves it at install time.
 Consequences, accepted:
 
 - A dep is never both inlined in `dist/` and installed beside it. No second copy, and a security fix
-  in a decompressor that eats untrusted bytes (`fflate`, `lzma1` — #14, #15) reaches consumers
+  in a decompressor that eats untrusted bytes (`lzma1` — #14) reaches consumers
   through `npm update`, not through a republish of this package.
 - No per-dep NOTICE obligation: we distribute no copy of their code. The `fflate` stanza added by
   #68 is dropped.
@@ -277,7 +277,8 @@ Each milestone = shippable npm prerelease. "Port" lists the AssetStudio files th
     hurt.
   - `lzma1` does **not** throw on truncated input — it returned 52 MB of garbage for a 100 KB slice
     of a 26 MB stream. #14's wrapper must assert the output length itself (R9).
-- gzip-wrapped files via `fflate`.
+- gzip-wrapped files via `fflate` (since 2026-11-26a: the platform `DecompressionStream`, in
+  `open()`).
 - `BinaryReader` directly over `Uint8Array`. No `ByteSource` interface yet — one impl, one backlog
   consumer (#51). Guard: total uncompressed block size above typed-array limit → throw.
 - Done when: `load()` returns `env.files` byte-identical to golden raw-file hashes for fixtures
@@ -837,3 +838,22 @@ new package `unity-asset-reader-cli` (`packages/cli`, bin `unity-asset-reader-cl
   calls' output; no golden of its own.
 - §1, §2, D7, §6 and R14 updated; §7's "GUI" does not cover it. Version 0.0.0 until its first
   release.
+
+**Revision 2026-11-26a** (#348, owner-approved 2026-11-11 on the issue): gzip and zlib move from
+`fflate` to the platform's `DecompressionStream`, and gzip unwrapping moves from `load()` to
+`open()`.
+
+- `gunzip()` and `unzlib()` return promises. `DecompressionStream("gzip")` / `("deflate")` is in
+  every target (browsers, Workers, Deno, Node.js 18+), native and checks the trailer (CRC32 and
+  ISIZE, Adler-32) itself; a rejection is a `CorruptError` (R9). `fflate` and the CRC32 /
+  Adler-32 checks written around it are removed: core's one runtime dependency is `lzma1`.
+- D4: `open()` unwraps a gzip-wrapped input, as often as it is wrapped, before its sync `load()`.
+  The file keeps its name, so a wrapped leaf keeps the `.gz` one, as upstream's `DecompressGZip`
+  does. `load()` refuses gzip with an `UnsupportedError` naming `open()` and `gunzip()`. Nothing
+  that parses is async.
+- `unity-asset-reader-node`'s `loadPath()` stays sync and keeps reading gzip: it unwraps with
+  `node:zlib`'s sync `gunzipSync`, which only a Node.js package may use (R4). The CLI reads
+  through `loadPath()`, so it keeps reading gzip too.
+- Breaking for `unity-asset-reader` (2.0.0): `gunzip()` / `unzlib()` are async, `load()` refuses
+  gzip.
+- §1, D4, the §2 externalization note and M1 updated; R5 names `gunzip()` / `unzlib()`.

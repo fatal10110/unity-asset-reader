@@ -2,7 +2,7 @@
 // (plan D4), so a big bundle parsed here never freezes the page.
 //
 // Import maps do not reach into Workers, so the packages are imported from
-// jsDelivr's `/+esm` endpoint, which rewrites their bare imports (`fflate`,
+// jsDelivr's `/+esm` endpoint, which rewrites their bare imports (`lzma1`,
 // `unity-asset-reader`, `texture2ddecoder-wasm`, ...) to CDN URLs as well.
 
 // cdn.html starts this file as `cdn-worker.js?local` when the page was opened
@@ -67,7 +67,8 @@ function describe(lib, obj, index) {
 const handlers = {
   /** Unpack and parse the picked files; list their objects. */
   async load(lib, { files }) {
-    env = lib.load(files.map(({ name, data }) => ({ name, data: new Uint8Array(data) })));
+    // open(), not load(): it unwraps a gzip-wrapped file, which load() refuses.
+    env = await lib.open(files.map(({ name, data }) => ({ name, data: new Uint8Array(data) })));
     return { objects: env.objects.map((obj, index) => describe(lib, obj, index)) };
   },
   /** Decode one Texture2D of the last load to RGBA, top row first. */
