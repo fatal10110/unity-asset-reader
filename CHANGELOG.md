@@ -780,6 +780,10 @@ First release (version 0.0.0 until then: plan revision 2026-11-10b). An applicat
     shaders as text, and any other class named with `--type` as type tree JSON. It goes on past
     an asset that fails, reports it, and exits 1 at the end.
   - `dump --path-id <n>` prints one object's type tree as JSON.
+  - `diff <old> <new>` lists the assets added, removed and modified between two builds with
+    core's `diff()`, one line each (change, class, container path or file/path id, size change,
+    fields), `--json` for a JSON array. It exits 0 when the builds do not differ, 1 when they
+    do, 2 on an error (#353).
   - A gzip-wrapped input (a web server's `.gz`) is read as the file inside, as `loadPath()`
     unwraps it (#348).
 

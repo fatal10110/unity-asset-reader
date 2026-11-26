@@ -4,9 +4,11 @@ import { parseArgs } from "node:util";
 import {
   BuildTarget,
   detectFileType,
+  diff,
   readBundle,
   readTypeTree,
   type BundleFile,
+  type DiffEntry,
   type Env,
   type ObjectReader,
 } from "unity-asset-reader";
@@ -47,11 +49,16 @@ Commands:
                                Vorbis AudioClips as .ogg (skipped without it)
   dump <input> --path-id <n>   one object's type tree as JSON
     --file <name>              the file holding it, when several have that id
+  diff <old> <new>             the assets added, removed or modified between two
+                               builds, one line each: change, class, container
+                               path (or file/path id), size change, fields
+    --json                     print a JSON array instead
 
 Options:
   -h, --help                   print this help
 
 Exit status: 0 on success, 1 when an asset or the input failed, 2 on a usage error.
+diff exits 0 when the builds do not differ, 1 when they do, 2 on any error.
 `;
 
 const OPTIONS = {
@@ -65,7 +72,7 @@ const OPTIONS = {
   help: { type: "boolean", short: "h" },
 } as const;
 
-type Command = "ls" | "info" | "extract" | "dump";
+type Command = "ls" | "info" | "extract" | "dump" | "diff";
 type Option = keyof typeof OPTIONS;
 
 /** The options each command takes, `--help` aside. */
@@ -74,12 +81,14 @@ const COMMAND_OPTIONS: Record<Command, Option[]> = {
   info: [],
   extract: ["type", "output", "mesh", "vorbis-headers"],
   dump: ["path-id", "file"],
+  diff: ["json"],
 };
 
 /**
  * Run the command line `argv` (the arguments after the program name) and
  * return its exit status: 0 on success, 1 when the input or an asset failed,
- * 2 on a usage error. Reports go to `io.err`, results to `io.out`.
+ * 2 on a usage error. `diff` has its own: 0 when the builds do not differ, 1
+ * when they do, 2 on any error. Reports go to `io.err`, results to `io.out`.
  *
  * @param argv the arguments, e.g. `["ls", "ui.bundle", "--json"]`
  * @param io where to write
@@ -128,6 +137,14 @@ async function run(argv: string[], io: Io): Promise<number> {
     if (option !== "help" && !COMMAND_OPTIONS[command].includes(option)) {
       throw new UsageError(`${command} does not take --${option}`);
     }
+  }
+  if (command === "diff") {
+    if (inputs.length !== 2) {
+      throw new UsageError(
+        `diff takes two files or directories, the old build and the new, got ${inputs.length}`,
+      );
+    }
+    return diffBuilds(inputs[0]!, inputs[1]!, values.json === true, io);
   }
   if (inputs.length === 0) throw new UsageError(`${command} needs a file or directory`);
   if (inputs.length > 1) {
@@ -239,6 +256,66 @@ function ls(env: Env, types: Set<string> | undefined, json: boolean, io: Io): nu
     io.out(table([header, ...cells]));
   }
   return failed > 0 ? 1 : 0;
+}
+
+/** One entry of `diff --json`: a {@link DiffEntry} without its assets. */
+interface DiffRow {
+  change: DiffEntry["change"];
+  type: string;
+  name: string;
+  path: string;
+  file: string;
+  pathId: string;
+  sizeDelta: number;
+  fields?: string[];
+}
+
+/**
+ * `diff`: core `diff()` of the two builds, one line or JSON object per entry.
+ * Its exit status differs from the other commands': 0 when nothing differs, 1
+ * when something does, 2 when a build cannot be read or compared.
+ */
+function diffBuilds(oldInput: string, newInput: string, json: boolean, io: Io): number {
+  const envs: Env[] = [];
+  for (const input of [oldInput, newInput]) {
+    try {
+      envs.push(loadPath(input));
+    } catch (error) {
+      io.err(`error: ${input}: ${describeError(error)}\n`);
+      return 2;
+    }
+  }
+  let entries: DiffEntry[];
+  try {
+    entries = diff(envs[0]!, envs[1]!);
+  } catch (error) {
+    io.err(`error: ${describeError(error)}\n`);
+    return 2;
+  }
+  const rows: DiffRow[] = entries.map((e) => ({
+    change: e.change,
+    type: e.type,
+    name: e.name,
+    path: e.path ?? "",
+    file: e.file,
+    pathId: e.pathId.toString(),
+    sizeDelta: e.sizeDelta,
+    fields: e.fields,
+  }));
+  if (json) {
+    io.out(`${JSON.stringify(rows, null, 2)}\n`);
+  } else {
+    // No header: nothing at all is printed for two builds that do not differ.
+    const cells = rows.map((r) => [
+      r.change,
+      r.type,
+      r.path !== "" ? r.path : `${r.file}/${r.pathId}`,
+      r.sizeDelta > 0 ? `+${r.sizeDelta}` : String(r.sizeDelta),
+      r.fields?.join(",") ?? "",
+    ]);
+    io.out(table(cells));
+  }
+  return rows.length > 0 ? 1 : 0;
 }
 
 /** Columns padded to their widest cell, two spaces apart, the last one not padded. */

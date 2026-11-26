@@ -28,7 +28,7 @@ It needs Node.js 20.19 or later. The command is `unity-asset-reader-cli`, not
 
 ## What it reads
 
-Every command takes **one file or one directory**:
+Every command takes **one file or one directory** (`diff` takes two, one per build):
 
 - a file: an AssetBundle, a `.assets` file, a WebGL `.data` file. Its `.resS` and `.resource`
   sidecars, and for a `.assets` file the files it depends on, are loaded from the same directory.
@@ -144,6 +144,39 @@ A directory of several bundles can hold the same path id more than once (each bu
 `AssetBundle` object is path id 1). Then name the file with `--file`, as `ls` shows it:
 `--file CAB-f04fab77212e693fb63bdad7458f66fe`.
 
+### `diff`: what changed between two builds
+
+```bash
+npx unity-asset-reader-cli diff old/ new/
+```
+
+```text
+modified  Texture2D    assets/fixtures/diff/changed.png        +2048  m_Width,m_CompleteImageSize,m_TextureFormat,m_StreamData
+modified  AssetBundle  CAB-b6ec7271e16d6169fe23b363bfe34b24/1  0      m_PreloadTable,m_Container
+removed   Texture2D    assets/fixtures/diff/removed.png        -1216
+added     Texture2D    assets/fixtures/diff/added.png          +1216
+```
+
+Each side is one file or directory, read as above. The assets are matched up and compared by the
+core library's
+[`diff()`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/core/README.md#compare-two-builds),
+which says how. One line per asset that was added, removed or modified, with no header:
+
+- the change: `added`, `removed` or `modified`;
+- its class;
+- its container path, or, for an asset without one, its file and path id as `<file>/<path id>`;
+- its size in the new build less its size in the old one, in bytes, streamed data included;
+- for a modified asset whose two sides have type trees, the top-level fields that differ, comma
+  separated. Empty when only bytes no field shows differ.
+
+Two builds that do not differ print nothing. `--json` prints a JSON array of
+`{ change, type, name, path, file, pathId, sizeDelta, fields }` objects instead, with the path id
+as a decimal string, `path` `""` when the asset has none, as in `ls --json`, and `fields` left out
+where the line above has none to list.
+
+`diff` has exit statuses of its own: 0 when the builds do not differ, 1 when they do, 2 on any
+error, so a script can test for changes as it would with the `diff` command.
+
 ## Exit status
 
 | Status | When |
@@ -151,6 +184,14 @@ A directory of several bundles can hold the same path id more than once (each bu
 | 0 | Done. Skipped assets do not count as failures. |
 | 1 | The input could not be read, or an asset failed. |
 | 2 | The command line is wrong: an unknown command or option, a missing `-o` or `--path-id`, several inputs. |
+
+`diff` is the exception:
+
+| Status | When |
+|---|---|
+| 0 | The two builds do not differ. |
+| 1 | They differ. |
+| 2 | An error: a build that cannot be read or compared, or a wrong command line. |
 
 Messages go to standard error; results (the table, JSON, the files written) to standard output.
 
