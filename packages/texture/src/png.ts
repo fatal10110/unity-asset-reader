@@ -2,6 +2,8 @@
 // (ISO/IEC 15948, W3C PNG 2nd edition) and RFC 1950 / RFC 1951, not ported:
 // AssetStudio hands its images to ImageSharp, whose encoder is not followed here.
 
+import { crc32 } from "unity-asset-reader";
+
 import type { RgbaImage } from "./convert.js";
 
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -14,8 +16,6 @@ const ZLIB_HEADER = [0x78, 0x01];
 /** Adler-32's modulus, and the most bytes summed before `b` can overflow 2^32 (RFC 1950). */
 const ADLER_MOD = 65521;
 const ADLER_NMAX = 5552;
-
-let crcTable: Uint32Array | undefined;
 
 /**
  * Encode an RGBA8 image as a PNG file: 8-bit RGBA (colour type 6), not
@@ -174,22 +174,4 @@ function chunk(
   fill(at + 8);
   view.setUint32(at + 8 + length, crc32(out, at + 4, at + 8 + length));
   return at + 12 + length;
-}
-
-/** CRC-32 (ISO 3309, polynomial 0xEDB88320 reflected) of `bytes[start..end)`, as PNG uses. */
-function crc32(bytes: Uint8Array, start: number, end: number): number {
-  const table = (crcTable ??= makeCrcTable());
-  let crc = 0xffffffff;
-  for (let i = start; i < end; i++) crc = table[(crc ^ bytes[i]!) & 0xff]! ^ (crc >>> 8);
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function makeCrcTable(): Uint32Array {
-  const table = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) {
-    let c = n;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    table[n] = c >>> 0;
-  }
-  return table;
 }
