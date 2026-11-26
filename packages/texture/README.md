@@ -136,7 +136,17 @@ writeFileSync("out.png", encodePng({ data: rgba, width, height }));
 `encodePng` is synchronous and has no dependency, so it does not compress. The deflate stream
 holds stored blocks, and the file is about as large as the pixels (`width * height * 4` bytes).
 
-For smaller files, or other formats, hand the RGBA to an image library instead, for example
+For a smaller file of the same pixels, `encodePngCompressed` filters the rows and deflates them
+with the platform's `CompressionStream`, so it is async:
+
+```js
+writeFileSync("out.png", await encodePngCompressed({ data: rgba, width, height }));
+```
+
+`CompressionStream` is in Chrome 80+, Firefox 113+, Safari 16.4+, Workers, Deno and Node.js 18+;
+without it the promise rejects with a `ReferenceError`.
+
+For other formats, or more compression, hand the RGBA to an image library instead, for example
 [`sharp`](https://www.npmjs.com/package/sharp):
 `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
@@ -388,6 +398,7 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
 | `encodePng(image)` | An `RgbaImage`, top row first, to a PNG file (8-bit RGBA, uncompressed deflate), sync |
+| `encodePngCompressed(image)` | The same PNG, rows filtered and deflated by the platform's `CompressionStream`: a promise of a smaller file of the same pixels |
 | `diffTexture(entry, options?)`, `diffTexture(before, after, options?)` | A modified `Texture2D` of core's `diff()`, or its two sides, compared pixel by pixel after decoding. Loads the WASM on first use |
 | `TextureDiff`, `TexturePixelDiff`, `TextureSizeChange` | What `diffTexture` returns: `{ sizeChanged: false, width, height, changedPixels, changedShare, image }`, or `{ sizeChanged: true, before, after }` when the sizes differ |
 
@@ -512,7 +523,7 @@ Not provided at all:
 - Crunch cubemaps, and `Cubemap`, `Texture2DArray` and `Texture3D` of Switch, Xbox 360, PS4 and
   PS5 builds.
 - `CubemapArray` ([#357](https://github.com/fatal10110/unity-asset-reader/issues/357)).
-- JPEG encoding, and compressed PNG (`encodePng` stores the pixels uncompressed).
+- JPEG encoding.
 
 Known differences and open questions:
 
