@@ -27,7 +27,6 @@ function get(path) {
 
 test("serves the packages cdn-worker.js loads, and their dependencies", async () => {
   assert.deepEqual([...SERVED].sort(), [
-    "fflate",
     "lzma1",
     "texture2ddecoder-wasm",
     "unity-asset-reader",
@@ -37,7 +36,7 @@ test("serves the packages cdn-worker.js loads, and their dependencies", async ()
     status: 302,
     location: "/npm/unity-asset-reader/dist/index.mjs",
   });
-  assert.equal((await get("/npm/fflate/package.json")).status, 200);
+  assert.equal((await get("/npm/lzma1/package.json")).status, 200);
 });
 
 test("nothing outside the served packages is reachable", async () => {
@@ -45,8 +44,8 @@ test("nothing outside the served packages is reachable", async () => {
     "/npm/..%2Fpackage.json",
     "/npm/..%2Fdocs%2Funity-asset-reader-plan.md",
     "/npm/%2E%2E/package.json",
-    "/npm/fflate/..%2F..%2Fpackage.json",
-    "/npm/fflate/%2E%2E/%2E%2E/package.json",
+    "/npm/lzma1/..%2F..%2Fpackage.json",
+    "/npm/lzma1/%2E%2E/%2E%2E/package.json",
     "/npm/typescript/package.json",
     "/examples/..%2Fpackage.json",
     "/docs/..%2Fpackage.json",
