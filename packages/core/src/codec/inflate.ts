@@ -9,8 +9,10 @@
  * unwraps a gzip-wrapped input before its sync `load()`.
  *
  * The stream checks the trailer itself - CRC32 and ISIZE for gzip, Adler-32 for
- * zlib - and rejects a truncated stream, a damaged one and bytes after its end,
- * so a rejection is all there is to turn into a {@link CorruptError} (R9).
+ * zlib - and rejects a truncated stream or a damaged one, so a rejection is all
+ * there is to turn into a {@link CorruptError} (R9). Bytes after the end of a
+ * zlib stream are the platform's call: newer runtimes reject them, Node 20 and
+ * 22.12 drop them and return the stream's own bytes.
  */
 
 import { CorruptError, UnsupportedError } from "../errors.js";
@@ -53,8 +55,9 @@ export function gunzip(data: Uint8Array): Promise<Uint8Array> {
  * @param data one complete zlib stream (RFC 1950 header, not raw deflate)
  * @returns the decompressed bytes
  * @throws {CorruptError} (as a rejection) for truncated input, a damaged
- *   stream, an Adler-32 trailer that disagrees with the output, or bytes after
- *   the end of the stream; never partial output
+ *   stream or an Adler-32 trailer that disagrees with the output; never partial
+ *   output. Bytes after the end of the stream reject on newer runtimes and are
+ *   dropped on others (Node 20, Node 22.12).
  */
 export function unzlib(data: Uint8Array): Promise<Uint8Array> {
   return inflate(data, "deflate", "zlib");

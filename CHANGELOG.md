@@ -45,8 +45,9 @@ versioning policy below explains when they ship in a minor version.
 
 - **gzip and zlib through the platform's `DecompressionStream`** (#348, plan revision 2026-11-26a).
   `fflate` is no longer a dependency; `lzma1` is the only one left. The stream checks the CRC32,
-  ISIZE and Adler-32 trailers itself, and a damaged, truncated or overlong stream rejects with a
-  `CorruptError`, never partial output.
+  ISIZE and Adler-32 trailers itself, and a damaged or truncated stream rejects with a
+  `CorruptError`, never partial output. Bytes after a gzip stream reject too; bytes after a zlib
+  stream reject or are dropped, depending on the runtime.
   - `gunzip(bytes)` and `unzlib(bytes)` return a promise of the bytes.
   - `open()` unwraps a gzip-wrapped file, as often as it is wrapped, before calling `load()`. The
     file keeps its name, so a wrapped bundle's files carry their own names, as before.

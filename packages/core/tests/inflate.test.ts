@@ -161,9 +161,19 @@ test("unzlib rejects a stream with a broken zlib header", async () => {
   await rejectsCorrupt(unzlib(flipByte(full, 0)), "zlib", full.length);
 });
 
-test("unzlib rejects bytes after the end of the stream", async () => {
-  const full = zlibbed(pseudoRandom(1024));
-  await rejectsCorrupt(unzlib(append(full, 1, 2, 3)), "zlib", full.length + 3);
+test("unzlib never mixes bytes after the end of the stream into its output", async () => {
+  // Newer runtimes reject them; Node 20 and 22.12 drop them. Either way the
+  // output is the stream's own bytes or nothing (R9).
+  const payload = pseudoRandom(1024);
+  const full = zlibbed(payload);
+  let output: Uint8Array | undefined;
+  try {
+    output = await unzlib(append(full, 1, 2, 3));
+  } catch (error) {
+    assert.ok(error instanceof CorruptError);
+    assert.match(error.message, new RegExp(`^zlib stream of ${full.length + 3} bytes failed to inflate: .+`));
+  }
+  if (output !== undefined) assert.deepStrictEqual(output, payload);
 });
 
 test("brotli input throws UnsupportedError naming brotli", () => {
