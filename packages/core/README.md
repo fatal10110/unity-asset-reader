@@ -675,6 +675,7 @@ For tools that work below `load()`:
 | `TypeTreeNodeData` | One node of a type tree supplied through `LoadOptions.typeTrees`: `{ type, name, level, byteSize, metaFlag }`, plain JSON |
 | `SerializedFileFormatVersion`, `BuildTarget` | Format version and target platform constants |
 | `decompressLz4`, `lzmaDecompress` | The block decompressors, each checking its output size |
+| `crc32(bytes, start?, end?)` | CRC-32 (reflected polynomial `0xEDB88320`, as PNG, gzip and zip use it) of `bytes[start..end)`, unsigned |
 | `gunzip`, `unzlib` | gzip and zlib through the platform's `DecompressionStream`: `async`, each returning a promise, rejected with a `CorruptError` on a damaged or truncated stream |
 | `formatSingle(value)`, `formatSingleInvariant(value)` | Write a float32 as .NET 8's `float.ToString()` does, under en-US and invariant culture |
 | `GltfWriter` | Build a binary glTF 2.0 file (`.glb`); see [glTF writer](#gltf-writer) |

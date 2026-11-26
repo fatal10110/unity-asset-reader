@@ -43,6 +43,9 @@ versioning policy below explains when they ship in a minor version.
 **Breaking:** `gunzip()` and `unzlib()` are async, and `load()` refuses a gzip-wrapped file;
 `open()` unwraps it instead (#348).
 
+- **New `crc32(bytes, start?, end?)` export** (#350): the CRC-32 of PNG, gzip and zip (reflected
+  polynomial `0xEDB88320`) over `bytes[start..end)`, unsigned. The texture and animation packages
+  use it instead of their own copies.
 - **gzip and zlib through the platform's `DecompressionStream`** (#348, plan revision 2026-11-26a).
   `fflate` is no longer a dependency; `lzma1` is the only one left. The stream checks the CRC32,
   ISIZE and Adler-32 trailers itself, and a damaged or truncated stream rejects with a
@@ -382,6 +385,7 @@ WASM.
   outside a bundle. Only `m_Width`, `m_Height`, `m_TextureFormat` and `imageData` are required;
   before, TypeScript asked for every Texture2D field, so such input needed a cast.
   `decodeTexture2D(obj.read())` compiles as before.
+- Internal: PNG chunk CRCs use core's `crc32` instead of a copy of it (#350).
 - **New `crunch` option for `decodeTexture2D`** (#335): `"unity"` or `"original"` names the
   Crunch variant of DXT1 and DXT5 Crunch data, and wins over the Unity 2017.3 fields that decide
   it otherwise. `"original"` on an ETC Crunch format is an `UnsupportedError`. New exported type
@@ -691,6 +695,7 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 - Internal: `crc32` encodes names with `TextEncoder` instead of a hand-written UTF-8
   encoder (#349). Same hashes, a lone surrogate still as U+FFFD.
+- Internal: `crc32` hashes the UTF-8 bytes with core's `crc32` instead of its own table (#350).
 - **Humanoid clips: the fingers are converted, and the UpperChest fold follows the Avatar**
   (#325). Checked against Unity's poses of two new fixture rigs in all four fixture editors
   (`fixtures/humanoid2-unity-goldens.json`, `fixtures/BUILDING.md` section 31).
