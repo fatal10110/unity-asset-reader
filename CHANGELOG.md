@@ -392,6 +392,10 @@ WASM.
   every level, face and slice. Crunch cubemaps, console builds of the three classes and a
   `GraphicsFormat` no fixture checks are an `UnsupportedError`. New exported type
   `DecodeLayersOptions`.
+- **New `diffTexture`** (#352): compares a modified Texture2D of core's `diff()`, or its two
+  sides, pixel by pixel after decoding: the changed pixels, their share and an RGBA image marking
+  them. A width or height change is reported with both sizes, without a comparison. New exported
+  types `TextureDiff`, `TexturePixelDiff` and `TextureSizeChange`.
 
 ### 1.3.0 - 2026-11-09
 
@@ -681,6 +685,8 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ### 1.1.0 - Unreleased
 
+- Internal: `crc32` encodes names with `TextEncoder` instead of a hand-written UTF-8
+  encoder (#349). Same hashes, a lone surrogate still as U+FFFD.
 - **Humanoid clips: the fingers are converted, and the UpperChest fold follows the Avatar**
   (#325). Checked against Unity's poses of two new fixture rigs in all four fixture editors
   (`fixtures/humanoid2-unity-goldens.json`, `fixtures/BUILDING.md` section 31).
