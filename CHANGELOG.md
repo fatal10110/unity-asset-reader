@@ -38,7 +38,22 @@ versioning policy below explains when they ship in a minor version.
 
 ## unity-asset-reader
 
-### 1.4.0 - Unreleased
+### 2.0.0 - Unreleased
+
+**Breaking:** `gunzip()` and `unzlib()` are async, and `load()` refuses a gzip-wrapped file;
+`open()` unwraps it instead (#348).
+
+- **gzip and zlib through the platform's `DecompressionStream`** (#348, plan revision 2026-11-26a).
+  `fflate` is no longer a dependency; `lzma1` is the only one left. The stream checks the CRC32,
+  ISIZE and Adler-32 trailers itself, and a damaged, truncated or overlong stream rejects with a
+  `CorruptError`, never partial output.
+  - `gunzip(bytes)` and `unzlib(bytes)` return a promise of the bytes.
+  - `open()` unwraps a gzip-wrapped file, as often as it is wrapped, before calling `load()`. The
+    file keeps its name, so a wrapped bundle's files carry their own names, as before.
+  - `load()` throws an `UnsupportedError` (`found` `"gzip"`) for a gzip-wrapped input, naming
+    `open()` and `gunzip()`. Migrate with `await open(bytes)`, or `load(await gunzip(bytes))`.
+  - Browsers need `DecompressionStream` for gzip and zlib; every current one has it, as do
+    Node.js 18+ and Deno.
 
 - **Compare two builds.** `diff(oldEnv, newEnv)` lists the assets added, removed or modified
   between two loaded builds. It matches them by container path, then by path id within the same
@@ -483,6 +498,13 @@ First release. Peer: `unity-asset-reader@^1`; depends on `texture2ddecoder-wasm@
 
 ## unity-asset-reader-node
 
+### 1.1.1 - Unreleased
+
+- **`loadPath()` unwraps gzip itself**, sync, with `node:zlib` (#348). Core's `load()` refuses gzip
+  from 2.0.0 on, because the platform inflate is async; `loadPath()` stays sync and reads a
+  gzip-wrapped file as before, with core 1.x or 2.x. A file that does not inflate throws a
+  `CorruptError` naming it. A gzip-wrapped loose SerializedFile now loads its externals too.
+
 ### 1.1.0 - 2026-10-16
 
 - **`loadPath(file)` loads a loose serialized file's external dependencies** from the same
@@ -746,6 +768,8 @@ First release (version 0.0.0 until then: plan revision 2026-11-10b). An applicat
     shaders as text, and any other class named with `--type` as type tree JSON. It goes on past
     an asset that fails, reports it, and exits 1 at the end.
   - `dump --path-id <n>` prints one object's type tree as JSON.
+  - A gzip-wrapped input (a web server's `.gz`) is read as the file inside, as `loadPath()`
+    unwraps it (#348).
 
 ## texture2ddecoder-wasm
 

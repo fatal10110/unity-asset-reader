@@ -4,11 +4,13 @@
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { gunzipSync } from "node:zlib";
 import {
   CorruptError,
   detectFileType,
   load,
   readSerializedFile,
+  UnsupportedError,
   type Env,
   type LoadInput,
 } from "unity-asset-reader";
@@ -19,6 +21,9 @@ import {
  * leading zeros, so `.split01` is not a part, just a file with an odd name.
  */
 const SPLIT_PART = /^(.+)\.split(0|[1-9]\d*)$/;
+
+/** How many gzip wrappers one file may have, as core's `open()` and `load()` limit nesting. */
+const MAX_GZIP_DEPTH = 16;
 
 /**
  * Load a Unity file, or every file below a directory, from disk and unpack it
@@ -59,6 +64,12 @@ const SPLIT_PART = /^(.+)\.split(0|[1-9]\d*)$/;
  * holds two builds that both have, say, a `sharedassets0.assets.resS`, the
  * first one serves both. Load each build with its own call to keep them apart.
  *
+ * **gzip.** A gzip-wrapped file (a web server's `.gz`) is inflated first,
+ * again while the result is gzip too, and keeps its name, as core's `open()`
+ * does it: a wrapped bundle's files carry their own names, a wrapped leaf the
+ * `.gz` one. `load()` refuses gzip because the platform inflate it has is
+ * async; this uses `node:zlib`'s sync one instead.
+ *
  * Sync on purpose: `load()` is sync (D4, parsing blocks either way), so an
  * async read would only make this the one promise outside texture decoding.
  *
@@ -72,7 +83,9 @@ const SPLIT_PART = /^(.+)\.split(0|[1-9]\d*)$/;
  *   what it cannot read would hand back an env with holes in it
  * @throws {Error} when `fileOrDir` is neither a file nor a directory
  * @throws {CorruptError} when the parts of a split file do not run 0..N without
- *   a gap, naming the file and the first missing part
+ *   a gap, naming the file and the first missing part; or when a gzip-wrapped
+ *   file does not inflate (truncated, damaged, a bad CRC32 or length), naming it
+ * @throws {UnsupportedError} when a file is wrapped in gzip more than 16 times
  * @throws {UnsupportedError} / {CorruptError} as `load()` does
  */
 export function loadPath(fileOrDir: string): Env {
@@ -161,15 +174,46 @@ function readInputs(root: string, names: readonly string[]): LoadInput[] {
 
   const inputs: LoadInput[] = [...whole].map((name) => ({
     name,
-    data: view(readFileSync(fromRoot(root, name))),
+    data: unwrapGzip(fromRoot(root, name), view(readFileSync(fromRoot(root, name)))),
   }));
   for (const [name, own] of parts) {
     // Upstream merges only when `<name>` is not there yet, and then loads
     // `<name>` instead of the parts either way.
     if (whole.has(name)) continue;
-    inputs.push({ name, data: merge(root, name, own) });
+    inputs.push({ name, data: unwrapGzip(fromRoot(root, name), merge(root, name, own)) });
   }
   return inputs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+/**
+ * Inflate `data` for as long as it is gzip-wrapped: what core's `open()` does
+ * before its `load()`, which refuses gzip, but sync (`node:zlib`).
+ *
+ * @param path the file, for error messages
+ * @throws {CorruptError} when it does not inflate, naming the file
+ * @throws {UnsupportedError} past {@link MAX_GZIP_DEPTH} wrappers
+ */
+function unwrapGzip(path: string, data: Uint8Array): Uint8Array {
+  for (let depth = 1; detectFileType(data) === "gzip"; depth++) {
+    if (depth > MAX_GZIP_DEPTH) {
+      const error = new UnsupportedError(
+        "container nesting",
+        depth,
+        `above the ${MAX_GZIP_DEPTH} level limit`,
+      );
+      error.message = `${path}: ${error.message}`;
+      throw error;
+    }
+    try {
+      data = view(gunzipSync(data));
+    } catch (cause) {
+      const reason = cause instanceof Error ? cause.message : String(cause);
+      throw new CorruptError(
+        `${path}: gzip stream of ${data.length} bytes failed to inflate: ${reason}`,
+      );
+    }
+  }
+  return data;
 }
 
 /**

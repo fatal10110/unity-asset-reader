@@ -2,8 +2,6 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { brotliCompressSync, deflateSync, gzipSync } from "node:zlib";
 
-import { gunzipSync as fflateGunzipSync, unzlibSync as fflateUnzlibSync } from "fflate";
-
 import { golden, loadFixture, sha256 } from "../../../fixtures/helpers.js";
 import { CorruptError, UnsupportedError } from "../src/errors.js";
 import { brotliDecompress, gunzip, lzhamDecompress, unzlib } from "../src/codec/inflate.js";
@@ -42,19 +40,46 @@ function flipByte(data: Uint8Array, index: number): Uint8Array {
   return copy;
 }
 
+/** Same bytes followed by `extra`. */
+function append(data: Uint8Array, ...extra: number[]): Uint8Array {
+  return Uint8Array.from([...data, ...extra]);
+}
+
+/** Asserts a rejection with a {@link CorruptError} naming the format and the input size. */
+async function rejectsCorrupt(
+  promise: Promise<Uint8Array>,
+  format: "gzip" | "zlib",
+  size: number,
+  note?: string,
+): Promise<void> {
+  await assert.rejects(promise, (error: unknown) => {
+    assert.ok(error instanceof CorruptError, note);
+    const expected = `^${format} stream of ${size} bytes failed to inflate: .+`;
+    assert.match(error.message, new RegExp(expected));
+    return true;
+  }, note);
+}
+
 for (const [name, data] of VECTORS) {
-  test(`gunzip round-trips ${name}`, () => {
-    assert.deepStrictEqual(gunzip(gzipped(data)), data);
+  test(`gunzip round-trips ${name}`, async () => {
+    assert.deepStrictEqual(await gunzip(gzipped(data)), data);
   });
 
-  test(`unzlib round-trips ${name}`, () => {
-    assert.deepStrictEqual(unzlib(zlibbed(data)), data);
+  test(`unzlib round-trips ${name}`, async () => {
+    assert.deepStrictEqual(await unzlib(zlibbed(data)), data);
   });
 }
 
-test("gunzip unwraps the real gzip-wrapped bundle fixture", () => {
+test("gunzip and unzlib return promises: inflating is async (D4)", async () => {
+  const pending = gunzip(gzipped(Uint8Array.of(1)));
+  assert.ok(pending instanceof Promise);
+  assert.ok(unzlib(zlibbed(Uint8Array.of(1))) instanceof Promise);
+  await pending;
+});
+
+test("gunzip unwraps the real gzip-wrapped bundle fixture", async () => {
   const name = "gzip-lz4.bundle.gz";
-  const inner = gunzip(loadFixture(name));
+  const inner = await gunzip(loadFixture(name));
 
   // The oracle does not unwrap gzip around a bundle (fixtures/README.md), so
   // the golden describes what is inside: the same UnityFS bundle as lz4.bundle.
@@ -64,82 +89,81 @@ test("gunzip unwraps the real gzip-wrapped bundle fixture", () => {
   assert.deepStrictEqual(golden(name).files, golden("lz4.bundle").files);
 });
 
-test("gunzip rejects a stream that is not gzip, naming the magic it found", () => {
+test("gunzip rejects a stream that is not gzip", async () => {
   const notGzip = new Uint8Array(32).fill(0x42);
-  assert.throws(() => gunzip(notGzip), (error: unknown) => {
-    assert.ok(error instanceof CorruptError);
-    assert.match(error.message, /not a gzip stream: magic 4242, expected 1f8b/);
-    return true;
-  });
+  await rejectsCorrupt(gunzip(notGzip), "gzip", 32);
 });
 
-test("gunzip rejects input too short to hold a header and trailer", () => {
-  assert.throws(() => gunzip(Uint8Array.of(0x1f, 0x8b, 0x08)), CorruptError);
+test("gunzip rejects empty input and input too short to hold a header and trailer", async () => {
+  await rejectsCorrupt(gunzip(new Uint8Array(0)), "gzip", 0);
+  await rejectsCorrupt(gunzip(Uint8Array.of(0x1f, 0x8b, 0x08)), "gzip", 3);
 });
 
-test("gunzip rejects truncated streams at every stage", () => {
+test("gunzip rejects truncated streams at every stage", async () => {
   const full = gzipped(pseudoRandom(8192));
-  // 18 bytes is header plus trailer: past the length guard, no deflate data.
-  for (const cut of [18, Math.floor(full.length / 2), full.length - 1]) {
-    assert.throws(() => gunzip(full.subarray(0, cut)), CorruptError, `cut at ${cut}`);
+  // 10 is the header alone; length - 4 drops ISIZE, length - 1 its last byte.
+  for (const cut of [10, 18, Math.floor(full.length / 2), full.length - 4, full.length - 1]) {
+    await rejectsCorrupt(gunzip(full.subarray(0, cut)), "gzip", cut, `cut at ${cut}`);
   }
 });
 
-test("gunzip rejects a corrupted deflate payload instead of returning garbage", () => {
-  // fflate inflates this one without complaint and returns wrong bytes of the
-  // right length; only the CRC32 trailer catches it (R9).
+test("gunzip rejects a corrupted deflate payload instead of returning garbage", async () => {
+  // fflate inflated this one to wrong bytes of the right length; only the
+  // CRC32 trailer catches it (R9).
   const full = gzipped(pseudoRandom(4096));
-  const bad = flipByte(full, 15);
-  assert.doesNotThrow(() => fflateGunzipSync(bad), "vector no longer exercises the CRC path");
-  assert.throws(() => gunzip(bad), (error: unknown) => {
-    assert.ok(error instanceof CorruptError);
-    assert.match(error.message, /CRC32 0x[0-9a-f]{8} does not match the trailer's 0x[0-9a-f]{8}/);
-    return true;
-  });
+  await rejectsCorrupt(gunzip(flipByte(full, 15)), "gzip", full.length);
 });
 
-test("gunzip rejects a trailer whose length disagrees with the output", () => {
+test("gunzip rejects a CRC32 trailer that disagrees with the output", async () => {
+  const full = gzipped(pseudoRandom(4096));
+  // CRC32 is the four bytes before ISIZE, little-endian.
+  await rejectsCorrupt(gunzip(flipByte(full, full.length - 8)), "gzip", full.length);
+});
+
+test("gunzip rejects a trailer whose length disagrees with the output", async () => {
   const full = gzipped(pseudoRandom(4096));
   const bad = full.slice();
   bad[bad.length - 1]! ^= 0x01; // ISIZE is the last four bytes, little-endian
-  assert.throws(() => gunzip(bad), (error: unknown) => {
-    assert.ok(error instanceof CorruptError);
-    assert.match(error.message, /gzip wrote 4096 bytes but its trailer expected \d+/);
-    return true;
-  });
+  await rejectsCorrupt(gunzip(bad), "gzip", full.length);
 });
 
-test("unzlib rejects input too short to hold a header and trailer", () => {
-  assert.throws(() => unzlib(Uint8Array.of(0x78, 0x9c, 0x03)), CorruptError);
+test("gunzip rejects bytes after the end of the stream", async () => {
+  const full = gzipped(pseudoRandom(1024));
+  await rejectsCorrupt(gunzip(append(full, 1, 2, 3)), "gzip", full.length + 3);
 });
 
-test("unzlib rejects truncated streams, including the one fflate empties", () => {
+test("unzlib rejects empty input and input too short to hold a header and trailer", async () => {
+  await rejectsCorrupt(unzlib(new Uint8Array(0)), "zlib", 0);
+  await rejectsCorrupt(unzlib(Uint8Array.of(0x78, 0x9c, 0x03)), "zlib", 3);
+});
+
+test("unzlib rejects truncated streams, including one cut to its header", async () => {
   const full = zlibbed(pseudoRandom(8192));
-  // Cut to six bytes fflate returns zero bytes rather than throwing; the
-  // Adler-32 check is what turns that into a CorruptError (R9).
-  assert.doesNotThrow(
-    () => fflateUnzlibSync(full.subarray(0, 6)),
-    "vector no longer exercises the Adler-32 path",
-  );
-  for (const cut of [6, Math.floor(full.length / 2), full.length - 1]) {
-    assert.throws(() => unzlib(full.subarray(0, cut)), CorruptError, `cut at ${cut}`);
+  // Cut to its 2-byte header or to six bytes, fflate returned zero bytes
+  // rather than throwing (R9).
+  for (const cut of [2, 6, Math.floor(full.length / 2), full.length - 1]) {
+    await rejectsCorrupt(unzlib(full.subarray(0, cut)), "zlib", cut, `cut at ${cut}`);
   }
 });
 
-test("unzlib rejects a corrupted deflate payload instead of returning garbage", () => {
+test("unzlib rejects a corrupted deflate payload instead of returning garbage", async () => {
   const full = zlibbed(pseudoRandom(4096));
-  const bad = flipByte(full, Math.floor(full.length / 2));
-  assert.doesNotThrow(() => fflateUnzlibSync(bad), "vector no longer exercises the Adler-32 path");
-  assert.throws(() => unzlib(bad), (error: unknown) => {
-    assert.ok(error instanceof CorruptError);
-    assert.match(error.message, /Adler-32 0x[0-9a-f]{8} does not match the trailer's/);
-    return true;
-  });
+  await rejectsCorrupt(unzlib(flipByte(full, Math.floor(full.length / 2))), "zlib", full.length);
 });
 
-test("unzlib rejects a stream with a broken zlib header", () => {
-  const bad = flipByte(zlibbed(pseudoRandom(1024)), 0);
-  assert.throws(() => unzlib(bad), CorruptError);
+test("unzlib rejects an Adler-32 trailer that disagrees with the output", async () => {
+  const full = zlibbed(pseudoRandom(4096));
+  await rejectsCorrupt(unzlib(flipByte(full, full.length - 1)), "zlib", full.length);
+});
+
+test("unzlib rejects a stream with a broken zlib header", async () => {
+  const full = zlibbed(pseudoRandom(1024));
+  await rejectsCorrupt(unzlib(flipByte(full, 0)), "zlib", full.length);
+});
+
+test("unzlib rejects bytes after the end of the stream", async () => {
+  const full = zlibbed(pseudoRandom(1024));
+  await rejectsCorrupt(unzlib(append(full, 1, 2, 3)), "zlib", full.length + 3);
 });
 
 test("brotli input throws UnsupportedError naming brotli", () => {

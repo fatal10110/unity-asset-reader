@@ -1,4 +1,7 @@
-import { load, type Env, type LoadOptions, type LoadSource } from "./env.js";
+import { detectFileType } from "./bundle/detect.js";
+import { gunzip } from "./codec/inflate.js";
+import { MAX_DEPTH, load, toInput, type Env, type LoadOptions, type LoadSource } from "./env.js";
+import { UnsupportedError } from "./errors.js";
 
 // The package compiles with `lib: ["ES2020"]` and no DOM or node types (R4),
 // so the WHATWG types `open()` takes are declared here by the members it
@@ -47,7 +50,8 @@ export interface URLLike {
  * - bytes or `{ name, data }`: passed to `load()` unchanged.
  *
  * A file that gets no name from any of these is called `"input <index>"`, as
- * in `load()`.
+ * in `load()`. Whatever the source, a gzip-wrapped file is unwrapped before
+ * `load()` sees it (see {@link open}).
  */
 export type OpenSource = string | URLLike | RequestLike | ResponseLike | BlobLike | LoadSource;
 
@@ -65,9 +69,16 @@ export interface OpenOptions extends LoadOptions {
 declare const fetch: ((input: string | RequestLike) => Promise<ResponseLike>) | undefined;
 
 /**
- * Fetch or read files, then {@link load} them: the async way in, for input
- * that is not bytes yet. Only getting the bytes is async; parsing stays sync,
- * inside `load()` (D4).
+ * Fetch or read files, unwrap the gzip-wrapped ones, then {@link load} them:
+ * the async way in, for input that is not bytes yet or is gzip-wrapped. Only
+ * getting the bytes and inflating gzip are async; parsing stays sync, inside
+ * `load()` (D4), which refuses a gzip-wrapped file itself.
+ *
+ * A gzip wrapper (magic `1f 8b`, as a web server's `.gz` file has) is inflated
+ * with {@link gunzip}, again while the result is gzip too, and the result
+ * keeps the file's name: a wrapped bundle's files carry their own names, and
+ * a wrapped SerializedFile or resource keeps the `.gz` one, as upstream, which
+ * sniffs the inflated bytes under the same path, names it.
  *
  * Every source is fetched or read at once, and the files are passed to
  * `load()` in the order given, so `load()`'s "first one loaded" rules follow
@@ -87,6 +98,9 @@ declare const fetch: ((input: string | RequestLike) => Promise<ResponseLike>) | 
  *   message prefixed with the URL
  * @throws {TypeError} when a source is none of the above, or a URL is given
  *   and there is neither `options.fetch` nor a global `fetch`
+ * @throws {CorruptError} when a gzip-wrapped file does not inflate (see
+ *   {@link gunzip}), naming the file
+ * @throws {UnsupportedError} when a file is wrapped in gzip more than 16 times
  * @throws what `load()` throws
  */
 export async function open(
@@ -94,8 +108,30 @@ export async function open(
   options: OpenOptions = {},
 ): Promise<Env> {
   const list: readonly OpenSource[] = isList(sources) ? sources : [sources];
-  const inputs = await Promise.all(list.map((source, index) => read(source, index, options)));
+  const inputs = await Promise.all(list.map(async (source, index) => {
+    const { name, data } = toInput(await read(source, index, options), index);
+    return { name, data: await unwrapGzip(name, data) };
+  }));
   return load(inputs, options);
+}
+
+/** Inflate `data` for as long as it is gzip-wrapped, naming the file in any error. */
+async function unwrapGzip(name: string, data: Uint8Array): Promise<Uint8Array> {
+  for (let depth = 1; detectFileType(data) === "gzip"; depth++) {
+    try {
+      // A gzip quine inflates to itself; this ends it the way `load()` ends
+      // any other nesting.
+      if (depth > MAX_DEPTH) {
+        const limit = `above the ${MAX_DEPTH} level limit`;
+        throw new UnsupportedError("container nesting", depth, limit);
+      }
+      data = await gunzip(data);
+    } catch (error) {
+      if (error instanceof Error) error.message = `${name}: ${error.message}`;
+      throw error;
+    }
+  }
+  return data;
 }
 
 /** `Array.isArray`, which does not narrow a union with a `readonly` array by itself. */

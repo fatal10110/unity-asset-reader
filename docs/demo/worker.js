@@ -4,7 +4,7 @@
 // details trees, RGBA pixels.
 //
 // Import maps do not reach into Workers, so the packages come from jsDelivr's
-// `/+esm` endpoint, which rewrites their own bare imports (`fflate`,
+// `/+esm` endpoint, which rewrites their own bare imports (`lzma1`,
 // `unity-asset-reader`, `texture2ddecoder-wasm`, ...) to CDN URLs too.
 //
 // The page starts this file as `worker.js?local` when it was opened with
