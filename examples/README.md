@@ -48,7 +48,7 @@ and RGBA pixels that go straight into `ImageData`. The page itself imports nothi
 - **No special headers.** Everything is single-threaded (D6), so the page works from any static
   host without COOP/COEP. It has to be served over HTTP, not opened as `file://`.
 - **One exact version per package.** jsDelivr's `/+esm` build of
-  `unity-asset-reader-texture@1.3.0` imports `unity-asset-reader@1.3.0/+esm` and
+  `unity-asset-reader-texture@2.0.0` imports `unity-asset-reader@2.0.0/+esm` and
   `texture2ddecoder-wasm@1.2.6/+esm`: exact versions, not ranges.
   - The Worker imports core at that same version, so core is loaded once.
   - It takes the WASM from that same decoder release.

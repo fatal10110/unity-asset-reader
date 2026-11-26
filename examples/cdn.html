@@ -124,13 +124,14 @@
     <div class="info">
       <strong>How this works</strong> (the Worker, <code>cdn-worker.js</code>):
       <pre><code>const CDN = "https://cdn.jsdelivr.net/npm";
-const { load, ClassID } = await import(`${CDN}/unity-asset-reader@1.0.0/+esm`);
+const { open, ClassID } = await import(`${CDN}/unity-asset-reader@2.0.0/+esm`);
 const { initTexture, decodeTexture2D } =
-  await import(`${CDN}/unity-asset-reader-texture@1.0.0/+esm`);
+  await import(`${CDN}/unity-asset-reader-texture@2.0.0/+esm`);
 // The decoder release the texture package imports; a Worker needs 1.2.3 or later (#149).
-await initTexture({ wasmPath: `${CDN}/texture2ddecoder-wasm@1.2.3/wasm` });
+await initTexture({ wasmPath: `${CDN}/texture2ddecoder-wasm@1.2.6/wasm` });
 
-const env = load([{ name: file.name, data: new Uint8Array(await file.arrayBuffer()) }]);
+// open(), not load(): it also unwraps a gzip-wrapped file.
+const env = await open([{ name: file.name, data: new Uint8Array(await file.arrayBuffer()) }]);
 for (const obj of env.objects) {
   if (obj.type === ClassID.Texture2D) {
     const { data, width, height } = await decodeTexture2D(obj.read()); // RGBA, top row first
