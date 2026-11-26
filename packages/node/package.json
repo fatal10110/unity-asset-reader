@@ -1,6 +1,6 @@
 {
   "name": "unity-asset-reader-node",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Node.js adapter for unity-asset-reader: file and directory loading with sidecar resolution.",
   "license": "MIT",
   "main": "dist/index.cjs",
@@ -31,7 +31,7 @@
     "nodejs"
   ],
   "peerDependencies": {
-    "unity-asset-reader": "^1"
+    "unity-asset-reader": "^2"
   },
   "devDependencies": {
     "unity-asset-reader": "*"

@@ -17,7 +17,7 @@ npm install unity-asset-reader unity-asset-reader-mesh
 ```
 
 `unity-asset-reader` is a peer dependency, so your app has exactly one copy of the parser. This
-package needs `^1.3.0`, the first core with the shared glTF writer and `formatSingle`.
+package needs `^2` (core 2.0.0 or later); 1.x of this package goes with core `^1.3.0`.
 
 ## Quick start
 

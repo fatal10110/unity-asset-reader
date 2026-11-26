@@ -38,7 +38,7 @@ versioning policy below explains when they ship in a minor version.
 
 ## unity-asset-reader
 
-### 2.0.0 - Unreleased
+### 2.0.0 - 2026-11-26
 
 **Breaking:** `gunzip()` and `unzlib()` are async, and `load()` refuses a gzip-wrapped file;
 `open()` unwraps it instead (#348).
@@ -379,8 +379,12 @@ WASM.
 
 ## unity-asset-reader-texture
 
-### 1.4.0 - Unreleased
+### 2.0.0 - 2026-11-26
 
+- **Breaking: peer** `unity-asset-reader@^2`: this version uses core's `crc32`, `diff()` entries
+  and the Cubemap, Texture2DArray and Texture3D readers, all new in core 2.0.0. Core 2.0.0 is a
+  breaking release, so the packages move with it (versioning policy); for core 1.x, stay on 1.x
+  of this package.
 - **New `encodePngCompressed(image)`** (#337, plan revision 2026-11-26b): an async PNG encoder
   that filters each row (None, Sub or Up) and deflates it with the platform's
   `CompressionStream("deflate")`, for a much smaller file of the same pixels as `encodePng`.
@@ -516,11 +520,13 @@ First release. Peer: `unity-asset-reader@^1`; depends on `texture2ddecoder-wasm@
 
 ## unity-asset-reader-node
 
-### 1.1.1 - Unreleased
+### 2.0.0 - 2026-11-26
 
+- **Breaking: peer** `unity-asset-reader@^2`. Core 2.0.0 is a breaking release, so the
+  packages move with it (versioning policy); for core 1.x, stay on 1.x of this package.
 - **`loadPath()` unwraps gzip itself**, sync, with `node:zlib` (#348). Core's `load()` refuses gzip
   from 2.0.0 on, because the platform inflate is async; `loadPath()` stays sync and reads a
-  gzip-wrapped file as before, with core 1.x or 2.x. A file that does not inflate throws a
+  gzip-wrapped file as before. A file that does not inflate throws a
   `CorruptError` naming it. A gzip-wrapped loose SerializedFile now loads its externals too.
 
 ### 1.1.0 - 2026-10-16
@@ -547,6 +553,12 @@ First release. Peer: `unity-asset-reader@^1`.
   parts and picks up `.resS`/`.resource` sidecars.
 
 ## unity-asset-reader-mesh
+
+### 2.0.0 - 2026-11-26
+
+- **Breaking: peer** `unity-asset-reader@^2`. Core 2.0.0 is a breaking release, so the
+  packages move with it (versioning policy); for core 1.x, stay on 1.x of this package.
+- No other change.
 
 ### 1.0.1 - 2026-11-09
 
@@ -586,6 +598,12 @@ First release. Peer: `unity-asset-reader@^1.2.0`, the first core that decodes `M
     `COLOR_0` with a component outside 0 to 1.
 
 ## unity-asset-reader-audio
+
+### 2.0.0 - 2026-11-26
+
+- **Breaking: peer** `unity-asset-reader@^2`. Core 2.0.0 is a breaking release, so the
+  packages move with it (versioning policy); for core 1.x, stay on 1.x of this package.
+- No other change.
 
 ### 1.1.0 - 2026-11-09
 
@@ -631,6 +649,12 @@ First release. Peer: `unity-asset-reader@^1`.
 
 ## unity-asset-reader-spine
 
+### 2.0.0 - 2026-11-26
+
+- **Breaking: peer** `unity-asset-reader@^2`. Core 2.0.0 is a breaking release, so the
+  packages move with it (versioning policy); for core 1.x, stay on 1.x of this package.
+- No other change.
+
 ### 1.0.1 - 2026-11-09
 
 - **Peer:** `unity-asset-reader@^1.3.0`, the first core with `resolveOrThrow`.
@@ -654,6 +678,12 @@ First release. Peer: `unity-asset-reader@^1`.
   an atlas type without `atlasFile`.
 
 ## unity-asset-reader-shader
+
+### 2.0.0 - 2026-11-26
+
+- **Breaking: peer** `unity-asset-reader@^2`. Core 2.0.0 is a breaking release, so the
+  packages move with it (versioning policy); for core 1.x, stay on 1.x of this package.
+- No other change.
 
 ### 1.1.0 - 2026-11-09
 
@@ -696,8 +726,11 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ## unity-asset-reader-animation
 
-### 1.1.0 - Unreleased
+### 2.0.0 - 2026-11-26
 
+- **Breaking: peer** `unity-asset-reader@^2`: this version uses core's `crc32`, new in core
+  2.0.0. Core 2.0.0 is a breaking release, so the packages move with it (versioning policy); for
+  core 1.x, stay on 1.x of this package.
 - Internal: `crc32` encodes names with `TextEncoder` instead of a hand-written UTF-8
   encoder (#349). Same hashes, a lone surrogate still as U+FFFD.
 - Internal: `crc32` hashes the UTF-8 bytes with core's `crc32` instead of its own table (#350).
@@ -772,7 +805,7 @@ scene readers.
 
 ## unity-asset-reader-cli
 
-### 1.0.0 - Unreleased
+### 1.0.0 - 2026-11-26
 
 First release (version 0.0.0 until then: plan revision 2026-11-10b). An application, run with
 `npx unity-asset-reader-cli`: it takes core, `unity-asset-reader-node`, `-texture`, `-audio`,

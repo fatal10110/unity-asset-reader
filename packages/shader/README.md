@@ -23,7 +23,8 @@ A built Unity shader holds two things, and the text shows both:
 npm install unity-asset-reader unity-asset-reader-shader
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.3.0` or later), so your app has exactly one copy
+`unity-asset-reader` is a peer dependency (`^2`; 1.x of this package goes with core
+`^1.3.0`), so your app has exactly one copy
 of the parser.
 
 ## Usage

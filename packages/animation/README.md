@@ -34,8 +34,8 @@ Node.js.
 npm install unity-asset-reader unity-asset-reader-animation
 ```
 
-`unity-asset-reader` is a peer dependency (`^1.3.0`, the first core to read `AnimationClip`,
-`Avatar`, `Animator` and the scene objects), so your app has exactly one copy of the parser.
+`unity-asset-reader` is a peer dependency (`^2`: this version uses core 2.0.0's `crc32`; 1.x of this
+package goes with core `^1.3.0`), so your app has exactly one copy of the parser.
 
 ## Usage
 
