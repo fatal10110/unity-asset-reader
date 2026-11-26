@@ -658,6 +658,8 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ### 1.1.0 - Unreleased
 
+- Internal: `crc32` encodes names with `TextEncoder` instead of a hand-written UTF-8
+  encoder (#349). Same hashes, a lone surrogate still as U+FFFD.
 - **Humanoid clips: the fingers are converted, and the UpperChest fold follows the Avatar**
   (#325). Checked against Unity's poses of two new fixture rigs in all four fixture editors
   (`fixtures/humanoid2-unity-goldens.json`, `fixtures/BUILDING.md` section 31).
