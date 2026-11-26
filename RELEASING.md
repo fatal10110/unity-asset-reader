@@ -38,11 +38,21 @@ Releases are published by the workflow, never from a laptop.
    - Then it runs the whole gate and `npm publish --dry-run` for each.
    - It fails when a package needs a range that neither npm nor an earlier package of the same
      release satisfies.
+   - It cannot see npm authentication. Before merging, check that every package to release (other
+     than a first publish) has a trusted publisher: the publisher of its latest version,
+     `npm view <name> _npmUser.name`, is `GitHub Actions`. A maintainer's name there means that
+     version went out with a token, and the package may never have been linked: link it first
+     ([Trusted publisher, per package](#trusted-publisher-per-package)), or its publish fails
+     with `EOTP` ([When a release fails](#when-a-release-fails)).
 3. **Merge** once CI and the dry run are green. The push to `main` runs the workflow for real: it
    publishes the packages whose version changed in that push, then tags each one
    `<name>@<version>`.
 4. **Watch the Release run** (Actions → Release). If it fails, see
    [When a release fails](#when-a-release-fails).
+   - npm's registry can take a few minutes to show a new version: `npm view` and the package page
+     may still name the old `latest` while the run says `+ <name>@<version>`. Ask for the exact
+     version (`https://registry.npmjs.org/<name>/<version>`) and wait a few minutes before
+     taking a version for missing.
 5. **GitHub release**, optional, from the tag, with the version's `CHANGELOG.md` section as notes:
    ```bash
    gh release create <name>@<version> --title "<name> <version>" --notes-file <file with that section>
@@ -161,6 +171,14 @@ are; the `<name>@<version>` tags never collide with them.
 - **Outside the code** (network, npm outage, a trusted-publisher typo): fix it and *Re-run failed
   jobs*. The re-run plans again against the same commits and skips what is on npm already. Or run
   the workflow by hand on `main` with `dry_run` unticked: it publishes every version not on npm.
+- **`EOTP` ("This operation requires a one-time password")** in the publish step: npm refused
+  the job's OIDC token for that package, so it has no matching trusted publisher, and fell back
+  to the `NPM_TOKEN` secret, which cannot pass 2FA. On 2026-11-26 this stopped the 2.0.0 release
+  at `unity-asset-reader-mesh`. Mesh, audio, spine, shader and animation had their first publish
+  with a token and were never linked. Core, texture and node had gone out before it.
+  Link the trusted publisher of every package left
+  ([Trusted publisher, per package](#trusted-publisher-per-package)), then *Re-run failed jobs*.
+  The run skips what is on npm and tags only what it publishes.
 - **The code or the packaging:** fix it on `main` and release the next patch version. Deprecate
   any package that did get out at the broken version:
   `npm deprecate <name>@<version> "broken release, use <next>"`.
@@ -238,7 +256,7 @@ tokens*. Trusted publishing keeps working, and no leaked token can publish.
 
 A package that is not on npm yet cannot have a trusted publisher, so its first publish needs a
 token. Every package of this repo has had its first publish (the last was
-`unity-asset-reader-animation` 1.0.0, 2026-11-09). This section applies to the next new package.
+`unity-asset-reader-cli` 1.0.0, 2026-11-26). This section applies to the next new package.
 The options, least bad first:
 
 | Option | Cost |
@@ -275,7 +293,10 @@ It is a release PR like any other: its `version` goes from `0.0.0` to `1.0.0`
    answer a 2FA prompt), with a short expiry.
 2. **The PR's dry run** must list `<name>@1.0.0`.
 3. **After the Release run publishes it:**
-   1. Link its trusted publisher ([above](#trusted-publisher-per-package)).
+   1. Link its trusted publisher ([above](#trusted-publisher-per-package)). Do not skip this:
+      without it, the package's next release falls back to the token and fails with `EOTP`, or
+      with `ENEEDAUTH` once the secret is gone ([When a release fails](#when-a-release-fails)). Check that `npm view <name> _npmUser.name`
+      says `GitHub Actions` after that next release.
    2. Delete the `NPM_TOKEN` secret (Settings → Secrets and variables → Actions) and revoke the
       token on npmjs.com.
    3. Set *disallow tokens* for the package (above).

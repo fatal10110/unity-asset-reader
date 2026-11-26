@@ -23,6 +23,11 @@ Unity textures. Each row says whether a library's documentation claims the featu
   external dependencies: on **2026-10-16**.
 - The animation and skinned-model rows: on **2026-11-09** (`unityfs-js` 0.2.9,
   `node-asset-studio-mod-js` 0.1.7).
+- The rows for mip levels, `Texture2DArray`, `Cubemap` and `Texture3D`, build comparison and a
+  command line tool, and `@tootallnate/unity-asset`'s animation-curve entry: on **2026-11-26**
+  (`@arkntools/unity-js` 5.3.0, `unityfs-js` 0.2.9, `node-asset-studio-mod-js` 0.1.7,
+  `node-asset-studio-mod` 1.0.5 with AssetStudioMod's README, `@tootallnate/unity-asset` 0.1.1,
+  `@lego-fan9/asset-studio-web` 1.0.2, `texture2ddecoder.js` 1.1.0).
 
 ## Libraries and sources
 
@@ -47,9 +52,13 @@ Unity textures. Each row says whether a library's documentation claims the featu
 | Uses WebAssembly | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ | ✓ |
 | Requires .NET | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ |
 | Requires a browser Buffer polyfill | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Command line tool | ✓ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ |
 
 Our library parses Unity files without WASM. Only its compressed texture decoder uses
 WebAssembly.
+
+Our command line tool is `unity-asset-reader-cli` (`ls`, `info`, `extract`, `dump`, `diff`),
+run with `npx`. Studio CLI's is AssetStudioMod's own CLI, which `node-asset-studio-mod` wraps.
 
 ## Containers and compression
 
@@ -77,6 +86,9 @@ WebAssembly.
 | Read TextAsset | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Read MonoBehaviour data through type trees | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 | Decode Texture2D | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Decode mip levels past the first | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Decode Texture2DArray slices | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Decode Cubemap faces and Texture3D slices | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Extract Sprite images | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Merge separate sprite alpha textures | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Extract sprites of a variant (scaled) SpriteAtlas | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -85,17 +97,28 @@ WebAssembly.
 | Decode audio to WAV / OGG / MP3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export meshes or models | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Export skinned models (bones and skin weights) | ✓ | ✗ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| Read AnimationClip curves as data | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Read AnimationClip curves as data | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ |
 | Export models with their animation clips | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Convert humanoid (muscle) clips to bone rotations | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Export Live2D | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Export Spine | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Export shader inspection text | ✓ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ |
 | Edit assets and repack bundles | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Compare two builds (added, removed and changed assets) | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Decode raw compressed texture blocks | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 Notes on these rows:
 
+- **Mip levels and layered textures:** our `unity-asset-reader-texture` decodes any mip level of
+  a `Texture2D` (except Crunch, Switch and Xbox 360 ones past the first), and every face or slice
+  of a `Cubemap`, `Texture2DArray` or `Texture3D` at any level. Their pixels are checked against
+  the Unity editor's. It does not read `CubemapArray`.
+  - Studio JS exports "the base mip of each layer" of a `Texture2DArray`, so its mip-level ✗.
+  - AssetStudioMod lists `Texture2DArray` among the types it converts to images.
+- **Build comparison:** our core's `diff(oldEnv, newEnv)` matches the assets of two loaded builds
+  and lists what was added, removed or changed, with the differing type tree fields and the size
+  change. `unity-asset-reader-texture`'s `diffTexture()` compares a changed texture's pixels, and
+  `unity-asset-reader-cli diff` prints the list.
 - **Audio:** our library converts PCM and ADPCM clips to WAV, and Vorbis clips to Ogg when the
   caller supplies the Vorbis setup header table, of which none ships
   (`unity-asset-reader-audio`). It converts no other codec.
@@ -108,13 +131,17 @@ Notes on these rows:
     skinned meshes and blend shapes with its clips, as glTF 2.0.
   - Its `clipCurves()` returns a clip's decoded keyframes (streamed, dense and constant), paths
     and events as data. It writes no `.anim` YAML.
-  - Humanoid clips become bone rotations, checked against the Unity editor. Their body position
-    (`RootT`), finger muscles and root motion are not converted.
+  - Humanoid clips become bone rotations, fingers included, checked against the Unity editor.
+    Their body position (`RootT`), root motion and IK goals are not converted.
   - Studio JS and Studio CLI export animated models as FBX (Studio JS's `fbxAnimation`, the
     CLI's `--fbx-animation`). Studio JS lists humanoid muscle retargeting as unsupported, and
     AssetStudioMod does not document it.
   - unityfs-js exports a `SkinnedMeshRenderer` as a `.glb`, which its README calls a
     skeletal-animation model (骨骼动画模型), and names no animation clip.
+  - `@tootallnate/unity-asset` 0.1.1 decodes clips with `decodeUnityAnimationClip` (streamed,
+    dense and constant curves to Transform tracks), hence its curve ✓. Its `extractUnityMesh`
+    returns mesh data with skin weights and bind poses, but writes no file. The STL / 3MF export
+    and the skinned 3D view belong to its nx-archive application, so its export rows stay ✗.
   - Studio CLI's skinned-model ✓ rests on AssetStudioMod's Animator FBX export and its bone
     options (`--fbx-bone-size`). Its documentation does not say "skin weights".
 - **Spine:** exporting Spine means grouping each spine-unity skeleton's data, atlas text and

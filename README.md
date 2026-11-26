@@ -9,7 +9,7 @@ browse its contents, and preview its textures and sprites.
 - The parser is written in TypeScript. Compressed texture decoding uses WebAssembly.
 - You do not need Unity, .NET, or a native application installed.
 - Packages for meshes, audio, Spine, shaders and animation build on the same core.
-- A command line tool lists, inspects and extracts bundles: `npx unity-asset-reader-cli`.
+- A command line tool lists, inspects, extracts and compares bundles: `npx unity-asset-reader-cli`.
 
 ## Quick start
 
@@ -39,8 +39,8 @@ for await (const { rgba, width, height, path, name, formatName } of images(env))
   call `load(bytes)`. `bytes` is a `Uint8Array` or an `ArrayBuffer` (a `Buffer` is a
   `Uint8Array` too). Or call `await open(url)` to fetch the file.
 - **Saving a PNG:** `encodePng({ data: rgba, width, height })` from `unity-asset-reader-texture`
-  returns the file's bytes, uncompressed. For smaller files, hand the RGBA to an image library,
-  for example `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
+  returns the file's bytes, uncompressed and sync. `await encodePngCompressed(...)` returns a much
+  smaller file of the same pixels, deflated by the platform's `CompressionStream`.
 
 ### Browser
 
@@ -81,7 +81,8 @@ the Vite and Next.js setups.
 | Write shaders as AssetStudio's inspection text (GLSL, Metal, SPIR-V) | Add `unity-asset-reader-shader` |
 | Decode animation clips into curves, or export an animated scene to glTF (`.glb`) | Add `unity-asset-reader-animation` |
 | Decode raw texture blocks without reading Unity files | `texture2ddecoder-wasm` |
-| List, inspect or extract bundles from the command line, without writing code | `npx unity-asset-reader-cli` |
+| Compare two builds: the assets added, removed or changed | `unity-asset-reader` (`diff()`), plus `unity-asset-reader-texture` for changed pixels |
+| List, inspect, extract or compare bundles from the command line, without writing code | `npx unity-asset-reader-cli` |
 
 How they fit together:
 
@@ -97,7 +98,8 @@ What each package does, and what it leaves out:
 
 - **[Core](packages/core/README.md)** (`unity-asset-reader`): unpacks bundles, lists assets and
   reads their data. Use `load(bytes)` for bytes you already have, or `await open(url)` to fetch
-  a file. Its `GltfWriter` writes binary glTF 2.0 files from data you give it (meshes, nodes,
+  a file. `diff(oldEnv, newEnv)` lists the assets one build added, removed or changed against
+  another. Its `GltfWriter` writes binary glTF 2.0 files from data you give it (meshes, nodes,
   skins, morph targets, animations).
   It does not decode textures to pixels or audio to WAV, does not convert Unity meshes, and does
   not read the disk. It throws `UnsupportedError` on a compression, container or Unity version
@@ -105,7 +107,8 @@ What each package does, and what it leaves out:
 - **[Textures](packages/texture/README.md)** (`unity-asset-reader-texture`): converts
   `Texture2D` and `Sprite` assets to RGBA pixels with `await decodeImage(asset)`.
   It also decodes every mip level, and the faces and slices of `Cubemap`, `Texture2DArray` and
-  `Texture3D` assets. It does not decode a few formats such as `DXT3` and `ARGBFloat` (see
+  `Texture3D` assets. It writes PNG files (`encodePng`, `encodePngCompressed`) and compares a
+  changed texture's pixels across two builds (`diffTexture`). It does not decode a few formats such as `DXT3` and `ARGBFloat` (see
   [Texture formats](packages/texture/README.md#texture-formats)).
 - **[Node.js](packages/node/README.md)** (`unity-asset-reader-node`): loads a file or folder
   with `loadPath()`, including split bundles and resource sidecars.
@@ -132,13 +135,14 @@ What each package does, and what it leaves out:
   - `clipCurves(env, clip)` decodes an `AnimationClip` into the curves AssetStudio's `.anim`
     export holds: each curve's path, attribute and keyframes, and the clip's events.
   - `sceneToGltf(env, root, { clips })` exports a scene (nodes, skinned meshes, blend shapes)
-    with its clips as a glTF 2.0 `.glb`. A humanoid clip's muscles (fingers aside) and `RootQ`
-    are converted to bone rotations.
+    with its clips as a glTF 2.0 `.glb`. A humanoid clip's muscles, fingers included, and
+    `RootQ` are converted to bone rotations.
 
   It does not write `.anim` YAML. Of a humanoid clip, it does not convert the body position
-  (the Hips keep their own position), the finger muscles, the root motion or the IK goals.
+  (the Hips keep their own position), the root motion or the IK goals.
 - **[Command line](packages/cli/README.md)** (`unity-asset-reader-cli`): `ls`, `info`,
-  `extract` and `dump` for one bundle, file or folder, built on the packages above. `extract`
+  `extract` and `dump` for one bundle, file or folder, and `diff` for two builds, built on the
+  packages above. `extract`
   writes images as PNG, audio as WAV or Ogg, meshes as OBJ or glTF, shaders and text as text.
   It does not take several paths or globs (pass their folder), and does not export what the
   packages above do not (Direct3D shaders, MPEG audio, Vorbis audio without its setup headers).
@@ -157,13 +161,13 @@ What each package does, and what it leaves out:
     platforms.
   - [`unity-asset-reader-node`](packages/node/README.md): `loadPath()`.
   - [`unity-asset-reader-mesh`](packages/mesh/README.md): `meshToObj()`, `meshToGltf()`.
-  - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV.
+  - [`unity-asset-reader-audio`](packages/audio/README.md): FSB5 codecs to WAV and Ogg.
   - [`unity-asset-reader-spine`](packages/spine/README.md): `spineSkeletons()`.
   - [`unity-asset-reader-shader`](packages/shader/README.md): `shaderToText()`.
   - [`unity-asset-reader-animation`](packages/animation/README.md): `clipCurves()`,
     `sceneToGltf()`.
-  - [`unity-asset-reader-cli`](packages/cli/README.md): the `ls`, `info`, `extract` and `dump`
-    commands.
+  - [`unity-asset-reader-cli`](packages/cli/README.md): the `ls`, `info`, `extract`, `dump`
+    and `diff` commands.
 - [`examples/`](examples/README.md): a CDN page that reads a bundle in a Worker and draws its
   textures.
 
@@ -234,7 +238,8 @@ A few terms used below:
 - **Platforms:** Xbox 360 textures are byte-swapped back, and Switch textures deswizzled.
   Textures of every other build target are decoded as stored, except PS4 and PS5 ones, which
   are refused ([#130](https://github.com/fatal10110/unity-asset-reader/issues/130)).
-- **Runtimes:** browsers and Web Workers (ES2020, WebAssembly for textures); Node.js
+- **Runtimes:** browsers and Web Workers (ES2020, WebAssembly for textures,
+  `DecompressionStream` for gzip and zlib); Node.js
   `^20.19.0 || >=22.12.0`, with `import` and `require`.
 
 ### Unity versions
@@ -253,6 +258,9 @@ A few terms used below:
 - `Avatar`, `AnimatorController`, `Animator`, `AnimatorOverrideController`, `AnimationClip`,
   `Animation`, `GameObject`, `Transform`, `RectTransform`, `MeshFilter`, `MeshRenderer` and
   `SkinnedMeshRenderer` come from 2019.4, 2020.3, 6000.3.26f1 and 6000.6.
+- `Cubemap`, `Texture2DArray` and `Texture3D`, and the textures with mip levels, come from
+  2019.4, 2020.3, 6000.3.26f1 and 6000.6. Their pixels at every mip level are checked against
+  the Unity editor's.
 
 **Tested on generated or hand-written bytes only.** No real Unity build of these versions or
 containers is in the tests:
