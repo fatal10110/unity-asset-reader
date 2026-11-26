@@ -140,6 +140,36 @@ For smaller files, or other formats, hand the RGBA to an image library instead, 
 [`sharp`](https://www.npmjs.com/package/sharp):
 `sharp(rgba, { raw: { width, height, channels: 4 } }).png().toFile("out.png")`.
 
+### Compare a texture between two builds
+
+`diffTexture` takes a modified `Texture2D` from core's `diff()` and compares its pixels in the two
+builds:
+
+```js
+import { writeFileSync } from "node:fs";
+import { diff } from "unity-asset-reader";
+import { diffTexture, encodePng } from "unity-asset-reader-texture";
+
+for (const entry of diff(oldEnv, newEnv)) {
+  if (entry.change !== "modified" || entry.type !== "Texture2D") continue;
+  const result = await diffTexture(entry);
+  if (result.sizeChanged) {
+    console.log(entry.path, "resized", result.before, "->", result.after);
+  } else {
+    console.log(entry.path, `${(result.changedShare * 100).toFixed(1)}% of pixels changed`);
+    writeFileSync(`${entry.name}.diff.png`, encodePng(result.image));
+  }
+}
+```
+
+- Both sides' first mip level is decoded to RGBA. A pixel changed when any of its four bytes
+  differs, so a format change alone (RGB24 to an opaque RGBA32) changes no pixel.
+- `image` has the texture's size: opaque red where a pixel changed, transparent elsewhere.
+- When the width or height differs, nothing is decoded or compared: the result is
+  `{ sizeChanged: true, before, after }` with both sizes.
+- `diffTexture(before, after)` takes the two assets instead, for two textures matched some other
+  way than by `diff()`.
+
 ### Reuse an atlas across sprites
 
 The package keeps no decoded textures on its own. To decode each shared texture once across
@@ -358,6 +388,8 @@ Every export. Each one has full JSDoc (parameters, return values, what it throws
 | `convertPlain(data, width, height, format)` | One plain-format image to RGBA, rows **as stored** (bottom row first). No console layouts undone. `decodeTexture2D` is usually what you want |
 | `RgbaImage` | `{ data, width, height }`: 4 bytes per pixel, R G B A |
 | `encodePng(image)` | An `RgbaImage`, top row first, to a PNG file (8-bit RGBA, uncompressed deflate), sync |
+| `diffTexture(entry, options?)`, `diffTexture(before, after, options?)` | A modified `Texture2D` of core's `diff()`, or its two sides, compared pixel by pixel after decoding. Loads the WASM on first use |
+| `TextureDiff`, `TexturePixelDiff`, `TextureSizeChange` | What `diffTexture` returns: `{ sizeChanged: false, width, height, changedPixels, changedShare, image }`, or `{ sizeChanged: true, before, after }` when the sizes differ |
 
 ## Texture formats
 
