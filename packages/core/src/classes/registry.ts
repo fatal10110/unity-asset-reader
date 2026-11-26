@@ -5,7 +5,7 @@
 import type { ResourceRef } from "../env.js";
 import { CorruptError, ResourceNotFoundError } from "../errors.js";
 import type { BuildTarget } from "../serialized/BuildTarget.js";
-import { ClassID } from "../serialized/ClassID.js";
+import { ClassID, classIdName } from "../serialized/ClassID.js";
 import type { ObjectReader } from "../serialized/ObjectReader.js";
 import { baseName } from "../serialized/SerializedFile.js";
 import { readTypeTree, typeTreeOf, type TypeTreeObject } from "../serialized/TypeTreeReader.js";
@@ -31,6 +31,13 @@ import {
 } from "./Renderer.js";
 import { readShader, type Shader } from "./Shader.js";
 import { readTexture2D, type Texture2D } from "./Texture2D.js";
+import { readCubemap, type Cubemap } from "./Cubemap.js";
+import {
+  readTexture2DArray,
+  readTexture3D,
+  type Texture2DArray,
+  type Texture3D,
+} from "./Texture2DArray.js";
 import { readMonoBehaviour, type MonoBehaviour } from "./MonoBehaviour.js";
 import { readMonoScript, type MonoScript } from "./MonoScript.js";
 import { readSprite, type Sprite } from "./Sprite.js";
@@ -45,6 +52,9 @@ import { readVideoClipData, type VideoClipData } from "./VideoClip.js";
 import {
   toAnimationClipFields,
   toAnimationFields,
+  toCubemapFields,
+  toTexture2DArrayFields,
+  toTexture3DFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -94,6 +104,9 @@ import {
   type SpriteFields,
   type TextAssetFields,
   type Texture2DFields,
+  type CubemapFields,
+  type Texture2DArrayFields,
+  type Texture3DFields,
   type VideoClipFields,
 } from "./fields.js";
 
@@ -121,6 +134,51 @@ export interface Texture2DData extends Texture2D {
 }
 
 /**
+ * A `Cubemap` as `obj.read()` returns it: every field `readCubemap` reads,
+ * plus the image bytes of all six faces wherever they live and the platform,
+ * as {@link Texture2DData} has them.
+ */
+export interface CubemapData extends Cubemap {
+  /** The platform the object's file was built for; see {@link Texture2DData.platform}. */
+  platform: BuildTarget;
+  /**
+   * The image data of all six faces, each face `imageData.length / 6` bytes
+   * with all its mip levels; resolved as {@link Texture2DData.imageData} is.
+   */
+  imageData: Uint8Array;
+}
+
+/**
+ * A `Texture2DArray` as `obj.read()` returns it: every field
+ * `readTexture2DArray` reads, plus the image bytes of all slices wherever they
+ * live and the platform, as {@link Texture2DData} has them.
+ */
+export interface Texture2DArrayData extends Texture2DArray {
+  /** The platform the object's file was built for; see {@link Texture2DData.platform}. */
+  platform: BuildTarget;
+  /**
+   * The image data of all slices, each `imageData.length / m_Depth` bytes with
+   * all its mip levels; resolved as {@link Texture2DData.imageData} is.
+   */
+  imageData: Uint8Array;
+}
+
+/**
+ * A `Texture3D` as `obj.read()` returns it: every field `readTexture3D`
+ * reads, plus the image bytes wherever they live and the platform, as
+ * {@link Texture2DData} has them.
+ */
+export interface Texture3DData extends Texture3D {
+  /** The platform the object's file was built for; see {@link Texture2DData.platform}. */
+  platform: BuildTarget;
+  /**
+   * The image data, every mip level with all its depth slices; resolved as
+   * {@link Texture2DData.imageData} is.
+   */
+  imageData: Uint8Array;
+}
+
+/**
  * A `MonoBehaviour` as `obj.read()` returns it: the whole object as
  * `readTypeTree()` reads it when the file has a type tree, and otherwise the
  * header alone. The header fields have the same values and shapes either
@@ -143,6 +201,9 @@ export type MonoBehaviourData = MonoBehaviour & { [field: string]: unknown };
  */
 export interface ObjectDataMap {
   Texture2D: Texture2DData;
+  Cubemap: CubemapData;
+  Texture2DArray: Texture2DArrayData;
+  Texture3D: Texture3DData;
   AssetBundle: AssetBundle;
   TextAsset: TextAsset;
   MonoScript: MonoScript;
@@ -178,6 +239,9 @@ export interface ObjectDataMap {
  */
 export interface AssetDataMap {
   Texture2D: Texture2DFields;
+  Cubemap: CubemapFields;
+  Texture2DArray: Texture2DArrayFields;
+  Texture3D: Texture3DFields;
   AssetBundle: AssetBundleFields;
   TextAsset: TextAssetFields;
   MonoScript: MonoScriptFields;
@@ -234,6 +298,10 @@ type ClassReader<T> = (reader: ObjectReader, resources: ResourceReader | undefin
  */
 const CLASS_READERS: { readonly [K in keyof ObjectDataMap]: ClassReader<ObjectDataMap[K]> } = {
   Texture2D: readTexture2DData,
+  Cubemap: (reader, resources) => withImageData(readCubemap(reader), reader, resources),
+  Texture2DArray: (reader, resources) =>
+    withImageData(readTexture2DArray(reader), reader, resources),
+  Texture3D: (reader, resources) => withImageData(readTexture3D(reader), reader, resources),
   AssetBundle: readAssetBundle,
   TextAsset: readTextAsset,
   MonoScript: readMonoScript,
@@ -320,6 +388,9 @@ type FieldMapper<K extends keyof ObjectDataMap> = (
 /** The mapping to the {@link AssetDataMap} shape, by class name. */
 const FIELD_MAPPERS: { readonly [K in keyof ObjectDataMap]: FieldMapper<K> } = {
   Texture2D: toTexture2DFields,
+  Cubemap: toCubemapFields,
+  Texture2DArray: toTexture2DArrayFields,
+  Texture3D: toTexture3DFields,
   AssetBundle: toAssetBundleFields,
   TextAsset: toTextAssetFields,
   MonoScript: toMonoScriptFields,
@@ -386,7 +457,25 @@ function readTexture2DData(
   reader: ObjectReader,
   resources: ResourceReader | undefined,
 ): Texture2DData {
-  const texture = readTexture2D(reader);
+  return withImageData(readTexture2D(reader), reader, resources);
+}
+
+/**
+ * A texture with its image bytes resolved and its platform: what
+ * {@link readTexture2DData} says, for every texture class (#331).
+ */
+function withImageData<
+  T extends {
+    m_Width: number;
+    m_Height: number;
+    "image data": Uint8Array;
+    m_StreamData?: ResourceRef;
+  },
+>(
+  texture: T,
+  reader: ObjectReader,
+  resources: ResourceReader | undefined,
+): T & { imageData: Uint8Array; platform: BuildTarget } {
   const inline = texture["image data"];
   if (inline.length > 0) return { ...texture, imageData: inline, platform: reader.platform };
   const stream = texture.m_StreamData;
@@ -396,8 +485,9 @@ function readTexture2DData(
       return { ...texture, imageData: inline, platform: reader.platform };
     }
     throw new CorruptError(
-      `Texture2D ${reader.pathId} has no image data, neither inline nor in a .resS ` +
-        "(image data is empty and m_StreamData.path names no file)",
+      `${classIdName(reader.type) ?? `class ${reader.type}`} ${reader.pathId} has no image ` +
+        "data, neither inline nor in a .resS (image data is empty and m_StreamData.path " +
+        "names no file)",
     );
   }
   // A reader built outside `load()` has no files to look in.

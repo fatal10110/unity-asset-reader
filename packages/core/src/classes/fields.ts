@@ -114,7 +114,13 @@ import type {
   SkinnedMeshRenderer,
   StaticBatchInfo,
 } from "./Renderer.js";
-import type { MonoBehaviourData, Texture2DData } from "./registry.js";
+import type {
+  CubemapData,
+  MonoBehaviourData,
+  Texture2DArrayData,
+  Texture2DData,
+  Texture3DData,
+} from "./registry.js";
 import type {
   Binding,
   BufferBinding,
@@ -973,6 +979,122 @@ export function toTexture2DFields(data: Texture2DData): Texture2DFields {
     streamData: data.m_StreamData,
     imageData: data.imageData,
     platform: data.platform,
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Cubemap, Texture2DArray, Texture3D
+
+/**
+ * The friendly form of {@link CubemapData}: the `Texture2D` fields of the six
+ * faces, and the textures it was made from.
+ */
+export interface CubemapFields extends Texture2DFields {
+  /** Unity: `m_SourceTextures`. Often null pointers in a build. */
+  sourceTextures: PPtr[];
+}
+
+/**
+ * A `Cubemap` as {@link CubemapFields}.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toCubemapFields(data: CubemapData): CubemapFields {
+  return { ...toTexture2DFields(data), sourceTextures: data.m_SourceTextures };
+}
+
+/**
+ * The friendly form of {@link Texture3DData}: the header, the image bytes
+ * wherever they were stored, and the platform they were built for.
+ */
+export interface Texture3DFields extends TextureFields {
+  /** Unity: `m_ColorSpace`. */
+  colorSpace: number;
+  /**
+   * Unity: `m_Format`. A `GraphicsFormat` value, not a `TextureFormat`; see
+   * `textureFormatOfGraphicsFormat`.
+   */
+  format: number;
+  /** Unity: `m_Width`. */
+  width: number;
+  /** Unity: `m_Height`. */
+  height: number;
+  /** Unity: `m_Depth`. Depth slices (Texture3D) or slices (Texture2DArray). */
+  depth: number;
+  /** Unity: `m_MipCount`. */
+  mipCount: number;
+  /** Unity: `m_DataSize`. Bytes of image data, all mip levels. */
+  dataSize: number;
+  /** Unity: `m_TextureSettings`. */
+  textureSettings: GLTextureSettingsFields;
+  /** Unity: `m_UsageMode`. Unity 2020.2 and later. */
+  usageMode?: number;
+  /** Unity: `m_IsReadable`. */
+  isReadable: boolean;
+  /**
+   * Unity: `m_StreamData`. The byte range of a resource file holding the
+   * image when it is not inline (an empty `path` otherwise).
+   */
+  streamData: StreamingInfo;
+  /**
+   * The image, every mip level, still encoded in `format`, wherever it was
+   * stored (see {@link Texture3DData.imageData}). A view, never a copy (R7).
+   */
+  imageData: Uint8Array;
+  /** The platform the object's file was built for; not a field of the class. */
+  platform: BuildTarget;
+}
+
+/**
+ * The friendly form of {@link Texture2DArrayData}: the {@link Texture3DFields}
+ * of its slices, plus the mipmap limit fields of Unity 2023.2.
+ */
+export interface Texture2DArrayFields extends Texture3DFields {
+  /** Unity: `m_MipsStripped`. Unity 2023.2 and later. */
+  mipsStripped?: number;
+  /** Unity: `m_IgnoreMipmapLimit`. Unity 2023.2 and later. */
+  ignoreMipmapLimit?: boolean;
+  /** Unity: `m_MipmapLimitGroupName`. Unity 2023.2 and later. */
+  mipmapLimitGroupName?: string;
+}
+
+/**
+ * A `Texture3D` as {@link Texture3DFields}. Unity's inline `image data` is
+ * not carried over on its own: `imageData` is it whenever it holds anything.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toTexture3DFields(data: Texture3DData): Texture3DFields {
+  return defined({
+    ...texture(data),
+    colorSpace: data.m_ColorSpace,
+    format: data.m_Format,
+    width: data.m_Width,
+    height: data.m_Height,
+    depth: data.m_Depth,
+    mipCount: data.m_MipCount,
+    dataSize: data.m_DataSize,
+    textureSettings: textureSettings(data.m_TextureSettings),
+    usageMode: data.m_UsageMode,
+    isReadable: data.m_IsReadable,
+    streamData: data.m_StreamData,
+    imageData: data.imageData,
+    platform: data.platform,
+  });
+}
+
+/**
+ * A `Texture2DArray` as {@link Texture2DArrayFields}, as
+ * {@link toTexture3DFields} maps a `Texture3D`.
+ *
+ * @param data what `obj.read()` returns for the object
+ */
+export function toTexture2DArrayFields(data: Texture2DArrayData): Texture2DArrayFields {
+  return defined({
+    ...toTexture3DFields(data),
+    mipsStripped: data.m_MipsStripped,
+    ignoreMipmapLimit: data.m_IgnoreMipmapLimit,
+    mipmapLimitGroupName: data.m_MipmapLimitGroupName,
   });
 }
 

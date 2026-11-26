@@ -113,10 +113,17 @@ export function filled(nodes: GoldenNode[], entityIds = 0): Uint8Array {
         w.f32(n / 8);
         break;
       case "SInt64":
+      case "UInt64":
         w.u64(BigInt(n) << 33n);
         break;
       case "string":
         w.str(`s${n}`);
+        break;
+      case "TypelessData":
+        // A byte array (a texture's image data): a count, then the bytes.
+        w.i32(2);
+        w.u8(n);
+        w.u8(n + 1);
         break;
       default: {
         const child = i + 1;

@@ -124,6 +124,22 @@ export interface Texture2D extends Texture {
  *   last field
  */
 export function readTexture2D(reader: ObjectReader): Texture2D {
+  const out = readTexture2DFields(reader, "Texture2D");
+  if (reader.remaining !== 0) {
+    throw new CorruptError(
+      `Texture2D ${reader.pathId} ends at ${reader.position} of its ${reader.byteSize} bytes`,
+    );
+  }
+  return out;
+}
+
+/**
+ * The `Texture2D` fields through `m_StreamData`, without the end check.
+ * Internal: `readCubemap` reads them too, then its own field.
+ *
+ * @param owner the class, for error messages
+ */
+export function readTexture2DFields(reader: ObjectReader, owner: string): Texture2D {
   const base = readTexture(reader);
   const { version } = reader;
   const v2020_1 = atLeast(version, 2020, 1);
@@ -145,12 +161,12 @@ export function readTexture2D(reader: ObjectReader): Texture2D {
   // from 2020.1 only, so on 2019.4.9+ its next flags are one field off.
   if (v2020_1) {
     out.m_IsPreProcessed = readBool(reader);
-    readMipmapLimit(reader, out);
+    readMipmapLimit(reader, out, owner);
   } else if (atLeast(version, 2019, 4, 9)) {
-    readMipmapLimit(reader, out);
+    readMipmapLimit(reader, out, owner);
     out.m_IsPreProcessed = readBool(reader);
   } else {
-    readMipmapLimit(reader, out);
+    readMipmapLimit(reader, out, owner);
   }
   if (atLeast(version, 3, 0) && !atLeast(version, 5, 5)) out.m_ReadAllowed = readBool(reader);
   if (atLeast(version, 2018, 2)) out.m_StreamingMipmaps = readBool(reader);
@@ -174,13 +190,7 @@ export function readTexture2D(reader: ObjectReader): Texture2D {
   reader.align();
   // 5.3+. Upstream skips it when the data is inline, but Unity writes it
   // either way (empty then), and the object is not over until it is read.
-  if (atLeast(version, 5, 3)) out.m_StreamData = readStreamingInfo(reader);
-
-  if (reader.remaining !== 0) {
-    throw new CorruptError(
-      `Texture2D ${reader.pathId} ends at ${reader.position} of its ${reader.byteSize} bytes`,
-    );
-  }
+  if (atLeast(version, 5, 3)) out.m_StreamData = readStreamingInfo(reader, owner);
   // Every required field was set above.
   return out as Texture2D;
 }
@@ -189,18 +199,21 @@ export function readTexture2D(reader: ObjectReader): Texture2D {
  * The master texture limit flag, 2019.3+, with 2022.2's rename and its new
  * group name after it.
  */
-function readMipmapLimit(reader: ObjectReader, out: Partial<Texture2D>): void {
+function readMipmapLimit(reader: ObjectReader, out: Partial<Texture2D>, owner: string): void {
   if (atLeast(reader.version, 2022, 2)) {
     out.m_IgnoreMipmapLimit = readBool(reader);
     reader.align();
-    out.m_MipmapLimitGroupName = readStringField(reader, "Texture2D", "m_MipmapLimitGroupName");
+    out.m_MipmapLimitGroupName = readStringField(reader, owner, "m_MipmapLimitGroupName");
   } else if (atLeast(reader.version, 2019, 3)) {
     out.m_IgnoreMasterTextureLimit = readBool(reader);
   }
 }
 
-/** Upstream `GLTextureSettings(ObjectReader)`, minus the per-game field. */
-function readTextureSettings(reader: ObjectReader): GLTextureSettings {
+/**
+ * Upstream `GLTextureSettings(ObjectReader)`, minus the per-game field.
+ * Internal: shared with `Texture2DArray.ts`.
+ */
+export function readTextureSettings(reader: ObjectReader): GLTextureSettings {
   const m_FilterMode = reader.readInt32();
   const m_Aniso = reader.readInt32();
   const m_MipBias = reader.readFloat32();
@@ -249,7 +262,7 @@ export function readStreamingInfo(
   return { offset, size, path: readStringField(reader, owner, "m_StreamData path") };
 }
 
-/** A one-byte bool, as Unity writes it. */
-function readBool(reader: ObjectReader): boolean {
+/** A one-byte bool, as Unity writes it. Internal: shared with `Texture2DArray.ts`. */
+export function readBool(reader: ObjectReader): boolean {
   return reader.readUInt8() !== 0;
 }

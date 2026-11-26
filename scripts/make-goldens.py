@@ -119,6 +119,10 @@ DUMPED_CLASSES = {
     111: "Animation",
     # For its hardcoded reader (#315); only the ui-animation fixtures hold it.
     224: "RectTransform",
+    # For their hardcoded readers (#331); only the cube-array-3d fixtures hold them.
+    89: "Cubemap",
+    117: "Texture3D",
+    187: "Texture2DArray",
 }
 # Class id -> how to get at the raw bytes an object carries (#41), in the
 # `rawData` golden: its own field when inline, else its StreamedResource.
@@ -134,6 +138,7 @@ REGISTRY_V1_TERMINUS = (
 )
 REGISTRY_V1_TERMINUS_TYPE = ("Terminus", "UnityEngine.DMAT", "FAKE_ASM")
 TEXTURE2D = 28
+TEXTURE2DARRAY = 187
 MESH = 43
 SPRITE = 213
 # The fixture sprite whose crop is also turned every way a packer can turn it
@@ -463,6 +468,14 @@ def serialized_golden(name: str, sf) -> dict:
         # stays byte-identical to what it was before #31.
         if textures:
             out["textures"] = textures
+        # Only files holding a Texture2DArray get the key (#331).
+        arrays = {
+            str(obj.path_id): texture_array_golden(obj)
+            for obj in sorted(sf.objects.values(), key=lambda o: str(o.path_id))
+            if obj.class_id == TEXTURE2DARRAY
+        }
+        if arrays:
+            out["textureArrays"] = arrays
         raw = {
             str(obj.path_id): raw_data_golden(obj)
             for obj in sorted(sf.objects.values(), key=lambda o: str(o.path_id))
@@ -649,6 +662,27 @@ def texture_golden(obj) -> dict:
         )
     if out["format"] in ORACLE_DISAGREES:
         out["oracleNote"] = ORACLE_DISAGREES[out["format"]]
+    return out
+
+
+def texture_array_golden(obj) -> dict:
+    """Level 0 of each slice of one Texture2DArray, as UnityPy decodes it (#331).
+
+    UnityPy's `Texture2DArray.images` cuts the image data into `m_Depth` equal
+    slices and decodes the first level of each; `rgbaSha256` is each RGBA8
+    image top row first (its `flip=True` default). The pixels of every level
+    are the editor's (texture-layer-pixel-unity-goldens.json); this is the
+    second check at level 0 the owner set on #331.
+    """
+    array = obj.read()
+    out = {"name": array.m_Name, "format": int(array.m_Format), "width": int(array.m_Width),
+           "height": int(array.m_Height), "depth": int(array.m_Depth)}
+    try:
+        images = array.images
+    except Exception as error:  # noqa: BLE001 - any failure is recorded, never guessed around
+        out["oracleError"] = f"{type(error).__name__}: {error}"
+        return out
+    out["rgbaSha256"] = [sha256(image.convert("RGBA").tobytes()) for image in images]
     return out
 
 

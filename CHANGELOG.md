@@ -56,6 +56,23 @@ versioning policy below explains when they ship in a minor version.
   `obj.read()` and `obj.readTypeTree()` then read the script's fields. A tree that does not fit
   throws `CorruptError` naming the script; `[SerializeReference]` data throws
   `UnsupportedError`. New type `TypeTreeNodeData`, the plain-JSON node format (#339).
+- **New readers for `Cubemap`, `Texture2DArray` and `Texture3D`** (#331), Unity 2019.1 and
+  later: `readCubemap`, `readTexture2DArray`, `readTexture3D`, the friendly shapes
+  `CubemapFields`, `Texture2DArrayFields`, `Texture3DFields` (`toCubemapFields`, ...), and
+  `GraphicsFormat` with `textureFormatOfGraphicsFormat`, which maps the `m_Format` of an array or
+  3D texture to the `TextureFormat` it decodes as (the values a fixture checks; any other is an
+  `UnsupportedError`). `diff()` now compares their streamed data in builds without type trees.
+  **Behavior change** for the three classes:
+  - They were `"Other"` in `env.assets()`, with `asset.data` and `obj.read()` the type tree's
+    result.
+  - Now `asset.type` is `"Cubemap"`, `"Texture2DArray"` or `"Texture3D"`, and `asset.data` their
+    friendly shape.
+  - `obj.read()` gives the type tree's fields as before, plus `imageData` (inline or read from
+    the `.resS`) and `platform`; `m_StreamData.offset` is a `number`. It now also reads a file
+    without type trees (it threw `UnsupportedError`).
+  - It throws `UnsupportedError` for a Unity version before 2019.1 (use `readTypeTree()`) and for
+    an editor file, `ResourceNotFoundError` when the `.resS` is not loaded, and `CorruptError`
+    when the object has no image data at all.
 
 ### 1.3.0 - 2026-11-09
 
@@ -353,6 +370,12 @@ WASM.
   for every plain and block format; checked against the Unity editor's pixels of every level. A
   level past the mip count is a `RangeError`; past level 0, Crunch, Switch and Xbox 360 textures
   are an `UnsupportedError`.
+- **New `decodeCubemap`, `decodeTexture2DArray` and `decodeTexture3D`** (#331): the six faces of
+  a cubemap, the slices of a texture array or the depth slices of a 3D texture, at the mip level
+  `options.mip` names (default 0), as `RgbaImage[]`. Checked against the Unity editor's pixels of
+  every level, face and slice. Crunch cubemaps, console builds of the three classes and a
+  `GraphicsFormat` no fixture checks are an `UnsupportedError`. New exported type
+  `DecodeLayersOptions`.
 
 ### 1.3.0 - 2026-11-09
 

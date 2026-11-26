@@ -71,10 +71,25 @@ export type { Texture } from "./classes/Texture.js";
 export { readTexture2D } from "./classes/Texture2D.js";
 export type { GLTextureSettings, StreamingInfo, Texture2D } from "./classes/Texture2D.js";
 export { TextureFormat } from "./classes/TextureFormat.js";
-export type { ObjectData, ObjectDataMap, Texture2DData } from "./classes/registry.js";
+export { readCubemap } from "./classes/Cubemap.js";
+export type { Cubemap } from "./classes/Cubemap.js";
+export { readTexture2DArray, readTexture3D } from "./classes/Texture2DArray.js";
+export type { Texture2DArray, Texture3D } from "./classes/Texture2DArray.js";
+export { GraphicsFormat, textureFormatOfGraphicsFormat } from "./classes/GraphicsFormat.js";
+export type {
+  CubemapData,
+  ObjectData,
+  ObjectDataMap,
+  Texture2DArrayData,
+  Texture2DData,
+  Texture3DData,
+} from "./classes/registry.js";
 export {
   toAnimationClipFields,
   toAnimationFields,
+  toCubemapFields,
+  toTexture2DArrayFields,
+  toTexture3DFields,
   toAnimatorControllerFields,
   toAnimatorFields,
   toAnimatorOverrideControllerFields,
@@ -204,6 +219,9 @@ export type {
   SubMeshFields,
   TextAssetFields,
   Texture2DFields,
+  Texture2DArrayFields,
+  Texture3DFields,
+  CubemapFields,
   TextureFields,
   TextureParameterFields,
   UAVParameterFields,

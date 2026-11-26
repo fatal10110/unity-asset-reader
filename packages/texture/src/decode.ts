@@ -487,7 +487,7 @@ async function decodeLevel(
 }
 
 /** One mip level: its size in pixels, the size it is stored at, and its bytes. */
-interface LevelLayout {
+export interface LevelLayout {
   width: number;
   height: number;
   storedWidth: number;
@@ -500,8 +500,16 @@ interface LevelLayout {
  * halved `n` times, down to 1. A block format stores whole blocks; PVRTC at
  * least 2 x 2 of them, so 8 x 8 pixels at 4 bpp and 16 x 8 at 2 bpp (the
  * PVRTC1 size rule, which the PVRTC fixtures' `m_CompleteImageSize` follows).
+ * Internal: for `layers.ts` too.
+ *
+ * @throws {UnsupportedError} for a format with no decoder here
  */
-function levelLayout(format: number, width: number, height: number, n: number): LevelLayout {
+export function levelLayout(
+  format: number,
+  width: number,
+  height: number,
+  n: number,
+): LevelLayout {
   const w = side(width, n);
   const h = side(height, n);
   const codec = BLOCK.get(format);
