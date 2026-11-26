@@ -12,6 +12,7 @@ import {
 import { NodeFlags } from "../src/bundle/BundleFile.js";
 import { load, type Env, type LoadedFile, type ResourceRef } from "../src/env.js";
 import { CorruptError, ResourceNotFoundError, UnsupportedError } from "../src/errors.js";
+import { open } from "../src/open.js";
 import { ClassID } from "../src/serialized/ClassID.js";
 import { ObjectReader } from "../src/serialized/ObjectReader.js";
 import { readSerializedFile } from "../src/serialized/SerializedFile.js";
@@ -40,12 +41,20 @@ function objectTable(objects: ObjectReader[]): TableRow[] {
 }
 
 for (const name of fixtureNames()) {
-  test(`load() unpacks ${name} byte-identically to the golden`, () => {
-    assertMatchesGolden(name, load([{ name, data: loadFixture(name) }]).files);
+  // load() refuses gzip (D4, revision 2026-11-26a): a gzip-wrapped fixture goes
+  // through open(), which unwraps it and hands the result to load().
+  const how = name.endsWith(".gz") ? "open()" : "load()";
+  const envOf = async (): Promise<Env> => {
+    const inputs = [{ name, data: loadFixture(name) }];
+    return how === "open()" ? open(inputs) : load(inputs);
+  };
+
+  test(`${how} unpacks ${name} byte-identically to the golden`, async () => {
+    assertMatchesGolden(name, (await envOf()).files);
   });
 
-  test(`load() lists the objects of ${name} as its golden object tables do`, () => {
-    const { objects } = load([{ name, data: loadFixture(name) }]);
+  test(`${how} lists the objects of ${name} as its golden object tables do`, async () => {
+    const { objects } = await envOf();
     // M1 fixtures hold only opaque nodes: no tables, so no objects either.
     const expected = Object.values(golden(name).objects).flat().sort(byPathId);
     assert.deepEqual(objectTable(objects), expected);
@@ -340,29 +349,20 @@ test("keeps a node that only looks gzip-wrapped, instead of failing the load", (
   assert.deepEqual(files, [{ path: "CAB-a.resS", data }]);
 });
 
-test("still unwraps a gzip wrapper the caller hands in directly", () => {
-  // The node case above must not cost the input case: a doubly-wrapped input
-  // keeps unwrapping, which is what upstream's LoadFile(DecompressGZip(...))
-  // does.
-  const inner = gzipSync(buildBundle([{ path: "CAB-a", data: payload(32, 19) }]));
-  const files = load([{ name: "a.bundle.gz.gz", data: gzipSync(inner) }]).files;
-
-  assert.deepEqual(
-    files.map((f) => f.path),
-    ["CAB-a"],
-  );
-});
-
-test("keeps the input name when a gzip wrapper unwraps to something opaque", () => {
-  // The fixture's inner bundle renames its nodes; only a leaf keeps the `.gz`
-  // name, which is what upstream's DecompressGZip does - it reuses the path.
-  const files = load([
-    { name: "gzip-lz4.bundle.gz", data: loadFixture("gzip-lz4.bundle.gz") },
-  ]).files;
-  assert.deepEqual(
-    files.map((f) => f.path),
-    ["CAB-lz4", "CAB-lz4.resS"],
-  );
+test("refuses a gzip-wrapped input, naming open() and gunzip()", () => {
+  // Inflating is async and load() is sync (D4, revision 2026-11-26a): open()
+  // unwraps gzip first (tests/open-gzip.test.ts).
+  const data = gzipSync(buildBundle([{ path: "CAB-a", data: payload(32, 19) }]));
+  assert.throws(() => load([{ name: "a.bundle.gz", data }]), (error: unknown) => {
+    assert.ok(error instanceof UnsupportedError);
+    assert.strictEqual(error.kind, "container");
+    assert.strictEqual(error.found, "gzip");
+    assert.match(
+      error.message,
+      /^a\.bundle\.gz: unsupported container: gzip \(.*open\(\).*gunzip\(/,
+    );
+    return true;
+  });
 });
 
 test("refuses containers nested past the depth cap instead of overflowing the stack", () => {

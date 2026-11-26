@@ -34,6 +34,7 @@ Every command takes **one file or one directory**:
   sidecars, and for a `.assets` file the files it depends on, are loaded from the same directory.
 - a directory: every file below it, loaded together. Pointers from one bundle into another and
   the bundles' resource files resolve.
+- either of these wrapped in gzip (a web server's `.gz`): it is unwrapped first.
 
 To read several bundles together, put them in one directory and pass the directory. Several
 paths and glob patterns are refused. The loading is

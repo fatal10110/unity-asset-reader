@@ -11,10 +11,12 @@ containers: UnityFS, UnityWeb, UnityRaw, `UnityWebData` and gzip.
 - **Isomorphic: runs anywhere.** It has no `node:*` import and no DOM. Input is a `Uint8Array`,
   or anything `open()` can fetch or read (a URL, a `Response`, a `Blob`).
 - **Synchronous parsing.** `load()` returns the unpacked files straight away. Only `open()` is
-  `async`, because it fetches or reads the bytes first. Nothing in the parse path is `async` (see
+  `async`, because it fetches or reads the bytes first and unwraps gzip, which the platform's
+  `DecompressionStream` inflates asynchronously. Nothing in the parse path is `async` (see
   [Run it in a Worker](#run-it-in-a-worker)).
-- **No WASM.** Its only dependencies are two small, pure-JS decompressors,
-  [`fflate`](https://www.npmjs.com/package/fflate) and [`lzma1`](https://www.npmjs.com/package/lzma1).
+- **No WASM.** Its only dependency is a small, pure-JS LZMA decompressor,
+  [`lzma1`](https://www.npmjs.com/package/lzma1). gzip and zlib use the platform's
+  `DecompressionStream`.
 - **64-bit values are always `bigint`**, whatever their size (see
   [64-bit values and JSON](#64-bit-values-and-json)).
 
@@ -76,7 +78,8 @@ for (const sprite of env.assets("Sprite")) sprite.data.rect; // filtered and typ
 
 What the example uses:
 
-- `load()` takes bytes and returns an `Env` at once. `open()` fetches or reads the bytes first.
+- `load()` takes bytes and returns an `Env` at once. `open()` fetches or reads the bytes first,
+  and unwraps a gzip-wrapped file.
 - `env.assets()` yields every object as an `Asset`. A `switch (asset.type)` narrows `asset.data`
   to that class's shape.
 - `"Other"` is every class without a hand-written reader. Its `data` comes from the object's
@@ -104,6 +107,10 @@ The sections below cover each step in more detail.
 - A `Response` or `Blob` / `File` is read.
 - Bytes or `{ name, data }` pass through.
 - An array mixes them.
+- A gzip-wrapped file (a web server's `.gz`) is unwrapped, as often as it is wrapped, and keeps
+  its name: a wrapped bundle's files carry their own names, a wrapped `.resS` the `.gz` one.
+  `load()` refuses gzip with an `UnsupportedError` naming `open()` and `gunzip()`, because
+  inflating is async and `load()` is not. `await gunzip(bytes)` unwraps one yourself.
 - A file is named after the last segment of its URL's path (decoded, without the query) or its
   `File.name`.
 - A response that is not OK throws an `Error` naming the URL and the status.
@@ -212,7 +219,7 @@ for (const obj of env.objects) {
 ```
 
 - **`env.files`** lists every file after unpacking. That covers the "just unpack it" use case.
-  - Nested containers are opened too: a gzip wrapper, a bundle inside a `UnityWebData` file.
+  - Nested containers are opened too: a bundle inside a `UnityWebData` file.
   - A SerializedFile or a `.resS` is kept under its own path.
 - **`env.objects`** lists every object of every SerializedFile in `env.files`.
   - The files are parsed the first time you read `env.objects` (or call `env.resolve` /
@@ -381,7 +388,7 @@ In the "Tested on" column:
 | UnityFS | Formats 6, 7 and 8. Blocks info at the end (flag `0x80`), 2019.4+ block padding (flag `0x200`), the 16-byte header padding of format 7 and of 2019.4.15+ format 6 | Fixtures (formats 7 and 8), generated (format 6) |
 | UnityWeb, UnityRaw (legacy web player bundles) | The old level layout and the format 6 archive layout, LZMA-compressed (UnityWeb) or not (UnityRaw) | Generated (formats 2 and 3), unit tests (formats 4 and 6) |
 | `UnityWebData1.0` (WebGL `.data`) | Yes, and a bundle inside it is opened too | Generated |
-| A gzip-wrapped file | Unwrapped, then opened as whatever is inside | Generated |
+| A gzip-wrapped file | Unwrapped by `open()`, then opened as whatever is inside; `load()` refuses it | Generated |
 | A loose SerializedFile (`.assets`, `level0`, `globalgamemanagers`) | Yes | Fixtures' SerializedFile nodes, read on their own |
 | `.resS` / `.resource` resource files, loose or bundle nodes | Yes: `Texture2D`, `Cubemap`, `Texture2DArray`, `Texture3D`, `AudioClip` and `VideoClip` read their data from them | Fixtures |
 | Split files (`.split0`, `.split1`, ...) | Pass the joined file to `load()`; [`unity-asset-reader-node`](https://github.com/fatal10110/unity-asset-reader/blob/main/packages/node/README.md)'s `loadPath()` joins them | Unit tests of `-node` |
@@ -571,7 +578,7 @@ bundled `index.d.ts`, so your editor shows it on hover.
 | Export | What |
 |---|---|
 | `load(inputs, options?)` | Unpack one file or several and index their objects. Returns an `Env` |
-| `open(sources, options?)` | Fetch or read files (URL, `Request`, `Response`, `Blob` / `File`, bytes), then `load()` them. Returns a promise of the `Env` |
+| `open(sources, options?)` | Fetch or read files (URL, `Request`, `Response`, `Blob` / `File`, bytes), unwrap gzip, then `load()` them. Returns a promise of the `Env` |
 | `OpenSource`, `OpenOptions` | What `open()` takes; options include `LoadOptions` and a `fetch` replacing the global one |
 | `ResponseLike`, `RequestLike`, `BlobLike`, `URLLike` | The parts of the WHATWG types `open()` uses, which `Response`, `Request`, `Blob`, `File` and `URL` fit |
 | `Env` | `files`, `objects`, `assets(...types)`, `get(path)`, `resolve(pptr, from)`, `readResource(ref, from)` |
@@ -667,7 +674,8 @@ For tools that work below `load()`:
 | `SerializedType`, `TypeTreeNode` | A type entry and its type tree |
 | `TypeTreeNodeData` | One node of a type tree supplied through `LoadOptions.typeTrees`: `{ type, name, level, byteSize, metaFlag }`, plain JSON |
 | `SerializedFileFormatVersion`, `BuildTarget` | Format version and target platform constants |
-| `decompressLz4`, `lzmaDecompress`, `gunzip`, `unzlib` | The block decompressors, each checking its output size |
+| `decompressLz4`, `lzmaDecompress` | The block decompressors, each checking its output size |
+| `gunzip`, `unzlib` | gzip and zlib through the platform's `DecompressionStream`: `async`, each returning a promise, rejected with a `CorruptError` on a damaged or truncated stream |
 | `formatSingle(value)`, `formatSingleInvariant(value)` | Write a float32 as .NET 8's `float.ToString()` does, under en-US and invariant culture |
 | `GltfWriter` | Build a binary glTF 2.0 file (`.glb`); see [glTF writer](#gltf-writer) |
 | `BinaryReader`, `Endian` | Bounds-checked reader over a `Uint8Array`, little- or big-endian |
@@ -759,8 +767,8 @@ what UnityPy reads from the same files. The class readers are also checked again
 
 ## Requirements
 
-- **Browsers:** any browser with ES2020 (`bigint`) and `TextDecoder`. Every current browser has
-  both.
+- **Browsers:** any browser with ES2020 (`bigint`) and `TextDecoder`, and for gzip and zlib
+  `DecompressionStream`. Every current browser has all three.
 - **Node.js:** 20.19+ or 22.12+ (`engines`: `^20.19.0 || >=22.12.0`), for both `import` and
   `require`.
   - `lzma1` is published as ES modules only, so `require("unity-asset-reader")` needs a Node.js
@@ -779,8 +787,7 @@ what UnityPy reads from the same files. The class readers are also checked again
 - [AssetRipper TypeTreeDumps](https://github.com/AssetRipper/TypeTreeDumps) and
   [Tpk](https://github.com/AssetRipper/Tpk) (Tpk: MIT): indirectly, the type tree data in
   UnityPy's TPK table, which the common strings and several version gates come from.
-- [fflate](https://github.com/101arrowz/fflate) (MIT) for gzip and zlib, and
-  [lzma1](https://github.com/xseman/lzma1) (MIT) for LZMA: the two runtime dependencies.
+- [lzma1](https://github.com/xseman/lzma1) (MIT) for LZMA: the one runtime dependency.
 
 The full list is in the [repository README](https://github.com/fatal10110/unity-asset-reader/blob/main/README.md#acknowledgements),
 and a comparison with similar npm packages in [COMPARISON.md](https://github.com/fatal10110/unity-asset-reader/blob/main/COMPARISON.md).

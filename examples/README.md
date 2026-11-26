@@ -43,7 +43,7 @@ The Worker imports the packages from jsDelivr, and sends the page plain data: th
 and RGBA pixels that go straight into `ImageData`. The page itself imports nothing.
 
 - **No import map.** Import maps do not apply inside Workers. So the Worker imports jsDelivr's
-  `/+esm` builds. These also rewrite the packages' own bare imports (`fflate`, `lzma1`,
+  `/+esm` builds. These also rewrite the packages' own bare imports (`lzma1`,
   `unity-asset-reader`, `texture2ddecoder-wasm`) to CDN URLs.
 - **No special headers.** Everything is single-threaded (D6), so the page works from any static
   host without COOP/COEP. It has to be served over HTTP, not opened as `file://`.

@@ -38,7 +38,23 @@ versioning policy below explains when they ship in a minor version.
 
 ## unity-asset-reader
 
-### 1.4.0 - Unreleased
+### 2.0.0 - Unreleased
+
+**Breaking:** `gunzip()` and `unzlib()` are async, and `load()` refuses a gzip-wrapped file;
+`open()` unwraps it instead (#348).
+
+- **gzip and zlib through the platform's `DecompressionStream`** (#348, plan revision 2026-11-26a).
+  `fflate` is no longer a dependency; `lzma1` is the only one left. The stream checks the CRC32,
+  ISIZE and Adler-32 trailers itself, and a damaged or truncated stream rejects with a
+  `CorruptError`, never partial output. Bytes after a gzip stream reject too; bytes after a zlib
+  stream reject or are dropped, depending on the runtime.
+  - `gunzip(bytes)` and `unzlib(bytes)` return a promise of the bytes.
+  - `open()` unwraps a gzip-wrapped file, as often as it is wrapped, before calling `load()`. The
+    file keeps its name, so a wrapped bundle's files carry their own names, as before.
+  - `load()` throws an `UnsupportedError` (`found` `"gzip"`) for a gzip-wrapped input, naming
+    `open()` and `gunzip()`. Migrate with `await open(bytes)`, or `load(await gunzip(bytes))`.
+  - Browsers need `DecompressionStream` for gzip and zlib; every current one has it, as do
+    Node.js 18+ and Deno.
 
 - **`BundleFile.blocks`**: a UnityFS bundle's storage blocks (`compressedSize`,
   `uncompressedSize`, `flags`, exported type `StorageBlock`), `[]` for a legacy UnityWeb or
@@ -380,6 +396,10 @@ WASM.
   every level, face and slice. Crunch cubemaps, console builds of the three classes and a
   `GraphicsFormat` no fixture checks are an `UnsupportedError`. New exported type
   `DecodeLayersOptions`.
+- **New `diffTexture`** (#352): compares a modified Texture2D of core's `diff()`, or its two
+  sides, pixel by pixel after decoding: the changed pixels, their share and an RGBA image marking
+  them. A width or height change is reported with both sizes, without a comparison. New exported
+  types `TextureDiff`, `TexturePixelDiff` and `TextureSizeChange`.
 
 ### 1.3.0 - 2026-11-09
 
@@ -486,6 +506,13 @@ First release. Peer: `unity-asset-reader@^1`; depends on `texture2ddecoder-wasm@
     leaves out the ones that fail instead of stopping.
 
 ## unity-asset-reader-node
+
+### 1.1.1 - Unreleased
+
+- **`loadPath()` unwraps gzip itself**, sync, with `node:zlib` (#348). Core's `load()` refuses gzip
+  from 2.0.0 on, because the platform inflate is async; `loadPath()` stays sync and reads a
+  gzip-wrapped file as before, with core 1.x or 2.x. A file that does not inflate throws a
+  `CorruptError` naming it. A gzip-wrapped loose SerializedFile now loads its externals too.
 
 ### 1.1.0 - 2026-10-16
 
@@ -662,6 +689,8 @@ License: MIT AND BSD-2-Clause (the SPIR-V disassembler is ported from CSspv).
 
 ### 1.1.0 - Unreleased
 
+- Internal: `crc32` encodes names with `TextEncoder` instead of a hand-written UTF-8
+  encoder (#349). Same hashes, a lone surrogate still as U+FFFD.
 - **Humanoid clips: the fingers are converted, and the UpperChest fold follows the Avatar**
   (#325). Checked against Unity's poses of two new fixture rigs in all four fixture editors
   (`fixtures/humanoid2-unity-goldens.json`, `fixtures/BUILDING.md` section 31).
@@ -751,6 +780,8 @@ First release (version 0.0.0 until then: plan revision 2026-11-10b). An applicat
     shaders as text, and any other class named with `--type` as type tree JSON. It goes on past
     an asset that fails, reports it, and exits 1 at the end.
   - `dump --path-id <n>` prints one object's type tree as JSON.
+  - A gzip-wrapped input (a web server's `.gz`) is read as the file inside, as `loadPath()`
+    unwraps it (#348).
 
 ## texture2ddecoder-wasm
 

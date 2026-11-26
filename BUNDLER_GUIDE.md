@@ -188,7 +188,7 @@ earlier, the build fails with `Can't resolve 'module'`
 a texture. Its Worker is [`examples/cdn-worker.js`](examples/cdn-worker.js).
 
 - **Import jsDelivr's `/+esm` builds.** The packages import their dependencies by bare name
-  (`fflate`, `lzma1`, `unity-asset-reader`, `texture2ddecoder-wasm`). A browser cannot
+  (`lzma1`, `unity-asset-reader`, `texture2ddecoder-wasm`). A browser cannot
   resolve those, and import maps do not apply inside Workers. jsDelivr's `/+esm` endpoint rewrites
   them to CDN URLs:
 
