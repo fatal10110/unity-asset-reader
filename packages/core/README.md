@@ -661,7 +661,7 @@ For tools that work below `load()`:
 |---|---|
 | `detectFileType(data)`, `FileType` | Sniff what a file is from its first bytes; never throws |
 | `detectContainer(data)`, `SupportedFileType` | The same, but throws `UnsupportedError` for what cannot be opened |
-| `readBundle(data)`, `BundleFile`, `BundleHeader`, `StreamFile`, `NodeFlags` | Unpack one UnityFS / UnityWeb / UnityRaw bundle |
+| `readBundle(data)`, `BundleFile`, `BundleHeader`, `StorageBlock`, `StreamFile`, `NodeFlags` | Unpack one UnityFS / UnityWeb / UnityRaw bundle: its header, its data blocks (`blocks`, each with its codec in `flags & 0x3f`) and its files |
 | `readWebFile(data)`, `WebFile` | Unpack one `UnityWebData1.0` file |
 | `readSerializedFile(data)`, `SerializedFile`, `SerializedFileHeader`, `ObjectInfo`, `FileIdentifier`, `LocalSerializedObjectIdentifier`, `UnityVersion` | Parse a SerializedFile's header, type trees and object table |
 | `SerializedType`, `TypeTreeNode` | A type entry and its type tree |

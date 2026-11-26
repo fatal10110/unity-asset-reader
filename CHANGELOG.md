@@ -40,6 +40,10 @@ versioning policy below explains when they ship in a minor version.
 
 ### 1.4.0 - Unreleased
 
+- **`BundleFile.blocks`**: a UnityFS bundle's storage blocks (`compressedSize`,
+  `uncompressedSize`, `flags`, exported type `StorageBlock`), `[]` for a legacy UnityWeb or
+  UnityRaw bundle. `flags & 0x3f` is a data block's codec; the header's compression bits name only
+  the blocks info's, which is LZ4HC in an LZMA or an uncompressed 2020.3 build too (#355).
 - **Compare two builds.** `diff(oldEnv, newEnv)` lists the assets added, removed or modified
   between two loaded builds. It matches them by container path, then by path id within the same
   bundle name, so a changed CAB name still matches. It compares object bytes and the streamed
@@ -739,8 +743,9 @@ First release (version 0.0.0 until then: plan revision 2026-11-10b). An applicat
   - `ls` lists the objects (class, name, container path, path id, size, file), `--type` to
     filter, `--json` for a JSON array.
   - `info` prints each input's container, format and Unity version, the unpacked files, the Unity
-    versions and platforms, and the object count per class. It names the compression of legacy
-    UnityWeb and UnityRaw files only (#355).
+    versions and platforms, and the object count per class, and the compression: the codec of a
+    UnityFS bundle's data blocks (#355), LZMA or uncompressed for a legacy UnityWeb or UnityRaw
+    file.
   - `extract -o <dir>` writes textures and sprites as PNG, TextAssets as their bytes, AudioClips
     as WAV (and Vorbis as Ogg with `--vorbis-headers`), meshes as OBJ or glTF (`--mesh`),
     shaders as text, and any other class named with `--type` as type tree JSON. It goes on past
